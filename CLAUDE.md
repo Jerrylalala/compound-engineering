@@ -1,380 +1,238 @@
-# Every Marketplace - Claude Code Plugin Marketplace
+# Compound Engineering Plugin（私有镜像）
 
-This repository is a Claude Code plugin marketplace that distributes the `compound-engineering` plugin to developers building with AI-powered tools.
+> **重要**：这是 `EveryInc/compound-engineering-plugin` 的私有镜像仓库，不是上游原始仓库。
 
-## Repository Structure
+## AI 助手快速入门
+
+**读完这一节，你就能立即开始工作。**
+
+### 仓库定位
 
 ```
-every-marketplace/
+本仓库 = 上游镜像 + 中文化层 + 本地扩展
+```
+
+| 角色 | 仓库 | 说明 |
+|-----|------|------|
+| **upstream** | EveryInc/compound-engineering-plugin | 上游原始仓库（只读） |
+| **origin** | Jerrylalala/compound-engineering-plugin-private | 用户的私有仓库 |
+
+### 核心原则
+
+1. **不修改上游英文文件** - 中文内容放在独立目录
+2. **只新增，不修改** - 减少同步冲突
+3. **本地扩展隔离** - `skills-custom/` 不影响上游
+
+### 当前组件统计
+
+| 组件 | 数量 | 位置 |
+|-----|------|------|
+| Agents | 28 | `plugins/compound-engineering/agents/` |
+| Commands | 28 | `plugins/compound-engineering/commands/` |
+| Skills | 15 | `plugins/compound-engineering/skills/` |
+| MCP Servers | 1 | Context7（HTTP 服务） |
+
+### 常用操作
+
+| 操作 | 命令 |
+|------|------|
+| 同步上游 | `pwsh scripts/sync-upstream.ps1` |
+| 导入本地技能 | `pwsh scripts/import-skills.ps1` |
+| 安装到 Codex | `bun run src/index.ts install ./plugins/compound-engineering --to codex` |
+
+---
+
+## 目录结构
+
+```
+compound-engineering-plugin-private/
 ├── .claude-plugin/
-│   └── marketplace.json          # Marketplace catalog (lists available plugins)
-├── docs/                         # Documentation site (GitHub Pages)
-│   ├── index.html                # Landing page
-│   ├── css/                      # Stylesheets
-│   ├── js/                       # JavaScript
-│   └── pages/                    # Reference pages
-└── plugins/
-    └── compound-engineering/   # The actual plugin
-        ├── .claude-plugin/
-        │   └── plugin.json        # Plugin metadata
-        ├── agents/                # 24 specialized AI agents
-        ├── commands/              # 13 slash commands
-        ├── skills/                # 11 skills
-        ├── mcp-servers/           # 2 MCP servers (playwright, context7)
-        ├── README.md              # Plugin documentation
-        └── CHANGELOG.md           # Version history
+│   └── marketplace.json              # 市场配置
+├── docs/
+│   ├── index.html                    # 文档首页
+│   ├── pages/                        # 参考页面
+│   └── zh-CN/                        # 📌 中文文档（本地新增）
+│       ├── README.md                 # 中文镜像策略说明
+│       └── REPO-SYNC.md              # 同步指南
+├── plugins/
+│   └── compound-engineering/
+│       ├── .claude-plugin/plugin.json
+│       ├── agents/                   # 28 个 agents
+│       │   ├── review/               # 代码审查 (14)
+│       │   ├── research/             # 研究分析 (5)
+│       │   ├── design/               # 设计 (3)
+│       │   ├── workflow/             # 工作流 (5)
+│       │   └── docs/                 # 文档 (1)
+│       ├── commands/
+│       │   ├── workflows/            # 英文工作流命令 (5)
+│       │   ├── workflows-zh/         # 📌 中文工作流命令 (4)
+│       │   └── *.md                  # 工具命令 (19)
+│       ├── skills/                   # 上游技能 (15)
+│       ├── skills-custom/            # 📌 本地自定义技能
+│       ├── skills-inbox/             # 📌 技能投递箱
+│       ├── README.md
+│       └── CHANGELOG.md
+├── scripts/
+│   ├── sync-upstream.ps1             # 一键同步上游
+│   └── import-skills.ps1             # 导入本地技能
+├── README.md                         # 上游英文说明（不修改）
+├── README.zh-CN.md                   # 📌 中文说明（本地新增）
+└── CLAUDE.md                         # 本文件
 ```
 
-## Philosophy: Compounding Engineering
+**📌 标记** = 本地新增内容，不在上游仓库中
 
-**Each unit of engineering work should make subsequent units of work easier—not harder.**
-
-When working on this repository, follow the compounding engineering process:
-
-1. **Plan** → Understand the change needed and its impact
-2. **Delegate** → Use AI tools to help with implementation
-3. **Assess** → Verify changes work as expected
-4. **Codify** → Update this CLAUDE.md with learnings
-
-## Working with This Repository
-
-### Adding a New Plugin
-
-1. Create plugin directory: `plugins/new-plugin-name/`
-2. Add plugin structure:
-   ```
-   plugins/new-plugin-name/
-   ├── .claude-plugin/plugin.json
-   ├── agents/
-   ├── commands/
-   └── README.md
-   ```
-3. Update `.claude-plugin/marketplace.json` to include the new plugin
-4. Test locally before committing
-
-### Updating the Compounding Engineering Plugin
-
-When agents, commands, or skills are added/removed, follow this checklist:
-
-#### 1. Count all components accurately
-
-```bash
-# Count agents
-ls plugins/compound-engineering/agents/*.md | wc -l
-
-# Count commands
-ls plugins/compound-engineering/commands/*.md | wc -l
-
-# Count skills
-ls -d plugins/compound-engineering/skills/*/ 2>/dev/null | wc -l
-```
-
-#### 2. Update ALL description strings with correct counts
-
-The description appears in multiple places and must match everywhere:
-
-- [ ] `plugins/compound-engineering/.claude-plugin/plugin.json` → `description` field
-- [ ] `.claude-plugin/marketplace.json` → plugin `description` field
-- [ ] `plugins/compound-engineering/README.md` → intro paragraph
-
-Format: `"Includes X specialized agents, Y commands, and Z skill(s)."`
-
-#### 3. Update version numbers
-
-When adding new functionality, bump the version in:
-
-- [ ] `plugins/compound-engineering/.claude-plugin/plugin.json` → `version`
-- [ ] `.claude-plugin/marketplace.json` → plugin `version`
-
-#### 4. Update documentation
-
-- [ ] `plugins/compound-engineering/README.md` → list all components
-- [ ] `plugins/compound-engineering/CHANGELOG.md` → document changes
-- [ ] `CLAUDE.md` → update structure diagram if needed
-
-#### 5. Rebuild documentation site
-
-Run the release-docs command to update all documentation pages:
-
-```bash
-claude /release-docs
-```
-
-This will:
-- Update stats on the landing page
-- Regenerate reference pages (agents, commands, skills, MCP servers)
-- Update the changelog page
-- Validate all counts match actual files
-
-#### 6. Validate JSON files
-
-```bash
-cat .claude-plugin/marketplace.json | jq .
-cat plugins/compound-engineering/.claude-plugin/plugin.json | jq .
-```
-
-#### 6. Verify before committing
-
-```bash
-# Ensure counts in descriptions match actual files
-grep -o "Includes [0-9]* specialized agents" plugins/compound-engineering/.claude-plugin/plugin.json
-ls plugins/compound-engineering/agents/*.md | wc -l
-```
-
-### Marketplace.json Structure
-
-The marketplace.json follows the official Claude Code spec:
-
-```json
-{
-  "name": "marketplace-identifier",
-  "owner": {
-    "name": "Owner Name",
-    "url": "https://github.com/owner"
-  },
-  "metadata": {
-    "description": "Marketplace description",
-    "version": "1.0.0"
-  },
-  "plugins": [
-    {
-      "name": "plugin-name",
-      "description": "Plugin description",
-      "version": "1.0.0",
-      "author": { ... },
-      "homepage": "https://...",
-      "tags": ["tag1", "tag2"],
-      "source": "./plugins/plugin-name"
-    }
-  ]
-}
-```
-
-**Only include fields that are in the official spec.** Do not add custom fields like:
-
-- `downloads`, `stars`, `rating` (display-only)
-- `categories`, `featured_plugins`, `trending` (not in spec)
-- `type`, `verified`, `featured` (not in spec)
-
-### Plugin.json Structure
-
-Each plugin has its own plugin.json with detailed metadata:
-
-```json
-{
-  "name": "plugin-name",
-  "version": "1.0.0",
-  "description": "Plugin description",
-  "author": { ... },
-  "keywords": ["keyword1", "keyword2"],
-  "components": {
-    "agents": 15,
-    "commands": 6,
-    "hooks": 2
-  },
-  "agents": {
-    "category": [
-      {
-        "name": "agent-name",
-        "description": "Agent description",
-        "use_cases": ["use-case-1", "use-case-2"]
-      }
-    ]
-  },
-  "commands": {
-    "category": ["command1", "command2"]
-  }
-}
-```
-
-## Documentation Site
-
-The documentation site is at `/docs` in the repository root (for GitHub Pages). This site is built with plain HTML/CSS/JS (based on Evil Martians' LaunchKit template) and requires no build step to view.
-
-### Documentation Structure
-
-```
-docs/
-├── index.html           # Landing page with stats and philosophy
-├── css/
-│   ├── style.css        # Main styles (LaunchKit-based)
-│   └── docs.css         # Documentation-specific styles
-├── js/
-│   └── main.js          # Interactivity (theme toggle, mobile nav)
-└── pages/
-    ├── getting-started.html  # Installation and quick start
-    ├── agents.html           # All 24 agents reference
-    ├── commands.html         # All 13 commands reference
-    ├── skills.html           # All 11 skills reference
-    ├── mcp-servers.html      # MCP servers reference
-    └── changelog.html        # Version history
-```
-
-### Keeping Docs Up-to-Date
-
-**IMPORTANT:** After ANY change to agents, commands, skills, or MCP servers, run:
-
-```bash
-claude /release-docs
-```
-
-This command:
-1. Counts all current components
-2. Reads all agent/command/skill/MCP files
-3. Regenerates all reference pages
-4. Updates stats on the landing page
-5. Updates the changelog from CHANGELOG.md
-6. Validates counts match across all files
-
-### Manual Updates
-
-If you need to update docs manually:
-
-1. **Landing page stats** - Update the numbers in `docs/index.html`:
-   ```html
-   <span class="stat-number">24</span>  <!-- agents -->
-   <span class="stat-number">13</span>  <!-- commands -->
-   ```
-
-2. **Reference pages** - Each page in `docs/pages/` documents all components in that category
-
-3. **Changelog** - `docs/pages/changelog.html` mirrors `CHANGELOG.md` in HTML format
-
-### Viewing Docs Locally
-
-Since the docs are static HTML, you can view them directly:
-
-```bash
-# Open in browser
-open docs/index.html
-
-# Or start a local server
-cd docs
-python -m http.server 8000
-# Then visit http://localhost:8000
-```
-
-## Testing Changes
-
-### Test Locally
-
-1. Install the marketplace locally:
-
-   ```bash
-   claude /plugin marketplace add /Users/yourusername/every-marketplace
-   ```
-
-2. Install the plugin:
-
-   ```bash
-   claude /plugin install compound-engineering
-   ```
-
-3. Test agents and commands:
-   ```bash
-   claude /review
-   claude agent kieran-rails-reviewer "test message"
-   ```
-
-### Validate JSON
-
-Before committing, ensure JSON files are valid:
-
-```bash
-cat .claude-plugin/marketplace.json | jq .
-cat plugins/compound-engineering/.claude-plugin/plugin.json | jq .
-```
-
-## Common Tasks
-
-### Adding a New Agent
-
-1. Create `plugins/compound-engineering/agents/new-agent.md`
-2. Update plugin.json agent count and agent list
-3. Update README.md agent list
-4. Test with `claude agent new-agent "test"`
-
-### Adding a New Command
-
-1. Create `plugins/compound-engineering/commands/new-command.md`
-2. Update plugin.json command count and command list
-3. Update README.md command list
-4. Test with `claude /new-command`
-
-### Adding a New Skill
-
-1. Create skill directory: `plugins/compound-engineering/skills/skill-name/`
-2. Add skill structure:
-   ```
-   skills/skill-name/
-   ├── SKILL.md           # Skill definition with frontmatter (name, description)
-   └── scripts/           # Supporting scripts (optional)
-   ```
-3. Update plugin.json description with new skill count
-4. Update marketplace.json description with new skill count
-5. Update README.md with skill documentation
-6. Update CHANGELOG.md with the addition
-7. Test with `claude skill skill-name`
-
-**Skill file format (SKILL.md):**
-```markdown
----
-name: skill-name
-description: Brief description of what the skill does
 ---
 
-# Skill Title
+## 中文化层策略
 
-Detailed documentation...
+### 文件分布
+
+| 内容类型 | 存放位置 | 说明 |
+|---------|---------|------|
+| 项目中文说明 | `README.zh-CN.md` | 独立于上游 README.md |
+| 中文文档 | `docs/zh-CN/` | 所有中文文档输出位置 |
+| 中文命令 | `commands/workflows-zh/` | 中文版工作流命令 |
+| 本地技能 | `skills-custom/` | 不影响上游 |
+
+### 为什么这样设计？
+
+- **减少冲突**：上游更新时，中文内容不会被覆盖
+- **易于维护**：中文内容集中管理
+- **可追溯**：清晰区分上游和本地内容
+
+---
+
+## 上游同步流程
+
+### 一键同步
+
+```powershell
+pwsh scripts/sync-upstream.ps1
 ```
 
-### Updating Tags/Keywords
-
-Tags should reflect the compounding engineering philosophy:
-
-- Use: `ai-powered`, `compound-engineering`, `workflow-automation`, `knowledge-management`
-- Avoid: Framework-specific tags unless the plugin is framework-specific
-
-## Commit Conventions
-
-Follow these patterns for commit messages:
-
-- `Add [agent/command name]` - Adding new functionality
-- `Remove [agent/command name]` - Removing functionality
-- `Update [file] to [what changed]` - Updating existing files
-- `Fix [issue]` - Bug fixes
-- `Simplify [component] to [improvement]` - Refactoring
-
-Include the Claude Code footer:
+### 脚本执行流程
 
 ```
+1. git fetch upstream          # 获取上游最新
+2. git checkout main           # 切换到主分支
+3. git merge upstream/main     # 合并上游
+4. [检测冲突]                   # 如有冲突，停止并显示
+5. git push origin main        # 推送到私有仓库
+6. bun install                 # 安装依赖
+7. 重新生成 Codex 输出
+```
+
+### 冲突处理原则
+
+| 冲突类型 | 处理方式 |
+|---------|---------|
+| 上游英文文件 | **接受上游版本** |
+| 中文镜像文件 | 按需重新生成或手动合并 |
+| skills-custom/ | 应无冲突（上游没有） |
+| docs/zh-CN/ | 应无冲突（上游没有） |
+
+详见 `docs/zh-CN/REPO-SYNC.md`
+
+---
+
+## 添加本地技能
+
+### 方式一：直接添加
+
+```bash
+# 在 skills-custom 中创建技能目录
+mkdir plugins/compound-engineering/skills-custom/my-skill
+
+# 创建 SKILL.md
+```
+
+### 方式二：通过投递箱
+
+1. 把技能放入 `skills-inbox/<skill-name>/`
+2. 运行：`pwsh scripts/import-skills.ps1`
+
+---
+
+## 更新插件时的检查清单
+
+当添加或修改 agents、commands、skills 时：
+
+### 1. 统计组件数量
+
+```bash
+# Windows PowerShell
+(Get-ChildItem -Recurse plugins/compound-engineering/agents/*.md).Count
+(Get-ChildItem -Recurse plugins/compound-engineering/commands/*.md).Count
+(Get-ChildItem -Directory plugins/compound-engineering/skills/).Count
+```
+
+### 2. 更新配置文件中的数量
+
+需要同步更新的地方：
+
+- [ ] `.claude-plugin/marketplace.json` → description
+- [ ] `plugins/compound-engineering/.claude-plugin/plugin.json` → description
+- [ ] `plugins/compound-engineering/README.md` → Components 表格
+
+### 3. 更新版本号
+
+- [ ] `.claude-plugin/marketplace.json` → version
+- [ ] `plugins/compound-engineering/.claude-plugin/plugin.json` → version
+
+### 4. 更新文档
+
+- [ ] `plugins/compound-engineering/CHANGELOG.md`
+- [ ] 如有必要，运行 `claude /release-docs`
+
+---
+
+## 提交规范
+
+```
+Add [agent/command name] - 添加新功能
+Remove [agent/command name] - 移除功能
+Update [file] to [what changed] - 更新文件
+Fix [issue] - Bug 修复
+
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-## Resources to search for when needing more information
+---
 
-- [Claude Code Plugin Documentation](https://docs.claude.com/en/docs/claude-code/plugins)
-- [Plugin Marketplace Documentation](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces)
-- [Plugin Reference](https://docs.claude.com/en/docs/claude-code/plugins-reference)
+## 相关文档
+
+| 文档 | 说明 |
+|-----|------|
+| `docs/zh-CN/README.md` | 中文文档首页和镜像策略 |
+| `docs/zh-CN/REPO-SYNC.md` | 详细的同步指南 |
+| `plugins/compound-engineering/CLAUDE.md` | 插件开发指南 |
+| `plugins/compound-engineering/README.md` | 插件使用说明 |
+
+---
 
 ## Key Learnings
 
-_This section captures important learnings as we work on this repository._
+### 2026-01-30：建立中文镜像策略
 
-### 2024-11-22: Added gemini-imagegen skill and fixed component counts
+建立了完整的中文化层策略，包括：
+- 中文文档集中在 `docs/zh-CN/`
+- 中文命令在 `commands/workflows-zh/`
+- 本地技能在 `skills-custom/`
+- 详细的同步指南在 `REPO-SYNC.md`
 
-Added the first skill to the plugin and discovered the component counts were wrong (said 15 agents, actually had 17). Created a comprehensive checklist for updating the plugin to prevent this in the future.
+**学习**：通过"只新增，不修改"的策略，可以最大限度减少与上游的冲突。
 
-**Learning:** Always count actual files before updating descriptions. The counts appear in multiple places (plugin.json, marketplace.json, README.md) and must all match. Use the verification commands in the checklist above.
+### 2024-11-22：组件数量不一致问题
 
-### 2024-10-09: Simplified marketplace.json to match official spec
+发现配置文件中的组件数量与实际文件数量不符。
 
-The initial marketplace.json included many custom fields (downloads, stars, rating, categories, trending) that aren't part of the Claude Code specification. We simplified to only include:
+**学习**：每次更新前必须先统计实际文件数量，然后同步更新所有配置文件。
 
-- Required: `name`, `owner`, `plugins`
-- Optional: `metadata` (with description and version)
-- Plugin entries: `name`, `description`, `version`, `author`, `homepage`, `tags`, `source`
+### 2024-10-09：marketplace.json 结构简化
 
-**Learning:** Stick to the official spec. Custom fields may confuse users or break compatibility with future versions.
+去除了不在官方规范中的自定义字段。
+
+**学习**：只使用官方规范中定义的字段，避免兼容性问题。

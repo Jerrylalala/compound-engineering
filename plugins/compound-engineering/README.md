@@ -6,9 +6,9 @@ AI-powered development tools that get smarter with every use. Make each unit of 
 
 | Component | Count |
 |-----------|-------|
-| Agents | 27 |
-| Commands | 20 |
-| Skills | 14 |
+| Agents | 28 |
+| Commands | 28 |
+| Skills | 15 |
 | MCP Servers | 1 |
 
 ## Agents
@@ -34,13 +34,14 @@ Agents are organized into categories for easier discovery.
 | `security-sentinel` | Security audits and vulnerability assessments |
 | `julik-frontend-races-reviewer` | Review JavaScript/Stimulus code for race conditions |
 
-### Research (4)
+### Research (5)
 
 | Agent | Description |
 |-------|-------------|
 | `best-practices-researcher` | Gather external best practices and examples |
 | `framework-docs-researcher` | Research framework documentation and best practices |
 | `git-history-analyzer` | Analyze git history and code evolution |
+| `learnings-researcher` | Search institutional learnings in docs/solutions/ for relevant past solutions |
 | `repo-research-analyst` | Research repository structure and conventions |
 
 ### Design (3)
@@ -81,27 +82,48 @@ Core workflow commands use `workflows:` prefix to avoid collisions with built-in
 | `/workflows:work` | Execute work items systematically |
 | `/workflows:compound` | Document solved problems to compound team knowledge |
 
+### Workflow Commands (Chinese)
+
+中文版工作流命令，功能与英文版一致：
+
+| Command | Description |
+|---------|-------------|
+| `/workflows-zh:plan` | 创建实施计划 |
+| `/workflows-zh:review` | 运行全面代码评审 |
+| `/workflows-zh:work` | 系统化执行工作项 |
+| `/workflows-zh:compound` | 记录已解决的问题以积累团队知识 |
+
 ### Utility Commands
 
 | Command | Description |
 |---------|-------------|
-| `/deepen-plan` | Enhance plans with parallel research agents for each section |
+| `/agent-native-audit` | Run comprehensive agent-native architecture review with scored principles |
 | `/changelog` | Create engaging changelogs for recent merges |
 | `/create-agent-skill` | Create or edit Claude Code skills |
+| `/deepen-plan` | Enhance plans with parallel research agents for each section |
+| `/deploy-docs` | Validate and prepare documentation for GitHub Pages deployment |
+| `/feature-video` | Record video walkthroughs and add to PR description |
 | `/generate_command` | Generate new slash commands |
 | `/heal-skill` | Fix skill documentation issues |
+| `/lfg` | Full autonomous engineering workflow |
 | `/plan_review` | Multi-agent plan review in parallel |
+| `/release-docs` | Build and update the documentation site with current plugin components |
 | `/report-bug` | Report a bug in the plugin |
 | `/reproduce-bug` | Reproduce bugs using logs and console |
 | `/resolve_parallel` | Resolve TODO comments in parallel |
 | `/resolve_pr_parallel` | Resolve PR comments in parallel |
 | `/resolve_todo_parallel` | Resolve todos in parallel |
-| `/triage` | Triage and prioritize issues |
 | `/test-browser` | Run browser tests on PR-affected pages |
+| `/triage` | Triage and prioritize issues |
 | `/xcode-test` | Build and test iOS apps on simulator |
-| `/feature-video` | Record video walkthroughs and add to PR description |
 
 ## Skills
+
+### Workflow & Planning
+
+| Skill | Description |
+|-------|-------------|
+| `brainstorming` | Explore user intent, approaches, and design decisions before planning |
 
 ### Architecture & Design
 
