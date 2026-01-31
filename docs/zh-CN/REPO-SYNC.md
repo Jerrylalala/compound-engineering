@@ -68,13 +68,12 @@ pwsh scripts/sync-upstream.ps1
 | 中文镜像文件 | 按需重新生成，或手动合并 |
 | `skills-custom/` | 应无冲突（上游没有此目录） |
 | `docs/zh-CN/` | 应无冲突（上游没有此目录） |
-| `commands/workflows-zh/` | 应无冲突（上游没有此目录） |
 
 ### 为什么这样设计？
 
 因为我们遵循 **"只新增，不修改"** 的原则：
 
-- 所有中文内容都放在 **独立目录**（`docs/zh-CN/`、`commands/workflows-zh/`）
+- 所有中文内容都放在 **独立目录**（`docs/zh-CN/`）
 - 本地技能放在 **独立目录**（`skills-custom/`）
 - **不修改**上游的英文文件
 
@@ -180,6 +179,5 @@ git remote -v
 
 - [ ] 上游英文文件未被意外修改
 - [ ] 中文文档仍然完整 (`docs/zh-CN/`)
-- [ ] 中文命令仍然可用 (`commands/workflows-zh/`)
 - [ ] 自定义技能仍然存在 (`skills-custom/`)
-- [ ] Codex 输出已更新 (`~/.codex/prompts`, `~/.codex/skills`)
+- [ ] 插件可正常加载（重启 Claude Code）

@@ -28,17 +28,20 @@
 | 组件 | 数量 | 位置 |
 |-----|------|------|
 | Agents | 28 | `plugins/compound-engineering/agents/` |
-| Commands | 28 | `plugins/compound-engineering/commands/` |
-| Skills | 15 | `plugins/compound-engineering/skills/` |
+| Commands | 24 | `plugins/compound-engineering/commands/` |
+| Skills | 16 | `plugins/compound-engineering/skills/` |
 | MCP Servers | 1 | Context7（HTTP 服务） |
 
 ### 常用操作
 
 | 操作 | 命令 |
 |------|------|
+| **本地开发启动** | `claude --plugin-dir "完整路径\plugins\compound-engineering"` |
+| **更新后重载** | 重启 Claude Code 即可（`--plugin-dir` 每次启动读取最新内容） |
 | 同步上游 | `pwsh scripts/sync-upstream.ps1` |
 | 导入本地技能 | `pwsh scripts/import-skills.ps1` |
-| 安装到 Codex | `bun run src/index.ts install ./plugins/compound-engineering --to codex` |
+
+> **重要**：`--plugin-dir` 是官方推荐的本地开发方式。详见 `docs/zh-CN/INSTALL.md`
 
 ---
 
@@ -64,8 +67,7 @@ compound-engineering-plugin-private/
 │       │   ├── workflow/             # 工作流 (5)
 │       │   └── docs/                 # 文档 (1)
 │       ├── commands/
-│       │   ├── workflows/            # 英文工作流命令 (5)
-│       │   ├── workflows-zh/         # 📌 中文工作流命令 (4)
+│       │   ├── workflows/            # 工作流命令 (5)
 │       │   └── *.md                  # 工具命令 (19)
 │       ├── skills/                   # 上游技能 (15)
 │       ├── skills-custom/            # 📌 本地自定义技能
@@ -92,7 +94,6 @@ compound-engineering-plugin-private/
 |---------|---------|------|
 | 项目中文说明 | `README.zh-CN.md` | 独立于上游 README.md |
 | 中文文档 | `docs/zh-CN/` | 所有中文文档输出位置 |
-| 中文命令 | `commands/workflows-zh/` | 中文版工作流命令 |
 | 本地技能 | `skills-custom/` | 不影响上游 |
 
 ### 为什么这样设计？
@@ -206,6 +207,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 | 文档 | 说明 |
 |-----|------|
+| `docs/zh-CN/SYNC-WORKFLOW.md` | **⭐ 上游同步工作流（AI 助手执行）** |
+| `docs/zh-CN/INSTALL.md` | Claude Code 插件安装指南 |
 | `docs/zh-CN/README.md` | 中文文档首页和镜像策略 |
 | `docs/zh-CN/REPO-SYNC.md` | 详细的同步指南 |
 | `plugins/compound-engineering/CLAUDE.md` | 插件开发指南 |
@@ -215,11 +218,44 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Key Learnings
 
+### 2026-01-31：本地插件开发的正确方式（修订）
+
+**问题**：通过 marketplace 安装私有仓库插件时遇到 SSH 认证失败，且之前记录的 `/plugins install-local` 命令不存在。
+
+**根因**：
+1. `/plugins install-local` 命令**不存在**，之前的记录是错误的
+2. 私有仓库通过 marketplace 安装需要 SSH 认证
+3. Claude Code 有专门的本地开发机制
+
+**正确方法**：使用 `--plugin-dir` 标志启动 Claude Code
+```bash
+claude --plugin-dir "完整路径\plugins\compound-engineering"
+```
+
+**学习**：
+- `--plugin-dir` 是官方推荐的本地开发方式
+- 修改插件后重启 Claude Code 即可生效
+- 可以用多个 `--plugin-dir` 加载多个插件
+- 参考：[官方文档](https://code.claude.com/docs/en/plugins)
+- 详见 `docs/zh-CN/INSTALL.md`
+
+### 2026-01-31：Claude Code 插件安装机制（初版）
+
+**问题**：用户发现 compound-engineering 的 `/workflows:plan` 命令无法使用，但 `~/.claude/skills/` 目录里有技能。
+
+**根因**：
+1. 插件技能和独立技能是**两套不同的系统**
+2. `~/.claude/skills/` 是独立技能目录，直接调用名称
+3. 插件的技能/命令需要通过安装或 `--plugin-dir` 加载才能使用
+4. 已安装插件存放在 `~/.claude/plugins/cache/`
+
+**学习**：
+- 独立技能 vs 插件技能 vs 插件命令 是三种不同的概念
+
 ### 2026-01-30：建立中文镜像策略
 
 建立了完整的中文化层策略，包括：
 - 中文文档集中在 `docs/zh-CN/`
-- 中文命令在 `commands/workflows-zh/`
 - 本地技能在 `skills-custom/`
 - 详细的同步指南在 `REPO-SYNC.md`
 

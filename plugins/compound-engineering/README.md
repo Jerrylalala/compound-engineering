@@ -7,8 +7,8 @@ AI-powered development tools that get smarter with every use. Make each unit of 
 | Component | Count |
 |-----------|-------|
 | Agents | 28 |
-| Commands | 28 |
-| Skills | 15 |
+| Commands | 24 |
+| Skills | 16 |
 | MCP Servers | 1 |
 
 ## Agents
@@ -81,17 +81,6 @@ Core workflow commands use `workflows:` prefix to avoid collisions with built-in
 | `/workflows:review` | Run comprehensive code reviews |
 | `/workflows:work` | Execute work items systematically |
 | `/workflows:compound` | Document solved problems to compound team knowledge |
-
-### Workflow Commands (Chinese)
-
-中文版工作流命令，功能与英文版一致：
-
-| Command | Description |
-|---------|-------------|
-| `/workflows-zh:plan` | 创建实施计划 |
-| `/workflows-zh:review` | 运行全面代码评审 |
-| `/workflows-zh:work` | 系统化执行工作项 |
-| `/workflows-zh:compound` | 记录已解决的问题以积累团队知识 |
 
 ### Utility Commands
 

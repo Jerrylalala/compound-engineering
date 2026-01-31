@@ -12,7 +12,6 @@
 |---------|---------|------|
 | 项目中文说明 | `README.zh-CN.md` | 根目录，独立于上游 README.md |
 | 中文文档 | `docs/zh-CN/` | 本目录，所有中文文档输出位置 |
-| 中文命令 | `commands/workflows-zh/` | 中文版工作流命令 |
 | 自定义技能 | `skills-custom/` | 本地技能，不影响上游 |
 
 ### 为什么这样设计？
@@ -44,14 +43,14 @@
 bun run src/index.ts install ./plugins/compound-engineering --to codex
 ```
 
-### 2. 使用中文命令
+### 2. 使用工作流命令
 
 | 命令 | 说明 |
 |------|------|
-| `/workflows-zh:plan` | 把需求描述整理成可执行的计划 |
-| `/workflows-zh:work` | 按计划执行并交付 |
-| `/workflows-zh:review` | 多代理代码审查 |
-| `/workflows-zh:compound` | 沉淀解决方案与知识 |
+| `/workflows:plan` | 把需求描述整理成可执行的计划 |
+| `/workflows:work` | 按计划执行并交付 |
+| `/workflows:review` | 多代理代码审查 |
+| `/workflows:compound` | 沉淀解决方案与知识 |
 
 ---
 
