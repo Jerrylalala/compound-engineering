@@ -2,3 +2,5 @@
 *.log
 node_modules/
 .codex/
+.claude/settings.local.json
+nul
