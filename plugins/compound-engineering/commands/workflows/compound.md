@@ -1,6 +1,6 @@
 ---
 name: workflows:compound
-description: Document a recently solved problem to compound your team's knowledge
+description: ⑤ 记录已解决的问题，积累团队知识
 argument-hint: "[optional: brief context about the fix]"
 ---
 

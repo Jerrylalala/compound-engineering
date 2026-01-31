@@ -1,6 +1,6 @@
 ---
 name: glue-coding
-description: This skill should be used for COMPLETE project architecture planning when starting a new project, designing a system, or doing comprehensive tech stack selection. It provides a full workflow for decomposing requirements and selecting open-source libraries. Triggers on "architect a project", "design system architecture", "full tech stack", "project from scratch", or explicit "/glue-coding" invocation. Note - basic glue coding principles (search GitHub before coding) are already embedded in global CLAUDE.md and apply automatically to all tasks.
+description: 完整的项目架构规划，用于新项目启动、系统设计或技术选型。提供需求拆解和开源库选择的完整工作流。触发词："架构规划"、"技术选型"、"从零开始"或 "/glue-coding"。注：基本胶水编程原则（写代码前先搜 GitHub）已内置于全局 CLAUDE.md，自动生效。
 ---
 
 # 胶水编程 (Glue Coding)

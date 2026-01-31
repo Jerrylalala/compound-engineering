@@ -1,6 +1,6 @@
 ---
 name: workflows:brainstorm
-description: Explore requirements and approaches through collaborative dialogue before planning implementation
+description: ① 探索需求和方案，在规划前进行协作对话
 argument-hint: "[feature idea or problem to explore]"
 ---
 
