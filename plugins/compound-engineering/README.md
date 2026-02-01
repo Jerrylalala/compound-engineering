@@ -74,13 +74,15 @@ Agents are organized into categories for easier discovery.
 
 Core workflow commands use `workflows:` prefix to avoid collisions with built-in commands:
 
-| Command | Description |
-|---------|-------------|
-| `/workflows:brainstorm` | Explore requirements and approaches before planning |
-| `/workflows:plan` | Create implementation plans |
-| `/workflows:review` | Run comprehensive code reviews |
-| `/workflows:work` | Execute work items systematically |
-| `/workflows:compound` | Document solved problems to compound team knowledge |
+| Step | Command | Description |
+|------|---------|-------------|
+| 0 | `/workflows:load` | Load project context from previous session |
+| 1 | `/workflows:brainstorm` | Explore requirements and approaches before planning |
+| 2 | `/workflows:plan` | Create implementation plans |
+| 3 | `/workflows:work` | Execute work items systematically |
+| 4 | `/workflows:review` | Run comprehensive code reviews |
+| 5 | `/workflows:compound` | Document solved problems to compound team knowledge |
+| 6 | `/workflows:save` | Save project context for cross-session recovery |
 
 ### Utility Commands
 
