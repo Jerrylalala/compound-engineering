@@ -25,6 +25,20 @@ Captures problem solutions while context is fresh, creating structured documenta
 
 This command launches multiple specialized subagents IN PARALLEL to maximize efficiency:
 
+### 0. **Location Classifier** (First, Required)
+   - **判断经验应该放在哪里**（全局 or 项目）
+   - 根据全局 CLAUDE.md 中的分类规则：
+     | 经验类型 | 放入位置 |
+     |----------|----------|
+     | Claude Code 使用问题 | `~/.claude/solutions/` |
+     | 开发工具/IDE 问题 | `~/.claude/solutions/` |
+     | Git/GitHub 通用问题 | `~/.claude/solutions/` |
+     | 项目业务逻辑 bug | `项目/docs/solutions/` |
+     | 项目特定架构问题 | `项目/docs/solutions/` |
+   - 如果是**全局经验**：同时写入两个位置（全局优先）
+   - 如果是**项目经验**：只写入项目目录
+   - Returns: Target location(s)
+
 ### 1. **Context Analyzer** (Parallel)
    - Extracts conversation history
    - Identifies problem type, component, symptoms
@@ -94,7 +108,22 @@ This command launches multiple specialized subagents IN PARALLEL to maximize eff
 
 ## What It Creates
 
-**Organized documentation:**
+**文档位置判断（优先级）：**
+
+| 经验类型 | 写入位置 | 说明 |
+|----------|----------|------|
+| Claude Code 插件/使用问题 | `~/.claude/solutions/` + 项目 | 全局优先，项目备份 |
+| 开发工具/IDE 通用问题 | `~/.claude/solutions/` | 仅全局 |
+| Git/GitHub 通用问题 | `~/.claude/solutions/` | 仅全局 |
+| 项目业务逻辑 bug | `项目/docs/solutions/` | 仅项目 |
+| 项目特定架构问题 | `项目/docs/solutions/` | 仅项目 |
+
+**判断标准：**
+- 问题是否**跨项目可复用**？ → 全局
+- 问题是否与**特定代码库**相关？ → 项目
+- 问题是否涉及**通用工具/框架**？ → 全局
+
+**项目内分类（当写入项目时）：**
 
 - File: `docs/solutions/[category]/[filename].md`
 
