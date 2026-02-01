@@ -184,6 +184,49 @@ description: ① 描述内容
 
 新增 workflow 命令时，按顺序分配 Step 编号，确保使用 ASCII 格式。
 
+## 全局经验库架构
+
+为了让经验跨项目生效，建立了双层经验库：
+
+### 架构
+
+```
+~/.claude/
+├── CLAUDE.md              ← 全局规则（所有项目生效）
+└── solutions/             ← 全局经验库（通用经验）
+    └── *.md
+
+任何项目/
+├── CLAUDE.md              ← 项目规则
+└── docs/solutions/        ← 项目经验库（项目特定经验）
+    └── *.md
+```
+
+### 搜索规则（已添加到全局 CLAUDE.md）
+
+```bash
+# 1. 搜索全局经验库（通用经验）
+Grep pattern="关键词" path=~/.claude/solutions/ output_mode=files_with_matches
+
+# 2. 搜索项目经验库（项目特定经验）
+Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
+```
+
+### 经验分类
+
+| 经验类型 | 放入位置 |
+|----------|----------|
+| Claude Code 使用问题 | `~/.claude/solutions/` |
+| 开发工具/IDE 问题 | `~/.claude/solutions/` |
+| Git/GitHub 通用问题 | `~/.claude/solutions/` |
+| 项目业务逻辑 bug | `项目/docs/solutions/` |
+| 项目特定架构问题 | `项目/docs/solutions/` |
+
+### 生效范围
+
+- **全局规则**：在任何项目中，AI 都会先搜索 `~/.claude/solutions/`
+- **项目规则**：如果项目有 `docs/solutions/`，也会搜索
+
 ## 相关文档
 
 - [版本管理预防策略](../../zh-CN/VERSION-STRATEGY.md)
