@@ -60,7 +60,14 @@ compound-engineering-plugin-private/
 ├── docs/
 │   └── zh-CN/                        # 📌 中文文档
 │       ├── INSTALL.md                # 安装与使用指南
-│       └── SYNC.md                   # 上游同步指南
+│       ├── SYNC.md                   # 上游同步指南
+│       ├── VERSION-STRATEGY.md       # 📌 版本管理预防策略
+│       └── FORK-SETUP.md             # 📌 Fork 初始化清单
+├── scripts/                          # 📌 自动化工具
+│   ├── check-versions.ps1            # 版本一致性检查
+│   ├── check-versions.sh             # Bash 版本
+│   ├── bump-version.ps1              # 自动更新版本号
+│   └── pre-commit                    # Git hook
 ├── plugins/
 │   └── compound-engineering/
 │       ├── .claude-plugin/plugin.json
@@ -96,17 +103,30 @@ compound-engineering-plugin-private/
 
 ## 更新插件时的检查清单
 
-> **⚠️ 版本号必须同步！** 两个文件的版本号必须一致，否则 Marketplace 无法更新：
-> - `.claude-plugin/marketplace.json` ← Marketplace 读取这个
-> - `plugins/compound-engineering/.claude-plugin/plugin.json` ← 插件本身版本
+> **⚠️ 版本号必须同步！** 详见 [版本管理预防策略](docs/zh-CN/VERSION-STRATEGY.md)
 
-- [ ] **同步版本号**（两个文件必须相同！）
-- [ ] 更新组件数量：本文件、`marketplace.json`、`plugin.json`
-- [ ] 更新 `CHANGELOG.md`
+### 自动化工具（推荐）
 
-**快速检查版本是否一致：**
 ```powershell
-# 两个版本号应该相同
+# 自动更新版本号（推荐）
+powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch
+
+# 验证版本一致性
+powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+
+# 安装 pre-commit hook（一次性）
+copy scripts\pre-commit .git\hooks\pre-commit
+```
+
+### 手动检查清单
+
+- [ ] **同步版本号** - `marketplace.json` = `plugin.json`
+- [ ] **更新组件数量** - 本文件、`marketplace.json`、`plugin.json`
+- [ ] **更新 CHANGELOG.md**
+
+### 快速检查版本
+
+```powershell
 (Get-Content .claude-plugin/marketplace.json | ConvertFrom-Json).plugins[0].version
 (Get-Content plugins/compound-engineering/.claude-plugin/plugin.json | ConvertFrom-Json).version
 ```
@@ -127,11 +147,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## 相关文档
 
-| 文档                                     | 说明           |
-| ---------------------------------------- | -------------- |
-| `docs/zh-CN/INSTALL.md`                  | 安装与使用指南 |
-| `docs/zh-CN/SYNC.md`                     | 上游同步指南   |
-| `plugins/compound-engineering/CLAUDE.md` | 插件开发指南   |
+| 文档                                     | 说明               |
+| ---------------------------------------- | ------------------ |
+| `docs/zh-CN/INSTALL.md`                  | 安装与使用指南     |
+| `docs/zh-CN/SYNC.md`                     | 上游同步指南       |
+| `docs/zh-CN/VERSION-STRATEGY.md`         | 版本管理预防策略   |
+| `docs/zh-CN/FORK-SETUP.md`               | Fork 仓库初始化    |
+| `plugins/compound-engineering/CLAUDE.md` | 插件开发指南       |
 
 ---
 

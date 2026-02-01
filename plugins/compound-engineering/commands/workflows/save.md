@@ -1,6 +1,6 @@
 ---
 name: workflows:save
-description: ⑥ 保存项目上下文，用于跨会话恢复
+description: "Step 6: 保存项目上下文，用于跨会话恢复"
 argument-hint: "[可选: 自定义保存路径]"
 ---
 

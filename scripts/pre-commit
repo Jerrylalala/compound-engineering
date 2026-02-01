@@ -1,0 +1,28 @@
+#!/bin/bash
+# Git pre-commit hook - 版本一致性检查
+# 安装方法: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+# 检查是否有版本相关文件被修改
+VERSION_FILES_CHANGED=$(git diff --cached --name-only | grep -E "(marketplace\.json|plugin\.json)" || true)
+
+if [ -z "$VERSION_FILES_CHANGED" ]; then
+    # 没有版本文件被修改，跳过检查
+    exit 0
+fi
+
+echo "检测到版本文件变更，执行一致性检查..."
+
+# 运行检查脚本
+if [ -f "scripts/check-versions.sh" ]; then
+    bash scripts/check-versions.sh
+    exit $?
+elif command -v powershell &> /dev/null; then
+    powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+    exit $?
+else
+    echo "警告: 无法运行版本检查脚本"
+    echo "请手动确认版本号一致性:"
+    echo "  - .claude-plugin/marketplace.json"
+    echo "  - plugins/compound-engineering/.claude-plugin/plugin.json"
+    exit 0
+fi

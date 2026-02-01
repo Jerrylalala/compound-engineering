@@ -1,6 +1,6 @@
 ---
 name: workflows:load
-description: ⓪ 加载项目上下文，恢复之前的会话
+description: "Step 0: 加载项目上下文，恢复之前的会话"
 argument-hint: "[可选: 自定义加载路径]"
 ---
 
