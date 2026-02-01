@@ -31,7 +31,7 @@
 | 组件        | 数量 | 位置                                     |
 | ----------- | ---- | ---------------------------------------- |
 | Agents      | 28   | `plugins/compound-engineering/agents/`   |
-| Commands    | 24   | `plugins/compound-engineering/commands/` |
+| Commands    | 26   | `plugins/compound-engineering/commands/` |
 | Skills      | 16   | `plugins/compound-engineering/skills/`   |
 | MCP Servers | 1    | Context7（HTTP 服务）                    |
 
