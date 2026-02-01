@@ -28,7 +28,32 @@ This command takes a work document (plan, specification, or todo file) and execu
    - Get user approval to proceed
    - **Do not skip this** - better to ask questions now than build the wrong thing
 
-2. **Setup Environment**
+2. **Detect UI/Frontend Tasks** (Auto-Detection)
+
+   After reading the plan, scan for UI-related keywords:
+
+   **Detection triggers** (case-insensitive):
+   - `UI`, `前端`, `frontend`, `界面`, `页面`, `组件`
+   - `button`, `form`, `modal`, `layout`, `设计`
+   - `CSS`, `Tailwind`, `React`, `Vue`, `HTML`
+   - `Figma`, `design`, `视觉`, `交互`
+
+   **If UI work detected:**
+
+   - Announce: "检测到 UI/前端任务，自动加载设计指南..."
+   - Load `frontend-design` skill for visual aesthetics
+   - Load `user-first-design` skill for UX principles (if available in skills-custom/)
+   - Apply these principles throughout implementation:
+     - 极简操作路径（最多3步）
+     - 即时反馈（视觉/文字/动画）
+     - 温柔的错误处理（禁止责备性词汇）
+     - 高对比、低密度、清晰间距
+
+   **If Figma URL found in plan:**
+   - Note for Phase 2: Use `figma-design-sync` agent for pixel-perfect implementation
+   - Remind: "发现 Figma 链接，将在实现阶段使用 figma-design-sync 进行同步"
+
+3. **Setup Environment**
 
    First, check the current branch:
 
@@ -153,7 +178,51 @@ This command takes a work document (plan, specification, or todo file) and execu
    - Fix visual differences identified
    - Repeat until implementation matches design
 
-6. **Track Progress**
+6. **UI/UX Quality Check** (if UI work detected in Phase 1)
+
+   Before moving to Phase 3, verify UI implementation against loaded design principles:
+
+   **user-first-design 检查项：**
+   - [ ] 操作路径是否 ≤ 3 步？
+   - [ ] 所有操作是否有即时反馈？
+   - [ ] 错误提示是否告诉用户如何解决（而非责备）？
+   - [ ] 文案是否使用正向语气？（禁止"错误"、"失败"、"无效"）
+
+   **frontend-design 检查项：**
+   - [ ] 是否避免了 AI 风格同质化？（避免 Inter、Roboto、紫色渐变）
+   - [ ] 视觉层级是否清晰？
+   - [ ] 是否有适当的动效反馈？
+
+   **Optional:** Use `design-iterator` agent for iterative visual refinement if design feels off
+
+7. **Cursor Visual Editor 微调** (if running in Cursor environment)
+
+   当 Claude Code 生成的 UI 需要微调时，使用 Cursor Visual Editor：
+
+   **Step 1: 启动预览**
+   ```bash
+   # 确保开发服务器运行中
+   npm run dev  # 或 bin/dev, pnpm dev 等
+   ```
+
+   **Step 2: Cursor Browser 打开页面**
+   - 使用 Cursor 内置浏览器打开 `http://localhost:3000`（或对应端口）
+   - 快捷键：`Cmd/Ctrl + Shift + P` → "Simple Browser: Show"
+
+   **Step 3: Visual Editor 微调**
+   - 打开右侧 Visual Editor 面板
+   - **点击修改**：点击任意元素，输入描述（如"增大字号"、"改为蓝色"）
+   - **拖拽布局**：直接拖动元素调整位置
+   - **样式滑块**：使用 Styles 面板微调颜色、间距、圆角
+
+   **Step 4: 验证修改**
+   - Visual Editor 的修改会自动同步到代码
+   - 检查生成的代码是否符合项目规范
+   - 如有问题，让 Claude Code 优化代码结构
+
+   **提示**：Cursor Visual Editor 适合快速微调样式，复杂逻辑变更仍由 Claude Code 处理
+
+8. **Track Progress**
    - Keep TodoWrite updated as you complete tasks
    - Note any blockers or unexpected discoveries
    - Create new tasks if scope expands

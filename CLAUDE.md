@@ -10,10 +10,10 @@
 本仓库 = 上游镜像 + 中文化层 + 本地扩展
 ```
 
-| 角色 | 仓库 | 说明 |
-|-----|------|------|
-| **upstream** | EveryInc/compound-engineering-plugin | 上游原始仓库（只读） |
-| **origin** | Jerrylalala/compound-engineering-plugin-private | 用户的私有仓库 |
+| 角色         | 仓库                                            | 说明                 |
+| ------------ | ----------------------------------------------- | -------------------- |
+| **upstream** | EveryInc/compound-engineering-plugin            | 上游原始仓库（只读） |
+| **origin**   | Jerrylalala/compound-engineering-plugin-private | 用户的私有仓库       |
 
 ### 核心原则
 
@@ -28,12 +28,12 @@
 
 ### 当前组件统计
 
-| 组件 | 数量 | 位置 |
-|-----|------|------|
-| Agents | 28 | `plugins/compound-engineering/agents/` |
-| Commands | 24 | `plugins/compound-engineering/commands/` |
-| Skills | 16 | `plugins/compound-engineering/skills/` |
-| MCP Servers | 1 | Context7（HTTP 服务） |
+| 组件        | 数量 | 位置                                     |
+| ----------- | ---- | ---------------------------------------- |
+| Agents      | 28   | `plugins/compound-engineering/agents/`   |
+| Commands    | 24   | `plugins/compound-engineering/commands/` |
+| Skills      | 16   | `plugins/compound-engineering/skills/`   |
+| MCP Servers | 1    | Context7（HTTP 服务）                    |
 
 ### 安装方式
 
@@ -82,11 +82,11 @@ compound-engineering-plugin-private/
 
 ## 常用操作
 
-| 操作 | 命令 |
-|------|------|
-| 同步上游 | `pwsh scripts/sync-upstream.ps1` |
+| 操作         | 命令                             |
+| ------------ | -------------------------------- |
+| 同步上游     | `pwsh scripts/sync-upstream.ps1` |
 | 导入本地技能 | `pwsh scripts/import-skills.ps1` |
-| 统计组件数量 | 见下方 |
+| 统计组件数量 | 见下方                           |
 
 ### 统计组件数量
 
@@ -120,11 +120,11 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## 相关文档
 
-| 文档 | 说明 |
-|-----|------|
-| `docs/zh-CN/INSTALL.md` | 安装与使用指南 |
-| `docs/zh-CN/SYNC.md` | 上游同步指南 |
-| `plugins/compound-engineering/CLAUDE.md` | 插件开发指南 |
+| 文档                                     | 说明           |
+| ---------------------------------------- | -------------- |
+| `docs/zh-CN/INSTALL.md`                  | 安装与使用指南 |
+| `docs/zh-CN/SYNC.md`                     | 上游同步指南   |
+| `plugins/compound-engineering/CLAUDE.md` | 插件开发指南   |
 
 ---
 
