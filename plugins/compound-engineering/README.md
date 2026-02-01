@@ -8,7 +8,7 @@ AI-powered development tools that get smarter with every use. Make each unit of 
 |-----------|-------|
 | Agents | 28 |
 | Commands | 26 |
-| Skills | 16 |
+| Skills | 17 |
 | MCP Servers | 1 |
 
 ## Agents
@@ -115,6 +115,7 @@ Core workflow commands use `workflows:` prefix to avoid collisions with built-in
 | Skill | Description |
 |-------|-------------|
 | `brainstorming` | Explore user intent, approaches, and design decisions before planning |
+| `party-mode` | Multi-agent collaborative discussions with diverse expert perspectives |
 
 ### Architecture & Design
 

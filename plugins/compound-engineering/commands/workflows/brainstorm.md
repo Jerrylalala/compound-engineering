@@ -12,6 +12,8 @@ Brainstorming helps answer **WHAT** to build through collaborative dialogue. It 
 
 **Process knowledge:** Load the `brainstorming` skill for detailed question techniques, approach exploration patterns, and YAGNI principles.
 
+**Party Mode available:** At any point, user can say `[P]` or "开启派对模式" to switch to multi-agent collaborative discussion. Load the `party-mode` skill for details.
+
 ## Feature Description
 
 <feature_description> #$ARGUMENTS </feature_description>
@@ -70,6 +72,9 @@ Lead with your recommendation and explain why. Apply YAGNI—prefer simpler solu
 
 Use **AskUserQuestion tool** to ask which approach the user prefers.
 
+**Party Mode option:** If the decision involves complex trade-offs or would benefit from multiple expert perspectives, offer:
+- Option: "[P] Party Mode - 听听多位专家的意见" - Loads `party-mode` skill for multi-agent discussion
+
 ### Phase 3: Capture the Design
 
 Write a brainstorm document to `docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md`.
@@ -111,5 +116,12 @@ Next: Run `/workflows:plan` when ready to implement.
 - **Ask one question at a time** - Don't overwhelm
 - **Apply YAGNI** - Prefer simpler approaches
 - **Keep outputs concise** - 200-300 words per section max
+
+**Party Mode Guidelines:**
+- User can activate anytime with `[P]` or "开启派对模式"
+- In party mode: 2-3 agents discuss from different perspectives
+- Each agent maintains consistent personality and communication style
+- User can exit with `[E]` or "结束派对"
+- Party mode output integrates into the brainstorm document
 
 NEVER CODE! Just explore and document decisions.

@@ -39,7 +39,7 @@ Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
 | ----------- | ---- | ---------------------------------------- |
 | Agents      | 28   | `plugins/compound-engineering/agents/`   |
 | Commands    | 26   | `plugins/compound-engineering/commands/` |
-| Skills      | 16   | `plugins/compound-engineering/skills/`   |
+| Skills      | 17   | `plugins/compound-engineering/skills/`   |
 | MCP Servers | 1    | Context7（HTTP 服务）                    |
 
 ### 安装方式

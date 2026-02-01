@@ -5,6 +5,27 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.30.0] - 2026-02-01
+
+### Added
+
+- **`party-mode` skill** - Multi-agent collaborative discussion framework integrated with brainstorming
+  - Enables 2-3 AI agents to discuss from different expert perspectives
+  - Includes 14 pre-defined agent personas (architects, developers, PMs, designers, etc.)
+  - Intelligent agent selection based on discussion topic
+  - Natural cross-talk between agents (referencing, challenging, building on points)
+  - Seamless integration with `/workflows:brainstorm` via `[P]` trigger
+
+### Changed
+
+- **`/workflows:brainstorm` command** - Added Party Mode entry point for multi-perspective discussions
+
+### Summary
+
+- 28 agents, 26 commands, 17 skills, 1 MCP server
+
+---
+
 ## [2.29.0] - 2026-02-01
 
 ### Fixed
