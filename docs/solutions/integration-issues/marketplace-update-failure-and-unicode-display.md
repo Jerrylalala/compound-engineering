@@ -13,6 +13,8 @@ symptoms:
   - "Marketplace 点击 'Update now' 时报错 'Local plugins cannot be updated remotely'"
   - "Workflow 命令中的圆圈数字序号（①②③④⑤⑥⓪）在部分终端显示为乱码或方框"
   - "插件版本号不一致（marketplace.json vs plugin.json）"
+  - "修改 GitHub 上的 marketplace.json 后，Claude Code 中的 marketplace 名称不更新"
+  - "插件加载失败，显示 'failed to load · 1 error'"
 module: compound-engineering-plugin
 date_resolved: "2026-02-01"
 version_fixed: "2.29.0"
@@ -25,6 +27,8 @@ version_fixed: "2.29.0"
 1. **Marketplace 更新失败**：点击 "Update now" 时报错 `Local plugins cannot be updated remotely`
 2. **序号显示异常**：`①②③④⑤⑥⓪` 在某些终端显示为方框或乱码
 3. **版本号不一致**：marketplace.json 显示 2.28.0，plugin.json 显示 2.29.0
+4. **Marketplace 名称不更新**：修改 GitHub 上的 `marketplace.json` 后，Claude Code 中仍显示旧名称
+5. **插件加载失败**：显示 "failed to load · 1 error"
 
 ## 根本原因
 
@@ -45,14 +49,31 @@ Claude Code 检测到：
 3. 而实际仓库是 `Jerrylalala/...`（私有 fork）
 4. **身份信息冲突** → 被识别为"本地修改的插件" → 无法远程更新
 
-### 问题2：序号显示异常
+### 问题2：Marketplace 名称缓存不更新
+
+Claude Code 首次添加 marketplace 时会读取 `marketplace.json` 并**缓存**以下元数据：
+- `name` - marketplace 名称
+- `owner` - 所有者信息
+- `metadata` - 其他元数据
+
+**缓存行为**：
+1. 之后即使 GitHub 上修改了 `marketplace.json`，Claude Code **不会自动更新**这些元数据
+2. 只有**移除并重新添加** marketplace 才会重新读取
+3. 缓存位置：`~/.claude/plugins/marketplaces/[marketplace-name]/`
+
+**影响**：
+- 用户修改 `name: "every-marketplace"` → `name: "jerry-marketplace"` 后
+- Claude Code 仍显示 `every-marketplace`
+- 导致用户误以为修改没有生效
+
+### 问题3：序号显示异常
 
 Unicode 圆圈数字（U+2460-U+2464 等）依赖终端字体支持：
 - Windows CMD：可能显示为方框
 - 非 UTF-8 终端：显示为乱码
 - SSH 会话：取决于终端配置
 
-### 问题3：版本号不一致
+### 问题4：版本号不一致
 
 需要同步的 4 个位置未全部更新：
 1. `.claude-plugin/marketplace.json`
@@ -126,7 +147,21 @@ powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patc
 powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 ```
 
-### 4. 重新安装插件
+### 4. 重新安装插件（重要）
+
+> ⚠️ **关键发现**：Claude Code 首次添加 marketplace 时会**缓存** `name` 字段，之后即使 GitHub 上修改了 `marketplace.json`，也**不会自动更新名称**。必须先移除再重新添加。
+
+**方法 A：通过 UI 操作（推荐）**
+
+1. 打开 `/plugin` 界面
+2. 切换到 **Marketplaces** 标签
+3. 选中旧的 marketplace（如 `every-marketplace`）
+4. 按 **`r`** 移除
+5. 选择 **`+ Add Marketplace`**
+6. 输入：`Jerrylalala/compound-engineering-plugin-private`
+7. 新名称 `jerry-marketplace` 会正确显示
+
+**方法 B：手动删除缓存**
 
 ```powershell
 # 删除旧缓存
@@ -135,6 +170,12 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\marketplaces\every
 # 重启 Claude Code 后重新添加
 # /plugins → Add marketplace → Jerrylalala/compound-engineering-plugin-private
 ```
+
+### 5. 验证修复
+
+修复后检查：
+1. `/plugin` → Marketplaces：名称显示为 `jerry-marketplace`
+2. `/plugin` → Installed：插件状态为正常加载（无 "failed to load" 错误）
 
 ## 预防策略
 

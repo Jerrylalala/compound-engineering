@@ -50,15 +50,15 @@ skills/
 
 **Workflow commands** use `workflows:` prefix to avoid collisions with built-in commands:
 
-| 序号 | 命令 | 说明 |
-|------|------|------|
-| Step 0: | `/workflows:load` | 加载项目上下文 |
+| 序号    | 命令                    | 说明           |
+| ------- | ----------------------- | -------------- |
+| Step 0: | `/workflows:load`       | 加载项目上下文 |
 | Step 1: | `/workflows:brainstorm` | 探索需求和方案 |
-| Step 2: | `/workflows:plan` | 创建实施计划 |
-| Step 3: | `/workflows:work` | 执行工作计划 |
-| Step 4: | `/workflows:review` | 代码审查 |
-| Step 5: | `/workflows:compound` | 记录解决方案 |
-| Step 6: | `/workflows:save` | 保存项目上下文 |
+| Step 2: | `/workflows:plan`       | 创建实施计划   |
+| Step 3: | `/workflows:work`       | 执行工作计划   |
+| Step 4: | `/workflows:review`     | 代码审查       |
+| Step 5: | `/workflows:compound`   | 记录解决方案   |
+| Step 6: | `/workflows:save`       | 保存项目上下文 |
 
 **Why `workflows:`?** Claude Code has built-in `/plan` and `/review` commands. Using `name: workflows:plan` in frontmatter creates a unique `/workflows:plan` command with no collision.
 
