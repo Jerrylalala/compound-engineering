@@ -157,6 +157,33 @@ Fork 后立即执行：
 
 CLI 输出中避免使用 Unicode 特殊字符，优先使用 ASCII 兼容格式。
 
+### Workflow 命令序号规范
+
+已在 `plugins/compound-engineering/CLAUDE.md` 中添加明确规范：
+
+**完整命令列表：**
+
+| 序号 | 命令 | 说明 |
+|------|------|------|
+| Step 0: | `/workflows:load` | 加载项目上下文 |
+| Step 1: | `/workflows:brainstorm` | 探索需求和方案 |
+| Step 2: | `/workflows:plan` | 创建实施计划 |
+| Step 3: | `/workflows:work` | 执行工作计划 |
+| Step 4: | `/workflows:review` | 代码审查 |
+| Step 5: | `/workflows:compound` | 记录解决方案 |
+| Step 6: | `/workflows:save` | 保存项目上下文 |
+
+**格式规范：**
+```yaml
+# ✅ 正确
+description: "Step X: 描述内容"
+
+# ❌ 错误
+description: ① 描述内容
+```
+
+新增 workflow 命令时，按顺序分配 Step 编号，确保使用 ASCII 格式。
+
 ## 相关文档
 
 - [版本管理预防策略](../../zh-CN/VERSION-STRATEGY.md)
