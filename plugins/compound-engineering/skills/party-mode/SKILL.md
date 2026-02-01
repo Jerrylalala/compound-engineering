@@ -1,11 +1,10 @@
 ---
 name: party-mode
 description: |
-  This skill should be used when multi-perspective discussion is needed during brainstorming.
-  It enables 2-3 AI agents with distinct expert personas to collaborate on complex decisions,
-  technical choices, requirement exploration, or retrospectives.
+  此技能应在头脑风暴中需要多视角讨论时使用。
+  它让 2-3 个具有不同专家人格的 AI 代理协作讨论复杂决策、技术选型、需求探索或事后复盘。
 
-  Triggers: "派对模式", "开启派对", "多视角讨论", "[P]", "party mode", "听听专家意见"
+  触发词：「派对模式」「开启派对」「多视角讨论」「[P]」「听听专家意见」
 ---
 
 # 派对模式 - 多代理协作讨论
