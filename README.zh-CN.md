@@ -7,17 +7,19 @@
 
 > 说明：中文版本全部集中在 `README.zh-CN.md` 与 `docs/zh-CN/` 目录中。同步上游时，这些内容不会被覆盖。
 
-## 本地开发（推荐）
+## 安装方式
 
-使用 `--plugin-dir` 标志启动 Claude Code：
+**推荐：通过 Marketplace 安装**
+
+```
+/plugins → Add marketplace → Jerrylalala/compound-engineering-plugin-private
+```
+
+**本地开发（可选）：**
 
 ```bash
 claude --plugin-dir "路径/plugins/compound-engineering"
 ```
-
-或使用启动脚本：
-- Windows: 双击 `start-claude.bat`
-- macOS/Linux: `./start-claude.sh`
 
 ## 工作流命令
 
@@ -28,10 +30,10 @@ claude --plugin-dir "路径/plugins/compound-engineering"
 | `/workflows:review` | 多代理代码审查 |
 | `/workflows:compound` | 沉淀解决方案与知识 |
 
-## 更多中文文档
+## 更多文档
 
 | 文档 | 说明 |
 |------|------|
 | `docs/zh-CN/INSTALL.md` | 插件安装指南 |
-| `docs/zh-CN/SYNC-WORKFLOW.md` | 上游同步工作流 |
-| `docs/zh-CN/README.md` | 中文文档首页 |
+| `docs/zh-CN/SYNC.md` | 上游同步指南 |
+| `CLAUDE.md` | 项目指令 |

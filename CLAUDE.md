@@ -65,13 +65,9 @@ compound-engineering-plugin-private/
 │   └── compound-engineering/
 │       ├── .claude-plugin/plugin.json
 │       ├── agents/                   # 28 个 agents
-│       ├── commands/                 # 24 个 commands
+│       ├── commands/                 # 26 个 commands
 │       ├── skills/                   # 16 个 skills
-│       ├── skills-custom/            # 📌 本地自定义技能
-│       └── skills-inbox/             # 📌 技能投递箱
-├── scripts/
-│   ├── sync-upstream.ps1
-│   └── import-skills.ps1
+│       └── skills-custom/            # 📌 本地自定义技能
 ├── README.md                         # 上游英文说明（不修改）
 └── CLAUDE.md                         # 本文件
 ```
@@ -82,11 +78,11 @@ compound-engineering-plugin-private/
 
 ## 常用操作
 
-| 操作         | 命令                             |
-| ------------ | -------------------------------- |
-| 同步上游     | `pwsh scripts/sync-upstream.ps1` |
-| 导入本地技能 | `pwsh scripts/import-skills.ps1` |
-| 统计组件数量 | 见下方                           |
+| 操作         | 命令                                     |
+| ------------ | ---------------------------------------- |
+| 同步上游     | 见 `docs/zh-CN/SYNC.md`                  |
+| 添加自定义技能 | 直接在 `skills-custom/` 创建目录       |
+| 统计组件数量 | 见下方                                   |
 
 ### 统计组件数量
 

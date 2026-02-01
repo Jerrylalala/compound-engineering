@@ -32,15 +32,7 @@ origin   -> https://github.com/Jerrylalala/compound-engineering-plugin-private.g
 
 ---
 
-## 一键同步（推荐）
-
-```powershell
-pwsh scripts/sync-upstream.ps1
-```
-
----
-
-## 手动同步步骤
+## 同步步骤
 
 ### 第一步：检测上游更新
 
