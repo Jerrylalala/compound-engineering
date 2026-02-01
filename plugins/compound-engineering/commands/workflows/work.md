@@ -38,7 +38,12 @@ This command takes a work document (plan, specification, or todo file) and execu
    - `CSS`, `Tailwind`, `React`, `Vue`, `HTML`
    - `Figma`, `design`, `视觉`, `交互`
 
-   **If UI work detected:**
+   **Exclusion triggers** (suppress UI detection if found):
+   - `database design`, `API design`, `system design`, `schema design`, `架构设计`
+   - `data layout`, `memory layout`, `struct layout`
+   - `backend only`, `server-side`, `CLI`, `命令行`
+
+   **If UI work detected (and no exclusion triggers found):**
 
    - Announce: "检测到 UI/前端任务，自动加载设计指南..."
    - Load `frontend-design` skill for visual aesthetics
@@ -97,7 +102,7 @@ This command takes a work document (plan, specification, or todo file) and execu
    - You want to keep the default branch clean while experimenting
    - You plan to switch between branches frequently
 
-3. **Create Todo List**
+4. **Create Todo List**
    - Use TodoWrite to break plan into actionable tasks
    - Include dependencies between tasks
    - Prioritize based on what needs to be done first
@@ -197,30 +202,14 @@ This command takes a work document (plan, specification, or todo file) and execu
 
 7. **Cursor Visual Editor 微调** (if running in Cursor environment)
 
-   当 Claude Code 生成的 UI 需要微调时，使用 Cursor Visual Editor：
+   当 Claude Code 生成的 UI 需要微调时，使用 Cursor Visual Editor 进行可视化调整。
 
-   **Step 1: 启动预览**
-   ```bash
-   # 确保开发服务器运行中
-   npm run dev  # 或 bin/dev, pnpm dev 等
-   ```
+   详细操作步骤参见 `user-first-design` 技能中的「Cursor 集成工作流」部分。
 
-   **Step 2: Cursor Browser 打开页面**
-   - 使用 Cursor 内置浏览器打开 `http://localhost:3000`（或对应端口）
-   - 快捷键：`Cmd/Ctrl + Shift + P` → "Simple Browser: Show"
-
-   **Step 3: Visual Editor 微调**
-   - 打开右侧 Visual Editor 面板
-   - **点击修改**：点击任意元素，输入描述（如"增大字号"、"改为蓝色"）
-   - **拖拽布局**：直接拖动元素调整位置
-   - **样式滑块**：使用 Styles 面板微调颜色、间距、圆角
-
-   **Step 4: 验证修改**
-   - Visual Editor 的修改会自动同步到代码
-   - 检查生成的代码是否符合项目规范
-   - 如有问题，让 Claude Code 优化代码结构
-
-   **提示**：Cursor Visual Editor 适合快速微调样式，复杂逻辑变更仍由 Claude Code 处理
+   **快速提示**：
+   - 启动本地服务器 → Cursor Browser 打开页面 → Visual Editor 面板微调
+   - 点击元素 + 描述修改，或拖拽调整布局
+   - 修改会自动同步到代码
 
 8. **Track Progress**
    - Keep TodoWrite updated as you complete tasks
