@@ -23,6 +23,13 @@
 
 ### AI 助手行为规范
 
+**开始工作前检查历史经验**：在修复 bug 或实现功能前，先搜索 `docs/solutions/` 查找相关经验：
+```bash
+# 搜索相关文档
+Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
+```
+如果找到相关文档，先阅读再开始工作，避免重复踩坑。
+
 **功能完成后必须询问**：当完成用户请求的功能后，必须询问用户是否要推送到 Git：
 > "功能已完成。要推送到 Git 吗？"
 
