@@ -96,9 +96,20 @@ compound-engineering-plugin-private/
 
 ## 更新插件时的检查清单
 
-- [ ] 更新版本号：`.claude-plugin/marketplace.json` 和 `plugin.json`
+> **⚠️ 版本号必须同步！** 两个文件的版本号必须一致，否则 Marketplace 无法更新：
+> - `.claude-plugin/marketplace.json` ← Marketplace 读取这个
+> - `plugins/compound-engineering/.claude-plugin/plugin.json` ← 插件本身版本
+
+- [ ] **同步版本号**（两个文件必须相同！）
 - [ ] 更新组件数量：本文件、`marketplace.json`、`plugin.json`
 - [ ] 更新 `CHANGELOG.md`
+
+**快速检查版本是否一致：**
+```powershell
+# 两个版本号应该相同
+(Get-Content .claude-plugin/marketplace.json | ConvertFrom-Json).plugins[0].version
+(Get-Content plugins/compound-engineering/.claude-plugin/plugin.json | ConvertFrom-Json).version
+```
 
 ---
 
@@ -125,6 +136,16 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ---
 
 ## Key Learnings
+
+### 2026-02-01：版本号同步问题
+
+**问题**：`marketplace.json` 和 `plugin.json` 版本号不一致导致 Marketplace 无法更新。
+**原因**：Marketplace 只读取 `marketplace.json` 的版本号，如果它比已安装版本旧或相同，则认为无需更新。
+**解决**：每次发版必须同时更新两个文件的版本号，保持一致。
+
+### 2026-02-01：避免特殊字符
+
+命令描述中避免使用圆圈数字（①②③）等特殊 Unicode 字符，在某些终端显示异常。改用 `Step 1:` 等 ASCII 兼容格式。
 
 ### 2026-01-31：安装方式更新
 

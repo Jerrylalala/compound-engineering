@@ -1,6 +1,6 @@
 ---
 name: workflows:compound
-description: ⑤ 记录已解决的问题，积累团队知识
+description: "Step 5: 记录已解决的问题，积累团队知识"
 argument-hint: "[optional: brief context about the fix]"
 ---
 

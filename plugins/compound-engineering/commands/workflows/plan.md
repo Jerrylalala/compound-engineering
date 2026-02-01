@@ -1,6 +1,6 @@
 ---
 name: workflows:plan
-description: ② 将功能描述转化为结构清晰的项目计划
+description: "Step 2: 将功能描述转化为结构清晰的项目计划"
 argument-hint: "[feature description, bug report, or improvement idea]"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: workflows:review
-description: ④ 使用多代理分析进行全面代码审查
+description: "Step 4: 使用多代理分析进行全面代码审查"
 argument-hint: "[PR number, GitHub URL, branch name, or latest]"
 ---
 

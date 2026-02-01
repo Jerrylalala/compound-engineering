@@ -1,6 +1,6 @@
 ---
 name: workflows:work
-description: ③ 高效执行工作计划，保持质量并完成功能
+description: "Step 3: 高效执行工作计划，保持质量并完成功能"
 argument-hint: "[plan file, specification, or todo file path]"
 ---
 

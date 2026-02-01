@@ -5,6 +5,25 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.29.0] - 2026-02-01
+
+### Fixed
+
+- **Workflow command descriptions** - Changed circle numbers (①②③④⑤) to ASCII format (Step 1: Step 2: etc.) for better terminal compatibility
+- **Version sync issue** - Fixed marketplace.json version mismatch that prevented plugin updates via Marketplace
+- **README.md** - Updated Commands count from 24 to 26
+
+### Changed
+
+- **CLAUDE.md (root)** - Added version sync warning and quick check command
+- **CLAUDE.md (plugin)** - Added marketplace.json to version sync requirements
+
+### Summary
+
+- 28 agents, 26 commands, 16 skills, 1 MCP server
+
+---
+
 ## [2.28.0] - 2026-01-21
 
 ### Added
