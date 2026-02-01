@@ -26,18 +26,35 @@ Captures problem solutions while context is fresh, creating structured documenta
 This command launches multiple specialized subagents IN PARALLEL to maximize efficiency:
 
 ### 0. **Location Classifier** (First, Required)
-   - **判断经验应该放在哪里**（全局 or 项目）
-   - 根据全局 CLAUDE.md 中的分类规则：
-     | 经验类型 | 放入位置 |
-     |----------|----------|
-     | Claude Code 使用问题 | `~/.claude/solutions/` |
-     | 开发工具/IDE 问题 | `~/.claude/solutions/` |
-     | Git/GitHub 通用问题 | `~/.claude/solutions/` |
-     | 项目业务逻辑 bug | `项目/docs/solutions/` |
-     | 项目特定架构问题 | `项目/docs/solutions/` |
-   - 如果是**全局经验**：同时写入两个位置（全局优先）
-   - 如果是**项目经验**：只写入项目目录
-   - Returns: Target location(s)
+
+> **规则来源**：遵循 `~/.claude/CLAUDE.md` 中的「经验分类规则（SSOT）」，此处不重复定义。
+
+**执行步骤：**
+
+1. 分析问题特征，使用全局 CLAUDE.md 的判定决策树：
+   - Q1: 涉及 Claude Code/API？ → 全局 + 项目备份
+   - Q2: 通用开发工具问题？ → 仅全局
+   - Q3: 可复用的设计模式/规范？ → 仅全局
+   - Q4: 只与当前项目相关？ → 仅项目
+
+2. 确定写入位置和文件路径
+
+3. 返回结构化结果
+
+**返回值（JSON）：**
+```json
+{
+  "scope": "global" | "project",
+  "primary_location": "~/.claude/solutions/..." | "docs/solutions/...",
+  "backup_location": "docs/solutions/...",  // 仅当 scope=global 时存在
+  "category": "integration-issues",          // 问题分类
+  "reasoning": "问题涉及 Claude Code 插件..."  // 判定理由
+}
+```
+
+**示例：**
+- 「Marketplace 缓存问题」→ `{ scope: "global", primary: "~/.claude/solutions/marketplace-cache.md", backup: "docs/solutions/integration-issues/..." }`
+- 「项目 N+1 查询」→ `{ scope: "project", primary: "docs/solutions/performance-issues/..." }`
 
 ### 1. **Context Analyzer** (Parallel)
    - Extracts conversation history
@@ -108,22 +125,13 @@ This command launches multiple specialized subagents IN PARALLEL to maximize eff
 
 ## What It Creates
 
-**文档位置判断（优先级）：**
+> **位置判断规则**：参见 `~/.claude/CLAUDE.md` 的「经验分类规则（SSOT）」
 
-| 经验类型 | 写入位置 | 说明 |
-|----------|----------|------|
-| Claude Code 插件/使用问题 | `~/.claude/solutions/` + 项目 | 全局优先，项目备份 |
-| 开发工具/IDE 通用问题 | `~/.claude/solutions/` | 仅全局 |
-| Git/GitHub 通用问题 | `~/.claude/solutions/` | 仅全局 |
-| 项目业务逻辑 bug | `项目/docs/solutions/` | 仅项目 |
-| 项目特定架构问题 | `项目/docs/solutions/` | 仅项目 |
+**文档位置：**
+- 全局经验 → `~/.claude/solutions/[filename].md` + 项目备份
+- 项目经验 → `docs/solutions/[category]/[filename].md`
 
-**判断标准：**
-- 问题是否**跨项目可复用**？ → 全局
-- 问题是否与**特定代码库**相关？ → 项目
-- 问题是否涉及**通用工具/框架**？ → 全局
-
-**项目内分类（当写入项目时）：**
+**项目内分类：**
 
 - File: `docs/solutions/[category]/[filename].md`
 

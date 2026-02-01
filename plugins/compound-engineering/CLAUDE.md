@@ -48,7 +48,11 @@ skills/
 
 ## Command Naming Convention
 
-**Workflow commands** use `workflows:` prefix to avoid collisions with built-in commands:
+**Workflow commands** use `workflows:` prefix to avoid collisions with built-in commands.
+
+**Why `workflows:`?** Claude Code has built-in `/plan` and `/review` commands. Using `name: workflows:plan` in frontmatter creates a unique `/workflows:plan` command with no collision.
+
+### Workflow 命令列表
 
 | 序号    | 命令                    | 说明           |
 | ------- | ----------------------- | -------------- |
@@ -60,21 +64,16 @@ skills/
 | Step 5: | `/workflows:compound`   | 记录解决方案   |
 | Step 6: | `/workflows:save`       | 保存项目上下文 |
 
-**Why `workflows:`?** Claude Code has built-in `/plan` and `/review` commands. Using `name: workflows:plan` in frontmatter creates a unique `/workflows:plan` command with no collision.
+### 序号格式规范
 
-### Workflow 命令序号规范
+> ⚠️ 避免使用 Unicode 特殊字符（①②③），在某些终端显示异常。
 
-> ⚠️ **避免使用 Unicode 特殊字符！** 圆圈数字（①②③）在某些终端显示异常。
-
-**正确格式：**
 ```yaml
+# 正确
 description: "Step X: 描述内容"
-```
 
-**错误格式：**
-```yaml
-description: ① 描述内容    # 终端兼容性差
-description: 1. 描述内容   # 格式不统一
+# 错误
+description: ① 描述内容
 ```
 
 新增 workflow 命令时，按顺序分配 Step 编号。

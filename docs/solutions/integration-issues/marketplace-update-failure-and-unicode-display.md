@@ -196,77 +196,11 @@ Fork 后立即执行：
 
 ### 避免特殊字符
 
-CLI 输出中避免使用 Unicode 特殊字符，优先使用 ASCII 兼容格式。
+CLI 输出中避免使用 Unicode 特殊字符（如 ①②③），优先使用 ASCII 兼容格式（如 `Step 1:`）。
 
-### Workflow 命令序号规范
+> **详细规范**：参见 `plugins/compound-engineering/CLAUDE.md` 的「序号格式规范」
 
-已在 `plugins/compound-engineering/CLAUDE.md` 中添加明确规范：
-
-**完整命令列表：**
-
-| 序号 | 命令 | 说明 |
-|------|------|------|
-| Step 0: | `/workflows:load` | 加载项目上下文 |
-| Step 1: | `/workflows:brainstorm` | 探索需求和方案 |
-| Step 2: | `/workflows:plan` | 创建实施计划 |
-| Step 3: | `/workflows:work` | 执行工作计划 |
-| Step 4: | `/workflows:review` | 代码审查 |
-| Step 5: | `/workflows:compound` | 记录解决方案 |
-| Step 6: | `/workflows:save` | 保存项目上下文 |
-
-**格式规范：**
-```yaml
-# ✅ 正确
-description: "Step X: 描述内容"
-
-# ❌ 错误
-description: ① 描述内容
-```
-
-新增 workflow 命令时，按顺序分配 Step 编号，确保使用 ASCII 格式。
-
-## 全局经验库架构
-
-为了让经验跨项目生效，建立了双层经验库：
-
-### 架构
-
-```
-~/.claude/
-├── CLAUDE.md              ← 全局规则（所有项目生效）
-└── solutions/             ← 全局经验库（通用经验）
-    └── *.md
-
-任何项目/
-├── CLAUDE.md              ← 项目规则
-└── docs/solutions/        ← 项目经验库（项目特定经验）
-    └── *.md
-```
-
-### 搜索规则（已添加到全局 CLAUDE.md）
-
-```bash
-# 1. 搜索全局经验库（通用经验）
-Grep pattern="关键词" path=~/.claude/solutions/ output_mode=files_with_matches
-
-# 2. 搜索项目经验库（项目特定经验）
-Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
-```
-
-### 经验分类
-
-| 经验类型 | 放入位置 |
-|----------|----------|
-| Claude Code 使用问题 | `~/.claude/solutions/` |
-| 开发工具/IDE 问题 | `~/.claude/solutions/` |
-| Git/GitHub 通用问题 | `~/.claude/solutions/` |
-| 项目业务逻辑 bug | `项目/docs/solutions/` |
-| 项目特定架构问题 | `项目/docs/solutions/` |
-
-### 生效范围
-
-- **全局规则**：在任何项目中，AI 都会先搜索 `~/.claude/solutions/`
-- **项目规则**：如果项目有 `docs/solutions/`，也会搜索
+> **经验分类规则**：参见 `~/.claude/CLAUDE.md` 的「经验分类规则（SSOT）」
 
 ## 相关文档
 
