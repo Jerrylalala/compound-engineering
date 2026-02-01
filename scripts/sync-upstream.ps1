@@ -1,9 +1,9 @@
 $ErrorActionPreference = 'Stop'
 
 function Write-Heading([string]$text) {
-  Write-Host ("=`" * 60)
+  Write-Host ("=" * 60)
   Write-Host $text
-  Write-Host ("=`" * 60)
+  Write-Host ("=" * 60)
 }
 
 Write-Heading "Sync upstream"
