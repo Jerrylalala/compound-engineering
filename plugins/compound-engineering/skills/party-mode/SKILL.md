@@ -67,7 +67,7 @@ description: |
 | **说话风格** | 决定表达方式 | 「冷静务实，用类比解释」 |
 | **决策原则** | 指导观点立场 | 「简单方案优先」 |
 
-详见 [代理人格清单](./references/party-roster.md)。
+详见 [代理索引](./references/_index.md)，按需加载具体代理文件。
 
 ### 三、自然交叉讨论
 
@@ -239,4 +239,12 @@ description: |
 
 ## 进阶参考
 
-- [代理人格清单](./references/party-roster.md) - 完整的 14 个代理人格定义
+### 代理人格文件
+
+**动态加载机制**：为减少 token 消耗，代理人格按需加载，而非一次性全部读取。
+
+1. 先读取 [代理索引](./references/_index.md) 了解全部 14 个代理
+2. 根据话题领域选择 2-3 个代理
+3. 按需加载对应人格文件：
+   - 核心团队：[architect](./references/core/architect.md) | [analyst](./references/core/analyst.md) | [developer](./references/core/developer.md) | [pm](./references/core/pm.md) | [designer](./references/core/designer.md) | [security](./references/core/security.md) | [performance](./references/core/performance.md) | [qa](./references/core/qa.md)
+   - 创意团队：[brainstorm-coach](./references/creative/brainstorm-coach.md) | [design-thinking](./references/creative/design-thinking.md) | [storyteller](./references/creative/storyteller.md) | [innovator](./references/creative/innovator.md) | [presenter](./references/creative/presenter.md) | [polymath](./references/creative/polymath.md)
