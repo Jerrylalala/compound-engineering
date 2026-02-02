@@ -225,3 +225,45 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 - **MCP 服务器限制**：插件只能配置无需认证的 HTTP 类型 MCP（如 Context7）
 - **安装方式**：`/plugins → Add marketplace → Jerrylalala/compound-engineering-plugin-private`
+
+---
+
+## Codex 集成（可选）
+
+本项目支持 Claude Code 与 OpenAI Codex 的协作审核。
+
+### 自动审核（已配置）
+
+在 `.claude/settings.local.json` 中配置了 Stop hook，Claude 完成工作后自动触发 Codex 审核：
+
+```json
+{
+  "hooks": {
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/codex-review.sh\"",
+        "async": true
+      }]
+    }]
+  }
+}
+```
+
+### 手动审核
+
+```bash
+# 审核未提交的更改
+./scripts/codex-review-now.sh uncommitted
+
+# 审核暂存的更改
+./scripts/codex-review-now.sh staged
+
+# 审核整个分支
+./scripts/codex-review-now.sh branch
+```
+
+### 前提条件
+
+- 安装 Codex CLI: `npm install -g @openai/codex`
+- 登录 OpenAI 账户: `codex` (首次运行时)
