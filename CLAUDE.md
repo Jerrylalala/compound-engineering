@@ -30,6 +30,35 @@ Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
 ```
 如果找到相关文档，先阅读再开始工作，避免重复踩坑。
 
+**完成前验证（铁律）**：声明任何工作完成之前，必须有新鲜的验证证据。
+
+```
+在声明任何状态或表达满意之前：
+
+1. 识别：什么命令能证明这个声明？
+2. 运行：执行完整命令（新鲜的，完整的）
+3. 阅读：完整输出，检查退出码，统计失败数
+4. 验证：输出是否确认声明？
+   - 否 → 陈述实际状态并附证据
+   - 是 → 陈述声明并附证据
+5. 然后才能：做出声明
+
+跳过任何步骤 = 虚假声明，不是验证
+```
+
+| 声明 | 需要 | 不充分 |
+|------|------|--------|
+| 测试通过 | 测试命令输出：0 失败 | 之前的运行、「应该通过」 |
+| 构建成功 | 构建命令：exit 0 | lint 通过、日志看起来正常 |
+| Bug 已修复 | 测试原始症状：通过 | 代码改了、假设修好了 |
+| 需求满足 | 逐行清单验证 | 测试通过 |
+
+**危险信号 - 停下来**：
+- 使用「应该」「可能」「似乎」
+- 在验证前表达满意（「太好了！」「完成！」）
+- 准备提交/推送/PR 但没验证
+- 想着「就这一次」
+
 **功能完成后必须询问**：当完成用户请求的功能后，必须询问用户是否要推送到 Git：
 > "功能已完成。要推送到 Git 吗？"
 
@@ -39,7 +68,7 @@ Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
 | ----------- | ---- | ---------------------------------------- |
 | Agents      | 28   | `plugins/compound-engineering/agents/`   |
 | Commands    | 26   | `plugins/compound-engineering/commands/` |
-| Skills      | 17   | `plugins/compound-engineering/skills/`   |
+| Skills      | 20   | `plugins/compound-engineering/skills/`   |
 | MCP Servers | 1    | Context7（HTTP 服务）                    |
 
 ### 安装方式
@@ -80,7 +109,7 @@ compound-engineering-plugin-private/
 │       ├── .claude-plugin/plugin.json
 │       ├── agents/                   # 28 个 agents
 │       ├── commands/                 # 26 个 commands
-│       ├── skills/                   # 16 个 skills
+│       ├── skills/                   # 20 个 skills
 │       └── skills-custom/            # 📌 本地自定义技能
 ├── README.md                         # 上游英文说明（不修改）
 └── CLAUDE.md                         # 本文件

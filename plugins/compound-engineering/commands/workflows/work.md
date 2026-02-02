@@ -1,6 +1,6 @@
 ---
 name: workflows:work
-description: "Step 3: 高效执行工作计划，保持质量并完成功能"
+description: "Step 3: 高效执行工作计划（1任务=标准，≥2任务=自动Subagent）"
 argument-hint: "[plan file, specification, or todo file path]"
 ---
 
@@ -15,6 +15,35 @@ This command takes a work document (plan, specification, or todo file) and execu
 ## Input Document
 
 <input_document> #$ARGUMENTS </input_document>
+
+## Execution Mode Detection（自动）
+
+在 Phase 1 Step 4（Create Todo List）完成后，根据 TodoWrite 中的任务数量自动选择执行模式：
+
+```
+统计时机: Phase 1 结束后，Phase 2 开始前
+统计来源: TodoWrite 任务列表
+
+任务数量 = 1  → 标准模式（单代理执行）
+任务数量 ≥ 2 → Subagent-Driven 模式（自动启用）
+```
+
+**宣布执行模式：**
+```
+if (task_count == 1):
+  "检测到 1 个任务，使用标准模式执行。"
+else:
+  "检测到 [task_count] 个任务，自动启用 Subagent-Driven 模式。"
+```
+
+**Subagent-Driven 模式（≥2 任务自动启用）：**
+- 每个任务派遣新的子代理执行
+- 执行两阶段审查（规范合规 → 代码质量）
+- 默认批量处理 3 个任务后设置人工检查点
+
+**标准模式（1 任务）：**
+- 单代理直接执行
+- 无需额外开销
 
 ## Execution Workflow
 
@@ -111,6 +140,10 @@ This command takes a work document (plan, specification, or todo file) and execu
 
 ### Phase 2: Execute
 
+#### Execution Mode A: Standard（1 任务时使用）
+
+单代理执行，适合简单任务。
+
 1. **Task Execution Loop**
 
    For each task in priority order:
@@ -130,7 +163,77 @@ This command takes a work document (plan, specification, or todo file) and execu
 
    **IMPORTANT**: Always update the original plan document by checking off completed items. Use the Edit tool to change `- [ ]` to `- [x]` for each task you finish. This keeps the plan as a living document showing progress and ensures no checkboxes are left unchecked.
 
-2. **Incremental Commits**
+#### Execution Mode B: Subagent-Driven（≥2 任务自动启用）
+
+每任务派遣新子代理，避免上下文污染，适合复杂任务。
+
+1. **Batch Task Execution**
+
+   默认批量处理前 3 个任务，然后设置人工检查点：
+
+   ```
+   batch_size = 3
+
+   while (tasks remain):
+     current_batch = tasks[0:batch_size]
+
+     for task in current_batch:
+       # 1. 派遣新子代理执行单个任务
+       Task(general-purpose): """
+         执行以下任务：
+
+         任务描述: [task.description]
+         文件路径: [task.file_path]
+         代码: [task.code]
+
+         **执行规则**：
+         - 如果任务涉及新功能实现 → 使用 test-driven-development skill（先写失败测试）
+         - 如果任务涉及 bug 修复 → 使用 systematic-debugging skill（先做根因分析）
+         - 否则 → 直接执行
+
+         完成后运行验证命令并报告结果。
+       """
+
+       # 2. 两阶段审查
+       # Stage 1: 规范合规审查（使用 spec-compliance-review skill）
+       Task(general-purpose): """
+         使用 spec-compliance-review skill 审查刚完成的任务。
+
+         原始任务描述: [task.description]
+         实现者报告: [subagent 的执行结果]
+
+         验证：
+         1. 遗漏的需求 - 是否实现了所有请求的功能？
+         2. 多余的工作 - 是否构建了不需要的东西？
+         3. 理解偏差 - 是否以不同于预期的方式解释需求？
+
+         报告：✅ 规格符合 或 ❌ 发现问题（附具体内容）
+       """
+
+       # Stage 2: 代码质量审查（可选，复杂任务启用）
+       # Task(code-simplicity-reviewer): "审查代码质量"
+
+       # 3. 更新任务状态
+       - Mark task as completed in TodoWrite
+       - Mark off checkbox in plan file ([ ] → [x])
+
+     # 4. 人工检查点
+     AskUserQuestion: "已完成 [batch_size] 个任务。继续下一批？"
+     - Yes: continue to next batch
+     - Review changes: show git diff, then ask again
+     - Stop: exit execution loop
+   ```
+
+2. **Why Subagent-Driven?**
+
+   | 问题 | 单代理 | 子代理驱动 |
+   |------|--------|------------|
+   | 上下文污染 | 任务越多，质量越差 | 每任务新鲜上下文 |
+   | Token 成本 | 上下文累积增长 | 每任务精确上下文 |
+   | 首次成功率 | ~40%（后期任务） | ~95%（恒定） |
+   | 适用场景 | 简单/连续任务 | 复杂/独立任务 |
+
+3. **Incremental Commits**
 
    After completing each task, evaluate whether to create an incremental commit:
 
@@ -159,7 +262,7 @@ This command takes a work document (plan, specification, or todo file) and execu
 
    **Note:** Incremental commits use clean conventional messages without attribution footers. The final Phase 4 commit/PR includes the full attribution.
 
-3. **Follow Existing Patterns**
+4. **Follow Existing Patterns**
 
    - The plan should reference similar code - read those files first
    - Match naming conventions exactly
@@ -167,14 +270,14 @@ This command takes a work document (plan, specification, or todo file) and execu
    - Follow project coding standards (see CLAUDE.md)
    - When in doubt, grep for similar implementations
 
-4. **Test Continuously**
+5. **Test Continuously**
 
    - Run relevant tests after each significant change
    - Don't wait until the end to test
    - Fix failures immediately
    - Add new tests for new functionality
 
-5. **Figma Design Sync** (if applicable)
+6. **Figma Design Sync** (if applicable)
 
    For UI work with Figma designs:
 
@@ -183,7 +286,7 @@ This command takes a work document (plan, specification, or todo file) and execu
    - Fix visual differences identified
    - Repeat until implementation matches design
 
-6. **UI/UX Quality Check** (if UI work detected in Phase 1)
+7. **UI/UX Quality Check** (if UI work detected in Phase 1)
 
    Before moving to Phase 3, verify UI implementation against loaded design principles:
 
@@ -200,7 +303,7 @@ This command takes a work document (plan, specification, or todo file) and execu
 
    **Optional:** Use `design-iterator` agent for iterative visual refinement if design feels off
 
-7. **Cursor Visual Editor 微调** (if running in Cursor environment)
+8. **Cursor Visual Editor 微调** (if running in Cursor environment)
 
    当 Claude Code 生成的 UI 需要微调时，使用 Cursor Visual Editor 进行可视化调整。
 
@@ -211,7 +314,7 @@ This command takes a work document (plan, specification, or todo file) and execu
    - 点击元素 + 描述修改，或拖拽调整布局
    - 修改会自动同步到代码
 
-8. **Track Progress**
+9. **Track Progress**
    - Keep TodoWrite updated as you complete tasks
    - Note any blockers or unexpected discoveries
    - Create new tasks if scope expands

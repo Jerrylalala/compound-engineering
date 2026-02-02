@@ -120,7 +120,70 @@ After all research steps complete, consolidate findings:
 
 **Optional validation:** Briefly summarize findings and ask if anything looks off or missing before proceeding to planning.
 
-### 2. Issue Planning & Structure
+### 2. Task Breakdown（Bite-Sized 格式 - 必须遵循）
+
+> **铁律：每个任务必须是 2-5 分钟可完成的原子操作**
+
+将功能拆解为细粒度任务，每个任务必须包含：
+
+```markdown
+### Task N: [动作描述]
+
+**文件**: `确切/文件/路径.ext:行号`（如已知）
+**操作**:
+- [ ] 具体步骤 1
+- [ ] 具体步骤 2
+
+**代码**:
+```language
+// 完整代码，不是伪代码
+// 如果是修改，标注修改位置
+```
+
+**验证**:
+- [ ] 运行 `具体命令` 确认 [预期结果]
+```
+
+**格式检查清单**：
+- [ ] 每个任务是否 ≤ 5 分钟可完成？
+- [ ] 文件路径是否确切（不是模糊描述）？
+- [ ] 代码是否完整（不是伪代码或省略号）？
+- [ ] 验证步骤是否具体可执行？
+
+**拆分示例**：
+
+❌ 错误（太大）：
+```
+- [ ] 实现用户认证功能
+```
+
+✅ 正确（原子化）：
+```
+### Task 1: 创建 User 模型的失败测试
+**文件**: `test/models/user_test.rb`
+**代码**:
+```ruby
+test "user requires email" do
+  user = User.new(email: nil)
+  assert_not user.valid?
+end
+```
+**验证**: 运行 `bin/rails test test/models/user_test.rb` 确认测试失败
+
+### Task 2: 添加 email presence 验证使测试通过
+**文件**: `app/models/user.rb:3`
+**代码**:
+```ruby
+validates :email, presence: true
+```
+**验证**: 运行 `bin/rails test test/models/user_test.rb` 确认测试通过
+
+### Task 3: 提交这个功能
+**操作**: `git add . && git commit -m "feat(user): add email presence validation"`
+**验证**: `git log -1` 确认提交成功
+```
+
+### 3. Issue Planning & Structure
 
 <thinking>
 Think like a product manager - what would make this issue clear and actionable? Consider multiple perspectives
@@ -146,7 +209,7 @@ Think like a product manager - what would make this issue clear and actionable? 
 - [ ] Gather supporting materials (error logs, screenshots, design mockups)
 - [ ] Prepare code examples or reproduction steps if applicable, name the mock filenames in the lists
 
-### 3. SpecFlow Analysis
+### 4. SpecFlow Analysis
 
 After planning the issue structure, run SpecFlow Analyzer to validate and refine the feature specification:
 
@@ -158,7 +221,7 @@ After planning the issue structure, run SpecFlow Analyzer to validate and refine
 - [ ] Incorporate any identified gaps or edge cases into the issue
 - [ ] Update acceptance criteria based on SpecFlow findings
 
-### 4. Choose Implementation Detail Level
+### 5. Choose Implementation Detail Level
 
 Select how comprehensive you want the issue to be, simpler is mostly better.
 
@@ -404,7 +467,7 @@ date: YYYY-MM-DD
 - Design documents: [links]
 ```
 
-### 5. Issue Creation & Formatting
+### 6. Issue Creation & Formatting
 
 <thinking>
 Apply best practices for clarity and actionability, making the issue easy to scan and understand
@@ -460,7 +523,7 @@ end
 - [ ] Emphasize comprehensive testing given rapid implementation
 - [ ] Document any AI-generated code that needs human review
 
-### 6. Final Review & Submission
+### 7. Final Review & Submission
 
 **Pre-submission Checklist:**
 
@@ -499,7 +562,7 @@ After writing the plan file, use the **AskUserQuestion tool** to present these o
 1. **Open plan in editor** - Open the plan file for review
 2. **Run `/deepen-plan`** - Enhance each section with parallel research agents (best practices, performance, UI)
 3. **Run `/plan_review`** - Get feedback from reviewers (DHH, Kieran, Simplicity)
-4. **Start `/workflows:work`** - Begin implementing this plan locally
+4. **Start `/workflows:work`** - Begin implementing (1任务=标准模式，≥2任务=自动Subagent模式)
 5. **Start `/workflows:work` on remote** - Begin implementing in Claude Code on the web (use `&` to run in background)
 6. **Create Issue** - Create issue in project tracker (GitHub/Linear)
 7. **Simplify** - Reduce detail level
@@ -508,7 +571,7 @@ Based on selection:
 - **Open plan in editor** → Run `open docs/plans/<plan_filename>.md` to open the file in the user's default editor
 - **`/deepen-plan`** → Call the /deepen-plan command with the plan file path to enhance with research
 - **`/plan_review`** → Call the /plan_review command with the plan file path
-- **`/workflows:work`** → Call the /workflows:work command with the plan file path
+- **`/workflows:work`** → Call the /workflows:work command (自动检测：1任务=标准模式，≥2任务=Subagent模式)
 - **`/workflows:work` on remote** → Run `/workflows:work docs/plans/<plan_filename>.md &` to start work in background for Claude Code web
 - **Create Issue** → See "Issue Creation" section below
 - **Simplify** → Ask "What should I simplify?" then regenerate simpler version
