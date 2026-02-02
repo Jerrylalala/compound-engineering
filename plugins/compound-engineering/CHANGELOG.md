@@ -5,6 +5,28 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.35.0] - 2026-02-02
+
+### Added
+
+- **Codex 可选审核集成到 `/workflows:review`** - 审核完成后提供 Codex 额外审核选项
+  - 用户输入 `[C]` 触发 Codex 审核（类似派对模式的 `[P]` 触发）
+  - Codex 结果**同步显示在当前会话**，而非写入临时文件
+  - 自动整合 Claude 多代理审核 + Codex 审核结果
+  - 提供综合建议：双方一致的发现优先级更高
+
+### Changed
+
+- **`/workflows:review` 命令** - 添加 Step 7: Codex 额外审核（可选）
+  - `[C]` 调用 Codex 审核
+  - `[S]` 跳过，结束审核
+
+### Summary
+
+- 28 agents, 26 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.34.0] - 2026-02-02
 
 ### Removed

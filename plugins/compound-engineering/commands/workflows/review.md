@@ -504,6 +504,98 @@ The subagent will:
 
 **Standalone:** `/xcode-test [scheme]`
 
+### 7. Codex 额外审核（可选）
+
+<codex_review_option>
+
+**审核完成后，提供 Codex 额外审核选项：**
+
+```markdown
+---
+
+**额外审核选项：**
+
+`[C]` 调用 Codex 进行额外审核 | `[S]` 跳过，结束审核
+
+---
+```
+
+**触发方式：** 用户输入 `[C]` 或说「调用 Codex」「Codex 审核」
+
+</codex_review_option>
+
+#### 如果用户选择 `[C]`：
+
+<codex_execution>
+
+**Step 1: 检查 Codex CLI 可用性**
+
+```bash
+command -v codex || echo "Codex CLI 未安装，请运行: npm install -g @openai/codex"
+```
+
+如果未安装，提示用户安装并跳过此步骤。
+
+**Step 2: 同步调用 Codex 审核**
+
+```bash
+# 审核未提交的更改（同步执行，结果直接显示）
+codex review --uncommitted --title "Code Review - $(date +%Y-%m-%d)"
+```
+
+**重要：** 使用同步调用，不要后台执行。结果必须显示在当前会话中。
+
+**Step 3: 整合 Codex 审核结果**
+
+将 Codex 的发现整合到审核报告中：
+
+```markdown
+---
+
+## 🤖 Codex 额外审核结果
+
+**审核时间：** [timestamp]
+**审核范围：** 未提交的更改
+
+### Codex 发现：
+
+[Codex 输出内容]
+
+### 与 Claude 审核的对比：
+
+| 发现类型 | Claude Agents | Codex | 状态 |
+|----------|---------------|-------|------|
+| 安全问题 | [count] | [count] | 一致/新增/遗漏 |
+| 性能问题 | [count] | [count] | 一致/新增/遗漏 |
+| 代码质量 | [count] | [count] | 一致/新增/遗漏 |
+
+### 综合建议：
+
+基于 Claude 多代理审核 + Codex 审核的综合结果：
+
+1. **必须修复（双方一致）：** [列表]
+2. **建议修复（单方发现）：** [列表]
+3. **可选优化：** [列表]
+
+---
+```
+
+</codex_execution>
+
+#### 如果用户选择 `[S]` 或跳过：
+
+直接结束审核，显示最终报告。
+
+<codex_prerequisites>
+
+**Codex 审核前提条件：**
+
+- 安装 Codex CLI: `npm install -g @openai/codex`
+- 首次使用需登录: `codex`（交互式登录）
+- 需要有未提交的更改才能审核
+
+</codex_prerequisites>
+
 ### Important: P1 Findings Block Merge
 
 Any **🔴 P1 (CRITICAL)** findings must be addressed before merging the PR. Present these prominently and ensure they're resolved before accepting the PR.
