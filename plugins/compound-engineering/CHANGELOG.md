@@ -5,6 +5,50 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.32.0] - 2026-02-02
+
+### Added
+
+- **Subagent-Driven Development** - Automatic execution mode selection in `/workflows:work`
+  - 1 task → Standard mode (single agent)
+  - ≥2 tasks → Subagent-Driven mode (fresh context per task)
+  - Two-stage review: spec-compliance → code quality
+  - Human checkpoints every 3 tasks
+
+- **Bite-Sized Task format** - Mandatory format in `/workflows:plan`
+  - 2-5 minute atomic tasks
+  - Exact file paths with line numbers
+  - Complete code (not pseudocode)
+  - Specific verification steps
+
+- **Solution documentation** - New docs in `docs/solutions/`
+  - `subagent-driven-workflow-integration.md` - Integration guide
+  - `skill-vs-agent-invocation.md` - Skill vs Agent usage patterns
+
+### Changed
+
+- **`/workflows:work` command** - Added automatic execution mode detection (lines 19-47) and Subagent batch execution (lines 155-206)
+- **`/workflows:plan` command** - Added Bite-Sized Task format requirement (lines 123-184)
+- **`skill-checking-protocol.md`** - Added auto execution mode explanation
+
+### Summary
+
+- 28 agents, 26 commands, 20 skills, 1 MCP server
+
+---
+
+## [2.31.0] - 2026-02-01
+
+### Changed
+
+- Internal improvements and bug fixes
+
+### Summary
+
+- 28 agents, 26 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.30.0] - 2026-02-01
 
 ### Added

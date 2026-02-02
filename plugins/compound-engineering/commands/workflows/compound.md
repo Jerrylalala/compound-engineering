@@ -175,9 +175,10 @@ issues occur in the Email Processing or Brief System modules.
 What's next?
 1. Continue workflow (recommended)
 2. Link related documentation
-3. Update other references
-4. View documentation
-5. Other
+3. Update CHANGELOG.md (if this was a feature/fix)
+4. Update CLAUDE.md Key Learnings (if important lesson)
+5. View documentation
+6. Other
 ```
 
 ## The Compounding Philosophy

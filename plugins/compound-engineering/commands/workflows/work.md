@@ -451,6 +451,13 @@ else:
    - Note any follow-up work needed
    - Suggest next steps if applicable
 
+5. **Documentation Reminder**
+   提醒用户以下文档可能需要更新：
+   - [ ] `CHANGELOG.md` - 记录版本变更（重要功能/修复）
+   - [ ] `CLAUDE.md` Key Learnings - 记录重要经验（如有）
+   - [ ] `docs/solutions/` - 非 trivial 问题记录（使用 `/workflows:compound`）
+   - [ ] 组件数量 - 如果添加了新的 agents/commands/skills
+
 ---
 
 ## Key Principles
@@ -500,6 +507,8 @@ Before creating PR, verify:
 - [ ] Commit messages follow conventional format
 - [ ] PR description includes summary, testing notes, and screenshots
 - [ ] PR description includes Compound Engineered badge
+- [ ] CHANGELOG.md updated (if adding features or fixing bugs)
+- [ ] Component counts verified (if adding agents/commands/skills)
 
 ## When to Use Reviewer Agents
 

@@ -27,11 +27,25 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 
 | 命令 | 说明 | 何时使用 |
 |------|------|---------|
-| `/workflows:brainstorm` | 探索需求和方案 | 需求不清晰时 |
-| `/workflows:plan` | 创建实施计划 | 开始新功能前 |
-| `/workflows:work` | 执行工作计划 | 有计划文档后 |
+| `/workflows:brainstorm` | 探索需求和方案（支持 Party Mode） | 需求不清晰时 |
+| `/workflows:plan` | 创建实施计划（Bite-Sized 格式） | 开始新功能前 |
+| `/workflows:work` | 执行工作计划（自动选择执行模式） | 有计划文档后 |
 | `/workflows:review` | 多代理代码评审 | 代码写完后 |
 | `/workflows:compound` | 记录解决方案 | 问题解决后 |
+
+### 自动执行模式（v2.32.0 新增）
+
+`/workflows:work` 会根据任务数量自动选择执行模式：
+
+| 任务数量 | 执行模式 | 说明 |
+|---------|---------|------|
+| 1 | 标准模式 | 单代理直接执行 |
+| ≥2 | Subagent-Driven | 每任务新子代理 + 两阶段审查 |
+
+**Subagent-Driven 模式特点**：
+- 每个任务派遣新的子代理（避免上下文污染）
+- 两阶段审查：规范合规 → 代码质量
+- 每 3 个任务设置人工检查点
 
 ### 辅助命令
 

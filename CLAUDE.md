@@ -17,9 +17,9 @@
 
 ### 核心原则
 
-1. **不修改上游英文文件** - 中文内容放在独立目录
-2. **只新增，不修改** - 减少同步冲突
-3. **本地扩展隔离** - `skills-custom/` 不影响上游
+1. **可修改所有文件** - 英文文档和中文文档都可以修改
+2. **本地扩展隔离** - `skills-custom/` 存放自定义技能
+3. **同步上游时注意冲突** - 见 `docs/zh-CN/SYNC.md`
 
 ### AI 助手行为规范
 
@@ -157,8 +157,12 @@ copy scripts\pre-commit .git\hooks\pre-commit
 ### 手动检查清单
 
 - [ ] **同步版本号** - `marketplace.json` = `plugin.json`
-- [ ] **更新组件数量** - 本文件、`marketplace.json`、`plugin.json`
-- [ ] **更新 CHANGELOG.md**
+- [ ] **更新组件数量** - 本文件、`marketplace.json`、`plugin.json`、README.md
+- [ ] **更新 CHANGELOG.md** - 在 `plugins/compound-engineering/CHANGELOG.md` 添加版本记录
+- [ ] **更新 README.md** - 在 `plugins/compound-engineering/README.md` 更新功能描述
+- [ ] **更新使用说明** - 在 `docs/zh-CN/INSTALL.md` 添加新命令/功能说明
+- [ ] **更新 Key Learnings** - 在本文件添加重要学习经验（如有）
+- [ ] **创建解决方案文档** - 非 trivial 问题添加到 `docs/solutions/`
 
 ### 快速检查版本
 
@@ -186,49 +190,37 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | 文档                                     | 说明               |
 | ---------------------------------------- | ------------------ |
 | `docs/zh-CN/INSTALL.md`                  | 安装与使用指南     |
+| `docs/zh-CN/CONCEPTS.md`                 | 核心概念（Skills vs Agents） |
+| `docs/zh-CN/SCRIPTS.md`                  | 脚本使用说明       |
 | `docs/zh-CN/SYNC.md`                     | 上游同步指南       |
 | `docs/zh-CN/VERSION-STRATEGY.md`         | 版本管理预防策略   |
 | `docs/zh-CN/FORK-SETUP.md`               | Fork 仓库初始化    |
+| `docs/development/VERSIONING.md`         | 版本管理规范（权威） |
 | `plugins/compound-engineering/CLAUDE.md` | 插件开发指南       |
 
 ---
 
-## Key Learnings
+## 经验与解决方案索引
 
-### 2026-02-01：版本号同步问题
+本项目积累的解决方案文档在 `docs/solutions/`。遇到问题时先搜索这里。
 
-**问题**：`marketplace.json` 和 `plugin.json` 版本号不一致导致 Marketplace 无法更新。
-**原因**：Marketplace 只读取 `marketplace.json` 的版本号，如果它比已安装版本旧或相同，则认为无需更新。
-**解决**：每次发版必须同时更新两个文件的版本号，保持一致。
+### 集成问题
 
-### 2026-02-01：避免特殊字符
+| 文档 | 关键词 |
+|------|--------|
+| [Subagent-Driven 工作流整合](docs/solutions/integration-issues/subagent-driven-workflow-integration.md) | 多任务执行、上下文污染、两阶段审查 |
+| [Skill 与 Agent 调用方式](docs/solutions/integration-issues/skill-vs-agent-invocation.md) | Task 工具、skills 目录、agents 目录 |
+| [Marketplace 更新与终端显示](docs/solutions/integration-issues/marketplace-update-failure-and-unicode-display.md) | 版本号同步、Unicode 特殊字符 |
 
-命令描述中避免使用圆圈数字（①②③）等特殊 Unicode 字符，在某些终端显示异常。改用 `Step 1:` 等 ASCII 兼容格式。
+### 开发规范
 
-### 2026-01-31：安装方式更新
+| 文档 | 用途 |
+|------|------|
+| [版本管理策略](docs/zh-CN/VERSION-STRATEGY.md) | 版本号同步、发版检查清单 |
+| [脚本使用说明](docs/zh-CN/SCRIPTS.md) | check-versions、bump-version、pre-commit |
+| [核心概念](docs/zh-CN/CONCEPTS.md) | Skills vs Agents、组件类型 |
 
-**推荐方式**：通过 Marketplace 从 GitHub 安装
-```
-/plugins → Add marketplace → Jerrylalala/compound-engineering-plugin-private
-```
+### 快速参考
 
-**备选方式**：本地开发用 `--plugin-dir`
-
-### 2026-01-31：MCP 服务器限制
-
-插件只能配置**无需认证的 HTTP 类型** MCP 服务器：
-- ✅ Context7（已配置）
-- ⚠️ GitHub MCP 需要用户自行认证，建议全局安装
-
-### 2026-01-31：文档整合
-
-将 6 个文档整合为 3 个：
-- `CLAUDE.md` - 项目指令
-- `docs/zh-CN/INSTALL.md` - 安装与使用
-- `docs/zh-CN/SYNC.md` - 上游同步
-
-### 2026-01-30：中文镜像策略
-
-- 中文文档集中在 `docs/zh-CN/`
-- 本地技能在 `skills-custom/`
-- "只新增，不修改"减少冲突
+- **MCP 服务器限制**：插件只能配置无需认证的 HTTP 类型 MCP（如 Context7）
+- **安装方式**：`/plugins → Add marketplace → Jerrylalala/compound-engineering-plugin-private`
