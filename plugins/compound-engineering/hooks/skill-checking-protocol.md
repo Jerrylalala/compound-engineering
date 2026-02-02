@@ -38,6 +38,7 @@
 | 遇到 bug / 测试失败 | `systematic-debugging` |
 | 实现新功能 | `test-driven-development` |
 | 代码审查前 | `spec-compliance-review` → `/workflows:review` |
+| 代码审查 + Codex | `/workflows:review [C]`（自动调用 Codex 额外审核） |
 | 需求不明确 | `/workflows:brainstorm` |
 | 需要多视角讨论 | `party-mode`（在 brainstorm 中用 [P]） |
 | 规划实现 | `/workflows:plan`（生成 Bite-Sized 任务格式） |

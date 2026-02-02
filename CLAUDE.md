@@ -228,11 +228,27 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---
 
-## Codex 审核（可选，开发者工具）
+## Codex 审核（可选）
 
-> **注意**：这是开发此仓库时的可选工具，**不是插件功能**，不随插件分发。
+### 方式一：通过 `/workflows:review [C]`（推荐，插件功能）
 
-### 手动审核
+```bash
+# 审核当前分支 + 自动 Codex 审核
+/workflows:review [C]
+
+# 审核 PR #123 + 自动 Codex 审核
+/workflows:review 123 [C]
+
+# 仅 Claude 多代理审核（不调用 Codex）
+/workflows:review
+```
+
+**特点：**
+- Codex 结果**同步显示在当前会话**
+- 自动整合 Claude + Codex 审核结果
+- 双方一致的发现优先级更高
+
+### 方式二：手动脚本（开发者工具，不随插件分发）
 
 ```bash
 # 审核未提交的更改
@@ -249,10 +265,3 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 - 安装 Codex CLI: `npm install -g @openai/codex`
 - 登录 OpenAI 账户: `codex`（首次运行时）
-
-### 推荐用法
-
-在 `/workflows:review` 步骤中手动调用，而非自动触发。这样：
-- 审核时机由开发者控制
-- 审核结果可直接在对话中讨论
-- 避免无意义的重复审核
