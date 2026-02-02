@@ -206,4 +206,5 @@ CLI 输出中避免使用 Unicode 特殊字符（如 ①②③），优先使用
 
 - [版本管理预防策略](../../zh-CN/VERSION-STRATEGY.md)
 - [Fork 仓库初始化清单](../../zh-CN/FORK-SETUP.md)
-- [插件版本管理规范](../plugin-versioning-requirements.md)
+- [插件版本管理规范](../../development/VERSIONING.md)
+

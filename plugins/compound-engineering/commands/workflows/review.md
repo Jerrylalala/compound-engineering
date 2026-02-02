@@ -38,7 +38,7 @@ First, I need to determine the review target type and set up the code for analys
 - [ ] Determine review type: PR number (numeric), GitHub URL, file path (.md), or empty (current branch)
 - [ ] Check current git branch
 - [ ] If ALREADY on the target branch (PR branch, requested branch name, or the branch already checked out for review) → proceed with analysis on current branch
-- [ ] If DIFFERENT branch than the review target → offer to use worktree: "Use git-worktree skill for isolated Call `skill: git-worktree` with branch name
+- [ ] If DIFFERENT branch than the review target → offer to use worktree: "Use git-worktree skill for isolated review." Call `skill: git-worktree` with branch name
 - [ ] Fetch PR metadata using `gh pr view --json` for title, body, files, linked issues
 - [ ] Set up language-specific analysis tools
 - [ ] Prepare security scanning environment
@@ -56,17 +56,13 @@ Run ALL or most of these agents at the same time:
 
 1. Task kieran-rails-reviewer(PR content)
 2. Task dhh-rails-reviewer(PR title)
-3. If turbo is used: Task rails-turbo-expert(PR content)
-4. Task git-history-analyzer(PR content)
-5. Task dependency-detective(PR content)
-6. Task pattern-recognition-specialist(PR content)
-7. Task architecture-strategist(PR content)
-8. Task code-philosopher(PR content)
-9. Task security-sentinel(PR content)
-10. Task performance-oracle(PR content)
-11. Task devops-harmony-analyst(PR content)
-12. Task data-integrity-guardian(PR content)
-13. Task agent-native-reviewer(PR content) - Verify new features are agent-accessible
+3. Task git-history-analyzer(PR content)
+4. Task pattern-recognition-specialist(PR content)
+5. Task architecture-strategist(PR content)
+6. Task security-sentinel(PR content)
+7. Task performance-oracle(PR content)
+8. Task data-integrity-guardian(PR content)
+9. Task agent-native-reviewer(PR content) - Verify new features are agent-accessible
 
 </parallel_tasks>
 
@@ -94,7 +90,7 @@ These agents are run ONLY when the PR matches specific criteria. Check the PR fi
 
 </conditional_agents>
 
-### 4. Ultra-Thinking Deep Dive Phases
+### 2. Ultra-Thinking Deep Dive Phases
 
 <ultrathink_instruction> For each phase below, spend maximum cognitive effort. Think step by step. Consider all angles. Question assumptions. And bring all reviews in a synthesis to the user.</ultrathink_instruction>
 
@@ -159,7 +155,7 @@ Complete system context map with component interactions
 - [ ] **Data Corruption**: Partial writes, inconsistency
 - [ ] **Cascading Failures**: Downstream service issues </scenario_checklist>
 
-### 6. Multi-Angle Review Perspectives
+### 3. Multi-Angle Review Perspectives
 
 #### Technical Excellence Angle
 
@@ -224,7 +220,7 @@ Remove duplicates, prioritize by severity and impact.
 
 - Create todo files directly using Write tool
 - All findings in parallel for speed
-- Use standard template from `.claude/skills/file-todos/assets/todo-template.md`
+- Use standard template from `${CLAUDE_PLUGIN_ROOT}/skills/file-todos/assets/todo-template.md`
 - Follow naming convention: `{issue_id}-pending-{priority}-{description}.md`
 
 **Option B: Sub-Agents in Parallel (Recommended for Scale)** For large PRs with 15+ findings, use sub-agents to create finding files in parallel:
@@ -272,7 +268,7 @@ Sub-agents can:
 
    The skill provides:
 
-   - Template location: `.claude/skills/file-todos/assets/todo-template.md`
+   - Template location: `${CLAUDE_PLUGIN_ROOT}/skills/file-todos/assets/todo-template.md`
    - Naming convention: `{issue_id}-{status}-{priority}-{description}.md`
    - YAML frontmatter structure: status, priority, issue_id, tags, dependencies
    - All required sections: Problem Statement, Findings, Solutions, etc.
@@ -292,7 +288,7 @@ Sub-agents can:
    004-pending-p3-unused-parameter.md
    ```
 
-5. Follow template structure from file-todos skill: `.claude/skills/file-todos/assets/todo-template.md`
+5. Follow template structure from file-todos skill: `${CLAUDE_PLUGIN_ROOT}/skills/file-todos/assets/todo-template.md`
 
 **Todo File Structure (from template):**
 
@@ -425,7 +421,7 @@ After creating all todo files, present comprehensive summary:
 
 ```
 
-### 7. End-to-End Testing (Optional)
+### 6. End-to-End Testing (Optional)
 
 <detect_project_type>
 
@@ -512,3 +508,5 @@ The subagent will:
 
 Any **🔴 P1 (CRITICAL)** findings must be addressed before merging the PR. Present these prominently and ensure they're resolved before accepting the PR.
 ```
+
+

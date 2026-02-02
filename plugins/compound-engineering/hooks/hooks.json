@@ -3,7 +3,12 @@
     "SessionStart": [
       {
         "matcher": "startup|resume|clear|compact",
-        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh"
+          }
+        ]
       }
     ]
   }

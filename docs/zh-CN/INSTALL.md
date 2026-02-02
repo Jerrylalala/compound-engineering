@@ -27,11 +27,13 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 
 | 命令 | 说明 | 何时使用 |
 |------|------|---------|
+| `/workflows:load` | 加载项目上下文，恢复之前的会话 | 开始新会话时 |
 | `/workflows:brainstorm` | 探索需求和方案（支持 Party Mode） | 需求不清晰时 |
 | `/workflows:plan` | 创建实施计划（Bite-Sized 格式） | 开始新功能前 |
 | `/workflows:work` | 执行工作计划（自动选择执行模式） | 有计划文档后 |
 | `/workflows:review` | 多代理代码评审 | 代码写完后 |
 | `/workflows:compound` | 记录解决方案 | 问题解决后 |
+| `/workflows:save` | 保存项目上下文，用于跨会话恢复 | 结束会话时 |
 
 ### 自动执行模式（v2.32.0 新增）
 
@@ -183,3 +185,4 @@ claude --plugin-dir "本地路径\plugins\compound-engineering"
 
 - [Create plugins - Claude Code Docs](https://code.claude.com/docs/en/plugins)
 - [Connect Claude Code to tools via MCP](https://code.claude.com/docs/en/mcp)
+

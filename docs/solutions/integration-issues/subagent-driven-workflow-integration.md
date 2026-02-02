@@ -109,7 +109,7 @@ while (tasks remain):
     Task(general-purpose): "执行任务..."
 
     # 2. 两阶段审查
-    Task(spec-compliance-review): "规范合规审查"
+    Task(general-purpose): "使用 spec-compliance-review skill 进行规范合规审查"
 
     # 3. 更新任务状态
     Mark task completed
@@ -163,3 +163,4 @@ while (tasks remain):
 - spec-compliance-review 技能：`skills/spec-compliance-review/SKILL.md`
 - systematic-debugging 技能：`skills/systematic-debugging/SKILL.md`
 - test-driven-development 技能：`skills/test-driven-development/SKILL.md`
+

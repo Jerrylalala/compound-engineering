@@ -76,7 +76,7 @@ else:
 
    - Announce: "检测到 UI/前端任务，自动加载设计指南..."
    - Load `frontend-design` skill for visual aesthetics
-   - Load `user-first-design` skill for UX principles (if available in skills-custom/)
+   - Load `user-first-design` skill for UX principles (if installed in ~/.claude/skills or .claude/skills).
    - Apply these principles throughout implementation:
      - 极简操作路径（最多3步）
      - 即时反馈（视觉/文字/动画）
@@ -342,7 +342,6 @@ else:
    - **kieran-rails-reviewer**: Verify Rails conventions (Rails projects)
    - **performance-oracle**: Check for performance issues
    - **security-sentinel**: Scan for security vulnerabilities
-   - **cora-test-reviewer**: Review test quality (Rails projects with comprehensive test coverage)
 
    Run reviewers in parallel with Task tool:
 
@@ -400,13 +399,12 @@ else:
    ```
    See the `agent-browser` skill for detailed usage.
 
-   **Step 3: Upload using imgup skill**
-   ```bash
-   skill: imgup
-   # Then upload each screenshot:
-   imgup -h pixhost screenshot.png  # pixhost works without API key
-   # Alternative hosts: catbox, imagebin, beeimg
-   ```
+   **Step 3: Upload screenshots (manual or rclone)**
+```bash
+# Option A: upload manually to your image host of choice
+# Option B: use rclone if you have a configured remote
+rclone copy screenshot.png <remote>:<path>
+```
 
    **What to capture:**
    - **New screens**: Screenshot of the new UI
@@ -531,3 +529,5 @@ For most features: tests + linting + following patterns is sufficient.
 - **Forgetting TodoWrite** - Track progress or lose track of what's done
 - **80% done syndrome** - Finish the feature, don't move on early
 - **Over-reviewing simple changes** - Save reviewer agents for complex work
+
+
