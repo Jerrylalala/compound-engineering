@@ -228,27 +228,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---
 
-## Codex 集成（可选）
+## Codex 审核（可选，开发者工具）
 
-本项目支持 Claude Code 与 OpenAI Codex 的协作审核。
-
-### 自动审核（已配置）
-
-在 `.claude/settings.local.json` 中配置了 Stop hook，Claude 完成工作后自动触发 Codex 审核：
-
-```json
-{
-  "hooks": {
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/codex-review.sh\"",
-        "async": true
-      }]
-    }]
-  }
-}
-```
+> **注意**：这是开发此仓库时的可选工具，**不是插件功能**，不随插件分发。
 
 ### 手动审核
 
@@ -266,4 +248,11 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ### 前提条件
 
 - 安装 Codex CLI: `npm install -g @openai/codex`
-- 登录 OpenAI 账户: `codex` (首次运行时)
+- 登录 OpenAI 账户: `codex`（首次运行时）
+
+### 推荐用法
+
+在 `/workflows:review` 步骤中手动调用，而非自动触发。这样：
+- 审核时机由开发者控制
+- 审核结果可直接在对话中讨论
+- 避免无意义的重复审核

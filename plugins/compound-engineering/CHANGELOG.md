@@ -5,6 +5,25 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.34.0] - 2026-02-02
+
+### Removed
+
+- **Codex Auto-Review Integration** - Removed Stop hook that automatically triggered Codex review
+  - Deleted `codex-review.sh`, `codex-review.ps1`, `codex-review-wrapper.sh`
+  - Removed Stop hook from `hooks.json`
+  - **Reason**: Auto-review was incomplete (results written to temp file with no consumption mechanism), triggered too frequently (any file change), and required users to have Codex CLI installed
+
+### Recommendation
+
+For code review, use `/workflows:review` or manually run `codex review --uncommitted` when needed.
+
+### Summary
+
+- 28 agents, 26 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.33.0] - 2026-02-02
 
 ### Added
