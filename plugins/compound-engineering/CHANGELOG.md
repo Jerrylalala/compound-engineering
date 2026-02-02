@@ -5,6 +5,28 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.33.0] - 2026-02-02
+
+### Added
+
+- **Codex Auto-Review Integration** - Stop hook triggers automatic code review via Codex CLI
+  - `codex-review.sh` - Bash script for Unix/Git Bash
+  - `codex-review.ps1` - PowerShell script for Windows
+  - Automatically runs `codex review --uncommitted` when Claude Code session ends
+  - Includes untracked new files in review scope (fixes P2 bug)
+  - Prevents infinite loop via `stop_hook_active` flag detection
+
+### Fixed
+
+- **Untracked files missing from review** - Scripts now include `git ls-files --others --exclude-standard` to capture new files
+- **Codex review mode** - Changed from interactive prompt to `codex review --uncommitted` for non-blocking execution
+
+### Summary
+
+- 28 agents, 26 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.32.0] - 2026-02-02
 
 ### Added
