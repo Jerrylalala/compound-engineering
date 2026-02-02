@@ -1,7 +1,7 @@
 ---
 name: workflows:review
 description: "Step 4: 使用多代理分析进行全面代码审查"
-argument-hint: "[PR number, GitHub URL, branch name, or latest]"
+argument-hint: "[PR number, GitHub URL, branch name, or latest] [C]"
 ---
 
 # Review Command
@@ -12,6 +12,23 @@ argument-hint: "[PR number, GitHub URL, branch name, or latest]"
 
 <role>Senior Code Review Architect with expertise in security, performance, architecture, and quality assurance</role>
 
+## 参数说明
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| PR 号 | GitHub PR 编号 | `/workflows:review 123` |
+| URL | GitHub PR URL | `/workflows:review https://github.com/.../pull/123` |
+| 分支名 | 审核指定分支 | `/workflows:review feature-branch` |
+| `[C]` | **自动调用 Codex 额外审核** | `/workflows:review [C]` 或 `/workflows:review 123 [C]` |
+
+**示例：**
+```bash
+/workflows:review              # 审核当前分支
+/workflows:review 123          # 审核 PR #123
+/workflows:review [C]          # 审核当前分支 + 自动 Codex 审核
+/workflows:review 123 [C]      # 审核 PR #123 + 自动 Codex 审核
+```
+
 ## Prerequisites
 
 <requirements>
@@ -19,16 +36,39 @@ argument-hint: "[PR number, GitHub URL, branch name, or latest]"
 - Clean main/master branch
 - Proper permissions to create worktrees and access the repository
 - For document reviews: Path to a markdown file or document
+- **For Codex review**: Codex CLI installed (`npm install -g @openai/codex`)
 </requirements>
 
 ## Main Tasks
 
+### 0. 解析参数（检测 [C] 标志）
+
+<argument_parsing>
+
+**检查参数中是否包含 `[C]` 标志：**
+
+```
+参数: $ARGUMENTS
+
+如果包含 [C] 或 [c]：
+  → CODEX_ENABLED = true
+  → 从参数中移除 [C]，剩余部分作为审核目标
+
+否则：
+  → CODEX_ENABLED = false
+```
+
+**记住这个标志，审核完成后根据它决定是否自动调用 Codex。**
+
+</argument_parsing>
+
 ### 1. Determine Review Target & Setup (ALWAYS FIRST)
 
-<review_target> #$ARGUMENTS </review_target>
+<review_target> #$ARGUMENTS (移除 [C] 后的部分) </review_target>
 
 <thinking>
 First, I need to determine the review target type and set up the code for analysis.
+Check if [C] flag is present - if yes, will auto-run Codex review at the end.
 </thinking>
 
 #### Immediate Actions:
@@ -504,48 +544,49 @@ The subagent will:
 
 **Standalone:** `/xcode-test [scheme]`
 
-### 7. Codex 额外审核（可选）
+### 7. Codex 额外审核（参数 `[C]` 触发）
 
-<codex_review_option>
+<codex_auto_review>
 
-**审核完成后，提供 Codex 额外审核选项：**
+**检查 Step 0 中解析的 CODEX_ENABLED 标志：**
 
-```markdown
----
+```
+如果 CODEX_ENABLED = true（命令参数包含 [C]）：
+  → 自动执行 Codex 审核
+  → 整合结果到报告
 
-**额外审核选项：**
-
-`[C]` 调用 Codex 进行额外审核 | `[S]` 跳过，结束审核
-
----
+如果 CODEX_ENABLED = false（命令参数不包含 [C]）：
+  → 跳过此步骤
+  → 直接显示最终报告
 ```
 
-**触发方式：** 用户输入 `[C]` 或说「调用 Codex」「Codex 审核」
+</codex_auto_review>
 
-</codex_review_option>
-
-#### 如果用户选择 `[C]`：
+#### 当 CODEX_ENABLED = true 时，自动执行：
 
 <codex_execution>
 
-**Step 1: 检查 Codex CLI 可用性**
+**Step 7.1: 检查 Codex CLI 可用性**
 
 ```bash
 command -v codex || echo "Codex CLI 未安装，请运行: npm install -g @openai/codex"
 ```
 
-如果未安装，提示用户安装并跳过此步骤。
+如果未安装，提示用户安装并跳过 Codex 审核（其他审核结果仍然有效）。
 
-**Step 2: 同步调用 Codex 审核**
+**Step 7.2: 同步调用 Codex 审核**
 
 ```bash
-# 审核未提交的更改（同步执行，结果直接显示）
+# 审核未提交的更改（同步执行，结果直接显示在会话中）
 codex review --uncommitted --title "Code Review - $(date +%Y-%m-%d)"
 ```
 
-**重要：** 使用同步调用，不要后台执行。结果必须显示在当前会话中。
+**重要：**
+- 使用**同步调用**，不要后台执行
+- 结果必须**显示在当前会话中**
+- 等待 Codex 完成后再继续
 
-**Step 3: 整合 Codex 审核结果**
+**Step 7.3: 整合 Codex 审核结果**
 
 将 Codex 的发现整合到审核报告中：
 
@@ -556,6 +597,7 @@ codex review --uncommitted --title "Code Review - $(date +%Y-%m-%d)"
 
 **审核时间：** [timestamp]
 **审核范围：** 未提交的更改
+**触发方式：** 命令参数 `[C]`
 
 ### Codex 发现：
 
@@ -573,22 +615,22 @@ codex review --uncommitted --title "Code Review - $(date +%Y-%m-%d)"
 
 基于 Claude 多代理审核 + Codex 审核的综合结果：
 
-1. **必须修复（双方一致）：** [列表]
-2. **建议修复（单方发现）：** [列表]
-3. **可选优化：** [列表]
+1. **必须修复（双方一致）：** [优先级最高]
+2. **建议修复（单方发现）：** [次优先]
+3. **可选优化：** [最低优先]
 
 ---
 ```
 
 </codex_execution>
 
-#### 如果用户选择 `[S]` 或跳过：
+#### 当 CODEX_ENABLED = false 时：
 
-直接结束审核，显示最终报告。
+跳过 Codex 审核，直接显示 Claude 多代理审核的最终报告。
 
 <codex_prerequisites>
 
-**Codex 审核前提条件：**
+**Codex 审核前提条件（使用 `[C]` 参数时需要）：**
 
 - 安装 Codex CLI: `npm install -g @openai/codex`
 - 首次使用需登录: `codex`（交互式登录）
