@@ -11,15 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Codex Auto-Review Integration** - Stop hook triggers automatic code review via Codex CLI
   - `codex-review.sh` - Bash script for Unix/Git Bash
-  - `codex-review.ps1` - PowerShell script for Windows
+  - `codex-review.ps1` - PowerShell script for Windows (called by wrapper)
+  - `codex-review-wrapper.sh` - Cross-platform wrapper (auto-detects OS)
   - Automatically runs `codex review --uncommitted` when Claude Code session ends
-  - Includes untracked new files in review scope (fixes P2 bug)
+  - Includes untracked new files in review scope
   - Prevents infinite loop via `stop_hook_active` flag detection
 
 ### Fixed
 
 - **Untracked files missing from review** - Scripts now include `git ls-files --others --exclude-standard` to capture new files
 - **Codex review mode** - Changed from interactive prompt to `codex review --uncommitted` for non-blocking execution
+- **jq dependency** - Added fallback to grep when jq is not installed
+
+### Requirements
+
+- **Codex CLI**: `npm install -g @openai/codex`
+- **Windows users**: Git Bash required (included with Git for Windows)
 
 ### Summary
 
