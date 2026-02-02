@@ -211,6 +211,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | [Subagent-Driven 工作流整合](docs/solutions/integration-issues/subagent-driven-workflow-integration.md) | 多任务执行、上下文污染、两阶段审查 |
 | [Skill 与 Agent 调用方式](docs/solutions/integration-issues/skill-vs-agent-invocation.md) | Task 工具、skills 目录、agents 目录 |
 | [Marketplace 更新与终端显示](docs/solutions/integration-issues/marketplace-update-failure-and-unicode-display.md) | 版本号同步、Unicode 特殊字符 |
+| [幻影 Agent 引用问题](docs/solutions/integration-issues/phantom-agent-references-in-workflows.md) | 不存在的 agent、上游同步、YAGNI |
 
 ### 开发规范
 
