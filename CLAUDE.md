@@ -161,6 +161,7 @@ copy scripts\pre-commit .git\hooks\pre-commit
 - [ ] **更新 CHANGELOG.md** - 在 `plugins/compound-engineering/CHANGELOG.md` 添加版本记录
 - [ ] **更新 README.md** - 在 `plugins/compound-engineering/README.md` 更新功能描述
 - [ ] **更新使用说明** - 在 `docs/zh-CN/INSTALL.md` 添加新命令/功能说明
+- [ ] **🔄 更新工作流可视化** - 若修改了 workflows 命令，同步更新 `docs/zh-CN/WORKFLOW-VISUAL.md`
 - [ ] **更新 Key Learnings** - 在本文件添加重要学习经验（如有）
 - [ ] **创建解决方案文档** - 非 trivial 问题添加到 `docs/solutions/`
 
@@ -189,6 +190,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 | 文档                                     | 说明               |
 | ---------------------------------------- | ------------------ |
+| `docs/zh-CN/WORKFLOW-VISUAL.md`          | 🔄 **工作流可视化指南**（用户必读） |
 | `docs/zh-CN/INSTALL.md`                  | 安装与使用指南     |
 | `docs/zh-CN/CONCEPTS.md`                 | 核心概念（Skills vs Agents） |
 | `docs/zh-CN/SCRIPTS.md`                  | 脚本使用说明       |
