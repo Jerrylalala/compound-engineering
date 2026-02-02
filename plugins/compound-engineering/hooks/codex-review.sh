@@ -5,7 +5,18 @@
 
 # 读取 hook 输入
 INPUT=$(cat)
-STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
+
+# 解析 stop_hook_active（优先用 jq，fallback 用 grep）
+if command -v jq &> /dev/null; then
+  STOP_HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
+else
+  # jq 未安装，使用 grep 简单匹配
+  if echo "$INPUT" | grep -q '"stop_hook_active"[[:space:]]*:[[:space:]]*true'; then
+    STOP_HOOK_ACTIVE="true"
+  else
+    STOP_HOOK_ACTIVE="false"
+  fi
+fi
 
 # 如果已经是 stop hook 触发的，跳过避免无限循环
 if [ "$STOP_HOOK_ACTIVE" = "true" ]; then
