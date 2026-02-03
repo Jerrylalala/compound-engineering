@@ -5,3 +5,9 @@ node_modules/
 .gemini/
 .compound/
 .claude/settings.local.json
+
+# 临时输出文件
+nul
+stderr.txt
+stdout.txt
+text_*.txt
