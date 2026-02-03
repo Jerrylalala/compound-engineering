@@ -119,14 +119,77 @@ docs/
 
 | 方式 | 适用场景 | 更新方式 |
 |------|---------|---------|
-| **Marketplace**（推荐） | 日常使用 | 通过 `/plugins` 更新 |
-| **`--plugin-dir`** | 开发调试 | 修改文件后重启 |
+| **Marketplace**（推荐） | Claude Code 日常使用 | 通过 `/plugins` 更新 |
+| **`--plugin-dir`** | 本地开发调试 | 修改文件后重启 |
+| **CLI 转换** | Codex / Gemini 安装 | 重新运行命令 |
 
 ### 本地开发模式
 
 ```bash
 claude --plugin-dir "完整路径\plugins\compound-engineering"
 ```
+
+---
+
+## Codex / Gemini CLI 安装
+
+### 方式 1：本地转换（推荐）
+
+```bash
+# 进入仓库目录
+cd F:\StudyFolder\StudyDest\project\compound-engineering-plugin-private
+
+# 转换到 Codex
+bun run src/index.ts install ./plugins/compound-engineering --to codex
+
+# 转换到 Gemini（输出到当前目录）
+bun run src/index.ts install ./plugins/compound-engineering --to gemini
+
+# 指定 Gemini 输出目录
+bun run src/index.ts install ./plugins/compound-engineering --to gemini --gemini-home "你的项目根目录"
+
+# 同时转换多个目标
+bun run src/index.ts install ./plugins/compound-engineering --to opencode --also codex,gemini
+```
+
+### 方式 2：从私有仓库远程安装
+
+> **注意**：`COMPOUND_PLUGIN_GITHUB_SOURCE` 环境变量只影响 `@every-env/compound-plugin` 这个 CLI 工具，不会影响其他工具。建议**临时设置**，不要添加到永久环境变量。
+
+**Windows PowerShell：**
+
+```powershell
+# 临时设置环境变量并安装
+$env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering-plugin-private"
+bunx @every-env/compound-plugin install compound-engineering --to gemini
+bunx @every-env/compound-plugin install compound-engineering --to codex
+```
+
+**Linux/macOS：**
+
+```bash
+# 一行命令（临时设置）
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering-plugin-private \
+  bunx @every-env/compound-plugin install compound-engineering --to gemini
+```
+
+### 输出位置
+
+| 目标 | 输出位置 | 说明 |
+|------|---------|------|
+| OpenCode | `~/.config/opencode/` | 全局配置 |
+| Codex | `~/.codex/prompts/` 和 `~/.codex/skills/` | 全局配置 |
+| Gemini | `<当前目录>/.gemini/GEMINI.md` | 项目级配置 |
+
+### 可选参数
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `--to` | 目标格式 | `opencode` / `codex` / `gemini` |
+| `--also` | 额外目标（逗号分隔） | `--also codex,gemini` |
+| `--output` | OpenCode 输出目录 | `--output ~/my-project` |
+| `--codex-home` | Codex 输出目录 | `--codex-home ~/.codex` |
+| `--gemini-home` | Gemini 输出目录 | `--gemini-home ~/my-project` |
 
 ---
 

@@ -31,12 +31,28 @@ Local dev:
 
 ```bash
 bun run src/index.ts install ./plugins/compound-engineering --to opencode
+bun run src/index.ts install ./plugins/compound-engineering --to codex
+bun run src/index.ts install ./plugins/compound-engineering --to gemini
 ```
 
-OpenCode output is written to `~/.opencode` by default, with `opencode.json` at the root and `agents/`, `skills/`, and `plugins/` alongside it.
-Both provider targets are experimental and may change as the formats evolve.
-Codex output is written to `~/.codex/prompts` and `~/.codex/skills`, with each Claude command converted into both a prompt and a skill (the prompt instructs Codex to load the corresponding skill). Generated Codex skill descriptions are truncated to 1024 characters (Codex limit).
-Gemini output is written to `.gemini/GEMINI.md` in the target project root, derived from CLAUDE.md plus command/tool summaries.
+Install from private fork (temporary env var):
+
+```bash
+# Linux/macOS
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering-plugin-private \
+  bunx @every-env/compound-plugin install compound-engineering --to gemini
+
+# Windows PowerShell
+$env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering-plugin-private"
+bunx @every-env/compound-plugin install compound-engineering --to gemini
+```
+
+**Output locations:**
+- OpenCode: `~/.config/opencode/` (opencode.json + agents/, skills/, plugins/)
+- Codex: `~/.codex/prompts/` and `~/.codex/skills/` (skill descriptions truncated to 1024 chars)
+- Gemini: `.gemini/GEMINI.md` in project root (from CLAUDE.md + command summaries)
+
+> Note: `COMPOUND_PLUGIN_GITHUB_SOURCE` only affects this CLI tool. Use temporary env vars, not permanent ones.
 
 ## Workflow
 

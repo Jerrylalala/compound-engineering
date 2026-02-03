@@ -24,14 +24,26 @@ claude --plugin-dir "路径/plugins/compound-engineering"
 **CLI 转换（Codex / Gemini）：**
 
 ```bash
-# 转换到 Codex
-bunx @every-env/compound-plugin install compound-engineering --to codex
+# 本地转换（推荐）
+cd 你的项目目录
+bun run src/index.ts install ./plugins/compound-engineering --to codex
+bun run src/index.ts install ./plugins/compound-engineering --to gemini
 
-# 转换到 Gemini
+# 从私有仓库远程安装（临时设置环境变量）
+# Windows PowerShell:
+$env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering-plugin-private"
 bunx @every-env/compound-plugin install compound-engineering --to gemini
+
+# Linux/macOS:
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering-plugin-private \
+  bunx @every-env/compound-plugin install compound-engineering --to gemini
 ```
 
-Codex 输出默认写入 `~/.codex/`，Gemini 输出为项目根目录下的 `.gemini/GEMINI.md`。
+**输出位置：**
+- Codex: `~/.codex/prompts/` 和 `~/.codex/skills/`
+- Gemini: `<当前目录>/.gemini/GEMINI.md`
+
+> **注意**：`COMPOUND_PLUGIN_GITHUB_SOURCE` 只影响这个 CLI 工具，不会影响其他工具。建议临时设置，不要添加到永久环境变量。
 
 ## 工作流命令
 
