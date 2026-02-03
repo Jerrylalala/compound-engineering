@@ -65,4 +65,116 @@ describe("convertClaudeToGemini", () => {
 
     expect(bundle.geminiMd).toContain("No CLAUDE.md found in the plugin root")
   })
+
+  test("converts commands to GeminiCommand array", () => {
+    const bundle = convertClaudeToGemini(fixturePlugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    expect(bundle.commands).toHaveLength(1)
+
+    const cmd = bundle.commands[0]
+    expect(cmd.name).toBe("workflows:plan")
+    expect(cmd.description).toBe("Plan the work.")
+    expect(cmd.relativePath).toBe("workflows/plan.toml")
+    expect(cmd.prompt).toContain("Plan content.")
+    expect(cmd.prompt).toContain("{{args}}")
+  })
+
+  test("generates correct paths for namespaced commands", () => {
+    const plugin = {
+      ...fixturePlugin,
+      commands: [
+        {
+          name: "workflows:review",
+          description: "Review code.",
+          body: "Review body.",
+          sourcePath: "/tmp/plugin/commands/workflows/review.md",
+        },
+        {
+          name: "simple-command",
+          description: "Simple command.",
+          body: "Simple body.",
+          sourcePath: "/tmp/plugin/commands/simple-command.md",
+        },
+      ],
+    }
+
+    const bundle = convertClaudeToGemini(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    expect(bundle.commands).toHaveLength(2)
+    expect(bundle.commands[0].relativePath).toBe("workflows/review.toml")
+    expect(bundle.commands[1].relativePath).toBe("simple-command.toml")
+  })
+
+  test("handles empty command name after sanitization", () => {
+    const plugin = {
+      ...fixturePlugin,
+      commands: [
+        {
+          name: "../..",
+          description: "Command that becomes empty after sanitization.",
+          body: "Body content.",
+          sourcePath: "/tmp/plugin/commands/empty.md",
+        },
+      ],
+    }
+
+    const bundle = convertClaudeToGemini(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    expect(bundle.commands).toHaveLength(1)
+    // 空命令名应回退到默认名称
+    expect(bundle.commands[0].relativePath).toBe("unnamed-command.toml")
+    expect(bundle.commands[0].name).not.toBe("")
+  })
+
+  test("sanitizes path traversal attempts in command names", () => {
+    const plugin = {
+      ...fixturePlugin,
+      commands: [
+        {
+          name: "../etc:passwd",
+          description: "Malicious command.",
+          body: "Bad body.",
+          sourcePath: "/tmp/plugin/commands/bad.md",
+        },
+        {
+          name: "..\\windows:system32",
+          description: "Another malicious command.",
+          body: "Bad body.",
+          sourcePath: "/tmp/plugin/commands/bad2.md",
+        },
+        {
+          name: "normal/slash:test",
+          description: "Command with slash in name.",
+          body: "Normal body.",
+          sourcePath: "/tmp/plugin/commands/normal.md",
+        },
+      ],
+    }
+
+    const bundle = convertClaudeToGemini(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    // 路径遍历字符 (..) 应被清理
+    expect(bundle.commands[0].relativePath).not.toContain("..")
+    expect(bundle.commands[1].relativePath).not.toContain("..")
+    // 输入中的斜杠应被替换为横杠（命名空间分隔符 : 转换为 / 是正常的）
+    expect(bundle.commands[2].relativePath).toBe("normal-slash/test.toml")
+    // 验证没有 Windows 反斜杠
+    expect(bundle.commands[1].relativePath).not.toContain("\\")
+  })
 })
