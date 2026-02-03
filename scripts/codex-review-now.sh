@@ -1,7 +1,7 @@
 #!/bin/bash
 # Codex 智能审核脚本（v2 - 使用 codex exec 非交互模式）
 # 用法: ./scripts/codex-review-now.sh [scope] [timeout_seconds]
-# scope: uncommitted (默认), staged, branch, all
+# scope: uncommitted (默认), staged, branch, last-commit, all
 # timeout_seconds: 超时秒数，默认 300 (5分钟)
 
 set -e
@@ -45,13 +45,18 @@ case $SCOPE in
     CHANGES=$(git diff --name-only "$BASE_BRANCH"...HEAD 2>/dev/null || true)
     DIFF=$(git diff "$BASE_BRANCH"...HEAD 2>/dev/null | head -500 || true)
     ;;
+  last-commit)
+    # 审核最近一次提交（HEAD~1 到 HEAD 的差异）
+    CHANGES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
+    DIFF=$(git diff HEAD~1 HEAD 2>/dev/null | head -500 || true)
+    ;;
   all)
     CHANGES=$(git ls-files --modified --others --exclude-standard 2>/dev/null || true)
     DIFF=$(git diff HEAD 2>/dev/null | head -500 || true)
     ;;
   *)
     echo "Unknown scope: $SCOPE"
-    echo "Usage: $0 [uncommitted|staged|branch|all] [timeout_seconds]"
+    echo "Usage: $0 [uncommitted|staged|branch|last-commit|all] [timeout_seconds]"
     exit 1
     ;;
 esac

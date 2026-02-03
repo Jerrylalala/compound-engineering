@@ -1,7 +1,7 @@
 #!/bin/bash
 # Gemini 智能审核脚本（简化版 - 基于 Gemini 官方建议）
 # 用法: ./scripts/gemini-review-now.sh [scope] [timeout_seconds]
-# scope: uncommitted (默认), staged, branch, all
+# scope: uncommitted (默认), staged, branch, last-commit, all
 # timeout_seconds: 超时秒数，默认 300 (5分钟)
 
 set -e
@@ -59,13 +59,18 @@ case $SCOPE in
     CHANGES=$(git diff --name-only "$BASE_BRANCH"...HEAD 2>/dev/null || true)
     DIFF=$(git diff "$BASE_BRANCH"...HEAD 2>/dev/null || true)
     ;;
+  last-commit)
+    # 审核最近一次提交（HEAD~1 到 HEAD 的差异）
+    CHANGES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
+    DIFF=$(git diff HEAD~1 HEAD 2>/dev/null || true)
+    ;;
   all)
     CHANGES=$(git ls-files --modified --others --exclude-standard 2>/dev/null || true)
     DIFF=$(git diff HEAD 2>/dev/null || true)
     ;;
   *)
     echo "Unknown scope: $SCOPE"
-    echo "Usage: $0 [uncommitted|staged|branch|all] [timeout_seconds]"
+    echo "Usage: $0 [uncommitted|staged|branch|last-commit|all] [timeout_seconds]"
     exit 1
     ;;
 esac
@@ -117,12 +122,13 @@ echo '```diff' >> "$INPUT_FILE"
 echo "$DIFF" >> "$INPUT_FILE"
 echo '```' >> "$INPUT_FILE"
 
-echo "🚀 Calling Gemini (--approval-mode plan -o json)..."
+echo "🚀 Calling Gemini (--yolo -o json)..."
 
-# 调用 Gemini（使用系统 timeout 命令 - Gemini 官方推荐）
-# --approval-mode plan: 只读模式，不执行任何操作
+# 调用 Gemini（使用系统 timeout 命令）
+# --yolo: 自动批准所有操作（非交互模式，不需要实验性功能）
+# -p "": 使用 stdin 作为 prompt
 # -o json: 结构化输出，方便解析
-if timeout "$TIMEOUT_SECONDS" bash -c "cat '$INPUT_FILE' | gemini --approval-mode plan -o json > '$OUTPUT_FILE' 2> '$LOG_FILE'"; then
+if timeout "$TIMEOUT_SECONDS" bash -c "cat '$INPUT_FILE' | gemini --yolo -p '' -o json > '$OUTPUT_FILE' 2> '$LOG_FILE'"; then
   EXIT_CODE=$?
   echo ""
 
