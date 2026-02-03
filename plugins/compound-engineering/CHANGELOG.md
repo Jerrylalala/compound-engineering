@@ -5,6 +5,27 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.36.1] - 2026-02-03
+
+### Changed
+
+- **Codex 审核优化** - 解决长时间无响应问题
+  - 改用 `codex exec --json` 非交互模式（[官方推荐](https://developers.openai.com/codex/noninteractive)）
+  - 支持 JSONL 事件流，实时显示进度（thread.started、turn.started 等）
+  - 后台执行 + 5 分钟超时保护
+  - 超时后提供清晰的备选方案（增加超时时间、手动运行、查看部分输出）
+  - 更新 `scripts/codex-review-now.sh` v2 版本
+
+### Fixed
+
+- 修复 Codex CLI 调用可能卡住 10+ 分钟无反馈的问题（[Issue #4775](https://github.com/openai/codex/issues/4775)）
+
+### Summary
+
+- 28 agents, 26 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.36.0] - 2026-02-03
 
 ### Added

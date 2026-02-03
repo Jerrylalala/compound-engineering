@@ -574,17 +574,68 @@ command -v codex || echo "Codex CLI 未安装，请运行: npm install -g @opena
 
 如果未安装，提示用户安装并跳过 Codex 审核（其他审核结果仍然有效）。
 
-**Step 7.2: 同步调用 Codex 审核**
+**Step 7.2: 使用 codex exec 非交互模式审核（带超时保护）**
 
-```bash
-# 审核未提交的更改（同步执行，结果直接显示在会话中）
-codex review --uncommitted --title "Code Review - $(date +%Y-%m-%d)"
+<codex_exec_strategy>
+
+**技术方案**：`codex exec --json` + 后台执行 + 超时保护
+
+基于 [Codex 非交互模式文档](https://developers.openai.com/codex/noninteractive)，使用 `codex exec` 替代交互式 `codex` 命令。
+
+**优势**：
+- 官方推荐的脚本/CI 集成方式
+- 支持 JSONL 事件流，可监控进度
+- 支持 `--output-last-message` 直接输出结果到文件
+
+</codex_exec_strategy>
+
+**执行流程（Claude 必须遵循）**：
+
+```
+Step 1: 后台启动 Codex
+  - 使用 Bash 工具，设置 run_in_background=true
+  - 调用: ./scripts/codex-review-now.sh uncommitted 300
+  - 记录返回的 task_id
+
+Step 2: 立即向用户显示进度提示
+  "⏳ Codex 审核已启动（后台运行）
+   - 使用 codex exec 非交互模式
+   - 超时阈值：5 分钟
+   - Claude 审核结果已展示，Codex 结果稍后追加"
+
+Step 3: 轮询检查（每 30 秒一次，最多 10 次 = 5 分钟）
+  使用 TaskOutput 工具：
+  - TaskOutput(task_id=xxx, block=false, timeout=5000)
+  - 检查任务是否完成
+
+Step 4: 根据结果处理
+  如果正常完成（exit code 0）：
+    → 读取输出，整合到报告
+
+  如果超时（exit code 124）：
+    → 显示超时提示和备选方案
+    → 提供手动命令供用户稍后查看
+
+  如果失败（其他 exit code）：
+    → 显示错误信息
+    → 建议用户手动运行交互式 codex
 ```
 
-**重要：**
-- 使用**同步调用**，不要后台执行
-- 结果必须**显示在当前会话中**
-- 等待 Codex 完成后再继续
+**调用命令**：
+
+```bash
+# 后台执行 Codex 审核脚本
+# 参数1: scope (uncommitted/staged/branch/all)
+# 参数2: timeout_seconds (默认 300 = 5分钟)
+./scripts/codex-review-now.sh uncommitted 300
+```
+
+**脚本特性**（`scripts/codex-review-now.sh` v2）：
+- 使用 `codex exec --json --output-last-message` 非交互模式
+- 通过 stdin 传递 prompt（避免超长参数问题）
+- 解析 JSONL 事件流显示进度
+- 内置软/硬超时保护
+- 超时后保留部分输出和事件日志
 
 **Step 7.3: 整合 Codex 审核结果**
 
@@ -620,6 +671,47 @@ codex review --uncommitted --title "Code Review - $(date +%Y-%m-%d)"
 3. **可选优化：** [最低优先]
 
 ---
+```
+
+**Step 7.4: 超时处理（如果 Codex 未在 5 分钟内完成）**
+
+如果 TaskOutput 返回超时（exit code 124）或任务仍在运行，向用户显示：
+
+```markdown
+---
+
+## ⏱️ Codex 审核超时
+
+Codex 审核未在 5 分钟内完成。可能原因：
+- 代码量较大，需要更多处理时间
+- 网络延迟或 API 响应慢
+
+### 备选方案
+
+**方案 1：增加超时时间重试**
+```bash
+./scripts/codex-review-now.sh uncommitted 600  # 10 分钟超时
+```
+
+**方案 2：手动运行交互式 Codex**
+```bash
+codex
+# 进入交互模式后输入:
+/review
+```
+
+**方案 3：查看部分输出**
+```bash
+# 结果文件（如有）
+cat ${TEMP:-/tmp}/codex-review/result-*.md | tail -1 | xargs cat
+
+# 事件日志
+cat ${TEMP:-/tmp}/codex-review/events-*.jsonl | tail -1 | xargs tail -20
+```
+
+---
+
+**注意**：Claude 多代理审核结果仍然有效，Codex 仅作为补充视角。
 ```
 
 </codex_execution>
