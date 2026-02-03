@@ -5,6 +5,35 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.37.0] - 2026-02-03
+
+### Added
+
+- **Gemini CLI 集成** - `/workflows:review [G]` 支持调用 Gemini 进行额外代码审核
+  - 使用 `gemini --approval-mode plan -o json` 非交互模式（基于 Gemini 官方建议）
+  - 通过 stdin 管道传递 prompt，支持 1M+ tokens（不截断 diff）
+  - 使用系统 `timeout` 命令处理超时
+  - 新增 `scripts/gemini-review-now.sh` 脚本
+
+- **多工具协同审核** - `/workflows:review [C][G]` 同时调用 Codex 和 Gemini
+  - 综合三方审核结果（Claude + Codex + Gemini）
+  - 多方一致的发现优先级更高
+
+- **转换器智能过滤** - 转换到 Codex/Gemini 格式时自动过滤 `[C]` `[G]` 参数说明
+  - 新增 `src/utils/filter-claude-code-only.ts` 公共过滤函数
+  - 支持 `<!-- CLAUDE-CODE-ONLY-START/END -->` 标记块过滤
+
+### Changed
+
+- **`/workflows:review`** - 更新参数解析支持 `[G]` 标志
+- 更新 Prerequisites 包含 Gemini CLI 安装说明
+
+### Summary
+
+- 28 agents, 26 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.36.1] - 2026-02-03
 
 ### Changed

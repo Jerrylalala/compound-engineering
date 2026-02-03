@@ -1,6 +1,7 @@
 import type { ClaudeCommand, ClaudePlugin } from "../types/claude"
 import type { GeminiBundle, GeminiCommand } from "../types/gemini"
 import type { ClaudeToOpenCodeOptions } from "./claude-to-opencode"
+import { filterClaudeCodeOnly } from "../utils/filter-claude-code-only"
 
 export type ClaudeToGeminiOptions = ClaudeToOpenCodeOptions
 
@@ -86,11 +87,13 @@ function sanitizeCommandName(name: string): string {
 
 /**
  * 构建命令的 prompt 内容
+ * 过滤 Claude Code 专属内容（[C] [G] 参数等）
  */
 function buildCommandPrompt(cmd: ClaudeCommand): string {
-  const body = cmd.body?.trim() || ""
+  const body = filterClaudeCodeOnly(cmd.body?.trim() || "")
   const header = cmd.argumentHint ? "## Arguments" : "## User Input"
-  const argLine = cmd.argumentHint ? `${cmd.argumentHint}: {{args}}` : "{{args}}"
+  const filteredHint = cmd.argumentHint ? filterClaudeCodeOnly(cmd.argumentHint) : null
+  const argLine = filteredHint ? `${filteredHint}: {{args}}` : "{{args}}"
   return [body, "", header, argLine].filter(Boolean).join("\n")
 }
 
@@ -148,9 +151,12 @@ function renderCommands(commands: ClaudeCommand[]): string[] {
 
 function renderCommandLine(command: ClaudeCommand): string {
   const name = command.name.startsWith("/") ? command.name : `/${command.name}`
+  // 过滤 Claude Code 专属内容（[C] [G] 参数等）
+  const filteredDesc = command.description ? filterClaudeCodeOnly(command.description) : null
+  const filteredHint = command.argumentHint ? filterClaudeCodeOnly(command.argumentHint) : null
   const details = [
-    command.description,
-    command.argumentHint && `Arguments: ${command.argumentHint}`,
+    filteredDesc,
+    filteredHint && `Arguments: ${filteredHint}`,
     command.allowedTools?.length && `Allowed tools: ${command.allowedTools.join(", ")}`,
   ].filter(Boolean)
 

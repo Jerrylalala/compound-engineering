@@ -1,7 +1,7 @@
 ---
 name: workflows:review
-description: "Step 4: [C] 使用多代理分析进行全面代码审查"
-argument-hint: "[PR number, GitHub URL, branch name, or latest] [C]"
+description: "Step 4: [C][G] 使用多代理分析进行全面代码审查"
+argument-hint: "[PR number, GitHub URL, branch name, or latest] [C] [G]"
 ---
 
 # Review Command
@@ -19,14 +19,21 @@ argument-hint: "[PR number, GitHub URL, branch name, or latest] [C]"
 | PR 号 | GitHub PR 编号 | `/workflows:review 123` |
 | URL | GitHub PR URL | `/workflows:review https://github.com/.../pull/123` |
 | 分支名 | 审核指定分支 | `/workflows:review feature-branch` |
-| `[C]` | **自动调用 Codex 额外审核** | `/workflows:review [C]` 或 `/workflows:review 123 [C]` |
+| `[C]` | **自动调用 Codex 额外审核** | `/workflows:review [C]` |
+| `[G]` | **自动调用 Gemini 额外审核** | `/workflows:review [G]` |
+
+<!-- CLAUDE-CODE-ONLY-START -->
+**注意**：`[C]` 和 `[G]` 参数仅在 Claude Code 中有效。转换到 Codex/Gemini 后不需要这些参数。
+<!-- CLAUDE-CODE-ONLY-END -->
 
 **示例：**
 ```bash
 /workflows:review              # 审核当前分支
 /workflows:review 123          # 审核 PR #123
-/workflows:review [C]          # 审核当前分支 + 自动 Codex 审核
-/workflows:review 123 [C]      # 审核 PR #123 + 自动 Codex 审核
+/workflows:review [C]          # 审核当前分支 + Codex 审核
+/workflows:review [G]          # 审核当前分支 + Gemini 审核
+/workflows:review [C][G]       # 审核当前分支 + Codex + Gemini 双重审核
+/workflows:review 123 [C][G]   # 审核 PR #123 + 双重审核
 ```
 
 ## Prerequisites
@@ -36,39 +43,50 @@ argument-hint: "[PR number, GitHub URL, branch name, or latest] [C]"
 - Clean main/master branch
 - Proper permissions to create worktrees and access the repository
 - For document reviews: Path to a markdown file or document
-- **For Codex review**: Codex CLI installed (`npm install -g @openai/codex`)
+- **For Codex review `[C]`**: Codex CLI installed (`npm install -g @openai/codex`)
+- **For Gemini review `[G]`**: Gemini CLI installed (`npm install -g @google/gemini-cli`)
 </requirements>
 
 ## Main Tasks
 
-### 0. 解析参数（检测 [C] 标志）
+### 0. 解析参数（检测 [C] 和 [G] 标志）
 
 <argument_parsing>
 
-**检查参数中是否包含 `[C]` 标志：**
+**检查参数中是否包含 `[C]` 和 `[G]` 标志：**
 
 ```
 参数: $ARGUMENTS
 
-如果包含 [C] 或 [c]：
-  → CODEX_ENABLED = true
-  → 从参数中移除 [C]，剩余部分作为审核目标
+检测 [C] 标志：
+  如果包含 [C] 或 [c]：
+    → CODEX_ENABLED = true
+    → 从参数中移除 [C]
+  否则：
+    → CODEX_ENABLED = false
 
-否则：
-  → CODEX_ENABLED = false
+检测 [G] 标志：
+  如果包含 [G] 或 [g]：
+    → GEMINI_ENABLED = true
+    → 从参数中移除 [G]
+  否则：
+    → GEMINI_ENABLED = false
+
+剩余部分作为审核目标
 ```
 
-**记住这个标志，审核完成后根据它决定是否自动调用 Codex。**
+**记住这些标志，审核完成后根据它们决定是否自动调用 Codex/Gemini。**
 
 </argument_parsing>
 
 ### 1. Determine Review Target & Setup (ALWAYS FIRST)
 
-<review_target> #$ARGUMENTS (移除 [C] 后的部分) </review_target>
+<review_target> #$ARGUMENTS (移除 [C] [G] 后的部分) </review_target>
 
 <thinking>
 First, I need to determine the review target type and set up the code for analysis.
 Check if [C] flag is present - if yes, will auto-run Codex review at the end.
+Check if [G] flag is present - if yes, will auto-run Gemini review at the end.
 </thinking>
 
 #### Immediate Actions:
@@ -729,6 +747,129 @@ cat ${TEMP:-/tmp}/codex-review/events-*.jsonl | tail -1 | xargs tail -20
 - 需要有未提交的更改才能审核
 
 </codex_prerequisites>
+
+### 8. Gemini 额外审核（参数 `[G]` 触发）
+
+<!-- CLAUDE-CODE-ONLY-START -->
+
+<gemini_auto_review>
+
+**检查 Step 0 中解析的 GEMINI_ENABLED 标志：**
+
+```
+如果 GEMINI_ENABLED = true（命令参数包含 [G]）：
+  → 自动执行 Gemini 审核
+  → 整合结果到报告
+
+如果 GEMINI_ENABLED = false（命令参数不包含 [G]）：
+  → 跳过此步骤
+```
+
+</gemini_auto_review>
+
+#### 当 GEMINI_ENABLED = true 时，自动执行：
+
+<gemini_execution>
+
+**Step 8.1: 检查 Gemini CLI 可用性**
+
+```bash
+command -v gemini || echo "Gemini CLI 未安装，请运行: npm install -g @google/gemini-cli"
+```
+
+如果未安装，提示用户安装并跳过 Gemini 审核（其他审核结果仍然有效）。
+
+**Step 8.2: 使用 gemini 非交互模式审核**
+
+**技术方案**（基于 Gemini 官方建议）：
+- 使用 `gemini --approval-mode plan -o json` 非交互模式
+- 通过 stdin 管道传递 prompt（避免命令行长度限制）
+- 使用系统 `timeout` 命令处理超时（Gemini CLI 无内置超时）
+- 不截断 diff（Gemini 支持 1M+ tokens）
+
+**执行流程**：
+
+```
+Step 1: 后台启动 Gemini
+  - 使用 Bash 工具，设置 run_in_background=true
+  - 调用: ./scripts/gemini-review-now.sh uncommitted 300
+  - 记录返回的 task_id
+
+Step 2: 向用户显示进度提示
+  "⏳ Gemini 审核已启动（后台运行）
+   - 使用 gemini --approval-mode plan -o json 非交互模式
+   - 超时阈值：5 分钟"
+
+Step 3: 等待完成
+  使用 TaskOutput 工具等待任务完成
+
+Step 4: 处理结果
+  正常完成 → 读取输出，整合到报告
+  超时/失败 → 显示错误信息
+```
+
+**调用命令**：
+
+```bash
+./scripts/gemini-review-now.sh uncommitted 300
+```
+
+**Step 8.3: 整合 Gemini 审核结果**
+
+```markdown
+---
+
+## 🤖 Gemini 额外审核结果
+
+**审核时间：** [timestamp]
+**审核范围：** 未提交的更改
+**触发方式：** 命令参数 `[G]`
+
+### Gemini 发现：
+
+[Gemini 输出内容]
+
+---
+```
+
+</gemini_execution>
+
+#### 当 GEMINI_ENABLED = false 时：
+
+跳过 Gemini 审核。
+
+<gemini_prerequisites>
+
+**Gemini 审核前提条件（使用 `[G]` 参数时需要）：**
+
+- 安装 Gemini CLI: `npm install -g @google/gemini-cli`
+- 首次使用需登录: `gemini`（交互式登录）
+- 需要有未提交的更改才能审核
+
+</gemini_prerequisites>
+
+<!-- CLAUDE-CODE-ONLY-END -->
+
+### 9. 多工具审核结果综合（[C][G] 同时启用时）
+
+<!-- CLAUDE-CODE-ONLY-START -->
+
+当 CODEX_ENABLED 和 GEMINI_ENABLED 都为 true 时，在最终报告中整合三方结果：
+
+```markdown
+## 🔄 多工具审核综合
+
+| 发现类型 | Claude | Codex | Gemini | 优先级 |
+|----------|--------|-------|--------|--------|
+| 安全问题 | [X] | [Y] | [Z] | 多方一致 > 双方 > 单方 |
+
+**综合建议**：
+1. 必须修复（多方一致）
+2. 建议修复（双方发现）
+3. 可选优化（单方发现）
+```
+
+<!-- CLAUDE-CODE-ONLY-END -->
 
 ### Important: P1 Findings Block Merge
 

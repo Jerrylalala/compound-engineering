@@ -1,4 +1,5 @@
 import { formatFrontmatter } from "../utils/frontmatter"
+import { filterClaudeCodeOnly } from "../utils/filter-claude-code-only"
 import type { ClaudeAgent, ClaudeCommand, ClaudePlugin } from "../types/claude"
 import type { CodexBundle, CodexGeneratedSkill } from "../types/codex"
 import type { ClaudeToOpenCodeOptions } from "./claude-to-opencode"
@@ -60,24 +61,29 @@ function convertAgent(agent: ClaudeAgent, usedNames: Set<string>): CodexGenerate
 
 function convertCommandSkill(command: ClaudeCommand, usedNames: Set<string>): CodexGeneratedSkill {
   const name = uniqueName(normalizeName(command.name), usedNames)
+  // 过滤 Claude Code 专属内容（[C] [G] 参数等）
+  const filteredDescription = filterClaudeCodeOnly(
+    command.description ?? `Converted from Claude command ${command.name}`,
+  )
   const frontmatter: Record<string, unknown> = {
     name,
-    description: sanitizeDescription(
-      command.description ?? `Converted from Claude command ${command.name}`,
-    ),
+    description: sanitizeDescription(filteredDescription),
   }
   const sections: string[] = []
   if (command.argumentHint) {
-    sections.push(`## Arguments\n${command.argumentHint}`)
+    // 过滤 argumentHint 中的 [C] [G]
+    const filteredHint = filterClaudeCodeOnly(command.argumentHint)
+    sections.push(`## Arguments\n${filteredHint}`)
   }
   if (command.allowedTools && command.allowedTools.length > 0) {
     sections.push(`## Allowed tools\n${command.allowedTools.map((tool) => `- ${tool}`).join("\n")}`)
   }
-  // Transform Task agent calls to Codex skill references
-  const transformedBody = transformTaskCalls(command.body.trim())
+  // 过滤 body 中的 Claude Code Only 内容，然后转换 Task 调用
+  const filteredBody = filterClaudeCodeOnly(command.body.trim())
+  const transformedBody = transformTaskCalls(filteredBody)
   sections.push(transformedBody)
   const body = sections.filter(Boolean).join("\n\n").trim()
-  const content = formatFrontmatter(frontmatter, body.length > 0 ? body : command.body)
+  const content = formatFrontmatter(frontmatter, body.length > 0 ? body : filterClaudeCodeOnly(command.body))
   return { name, content }
 }
 
