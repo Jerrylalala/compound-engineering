@@ -24,6 +24,7 @@ export async function loadClaudePlugin(inputPath: string): Promise<ClaudePlugin>
   const hooks = await loadHooks(root, manifest.hooks)
 
   const mcpServers = await loadMcpServers(root, manifest)
+  const claudeMd = await loadClaudeMd(root)
 
   return {
     root,
@@ -33,7 +34,16 @@ export async function loadClaudePlugin(inputPath: string): Promise<ClaudePlugin>
     skills,
     hooks,
     mcpServers,
+    claudeMd,
   }
+}
+
+async function loadClaudeMd(root: string): Promise<string | undefined> {
+  const claudePath = path.join(root, "CLAUDE.md")
+  if (await pathExists(claudePath)) {
+    return readText(claudePath)
+  }
+  return undefined
 }
 
 async function resolveClaudeRoot(inputPath: string): Promise<string> {

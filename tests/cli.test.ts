@@ -83,6 +83,7 @@ describe("CLI", () => {
       env: {
         ...process.env,
         HOME: tempRoot,
+        USERPROFILE: tempRoot,
       },
     })
 
@@ -162,6 +163,7 @@ describe("CLI", () => {
       env: {
         ...process.env,
         HOME: tempRoot,
+        USERPROFILE: tempRoot,
         COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
       },
     })
@@ -246,6 +248,38 @@ describe("CLI", () => {
     expect(await exists(path.join(codexRoot, "prompts", "workflows-review.md"))).toBe(true)
     expect(await exists(path.join(codexRoot, "skills", "workflows-review", "SKILL.md"))).toBe(true)
     expect(await exists(path.join(codexRoot, "AGENTS.md"))).toBe(true)
+  })
+
+  test("convert writes Gemini output", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-gemini-"))
+    const fixtureRoot = path.join(import.meta.dir, "fixtures", "sample-plugin")
+
+    const proc = Bun.spawn([
+      "bun",
+      "run",
+      "src/index.ts",
+      "convert",
+      fixtureRoot,
+      "--to",
+      "gemini",
+      "--output",
+      tempRoot,
+    ], {
+      cwd: path.join(import.meta.dir, ".."),
+      stdout: "pipe",
+      stderr: "pipe",
+    })
+
+    const exitCode = await proc.exited
+    const stdout = await new Response(proc.stdout).text()
+    const stderr = await new Response(proc.stderr).text()
+
+    if (exitCode !== 0) {
+      throw new Error(`CLI failed (exit ${exitCode}).\nstdout: ${stdout}\nstderr: ${stderr}`)
+    }
+
+    expect(stdout).toContain("Converted compound-engineering")
+    expect(await exists(path.join(tempRoot, ".gemini", "GEMINI.md"))).toBe(true)
   })
 
   test("install supports --also with codex output", async () => {

@@ -21,6 +21,18 @@
 claude --plugin-dir "路径/plugins/compound-engineering"
 ```
 
+**CLI 转换（Codex / Gemini）：**
+
+```bash
+# 转换到 Codex
+bunx @every-env/compound-plugin install compound-engineering --to codex
+
+# 转换到 Gemini
+bunx @every-env/compound-plugin install compound-engineering --to gemini
+```
+
+Codex 输出默认写入 `~/.codex/`，Gemini 输出为项目根目录下的 `.gemini/GEMINI.md`。
+
 ## 工作流命令
 
 | 命令 | 说明 |

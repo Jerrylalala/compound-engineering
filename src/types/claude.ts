@@ -58,6 +58,7 @@ export type ClaudePlugin = {
   skills: ClaudeSkill[]
   hooks?: ClaudeHooks
   mcpServers?: Record<string, ClaudeMcpServer>
+  claudeMd?: string
 }
 
 export type ClaudeHookCommand = {

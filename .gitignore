@@ -2,4 +2,5 @@
 *.log
 node_modules/
 .codex/
+.gemini/
 .claude/settings.local.json

@@ -22,7 +22,7 @@ export default defineCommand({
     to: {
       type: "string",
       default: "opencode",
-      description: "Target format (opencode | codex)",
+      description: "Target format (opencode | codex | gemini)",
     },
     output: {
       type: "string",
@@ -33,6 +33,11 @@ export default defineCommand({
       type: "string",
       alias: "codex-home",
       description: "Write Codex output to this .codex root (ex: ~/.codex)",
+    },
+    geminiHome: {
+      type: "string",
+      alias: "gemini-home",
+      description: "Write Gemini output to this project root (creates .gemini)",
     },
     also: {
       type: "string",
@@ -71,8 +76,13 @@ export default defineCommand({
     }
 
     const plugin = await loadClaudePlugin(String(args.source))
+    const outputRootProvided = Boolean(args.output && String(args.output).trim())
     const outputRoot = resolveOutputRoot(args.output)
     const codexHome = resolveCodexRoot(args.codexHome)
+    const geminiHome = resolveGeminiRoot(
+      args.geminiHome,
+      outputRootProvided ? outputRoot : process.cwd(),
+    )
 
     const options = {
       agentMode: String(args.agentMode) === "primary" ? "primary" : "subagent",
@@ -80,7 +90,11 @@ export default defineCommand({
       permissions: permissions as PermissionMode,
     }
 
-    const primaryOutputRoot = targetName === "codex" && codexHome ? codexHome : outputRoot
+    const primaryOutputRoot = targetName === "codex"
+      ? codexHome
+      : targetName === "gemini"
+        ? geminiHome
+        : outputRoot
     const bundle = target.convert(plugin, options)
     if (!bundle) {
       throw new Error(`Target ${targetName} did not return a bundle.`)
@@ -106,9 +120,11 @@ export default defineCommand({
         console.warn(`Skipping ${extra}: no output returned.`)
         continue
       }
-      const extraRoot = extra === "codex" && codexHome
+      const extraRoot = extra === "codex"
         ? codexHome
-        : path.join(outputRoot, extra)
+        : extra === "gemini"
+          ? geminiHome
+          : path.join(outputRoot, extra)
       await handler.write(extraRoot, extraBundle)
       console.log(`Converted ${plugin.manifest.name} to ${extra} at ${extraRoot}`)
     }
@@ -137,6 +153,14 @@ function resolveCodexHome(value: unknown): string | null {
 
 function resolveCodexRoot(value: unknown): string {
   return resolveCodexHome(value) ?? path.join(os.homedir(), ".codex")
+}
+
+function resolveGeminiRoot(value: unknown, fallback: string): string {
+  if (!value || !String(value).trim()) {
+    return path.resolve(fallback)
+  }
+  const expanded = expandHome(String(value).trim())
+  return path.resolve(expanded)
 }
 
 function expandHome(value: string): string {
