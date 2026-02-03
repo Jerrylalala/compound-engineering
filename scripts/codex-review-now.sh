@@ -62,8 +62,22 @@ case $SCOPE in
 esac
 
 if [ -z "$CHANGES" ]; then
-  echo "✅ No changes to review."
-  exit 0
+  # 智能 fallback：uncommitted 没有更改时自动切换到 last-commit
+  if [ "$SCOPE" = "uncommitted" ]; then
+    echo "⚠️ 没有未提交的更改，自动切换到 last-commit 模式..."
+    echo ""
+    SCOPE="last-commit"
+    CHANGES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
+    DIFF=$(git diff HEAD~1 HEAD 2>/dev/null | head -500 || true)
+
+    if [ -z "$CHANGES" ]; then
+      echo "✅ No changes to review (including last commit)."
+      exit 0
+    fi
+  else
+    echo "✅ No changes to review."
+    exit 0
+  fi
 fi
 
 FILE_COUNT=$(echo "$CHANGES" | wc -l | tr -d ' ')
