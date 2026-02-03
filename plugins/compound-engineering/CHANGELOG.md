@@ -5,6 +5,31 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.36.0] - 2026-02-03
+
+### Added
+
+- **跨工具经验库系统** - 支持 Claude Code、Codex、Gemini 共享经验库
+  - 统一全局目录：`~/.compound/solutions/`（跨项目、跨工具）
+  - 三级优先级：`COMPOUND_SOLUTIONS_HOME` > `~/.compound/solutions/` > `docs/solutions/`
+  - 跨平台支持：Windows、macOS、Linux 路径自动解析
+  - 首次运行自动检测、创建目录、注入配置
+  - 项目标记文件：`.compound/config.json`
+
+### Changed
+
+- **`/workflows:compound`** - 添加 Environment Setup 自动化流程
+  - Step 0: 自动检测并创建经验库系统
+  - Step 0.1: Codex/Gemini CLI 同步说明
+- **`learnings-researcher` agent** - 支持搜索全局 + 项目两个经验库
+- **项目 `CLAUDE.md`** - 更新搜索说明为双目录搜索
+
+### Summary
+
+- 28 agents, 26 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.35.0] - 2026-02-02
 
 ### Added

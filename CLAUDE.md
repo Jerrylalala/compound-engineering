@@ -23,12 +23,15 @@
 
 ### AI 助手行为规范
 
-**开始工作前检查历史经验**：在修复 bug 或实现功能前，先搜索 `docs/solutions/` 查找相关经验：
+**开始工作前检查历史经验**：在修复 bug 或实现功能前，搜索经验库：
 ```bash
-# 搜索相关文档
+# 搜索全局经验（跨项目）
+Grep pattern="关键词" path=~/.compound/solutions/ output_mode=files_with_matches
+
+# 搜索项目经验
 Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
 ```
-如果找到相关文档，先阅读再开始工作，避免重复踩坑。
+或直接使用 `/workflows:plan`，它会自动搜索两个目录。
 
 **完成前验证（铁律）**：声明任何工作完成之前，必须有新鲜的验证证据。
 
@@ -61,6 +64,28 @@ Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
 
 **功能完成后必须询问**：当完成用户请求的功能后，必须询问用户是否要推送到 Git：
 > "功能已完成。要推送到 Git 吗？"
+
+**Git 提交使用中文**：commit message 使用中文书写。
+
+**新功能/修改必须更新文档（铁律）**：
+
+> 添加新功能或修改现有功能时，**必须同步更新相关文档**，否则不算完成。
+
+| 修改类型 | 必须更新的文档 |
+|----------|----------------|
+| 新功能 | CHANGELOG.md、版本号、INSTALL.md（如需要） |
+| 修改命令/agent | CHANGELOG.md、版本号 |
+| 修改工作流 | CHANGELOG.md、版本号、WORKFLOW-VISUAL.md |
+| Bug 修复 | CHANGELOG.md、版本号（如重要） |
+
+**版本号位置（必须同步）：**
+- `.claude-plugin/marketplace.json` → `plugins[0].version`
+- `plugins/compound-engineering/.claude-plugin/plugin.json` → `version`
+
+**快速检查命令：**
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+```
 
 ### 当前组件统计
 

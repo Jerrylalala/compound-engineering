@@ -97,15 +97,50 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 
 ---
 
+## 经验库系统（v2.36.0 新增）
+
+### 双层经验库
+
+| 目录 | 范围 | 说明 |
+|------|------|------|
+| `~/.compound/solutions/` | 全局 | 跨项目、跨工具共享（Claude/Codex/Gemini） |
+| `docs/solutions/` | 项目 | 项目特定经验 |
+
+### 路径优先级
+
+```
+1. COMPOUND_SOLUTIONS_HOME（环境变量，可选）
+2. ~/.compound/solutions/（全局默认）
+3. docs/solutions/（项目回退）
+```
+
+### 跨平台支持
+
+| 平台 | 全局路径 |
+|------|----------|
+| Windows | `%USERPROFILE%\.compound\solutions\` |
+| macOS/Linux | `$HOME/.compound/solutions/` |
+
+### 自动化
+
+- **首次运行** `/workflows:compound` 时自动创建目录和配置
+- **搜索**：`/workflows:plan` 自动搜索两个目录
+- **记录**：`/workflows:compound` 自动判断写入位置
+
+---
+
 ## 文件输出位置
 
 ```
+~/.compound/
+└── solutions/            # 全局经验（跨项目）
+
 docs/
 ├── brainstorms/          # Brainstorm 输出
 │   └── YYYY-MM-DD-<topic>-brainstorm.md
 ├── plans/                # Plan 输出
 │   └── YYYY-MM-DD-<type>-<name>-plan.md
-├── solutions/            # Compound 输出
+├── solutions/            # 项目经验（Compound 输出）
 │   ├── build-errors/
 │   ├── test-failures/
 │   └── ...

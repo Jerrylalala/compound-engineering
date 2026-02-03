@@ -3,4 +3,5 @@
 node_modules/
 .codex/
 .gemini/
+.compound/
 .claude/settings.local.json

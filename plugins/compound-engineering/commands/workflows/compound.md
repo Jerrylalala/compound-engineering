@@ -25,74 +25,170 @@ Captures problem solutions while context is fresh, creating structured documenta
 
 This command launches multiple specialized subagents IN PARALLEL to maximize efficiency:
 
-### 0. **Location Classifier** (First, Required)
+### 0. **Environment Setup** (First, Automatic, Mandatory)
 
-> **规则来源**：遵循 `~/.claude/CLAUDE.md` 中的「经验分类规则（SSOT）」，此处不重复定义。
+> **铁律**：首次执行时自动检测并创建经验库系统，确保跨工具、跨平台可用。
 
-**执行步骤：**
+**检测标记**：`.compound/config.json` 存在且 `solutionsConfigured: true` 时跳过创建。
 
-1. 分析问题特征，使用全局 CLAUDE.md 的判定决策树：
-   - Q1: 涉及 Claude Code/API？ → 全局 + 项目备份
-   - Q2: 通用开发工具问题？ → 仅全局
-   - Q3: 可复用的设计模式/规范？ → 仅全局
-   - Q4: 只与当前项目相关？ → 仅项目
+#### 全局经验库路径优先级（三级）
 
-2. 确定写入位置和文件路径
+```
+1. COMPOUND_SOLUTIONS_HOME 环境变量（用户显式配置）
+2. ~/.compound/solutions/（统一默认目录）
+3. docs/solutions/（项目级回退）
+```
 
-3. 返回结构化结果
+#### 跨平台路径解析
+
+| 平台 | `~` 展开为 | 示例路径 |
+|------|-----------|----------|
+| Windows | `%USERPROFILE%` | `C:\Users\jerry\.compound\solutions\` |
+| macOS | `$HOME` | `/Users/jerry/.compound/solutions/` |
+| Linux | `$HOME` | `/home/jerry/.compound/solutions/` |
+
+#### 完整检测流程
+
+```
+Step 1: 检查项目标记
+├─ 读取 .compound/config.json
+├─ 存在且 solutionsConfigured=true → 跳到 Step 5
+└─ 不存在 → 继续
+
+Step 2: 解析全局路径
+├─ 检查 COMPOUND_SOLUTIONS_HOME 环境变量
+├─ 已设置 → 使用该路径
+└─ 未设置 → 使用 ~/.compound/solutions/
+
+Step 3: 创建全局目录
+├─ Windows: mkdir %USERPROFILE%\.compound\solutions
+└─ macOS/Linux: mkdir -p ~/.compound/solutions
+
+Step 4: 注入系统提示词（当前 AI 工具）
+├─ Claude Code → ~/.claude/CLAUDE.md
+├─ Codex → ~/.codex/AGENTS.md
+└─ Gemini → ~/.gemini/GEMINI.md
+│
+├─ 读取对应配置文件
+├─ 搜索 "~/.compound/solutions"
+├─ 已存在 → 跳过
+└─ 不存在 → 在文件开头插入配置块
+
+Step 5: 创建项目标记
+└─ 写入 .compound/config.json
+```
+
+#### Step 4 注入的配置块（通用）
+
+```markdown
+## 跨工具经验库
+
+| 目录 | 范围 |
+|------|------|
+| `~/.compound/solutions/` | 全局（跨项目、跨工具） |
+| `docs/solutions/` | 项目特定 |
+
+搜索：`/workflows:plan` 自动搜索。记录：`/workflows:compound`。
+```
+
+#### 项目标记文件 `.compound/config.json`
+
+```json
+{
+  "solutionsConfigured": true,
+  "globalPath": "~/.compound/solutions",
+  "createdAt": "YYYY-MM-DD",
+  "createdBy": "claude-code | codex | gemini"
+}
+```
+
+#### 首次运行输出
+
+```
+[Environment Setup]
+✓ Global path: ~/.compound/solutions/
+✓ Created directory
+✓ Injected config into ~/.claude/CLAUDE.md
+✓ Created .compound/config.json
+→ Experience library ready
+```
+
+---
+
+### 0.1 **Codex/Gemini 命令同步**
+
+> **注意**：`/workflows:compound` 是 Claude Code 插件命令。Codex/Gemini 需通过 CLI 转换。
+
+**更新插件后执行：**
+
+```bash
+# 同步到 Codex
+bun run src/index.ts install ./plugins/compound-engineering --to codex
+
+# 同步到 Gemini
+bun run src/index.ts install ./plugins/compound-engineering --to gemini
+```
+
+---
+
+### 1. **Location Classifier** (After Setup)
+
+**分类规则：**
+
+| 问题类型 | 写入位置 |
+|----------|----------|
+| AI 工具问题（Claude/Codex/Gemini） | 全局 `~/.compound/solutions/` |
+| 通用开发工具（Git/IDE/终端） | 全局 `~/.compound/solutions/` |
+| 可复用的设计模式/规范 | 全局 `~/.compound/solutions/` |
+| 项目业务逻辑/架构 | 项目 `docs/solutions/` |
 
 **返回值（JSON）：**
 ```json
 {
   "scope": "global" | "project",
-  "primary_location": "~/.claude/solutions/..." | "docs/solutions/...",
-  "backup_location": "docs/solutions/...",  // 仅当 scope=global 时存在
-  "category": "integration-issues",          // 问题分类
-  "reasoning": "问题涉及 Claude Code 插件..."  // 判定理由
+  "primary_location": "~/.compound/solutions/..." | "docs/solutions/...",
+  "category": "integration-issues",
+  "reasoning": "问题涉及..."
 }
 ```
 
-**示例：**
-- 「Marketplace 缓存问题」→ `{ scope: "global", primary: "~/.claude/solutions/marketplace-cache.md", backup: "docs/solutions/integration-issues/..." }`
-- 「项目 N+1 查询」→ `{ scope: "project", primary: "docs/solutions/performance-issues/..." }`
-
-### 1. **Context Analyzer** (Parallel)
+### 2. **Context Analyzer** (Parallel)
    - Extracts conversation history
    - Identifies problem type, component, symptoms
    - Validates against solution schema
    - Returns: YAML frontmatter skeleton
 
-### 2. **Solution Extractor** (Parallel)
+### 3. **Solution Extractor** (Parallel)
    - Analyzes all investigation steps
    - Identifies root cause
    - Extracts working solution with code examples
    - Returns: Solution content block
 
-### 3. **Related Docs Finder** (Parallel)
+### 4. **Related Docs Finder** (Parallel)
    - Searches `docs/solutions/` for related documentation
    - Identifies cross-references and links
    - Finds related GitHub issues
    - Returns: Links and relationships
 
-### 4. **Prevention Strategist** (Parallel)
+### 5. **Prevention Strategist** (Parallel)
    - Develops prevention strategies
    - Creates best practices guidance
    - Generates test cases if applicable
    - Returns: Prevention/testing content
 
-### 5. **Category Classifier** (Parallel)
+### 6. **Category Classifier** (Parallel)
    - Determines optimal `docs/solutions/` category
    - Validates category against schema
    - Suggests filename based on slug
    - Returns: Final path and filename
 
-### 6. **Documentation Writer** (Parallel)
+### 7. **Documentation Writer** (Parallel)
    - Assembles complete markdown file
    - Validates YAML frontmatter
    - Formats content for readability
    - Creates the file in correct location
 
-### 7. **Optional: Specialized Agent Invocation** (Post-Documentation)
+### 8. **Optional: Specialized Agent Invocation** (Post-Documentation)
    Based on problem type detected, automatically invoke applicable agents:
    - **performance_issue** → `performance-oracle`
    - **security_issue** → `security-sentinel`
@@ -124,10 +220,13 @@ This command launches multiple specialized subagents IN PARALLEL to maximize eff
 
 ## What It Creates
 
-> **位置判断规则**：参见 `~/.claude/CLAUDE.md` 的「经验分类规则（SSOT）」
+**文档位置（三级优先级）：**
+1. `$COMPOUND_SOLUTIONS_HOME/[filename].md`（如设置环境变量）
+2. `~/.compound/solutions/[filename].md`（全局默认）
+3. `docs/solutions/[category]/[filename].md`（项目级）
 
-**文档位置：**
-- 全局经验 → `~/.claude/solutions/[filename].md` + 项目备份
+**写入规则：**
+- 全局经验 → `~/.compound/solutions/[filename].md`
 - 项目经验 → `docs/solutions/[category]/[filename].md`
 
 **项目内分类：**
