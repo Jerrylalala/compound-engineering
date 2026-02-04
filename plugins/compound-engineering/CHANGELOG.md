@@ -5,6 +5,24 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.40.0] - 2026-02-04
+
+### Added
+
+- **`/workflows:sync-upstream` 命令** — 上游仓库智能同步检测
+  - 角色化策略：parent(git-native) / reference(github-api) / runtime(releases)
+  - 可扩展配置：`upstream-repos.json` 支持动态添加/移除监控仓库
+  - 结构化报告：带 YAML frontmatter，支持 `/workflows:plan` 自动发现
+  - 噪音过滤：自动排除 chore/bump/dependabot/merge commits
+  - 交互式讨论：评估后可直接创建整合计划或执行合并
+  - 语音通知：发现重要更新时自动语音提醒
+
+### Summary
+
+- 28 agents, 29 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.39.0] - 2026-02-04
 
 ### Added

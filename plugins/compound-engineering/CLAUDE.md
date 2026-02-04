@@ -120,6 +120,7 @@ skills/
 | Step 4: | `/workflows:review`     | 代码审查       |
 | Step 5: | `/workflows:compound`   | 记录解决方案   |
 | Step 6: | `/workflows:save`       | 保存项目上下文 |
+| 独立:   | `/workflows:sync-upstream` | 上游仓库同步检测 |
 
 ### 序号格式规范
 

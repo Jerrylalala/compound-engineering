@@ -92,7 +92,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 | 组件        | 数量 | 位置                                     |
 | ----------- | ---- | ---------------------------------------- |
 | Agents      | 28   | `plugins/compound-engineering/agents/`   |
-| Commands    | 28   | `plugins/compound-engineering/commands/` |
+| Commands    | 29   | `plugins/compound-engineering/commands/` |
 | Skills      | 20   | `plugins/compound-engineering/skills/`   |
 | MCP Servers | 1    | Context7（HTTP 服务）                    |
 

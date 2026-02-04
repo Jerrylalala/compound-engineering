@@ -14,9 +14,9 @@
 安装后重启 Claude Code 即可使用。
 
 > **插件更新后不生效？** 清除缓存后重新安装：
- 1. `/plugin` → 切换到 **Marketplaces** → 选中旧的 marketplace → 按 **`r`** 移除
- 2. 选择 **`+ Add Marketplace`** → 输入 `Jerrylalala/compound-engineering-plugin-private`
-3. 重启 Claude Code
+  1. 在 Claude Code 中：/plugins → 选 marketplace → Remove marketplace → 然后重新 Add marketplace 用 [https://github.com/Jerrylalala/compound-engineering-plugin-private]
+  2. 这样 Claude Code 会用 HTTPS 重新克隆
+  3. 重启 Claude Code
 
  **安装报错？** 可能是上次安装失败残留的临时文件（如 `temp_local_*`），手动清除：
  ```powershell
@@ -25,6 +25,7 @@
  Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\jerry-marketplace"
  # 第二步：更新插件市场，再搜索重新安装插件
  ```
+命令: 把这个仓库同步到 codex 和 gemini 中
 
 ---
 
@@ -46,6 +47,7 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 | `/workflows:work`       | 执行工作计划（自动选择执行模式）  | 有计划文档后 |
 | `/workflows:review`     | 多代理代码评审                    | 代码写完后   |
 | `/workflows:compound`   | 记录解决方案                      | 问题解决后   |
+| `/workflows:sync-upstream` | 检测上游仓库更新，生成分析报告 | 定期同步时   |
 | `/workflows:save`       | 保存项目上下文，用于跨会话恢复    | 结束会话时   |
 
 ### 自动执行模式（v2.32.0 新增）
@@ -153,6 +155,9 @@ docs/
 │   └── YYYY-MM-DD-<topic>-brainstorm.md
 ├── plans/                # Plan 输出
 │   └── YYYY-MM-DD-<type>-<name>-plan.md
+├── sync-reports/         # Sync-Upstream 输出
+│   ├── upstream-repos.json
+│   └── YYYY-MM-DD-upstream-sync.md
 ├── solutions/            # 项目经验（Compound 输出）
 │   ├── build-errors/
 │   ├── test-failures/

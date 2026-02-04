@@ -32,6 +32,19 @@ origin   -> https://github.com/Jerrylalala/compound-engineering-plugin-private.g
 
 ---
 
+## 自动化检测（推荐）
+
+使用 `/workflows:sync-upstream` 命令可自动检测上游更新：
+- 自动获取 4 个上游仓库最近 30 天的变更
+- 智能过滤噪音，分析相关性
+- 生成结构化报告供决策
+
+详见配置文件 `docs/sync-reports/upstream-repos.json`，支持动态添加/移除监控仓库。
+
+手动合并步骤见下方。
+
+---
+
 ## 同步步骤
 
 ### 第一步：检测上游更新

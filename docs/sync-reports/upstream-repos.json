@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "repos": [
+    {
+      "repo": "EveryInc/compound-engineering-plugin",
+      "role": "parent",
+      "strategy": "git-native",
+      "remote": "upstream",
+      "description": "主上游，需要直接 merge"
+    },
+    {
+      "repo": "bmad-code-org/BMAD-METHOD",
+      "role": "reference",
+      "strategy": "github-api",
+      "description": "方法论参考，学习 Prompt/Skill 设计"
+    },
+    {
+      "repo": "obra/superpowers",
+      "role": "reference",
+      "strategy": "github-api",
+      "description": "技能参考，按需手动迁移"
+    },
+    {
+      "repo": "anthropics/claude-code",
+      "role": "runtime",
+      "strategy": "releases",
+      "description": "运行时环境，关注新功能/API 变化"
+    }
+  ]
+}
