@@ -1,7 +1,7 @@
 ---
 name: workflows:brainstorm
-description: "Step 1: [P] 探索需求和方案，在规划前进行协作对话"
-argument-hint: "[feature idea or problem to explore]"
+description: "Step 1: [P][C][G] 探索需求和方案，在规划前进行协作对话"
+argument-hint: "[feature idea or problem to explore] [C] [G]"
 ---
 
 # Brainstorm a Feature or Improvement
@@ -14,6 +14,29 @@ Brainstorming helps answer **WHAT** to build through collaborative dialogue. It 
 
 **Party Mode available:** At any point, user can say `[P]` or "开启派对模式" to switch to multi-agent collaborative discussion. Load the `party-mode` skill for details.
 
+## 参数说明
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| 功能描述 | 想探索的功能或问题 | `/workflows:brainstorm Add notifications` |
+| `[P]` | 开启派对模式（多视角讨论） | `/workflows:brainstorm [P]` |
+| `[C]` | **Phase 2 后自动调用 Codex 方案咨询** | `/workflows:brainstorm [C]` |
+| `[G]` | **Phase 2 后自动调用 Gemini 方案咨询** | `/workflows:brainstorm [G]` |
+
+<!-- CLAUDE-CODE-ONLY-START -->
+**注意**：`[C]` 和 `[G]` 参数仅在 Claude Code 中有效。转换到 Codex/Gemini 后不需要这些参数。
+<!-- CLAUDE-CODE-ONLY-END -->
+
+**示例：**
+```bash
+/workflows:brainstorm Add notifications           # 基本探索
+/workflows:brainstorm [P]                          # 派对模式
+/workflows:brainstorm [C]                          # + Codex 咨询
+/workflows:brainstorm [G]                          # + Gemini 咨询
+/workflows:brainstorm [C][G]                       # + Codex + Gemini 双咨询
+/workflows:brainstorm [P][C][G] Add notifications  # 全开
+```
+
 ## Feature Description
 
 <feature_description> #$ARGUMENTS </feature_description>
@@ -23,6 +46,43 @@ Brainstorming helps answer **WHAT** to build through collaborative dialogue. It 
 Do not proceed until you have a feature description from the user.
 
 ## Execution Flow
+
+### Step 0: 解析参数（检测 [C] 和 [G] 标志）
+
+<!-- CLAUDE-CODE-ONLY-START -->
+
+<argument_parsing>
+
+**检查参数中是否包含 `[C]` 和 `[G]` 标志：**
+
+```
+参数: $ARGUMENTS
+
+检测 [C] 标志：
+  如果包含 [C] 或 [c]：
+    → CODEX_ENABLED = true
+    → 从参数中移除 [C]
+  否则：
+    → CODEX_ENABLED = false
+
+检测 [G] 标志：
+  如果包含 [G] 或 [g]：
+    → GEMINI_ENABLED = true
+    → 从参数中移除 [G]
+  否则：
+    → GEMINI_ENABLED = false
+
+剩余部分作为功能描述（feature_description）
+```
+
+**记住这些标志，Phase 2 完成后根据它们决定是否自动调用 Codex/Gemini。**
+
+如果 CODEX_ENABLED 或 GEMINI_ENABLED 为 true，在 Phase 2 提出方案时提示用户：
+"方案提出后将自动咨询 [Codex/Gemini/Codex+Gemini] 寻求更优解。"
+
+</argument_parsing>
+
+<!-- CLAUDE-CODE-ONLY-END -->
 
 ### Phase 0: Assess Requirements Clarity
 
@@ -75,11 +135,149 @@ Use **AskUserQuestion tool** to ask which approach the user prefers.
 **Party Mode option:** If the decision involves complex trade-offs or would benefit from multiple expert perspectives, offer:
 - Option: "[P] Party Mode - 听听多位专家的意见" - Loads `party-mode` skill for multi-agent discussion
 
+<!-- CLAUDE-CODE-ONLY-START -->
+
+### Phase 2.5: 外部 AI 咨询（[C][G] 参数触发）
+
+<external_consultation>
+
+**检查 Step 0 中解析的 CODEX_ENABLED 和 GEMINI_ENABLED 标志。**
+
+如果两者都为 false，跳过此步骤。
+
+#### 当 CODEX_ENABLED = true 时：
+
+**Step 2.5.1: 检查 Codex CLI 可用性**
+
+```bash
+command -v codex || echo "Codex CLI 未安装，请运行: npm install -g @openai/codex"
+```
+
+如果未安装，提示用户安装并跳过 Codex 咨询（主流程不中断）。
+
+**Step 2.5.2: 构建方案咨询 Prompt 并调用**
+
+构建结构化 prompt（从当前对话上下文中提取）：
+
+```
+## 项目背景
+[技术栈、框架]
+
+## 本轮头脑风暴的需求
+[feature_description]
+
+## Claude 提出的方案
+[Phase 2 中提出的 2-3 个方案，包含各方案的描述、优缺点]
+
+## 用户倾向的方向（如有）
+[用户在 Phase 2 中选择的偏好]
+
+## 请特别评估
+1. 这些方案中是否有最优解？如果都不是，更好的方案是什么？
+2. 有没有我们忽略的替代方案或开源库/框架？
+3. 性价比方面：是否存在更简洁、更高效的实现路径？
+4. 有没有潜在的坑或长期维护风险？
+```
+
+**执行流程**：
+
+```
+Step 1: 后台启动 Codex
+  - 使用 Bash 工具，设置 run_in_background=true
+  - 调用:
+    CODEX_OUTPUT="${TEMP:-/tmp}/codex-brainstorm-$(date +%s).md"
+    cat <<'PROMPT_EOF' | codex exec --output-last-message "$CODEX_OUTPUT" -
+    <构建好的prompt>
+    PROMPT_EOF
+  - 记录返回的 task_id
+
+Step 2: 等待完成
+  - 使用 TaskOutput 工具等待任务完成（最多 5 分钟）
+
+Step 3: 读取结果
+  - cat "$CODEX_OUTPUT" 获取 Codex 回答
+  - 整合到后续 brainstorm 文档中
+```
+
+#### 当 GEMINI_ENABLED = true 时：
+
+**Step 2.5.4: 检查 Gemini CLI 可用性**
+
+```bash
+command -v gemini || echo "Gemini CLI 未安装，请运行: npm install -g @google/gemini-cli"
+```
+
+如果未安装，提示用户安装并跳过 Gemini 咨询（主流程不中断）。
+
+**Step 2.5.5: 构建方案咨询 Prompt 并调用**
+
+使用与 Codex 相同的 prompt 结构，通过 Gemini CLI 调用。
+
+**执行流程**：
+
+```
+Step 1: 后台启动 Gemini
+  - 使用 Bash 工具，设置 run_in_background=true
+  - 调用:
+    cat <<'PROMPT_EOF' | gemini --approval-mode plan -p '' -o json
+    <构建好的prompt>
+    PROMPT_EOF
+  - 记录返回的 task_id
+
+Step 2: 等待完成
+  - 使用 TaskOutput 工具等待任务完成（最多 5 分钟）
+
+Step 3: 读取结果
+  - 解析 JSON 输出，提取 .response 字段
+  - 整合到后续 brainstorm 文档中
+```
+
+#### 当 CODEX_ENABLED 和 GEMINI_ENABLED 都为 true 时：
+
+在 Phase 3 的 brainstorm 文档中生成三方对比：
+
+```markdown
+## 外部咨询综合
+
+| 评估维度 | Claude | Codex | Gemini | 共识度 |
+|----------|--------|-------|--------|--------|
+| 推荐方案 | [X] | [Y] | [Z] | 一致/分歧 |
+| 替代建议 | ... | ... | ... | ... |
+| 风险提示 | ... | ... | ... | ... |
+
+**综合建议**：
+1. 多方一致的观点（可信度最高）
+2. 双方一致的建议（次优先）
+3. 单方独特见解（供参考）
+```
+
+#### 超时处理
+
+如果 Codex 或 Gemini 在 5 分钟内未完成：
+
+```markdown
+## ⏱️ [Codex/Gemini] 咨询超时
+
+咨询未在 5 分钟内完成。可手动运行：
+- Codex：`/codex [你的问题]`
+- Gemini：`/gemini [你的问题]`
+
+brainstorm 主流程结果仍然有效。
+```
+
+</external_consultation>
+
+<!-- CLAUDE-CODE-ONLY-END -->
+
 ### Phase 3: Capture the Design
 
 Write a brainstorm document to `docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md`.
 
 **Document structure:** See the `brainstorming` skill for the template format. Key sections: What We're Building, Why This Approach, Key Decisions, Open Questions.
+
+<!-- CLAUDE-CODE-ONLY-START -->
+**如果 CODEX_ENABLED 或 GEMINI_ENABLED 为 true**，将 Phase 2.5 的外部咨询结果写入文档的「外部 AI 咨询结果」小节（使用 Phase 2.5 中定义的三方对比表格格式）。
+<!-- CLAUDE-CODE-ONLY-END -->
 
 Ensure `docs/brainstorms/` directory exists before writing.
 

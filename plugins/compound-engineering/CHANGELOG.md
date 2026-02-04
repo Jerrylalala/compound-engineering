@@ -5,6 +5,23 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.39.0] - 2026-02-04
+
+### Added
+
+- **`/workflows:brainstorm [C][G]` 支持** - 在方案探索阶段调用 Codex/Gemini 外部方案咨询
+  - `[C]` 参数：Phase 2 后自动调用 Codex 方案咨询，寻找最优解
+  - `[G]` 参数：Phase 2 后自动调用 Gemini 方案咨询，寻找最优解
+  - `[P]` `[C]` `[G]` 三者正交兼容，可任意组合、无先后顺序
+  - 结果整合进 brainstorm 文档的「外部咨询」小节
+  - 使用 `<!-- CLAUDE-CODE-ONLY-START/END -->` 排除，不同步到 Codex/Gemini 格式
+
+### Summary
+
+- 28 agents, 28 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.38.1] - 2026-02-04
 
 ### 修复

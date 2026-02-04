@@ -43,7 +43,7 @@ skills/
 | 序号    | 命令                    | 说明           |
 | ------- | ----------------------- | -------------- |
 | Step 0: | `/workflows:load`       | 加载项目上下文 |
-| Step 1: | `/workflows:brainstorm` | 探索需求和方案 |
+| Step 1: | `/workflows:brainstorm` | 探索需求和方案（支持 [P][C][G]） |
 | Step 2: | `/workflows:plan`       | 创建实施计划   |
 | Step 3: | `/workflows:work`       | 执行工作计划   |
 | Step 4: | `/workflows:review`     | 代码审查       |
