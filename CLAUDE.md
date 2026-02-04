@@ -240,6 +240,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | [Marketplace 更新与终端显示](docs/solutions/integration-issues/marketplace-update-failure-and-unicode-display.md) | 版本号同步、Unicode 特殊字符 |
 | [幻影 Agent 引用问题](docs/solutions/integration-issues/phantom-agent-references-in-workflows.md) | 不存在的 agent、上游同步、YAGNI |
 | [SessionStart hook type:prompt 不被支持](docs/solutions/integration-issues/sessionstart-hook-prompt-type-not-supported.md) | SessionStart、type:prompt、终端卡死、CLAUDE.md |
+| [上游同步整合的完整工作流](docs/solutions/integration-issues/upstream-sync-integration-workflow.md) | git merge --squash、YAML frontmatter、CHANGELOG 标准、多方审核 |
 
 ### 开发规范
 
