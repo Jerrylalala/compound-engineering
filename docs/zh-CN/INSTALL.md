@@ -13,6 +13,16 @@
 
 安装后重启 Claude Code 即可使用。
 
+> **插件更新后不生效？** 清除缓存后重新安装：
+> 1. `/plugin` → 切换到 **Marketplaces** → 选中旧的 marketplace → 按 **`r`** 移除
+> 2. 选择 **`+ Add Marketplace`** → 输入 `Jerrylalala/compound-engineering-plugin-private`
+> 3. 重启 Claude Code
+>
+> 或手动删除缓存：
+> ```powershell
+> Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\jerry-marketplace"
+> ```
+
 ---
 
 ## 核心工作流
