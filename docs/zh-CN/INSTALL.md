@@ -20,11 +20,11 @@
 
  **安装报错？** 可能是上次安装失败残留的临时文件（如 `temp_local_*`），手动清除：
  ```powershell
- # 删除残留临时文件和旧缓存
-Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\temp_local_*"
-Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\jerry-marketplace"
- # 然后重新安装插件
-
+ # 第一步：删除残留临时文件和旧缓存
+ Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\temp_local_*"
+ Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\jerry-marketplace"
+ # 第二步：更新插件市场，再搜索重新安装插件
+ ```
 
 ---
 
