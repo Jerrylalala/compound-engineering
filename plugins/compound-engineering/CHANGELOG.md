@@ -5,6 +5,17 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.38.1] - 2026-02-04
+
+### 修复
+
+- **SessionStart hook 跨平台修复** - 改为 prompt hook，避免 Windows 无 bash 时报错卡住
+
+### Summary
+
+- 28 agents, 28 commands, 20 skills, 1 MCP server
+
+---
 ## [2.38.0] - 2026-02-04
 
 ### Added
@@ -649,3 +660,4 @@ These updates operationalize a key insight from building agent-native mobile app
 - **`/xcode-test` command** - Build and test iOS apps on simulator using XcodeBuildMCP. Automatically detects Xcode project, builds app, launches simulator, and runs test suite. Includes retries for flaky tests.
 
 - **`/playwright-test` command** - Run Playwright browser tests on pages affected by current PR or branch. Detects changed files, maps to affected routes, generates/runs targeted tests, and reports results with screenshots.
+
