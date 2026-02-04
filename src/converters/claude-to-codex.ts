@@ -20,7 +20,9 @@ export function convertClaudeToCodex(
 
   const usedSkillNames = new Set<string>(skillDirs.map((skill) => normalizeName(skill.name)))
   const commandSkills: CodexGeneratedSkill[] = []
-  const prompts = plugin.commands.map((command) => {
+  // 跳过 claude-code-only 命令（如 /gemini、/codex），这些只在 Claude Code 中有意义
+  const convertibleCommands = plugin.commands.filter((cmd) => !cmd.claudeCodeOnly)
+  const prompts = convertibleCommands.map((command) => {
     const promptName = uniqueName(normalizeName(command.name), promptNames)
     const commandSkill = convertCommandSkill(command, usedSkillNames)
     commandSkills.push(commandSkill)

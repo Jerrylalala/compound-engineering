@@ -99,6 +99,7 @@ async function loadCommands(commandsDirs: string[]): Promise<ClaudeCommand[]> {
       argumentHint: data["argument-hint"] as string | undefined,
       model: data.model as string | undefined,
       allowedTools,
+      claudeCodeOnly: data["claude-code-only"] === true,
       body: body.trim(),
       sourcePath: file,
     })

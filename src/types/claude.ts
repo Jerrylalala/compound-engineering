@@ -39,6 +39,7 @@ export type ClaudeCommand = {
   argumentHint?: string
   model?: string
   allowedTools?: string[]
+  claudeCodeOnly?: boolean
   body: string
   sourcePath: string
 }

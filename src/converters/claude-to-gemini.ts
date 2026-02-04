@@ -35,7 +35,8 @@ export function convertClaudeToGemini(
  * 将 Claude 命令转换为 Gemini TOML 命令格式
  */
 function convertCommands(commands: ClaudeCommand[]): GeminiCommand[] {
-  return commands.map((cmd) => {
+  // 跳过 claude-code-only 命令（如 /gemini、/codex），这些只在 Claude Code 中有意义
+  return commands.filter((cmd) => !cmd.claudeCodeOnly).map((cmd) => {
     const name = cmd.name.startsWith("/") ? cmd.name.slice(1) : cmd.name
     const relativePath = buildCommandPath(name)
     const description = cmd.description || `Run ${name} command`
@@ -137,12 +138,14 @@ function renderCommands(commands: ClaudeCommand[]): string[] {
   const lines: string[] = []
   lines.push("# Commands/Tools")
   lines.push("")
-  if (commands.length === 0) {
+  // 跳过 claude-code-only 命令
+  const convertibleCommands = commands.filter((cmd) => !cmd.claudeCodeOnly)
+  if (convertibleCommands.length === 0) {
     lines.push("No commands defined in this plugin.")
     return lines
   }
 
-  for (const command of commands) {
+  for (const command of convertibleCommands) {
     lines.push(renderCommandLine(command))
   }
 

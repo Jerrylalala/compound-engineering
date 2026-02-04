@@ -9,7 +9,7 @@
  * 但转换后的版本本身就是那个工具，不需要"调用自己"。
  */
 export function filterClaudeCodeOnly(content: string): string {
-  if (!content) return content
+  if (!content || typeof content !== "string") return (content as string) ?? ""
 
   let result = content
 
