@@ -7,7 +7,7 @@ AI-powered development tools that get smarter with every use. Make each unit of 
 | Component | Count |
 |-----------|-------|
 | Agents | 28 |
-| Commands | 26 |
+| Commands | 28 |
 | Skills | 20 |
 | MCP Servers | 1 |
 
@@ -90,10 +90,12 @@ Core workflow commands use `workflows:` prefix to avoid collisions with built-in
 |---------|-------------|
 | `/agent-native-audit` | Run comprehensive agent-native architecture review with scored principles |
 | `/changelog` | Create engaging changelogs for recent merges |
+| `/codex` | Ask Codex for better solutions and optimal approaches |
 | `/create-agent-skill` | Create or edit Claude Code skills |
 | `/deepen-plan` | Enhance plans with parallel research agents for each section |
 | `/deploy-docs` | Validate and prepare documentation for GitHub Pages deployment |
 | `/feature-video` | Record video walkthroughs and add to PR description |
+| `/gemini` | Ask Gemini for better solutions and optimal approaches |
 | `/generate_command` | Generate new slash commands |
 | `/heal-skill` | Fix skill documentation issues |
 | `/lfg` | Full autonomous engineering workflow |

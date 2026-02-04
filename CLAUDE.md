@@ -92,7 +92,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 | 组件        | 数量 | 位置                                     |
 | ----------- | ---- | ---------------------------------------- |
 | Agents      | 28   | `plugins/compound-engineering/agents/`   |
-| Commands    | 26   | `plugins/compound-engineering/commands/` |
+| Commands    | 28   | `plugins/compound-engineering/commands/` |
 | Skills      | 20   | `plugins/compound-engineering/skills/`   |
 | MCP Servers | 1    | Context7（HTTP 服务）                    |
 
@@ -133,7 +133,7 @@ compound-engineering-plugin-private/
 │   └── compound-engineering/
 │       ├── .claude-plugin/plugin.json
 │       ├── agents/                   # 28 个 agents
-│       ├── commands/                 # 26 个 commands
+│       ├── commands/                 # 28 个 commands
 │       ├── skills/                   # 20 个 skills
 │       └── skills-custom/            # 📌 本地自定义技能
 ├── README.md                         # 上游英文说明（不修改）

@@ -5,6 +5,34 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.38.0] - 2026-02-04
+
+### Added
+
+- **`/gemini` 命令** - 向 Gemini 寻求更优方案和最优解
+  - Claude 智能分析当前对话上下文（调试、设计、选型、重构等）
+  - 自动构建结构化 prompt，附上 Claude 当前方案供 Gemini 批判性评估
+  - 引导 Gemini 评估：是否最优解、有无替代方案、性价比、潜在风险
+  - 通过 `gemini --approval-mode plan -o json` 只读模式调用 Gemini CLI
+
+- **`/codex` 命令** - 向 Codex 寻求更优方案和最优解
+  - 与 `/gemini` 相同的智能上下文构建和批判性评估策略
+  - 通过 `codex exec --output-last-message` 调用 Codex CLI
+  - 综合对比分析，推荐性价比最优的方案
+
+### Changed
+
+- **挑战式咨询设计** - 核心理念是「寻求更优解」而非仅仅「第二意见」：
+  - 自动附上 Claude 当前方案，让外部工具做对比评判
+  - 引导外部工具从最优解、替代方案、性价比、维护风险四维度分析
+  - 结果展示以「方案对比与最优解分析」为核心，不回避分歧
+
+### Summary
+
+- 28 agents, 28 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.37.0] - 2026-02-03
 
 ### Added
