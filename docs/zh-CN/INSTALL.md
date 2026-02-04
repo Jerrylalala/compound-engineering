@@ -18,9 +18,12 @@
 > 2. 选择 **`+ Add Marketplace`** → 输入 `Jerrylalala/compound-engineering-plugin-private`
 > 3. 重启 Claude Code
 >
-> 或手动删除缓存：
+> **安装报错？** 可能是上次安装失败残留的临时文件（如 `temp_local_*`），手动清除：
 > ```powershell
+> # 删除残留临时文件和旧缓存
+> Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\temp_local_*"
 > Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\jerry-marketplace"
+> # 然后重新安装插件
 > ```
 
 ---
