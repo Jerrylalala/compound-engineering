@@ -40,6 +40,7 @@ else:
 - 每个任务派遣新的子代理执行
 - 执行两阶段审查（规范合规 → 代码质量）
 - 默认批量处理 3 个任务后设置人工检查点
+- ⚠️ **分支安全要求**：禁止在默认分支（main/master）上执行，必须先切到功能分支或 worktree
 
 **标准模式（1 任务）：**
 - 单代理直接执行
@@ -122,14 +123,15 @@ else:
    ```
 
    **Option C: Continue on the default branch**
-   - Requires explicit user confirmation
+   - ⚠️ **Subagent-Driven 模式禁止使用此选项** — 多任务并行执行风险高，必须使用 Option A 或 B
+   - 仅限标准模式（1 任务）：需要用户明确确认
    - Only proceed after user explicitly says "yes, commit to [default_branch]"
    - Never commit directly to the default branch without explicit permission
 
-   **Recommendation**: Use worktree if:
-   - You want to work on multiple features simultaneously
-   - You want to keep the default branch clean while experimenting
-   - You plan to switch between branches frequently
+   **Recommendation**:
+   - **Subagent-Driven 模式（≥2 任务）**：强烈推荐 Option B（worktree），次选 Option A（新分支）
+   - **标准模式（1 任务）**：Option A 或 B 均可，简单修改可用 Option C
+   - Use worktree if you want parallel development or need to keep default branch clean
 
 4. **Create Todo List**
    - Use TodoWrite to break plan into actionable tasks
@@ -166,6 +168,18 @@ else:
 #### Execution Mode B: Subagent-Driven（≥2 任务自动启用）
 
 每任务派遣新子代理，避免上下文污染，适合复杂任务。
+
+0. **Branch Safety Guard**
+
+   在执行任何任务前，验证当前分支（default_branch 来自 Phase 1 Step 3 的检测结果）：
+
+   ```
+   current_branch = git branch --show-current
+   # default_branch 已在 Phase 1 Step 3 中通过 git symbolic-ref 检测
+   if current_branch in [main, master, default_branch]:
+     ❌ STOP — "Subagent 模式禁止在默认分支上执行。请先切到功能分支或创建 worktree。"
+     → 回到 Phase 1 Step 3 选择 Option A 或 B
+   ```
 
 1. **Batch Task Execution**
 

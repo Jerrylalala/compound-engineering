@@ -5,6 +5,25 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.40.1] - 2026-02-04
+
+### Changed
+
+- **`/workflows:work` Subagent 分支安全增强** — 整合 superpowers 最佳实践
+  - Subagent-Driven 模式禁止在默认分支（main/master）上执行
+  - 添加 Branch Safety Guard 前置检查
+  - 强化 worktree 推荐：≥2 任务时强烈推荐 worktree 隔离
+
+### Fixed
+
+- **上游 `#142` protect plan files** — 防止审查过程意外删除 plan 文件（合并自 upstream/main）
+
+### Summary
+
+- 28 agents, 29 commands, 20 skills, 1 MCP server
+
+---
+
 ## [2.40.0] - 2026-02-04
 
 ### Added

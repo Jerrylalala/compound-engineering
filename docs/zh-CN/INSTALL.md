@@ -11,21 +11,49 @@
 # 选择安装插件
 ```
 
-安装后重启 Claude Code 即可使用。
+### 更新插件后同步到 Codex / Gemini
 
-> **插件更新后不生效？** 清除缓存后重新安装：
-  1. 在 Claude Code 中：/plugins → 选 marketplace → Remove marketplace → 然后重新 Add marketplace 用 [https://github.com/Jerrylalala/compound-engineering-plugin-private]
-  2. 这样 Claude Code 会用 HTTPS 重新克隆
-  3. 重启 Claude Code
+插件更新后，需要手动同步到其他 CLI 工具：
 
- **安装报错？** 可能是上次安装失败残留的临时文件（如 `temp_local_*`），手动清除：
- ```powershell
- # 第一步：删除残留临时文件和旧缓存
- Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\temp_local_*"
- Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\jerry-marketplace"
- # 第二步：更新插件市场，再搜索重新安装插件
- ```
-命令: 把这个仓库同步到 codex 和 gemini 中
+```
+把这个仓库同步到 codex 和 gemini 中
+```
+
+然后依次执行：
+
+1. **更新插件市场** — 在 Claude Code 中运行 `/plugins`，选择 marketplace `jerry-marketplace` 进行更新
+2. **重新安装插件** — 进入插件列表，更新 `compound-engineering`（会重新克隆仓库）
+
+---
+
+### 故障排除
+
+<details>
+<summary><b>插件更新后不生效</b></summary>
+
+清除缓存后重新安装：
+
+1. `/plugins` → 选 marketplace → **Remove marketplace**
+2. 重新 **Add marketplace**，输入：`Jerrylalala/compound-engineering-plugin-private`
+3. Claude Code 会用 HTTPS 重新克隆仓库
+4. **重启 Claude Code**
+
+</details>
+
+<details>
+<summary><b>安装报错（残留临时文件）</b></summary>
+
+可能是上次安装失败残留的临时文件（如 `temp_local_*`），手动清除后重试：
+
+```powershell
+# 第一步：删除残留临时文件和旧缓存
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\temp_local_*"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\jerry-marketplace"
+
+# 第二步：重新进入 /plugins，更新 marketplace 并重新安装插件
+```
+
+</details>
 
 ---
 
@@ -39,16 +67,16 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 
 ### 工作流命令
 
-| 命令                    | 说明                              | 何时使用     |
-| ----------------------- | --------------------------------- | ------------ |
-| `/workflows:load`       | 加载项目上下文，恢复之前的会话    | 开始新会话时 |
-| `/workflows:brainstorm` | 探索需求和方案（支持 Party Mode） | 需求不清晰时 |
-| `/workflows:plan`       | 创建实施计划（Bite-Sized 格式）   | 开始新功能前 |
-| `/workflows:work`       | 执行工作计划（自动选择执行模式）  | 有计划文档后 |
-| `/workflows:review`     | 多代理代码评审                    | 代码写完后   |
-| `/workflows:compound`   | 记录解决方案                      | 问题解决后   |
-| `/workflows:sync-upstream` | 检测上游仓库更新，生成分析报告 | 定期同步时   |
-| `/workflows:save`       | 保存项目上下文，用于跨会话恢复    | 结束会话时   |
+| 命令                       | 说明                              | 何时使用     |
+| -------------------------- | --------------------------------- | ------------ |
+| `/workflows:load`          | 加载项目上下文，恢复之前的会话    | 开始新会话时 |
+| `/workflows:brainstorm`    | 探索需求和方案（支持 Party Mode） | 需求不清晰时 |
+| `/workflows:plan`          | 创建实施计划（Bite-Sized 格式）   | 开始新功能前 |
+| `/workflows:work`          | 执行工作计划（自动选择执行模式）  | 有计划文档后 |
+| `/workflows:review`        | 多代理代码评审                    | 代码写完后   |
+| `/workflows:compound`      | 记录解决方案                      | 问题解决后   |
+| `/workflows:sync-upstream` | 检测上游仓库更新，生成分析报告    | 定期同步时   |
+| `/workflows:save`          | 保存项目上下文，用于跨会话恢复    | 结束会话时   |
 
 ### 自动执行模式（v2.32.0 新增）
 
