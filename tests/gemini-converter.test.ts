@@ -177,4 +177,47 @@ describe("convertClaudeToGemini", () => {
     // 验证没有 Windows 反斜杠
     expect(bundle.commands[1].relativePath).not.toContain("\\")
   })
+
+  test("excludes claude-code-only commands from conversion and GEMINI.md", () => {
+    const plugin = {
+      ...fixturePlugin,
+      commands: [
+        {
+          name: "normal-command",
+          description: "Normal command.",
+          body: "Normal body.",
+          sourcePath: "/tmp/plugin/commands/normal.md",
+        },
+        {
+          name: "gemini",
+          description: "Claude-only command.",
+          claudeCodeOnly: true,
+          body: "Should be excluded.",
+          sourcePath: "/tmp/plugin/commands/gemini.md",
+        },
+        {
+          name: "codex",
+          description: "Another Claude-only command.",
+          claudeCodeOnly: true,
+          body: "Should also be excluded.",
+          sourcePath: "/tmp/plugin/commands/codex.md",
+        },
+      ],
+    }
+
+    const bundle = convertClaudeToGemini(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    // 只有 normal-command 应该被转换
+    expect(bundle.commands).toHaveLength(1)
+    expect(bundle.commands[0].name).toBe("normal-command")
+
+    // GEMINI.md 中也不应列出 claude-code-only 命令
+    expect(bundle.geminiMd).toContain("/normal-command")
+    expect(bundle.geminiMd).not.toContain("/gemini")
+    expect(bundle.geminiMd).not.toContain("/codex")
+  })
 })

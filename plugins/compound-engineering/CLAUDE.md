@@ -64,6 +64,22 @@ description: ① 描述内容
 
 新增 workflow 命令时，按顺序分配 Step 编号。
 
+## Command Frontmatter 参考
+
+### `claude-code-only: true`
+
+标记命令仅在 Claude Code 中可用。转换到 Codex/Gemini 格式时，标记为 `claude-code-only` 的命令会被自动跳过。
+
+适用于依赖 Claude Code 特有能力（如 Bash 工具、对话上下文分析）的命令，例如 `/gemini`、`/codex`。
+
+```yaml
+---
+name: gemini
+description: 向 Gemini 寻求更优方案
+claude-code-only: true
+---
+```
+
 ## Skill Compliance Checklist
 
 When adding or modifying skills, verify compliance with skill-creator spec:

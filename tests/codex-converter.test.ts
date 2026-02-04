@@ -201,4 +201,50 @@ Don't confuse with file paths like /tmp/output.md or /dev/null.`,
     expect(description).not.toContain("\n")
     expect(description.endsWith("...")).toBe(true)
   })
+
+  test("excludes claude-code-only commands from conversion", () => {
+    const plugin: ClaudePlugin = {
+      ...fixturePlugin,
+      commands: [
+        {
+          name: "normal-command",
+          description: "Normal command",
+          body: "Normal body.",
+          sourcePath: "/tmp/plugin/commands/normal.md",
+        },
+        {
+          name: "gemini",
+          description: "Claude-only command",
+          claudeCodeOnly: true,
+          body: "Should be excluded.",
+          sourcePath: "/tmp/plugin/commands/gemini.md",
+        },
+        {
+          name: "codex",
+          description: "Another Claude-only command",
+          claudeCodeOnly: true,
+          body: "Should also be excluded.",
+          sourcePath: "/tmp/plugin/commands/codex.md",
+        },
+      ],
+      agents: [],
+      skills: [],
+    }
+
+    const bundle = convertClaudeToCodex(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    // 只有 normal-command 应该被转换
+    expect(bundle.prompts).toHaveLength(1)
+    expect(bundle.prompts[0].name).toBe("normal-command")
+
+    // generatedSkills 中也不应包含 claude-code-only 命令
+    const skillNames = bundle.generatedSkills.map((s) => s.name)
+    expect(skillNames).toContain("normal-command")
+    expect(skillNames).not.toContain("gemini")
+    expect(skillNames).not.toContain("codex")
+  })
 })
