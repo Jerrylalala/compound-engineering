@@ -91,9 +91,9 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 
 | 组件        | 数量 | 位置                                     |
 | ----------- | ---- | ---------------------------------------- |
-| Agents      | 28   | `plugins/compound-engineering/agents/`   |
-| Commands    | 29   | `plugins/compound-engineering/commands/` |
-| Skills      | 20   | `plugins/compound-engineering/skills/`   |
+| Agents      | 29   | `plugins/compound-engineering/agents/`   |
+| Commands    | 31   | `plugins/compound-engineering/commands/` |
+| Skills      | 23   | `plugins/compound-engineering/skills/`   |
 | MCP Servers | 1    | Context7（HTTP 服务）                    |
 
 ### 安装方式
@@ -224,6 +224,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | `docs/zh-CN/FORK-SETUP.md`               | Fork 仓库初始化    |
 | `docs/development/VERSIONING.md`         | 版本管理规范（权威） |
 | `plugins/compound-engineering/CLAUDE.md` | 插件开发指南       |
+| `UPSTREAM-MERGE-RECOMMENDATION.md`       | 🚨 **上游合并推荐**（关键） |
+| `docs/MERGE-VISUAL-SUMMARY.md`           | 上游合并可视化摘要 |
 
 ---
 
@@ -235,6 +237,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 | 文档 | 关键词 |
 |------|--------|
+| [🚨 上游合并架构影响分析](docs/solutions/integration-issues/upstream-merge-architectural-analysis-2026-02-10.md) | **上游合并、架构分析、选择性合并、文件删除风险** |
 | [Subagent-Driven 工作流整合](docs/solutions/integration-issues/subagent-driven-workflow-integration.md) | 多任务执行、上下文污染、两阶段审查 |
 | [Skill 与 Agent 调用方式](docs/solutions/integration-issues/skill-vs-agent-invocation.md) | Task 工具、skills 目录、agents 目录 |
 | [Marketplace 更新与终端显示](docs/solutions/integration-issues/marketplace-update-failure-and-unicode-display.md) | 版本号同步、Unicode 特殊字符 |

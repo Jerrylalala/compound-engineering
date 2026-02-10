@@ -3,6 +3,7 @@ name: test-driven-development
 description: |
   此技能应在实现任何功能或修复 bug 时使用，在编写实现代码之前。
   它强制执行「红-绿-重构」循环，确保代码有测试覆盖且行为正确。
+disable-model-invocation: true
 ---
 
 # 测试驱动开发（TDD）

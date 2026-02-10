@@ -3,6 +3,7 @@ name: gemini
 description: 向 Gemini 寻求更优方案和最优解
 argument-hint: "[你的问题]"
 claude-code-only: true
+disable-model-invocation: true
 ---
 
 # Gemini 上下文感知咨询
@@ -71,6 +72,7 @@ PROMPT_EOF
 ## Gemini 的方案
 [Gemini 的完整回答]
 
+disable-model-invocation: true
 ---
 
 ## 方案对比与最优解分析

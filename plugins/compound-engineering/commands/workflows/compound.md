@@ -21,7 +21,13 @@ Captures problem solutions while context is fresh, creating structured documenta
 /workflows:compound [brief context]    # Provide additional context hint
 ```
 
-## Execution Strategy: Parallel Subagents
+## Execution Strategy: Two-Phase Orchestration
+
+<critical_requirement>
+**Only ONE file gets written - the final documentation.**
+
+Phase 1 subagents return TEXT DATA to the orchestrator. They must NOT use Write, Edit, or create any files. Only the orchestrator (Phase 2) writes the final documentation file.
+</critical_requirement>
 
 This command launches multiple specialized subagents IN PARALLEL to maximize efficiency:
 
