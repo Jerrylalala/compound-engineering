@@ -3,6 +3,7 @@ name: spec-compliance-review
 description: |
   此技能应在代码审查前使用，作为 /workflows:review 的可选增强。
   它验证实现是否符合规格要求（不多不少），在检查代码质量之前。
+disable-model-invocation: true
 ---
 
 # 规格符合审查

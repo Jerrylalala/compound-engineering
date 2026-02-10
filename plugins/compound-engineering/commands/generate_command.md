@@ -2,6 +2,7 @@
 name: generate_command
 description: Create a new custom slash command following conventions and best practices
 argument-hint: "[command purpose and requirements]"
+disable-model-invocation: true
 ---
 
 # Create a Custom Claude Code Command
@@ -48,10 +49,12 @@ Create a new slash command in `.claude/commands/` for the requested task.
 **EVERY command MUST start with YAML frontmatter:**
 
 ```yaml
+disable-model-invocation: true
 ---
 name: command-name
 description: Brief description of what this command does (max 100 chars)
 argument-hint: "[what arguments the command accepts]"
+disable-model-invocation: true
 ---
 ```
 
@@ -135,10 +138,12 @@ Implement #$ARGUMENTS following these steps:
 ## Command File Template
 
 ```markdown
+disable-model-invocation: true
 ---
 name: command-name
 description: What this command does
 argument-hint: "[expected arguments]"
+disable-model-invocation: true
 ---
 
 # Command Title

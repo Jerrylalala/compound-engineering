@@ -2,6 +2,7 @@
 name: triage
 description: Triage and categorize findings for the CLI todo system
 argument-hint: "[findings list or source type]"
+disable-model-invocation: true
 ---
 
 - First set the /model to Haiku
@@ -25,6 +26,7 @@ This command is for:
 For each finding, present in this format:
 
 ```
+disable-model-invocation: true
 ---
 Issue #X: [Brief Title]
 
@@ -45,6 +47,7 @@ Proposed Solution:
 
 Estimated Effort: [Small (< 2 hours) / Medium (2-8 hours) / Large (> 8 hours)]
 
+disable-model-invocation: true
 ---
 Do you want to add this to the todo list?
 1. yes - create todo file
@@ -218,6 +221,7 @@ During triage, the following status updates occurred:
 
 ```
 
+disable-model-invocation: true
 ---
 
 Issue #5: Missing Transaction Boundaries for Multi-Step Operations
@@ -250,6 +254,7 @@ Proposed Solution: Wrap all operations in ApplicationRecord.transaction do ... e
 
 Estimated Effort: Small (30 minutes)
 
+disable-model-invocation: true
 ---
 
 Do you want to add this to the todo list?

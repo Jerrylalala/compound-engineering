@@ -3,6 +3,7 @@ name: systematic-debugging
 description: |
   此技能应在遇到任何 bug、测试失败或意外行为时使用，在提出修复方案之前。
   它提供四阶段根因分析方法，防止随机修复和症状式补丁。
+disable-model-invocation: true
 ---
 
 # 系统化调试

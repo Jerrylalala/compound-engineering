@@ -3,6 +3,7 @@ name: codex
 description: 向 Codex 寻求更优方案和最优解
 argument-hint: "[你的问题]"
 claude-code-only: true
+disable-model-invocation: true
 ---
 
 # Codex 上下文感知咨询
@@ -70,6 +71,7 @@ cat "$CODEX_OUTPUT"
 ## Codex 的方案
 [Codex 的完整回答]
 
+disable-model-invocation: true
 ---
 
 ## 方案对比与最优解分析

@@ -5,6 +5,39 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.41.0] - 2026-02-10
+
+### Critical Fix
+
+- **修复 context token 预算溢出 bug** — 插件使用了 316% 的 16K 字符预算，导致组件被静默排除
+  - 压缩 29 个 agent 描述（examples 从 frontmatter 移到 body），节省 ~35,600 字符
+  - 14 个命令添加 `disable-model-invocation: true` 标志
+  - 8 个 skill 添加 `disable-model-invocation: true` 标志
+  - 预算使用从 316% 降至 ~72%，实现 77% token 减少
+
+### Added
+
+- **`schema-drift-detector` agent** — 新增数据库 schema 漂移检测 agent（来自上游 v2.29.0）
+- **`orchestrating-swarms` skill** — 多 agent 编排指南，1718 行参考文档（来自上游 v2.30.0）
+- **`document-review` skill** — brainstorm/plan 文档审查 skill
+- **`resolve-pr-parallel` skill** — PR 评论并行解决（从 command 升级为 skill）
+- **`/slfg` command** — Swarm 模式自主工程工作流
+- **`/technical_review` command** — 技术审查命令
+- **`/triage-prs` command** — PR 分类和合并管理
+
+### Fixed
+
+- **Hook crash 修复** — 修复 hook 条目没有 matcher 时的崩溃（上游 #160）
+- **Subagent 中间文件防护** — `/workflows:compound` 防止 subagent 写入中间文件（上游 #150）
+- **配置备份** — 覆盖配置文件前先备份（上游 #119）
+
+### Summary
+
+- 29 agents, 31 commands, 23 skills, 1 MCP server
+- 基于上游 v2.29.0 - v2.30.0 选择性整合，保留全部中文文档和自定义功能
+
+---
+
 ## [2.40.1] - 2026-02-04
 
 ### Changed
