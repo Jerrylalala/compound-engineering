@@ -132,9 +132,9 @@ compound-engineering-plugin-private/
 ├── plugins/
 │   └── compound-engineering/
 │       ├── .claude-plugin/plugin.json
-│       ├── agents/                   # 28 个 agents
-│       ├── commands/                 # 28 个 commands
-│       ├── skills/                   # 20 个 skills
+│       ├── agents/                   # 29 个 agents
+│       ├── commands/                 # 31 个 commands
+│       ├── skills/                   # 23 个 skills
 │       └── skills-custom/            # 📌 本地自定义技能
 ├── README.md                         # 上游英文说明（不修改）
 └── CLAUDE.md                         # 本文件
