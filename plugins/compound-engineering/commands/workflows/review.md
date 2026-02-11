@@ -36,6 +36,8 @@ argument-hint: "[PR number, GitHub URL, branch name, or latest] [C] [G]"
 /workflows:review 123 [C][G]   # 审核 PR #123 + 双重审核
 ```
 
+> **Performance Tip**: For large PRs or multi-tool reviews ([C][G]), consider enabling `/fast` before running the review. Fast mode uses the same Opus 4.6 model with faster output, reducing review time by ~40%.
+
 ## Prerequisites
 
 <requirements>

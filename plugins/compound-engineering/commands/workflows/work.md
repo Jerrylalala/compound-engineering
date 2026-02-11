@@ -12,6 +12,8 @@ Execute a work plan efficiently while maintaining quality and finishing features
 
 This command takes a work document (plan, specification, or todo file) and executes it systematically. The focus is on **shipping complete features** by understanding requirements quickly, following existing patterns, and maintaining quality throughout.
 
+> **Performance Tip**: For plans with many tasks (Subagent-Driven mode), consider enabling `/fast` before execution. Fast mode uses the same Opus 4.6 model with faster output.
+
 ## Input Document
 
 <input_document> #$ARGUMENTS </input_document>

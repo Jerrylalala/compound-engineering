@@ -11,6 +11,11 @@ Improve brainstorm or plan documents through structured review.
 
 **If a document path is provided:** Read it, then proceed to Step 2.
 
+**If a PDF is provided:** Use the `pages` parameter to read specific page ranges (max 20 pages per request):
+- Small PDFs (< 20 pages): `Read(file_path="doc.pdf", pages="1-20")`
+- Large PDFs: `Read(file_path="doc.pdf", pages="1-10")`, then ask if more pages are needed
+- User-specified range: `Read(file_path="doc.pdf", pages="<user-specified>")`
+
 **If no document is specified:** Ask which document to review, or look for the most recent brainstorm/plan in `docs/brainstorms/` or `docs/plans/`.
 
 ## Step 2: Assess

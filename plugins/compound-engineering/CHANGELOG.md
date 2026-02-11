@@ -5,6 +5,16 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.42.0] - 2026-02-11
+
+### Added
+- **Memory frontmatter** — 为 6 个研究型/架构型 agents 添加 `memory: project/user`，启用跨会话知识积累
+- **PDF pages 支持** — document-review skill 现在支持大型 PDF 分页读取
+- **Fast mode 引导** — workflows:review 和 workflows:work 命令添加性能优化提示
+
+### Summary
+- 29 agents (6 with memory), 31 commands, 23 skills, 1 MCP server
+
 ## [2.41.0] - 2026-02-10
 
 ### Critical Fix
