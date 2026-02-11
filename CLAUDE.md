@@ -244,6 +244,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | [幻影 Agent 引用问题](docs/solutions/integration-issues/phantom-agent-references-in-workflows.md) | 不存在的 agent、上游同步、YAGNI |
 | [SessionStart hook type:prompt 不被支持](docs/solutions/integration-issues/sessionstart-hook-prompt-type-not-supported.md) | SessionStart、type:prompt、终端卡死、CLAUDE.md |
 | [上游同步整合的完整工作流](docs/solutions/integration-issues/upstream-sync-integration-workflow.md) | git merge --squash、YAML frontmatter、CHANGELOG 标准、多方审核 |
+| [Claude Code 运行时更新整合决策](docs/solutions/integration-issues/claude-code-runtime-updates-decisions-2026-02.md) | **runtime updates、Agent Teams、memory frontmatter、hooks、PDF pages、fast mode** |
 
 ### 开发规范
 
