@@ -1,6 +1,6 @@
 ---
 name: workflows:doctor
-description: "健康检查与自动配置：检测 CLI 工具、MCP 服务器、认证状态，支持一键修复"
+description: "独立工具: 健康检查与自动配置：检测 CLI 工具、MCP 服务器、认证状态，支持一键修复"
 argument-hint: "[--fix] [--smoke]"
 claude-code-only: true
 disable-model-invocation: true
