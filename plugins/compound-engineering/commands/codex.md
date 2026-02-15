@@ -50,7 +50,7 @@ $ARGUMENTS
 
 ```bash
 CODEX_OUTPUT="${TEMP:-/tmp}/codex-ask-$(date +%s).md"
-cat <<'PROMPT_EOF' | codex exec --output-last-message "$CODEX_OUTPUT" -
+cat <<'PROMPT_EOF' | codex exec -m gpt-5.3-codex --output-last-message "$CODEX_OUTPUT" -
 <构建好的prompt>
 PROMPT_EOF
 cat "$CODEX_OUTPUT"

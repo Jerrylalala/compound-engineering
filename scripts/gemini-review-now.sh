@@ -142,7 +142,7 @@ echo "🚀 Calling Gemini (--yolo -o json)..."
 # --yolo: 自动批准所有操作（非交互模式，不需要实验性功能）
 # -p "": 使用 stdin 作为 prompt
 # -o json: 结构化输出，方便解析
-if timeout "$TIMEOUT_SECONDS" bash -c "cat '$INPUT_FILE' | gemini --yolo -p '' -o json > '$OUTPUT_FILE' 2> '$LOG_FILE'"; then
+if timeout "$TIMEOUT_SECONDS" bash -c "cat '$INPUT_FILE' | gemini -m gemini-3-pro-preview --yolo -p '' -o json > '$OUTPUT_FILE' 2> '$LOG_FILE'"; then
   EXIT_CODE=$?
   echo ""
 

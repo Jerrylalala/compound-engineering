@@ -136,7 +136,7 @@ echo ""
 # 启动后台进程
 (
   printf "%s" "$REVIEW_PROMPT" | \
-    codex exec --json --output-last-message "$OUTPUT_FILE" - \
+    codex exec -m gpt-5.3-codex --json --output-last-message "$OUTPUT_FILE" - \
     2> "$EVENTS_FILE"
 ) &
 CODEX_PID=$!

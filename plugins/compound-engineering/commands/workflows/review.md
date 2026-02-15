@@ -796,7 +796,7 @@ command -v gemini || echo "Gemini CLI 未安装，请运行: npm install -g @goo
 **Step 8.2: 使用 gemini 非交互模式审核**
 
 **技术方案**（基于 Gemini 官方建议）：
-- 使用 `gemini --approval-mode plan -o json` 非交互模式
+- 使用 `gemini -m gemini-3-pro-preview -p '' -o json` 非交互模式
 - 通过 stdin 管道传递 prompt（避免命令行长度限制）
 - 使用系统 `timeout` 命令处理超时（Gemini CLI 无内置超时）
 - 不截断 diff（Gemini 支持 1M+ tokens）
@@ -811,7 +811,7 @@ Step 1: 后台启动 Gemini
 
 Step 2: 向用户显示进度提示
   "⏳ Gemini 审核已启动（后台运行）
-   - 使用 gemini --approval-mode plan -o json 非交互模式
+   - 使用 gemini -m gemini-3-pro-preview -p '' -o json 非交互模式
    - 超时阈值：5 分钟"
 
 Step 3: 等待完成

@@ -186,7 +186,7 @@ Step 1: 后台启动 Codex
   - 使用 Bash 工具，设置 run_in_background=true
   - 调用:
     CODEX_OUTPUT="${TEMP:-/tmp}/codex-brainstorm-$(date +%s).md"
-    cat <<'PROMPT_EOF' | codex exec --output-last-message "$CODEX_OUTPUT" -
+    cat <<'PROMPT_EOF' | codex exec -m gpt-5.3-codex --output-last-message "$CODEX_OUTPUT" -
     <构建好的prompt>
     PROMPT_EOF
   - 记录返回的 task_id
@@ -219,7 +219,7 @@ command -v gemini || echo "Gemini CLI 未安装，请运行: npm install -g @goo
 Step 1: 后台启动 Gemini
   - 使用 Bash 工具，设置 run_in_background=true
   - 调用:
-    cat <<'PROMPT_EOF' | gemini --approval-mode plan -p '' -o json
+    cat <<'PROMPT_EOF' | gemini -m gemini-3-pro-preview -p '' -o json
     <构建好的prompt>
     PROMPT_EOF
   - 记录返回的 task_id

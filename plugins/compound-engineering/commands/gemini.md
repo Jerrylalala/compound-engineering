@@ -46,16 +46,18 @@ $ARGUMENTS
 
 ## Step 2: 调用 Gemini CLI
 
-使用 heredoc 避免特殊字符问题，通过 `--approval-mode plan`（只读模式）调用：
+使用 heredoc 避免特殊字符问题，通过非交互模式调用：
 
 ```bash
-# --approval-mode plan: 只读模式，不执行文件操作
-# -p '': 清空系统 prompt，让 stdin 内容成为唯一输入
+# -m gemini-3-pro-preview: 使用 Gemini 3 Pro 最新模型
+# -p '': 非交互模式，stdin 内容作为 prompt
 # -o json: JSON 格式输出，提取 .response 字段
-cat <<'PROMPT_EOF' | gemini --approval-mode plan -p '' -o json
+cat <<'PROMPT_EOF' | gemini -m gemini-3-pro-preview -p '' -o json
 <构建好的prompt>
 PROMPT_EOF
 ```
+
+> **注意**：`-p` 模式本身就是只读的，不会执行文件操作。
 
 使用 Bash 工具执行，设置 **300 秒**超时。
 
