@@ -5,6 +5,23 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.42.3] - 2026-02-15
+
+### Enhanced
+- **`/workflows:doctor` 升级为全自动配置工作流** — 从 7 步扩展到 10 步检测，支持 `--fix` 一键修复
+  - 新增 `--fix` 参数：自动安装缺失的 Codex CLI、Gemini CLI、GitHub MCP
+  - 新增 GitHub MCP 检测：解析 `~/.claude.json`，支持全局/项目级配置检测
+  - 新增 Context7 MCP 检测：验证 plugin.json 中的 MCP 配置
+  - 新增 agent-browser 检测（可选）
+  - 新增 FIXD 状态：区分自动修复与手动通过
+  - 失败时提示 `--fix` 可用
+  - MCP 修复后提醒重启 Claude Code
+
+### Summary
+- 29 agents, 32 commands, 23 skills, 1 MCP server
+
+---
+
 ## [2.42.2] - 2026-02-15
 
 ### Added
