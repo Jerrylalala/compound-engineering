@@ -5,6 +5,22 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.42.1] - 2026-02-15
+
+### Fixed
+- **Codex/Gemini 模型升级** — 所有 CLI 调用升级为最新模型（Codex: `gpt-5.3-codex`，Gemini: `gemini-3-pro-preview`）
+- **Gemini CLI 兼容性修复** — 移除不兼容的 `--approval-mode plan` 参数（新版 Gemini CLI 需实验性功能）
+- **安全文档修正** — 删除 gemini.md 中 `-p` 模式只读的错误声明，替换为准确的安全提示
+- **Shell 注入风险修复** — gemini-review-now.sh 中 `bash -c` 改用环境变量传递路径，消除引号注入风险
+- **模型版本可配置化** — 脚本提取 `CODEX_MODEL`/`GEMINI_MODEL` 环境变量，支持 `CODEX_MODEL=xxx ./scripts/codex-review-now.sh` 覆盖
+- **文档一致性** — 修复 review.md 和 gemini-review-now.sh 中的过时描述
+
+### Summary
+- 29 agents, 31 commands, 23 skills, 1 MCP server
+- 基于三方代码审查（Claude + Codex + Gemini）发现并修复 P1/P2/P3 问题
+
+---
+
 ## [2.42.0] - 2026-02-11
 
 ### Added
