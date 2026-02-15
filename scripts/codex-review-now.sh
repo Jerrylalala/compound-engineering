@@ -6,6 +6,9 @@
 
 set -e
 
+# 模型配置（支持环境变量覆盖）
+CODEX_MODEL="${CODEX_MODEL:-gpt-5.3-codex}"
+
 SCOPE=${1:-uncommitted}
 TIMEOUT_SECONDS=${2:-300}
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
@@ -136,7 +139,7 @@ echo ""
 # 启动后台进程
 (
   printf "%s" "$REVIEW_PROMPT" | \
-    codex exec -m gpt-5.3-codex --json --output-last-message "$OUTPUT_FILE" - \
+    codex exec -m "$CODEX_MODEL" --json --output-last-message "$OUTPUT_FILE" - \
     2> "$EVENTS_FILE"
 ) &
 CODEX_PID=$!

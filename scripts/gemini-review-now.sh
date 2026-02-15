@@ -6,6 +6,9 @@
 
 set -e
 
+# 模型配置（支持环境变量覆盖）
+GEMINI_MODEL="${GEMINI_MODEL:-gemini-3-pro-preview}"
+
 SCOPE=${1:-uncommitted}
 TIMEOUT_SECONDS=${2:-300}
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
@@ -136,13 +139,14 @@ echo '```diff' >> "$INPUT_FILE"
 echo "$DIFF" >> "$INPUT_FILE"
 echo '```' >> "$INPUT_FILE"
 
-echo "🚀 Calling Gemini (--yolo -o json)..."
+echo "🚀 Calling Gemini (-m $GEMINI_MODEL --yolo -o json)..."
 
 # 调用 Gemini（使用系统 timeout 命令）
 # --yolo: 自动批准所有操作（非交互模式，不需要实验性功能）
 # -p "": 使用 stdin 作为 prompt
 # -o json: 结构化输出，方便解析
-if timeout "$TIMEOUT_SECONDS" bash -c "cat '$INPUT_FILE' | gemini -m gemini-3-pro-preview --yolo -p '' -o json > '$OUTPUT_FILE' 2> '$LOG_FILE'"; then
+if INPUT_FILE="$INPUT_FILE" OUTPUT_FILE="$OUTPUT_FILE" LOG_FILE="$LOG_FILE" GEMINI_MODEL="$GEMINI_MODEL" \
+  timeout "$TIMEOUT_SECONDS" bash -c 'cat "$INPUT_FILE" | gemini -m "$GEMINI_MODEL" --yolo -p "" -o json > "$OUTPUT_FILE" 2> "$LOG_FILE"'; then
   EXIT_CODE=$?
   echo ""
 

@@ -663,7 +663,7 @@ Step 4: 根据结果处理
 ```
 
 **脚本特性**（`scripts/codex-review-now.sh` v2）：
-- 使用 `codex exec --json --output-last-message` 非交互模式
+- 使用 `codex exec -m gpt-5.3-codex --json --output-last-message` 非交互模式
 - 通过 stdin 传递 prompt（避免超长参数问题）
 - 解析 JSONL 事件流显示进度
 - 内置软/硬超时保护

@@ -57,7 +57,7 @@ cat <<'PROMPT_EOF' | gemini -m gemini-3-pro-preview -p '' -o json
 PROMPT_EOF
 ```
 
-> **注意**：`-p` 模式本身就是只读的，不会执行文件操作。
+> **安全提示**：`-p` 仅控制 prompt 输入方式，不限制执行权限。Gemini 在此模式下仍可能尝试工具调用。当前通过 Claude Code 的 Bash 工具执行，由 Claude Code 控制实际权限边界。
 
 使用 Bash 工具执行，设置 **300 秒**超时。
 
