@@ -121,6 +121,7 @@ skills/
 | Step 5: | `/workflows:compound`   | 记录解决方案   |
 | Step 6: | `/workflows:save`       | 保存项目上下文 |
 | 独立:   | `/workflows:sync-upstream` | 上游仓库同步检测 |
+| 独立:   | `/workflows:doctor`    | 健康检查（Codex/Gemini CLI） |
 
 ### 序号格式规范
 

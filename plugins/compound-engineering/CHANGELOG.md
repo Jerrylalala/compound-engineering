@@ -5,6 +5,21 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.42.2] - 2026-02-15
+
+### Added
+- **`/workflows:doctor` 健康检查命令** — 一键检测 Codex/Gemini CLI 安装状态、模型版本、认证配置
+  - 快速模式（默认）：检测安装、模型、认证
+  - `--smoke` 模式：额外执行冒烟测试验证 CLI 可用性
+  - 支持 `CODEX_MODEL`/`GEMINI_MODEL` 环境变量覆盖
+  - 退出码：0=全部通过，1=有失败，2=仅警告
+- **`scripts/doctor.sh` 检测脚本** — 7 步检测流程，失败不中断，结构化输出
+
+### Summary
+- 29 agents, 32 commands, 23 skills, 1 MCP server
+
+---
+
 ## [2.42.1] - 2026-02-15
 
 ### Fixed
