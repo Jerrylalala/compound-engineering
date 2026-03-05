@@ -285,12 +285,17 @@ Ensure `docs/brainstorms/` directory exists before writing.
 
 Use **AskUserQuestion tool** to present next steps:
 
-**Question:** "Brainstorm captured. What would you like to do next?"
+**Question:** "头脑风暴已记录。下一步？"
 
 **Options:**
-1. **Proceed to planning** - Run `/workflows:plan` (will auto-detect this brainstorm)
-2. **Refine design further** - Continue exploring
-3. **Done for now** - Return later
+1. **进入规划** - 运行 `/workflows:plan`（将自动检测此 brainstorm）（推荐）
+2. **继续探索** - 继续细化设计
+3. **停止** - 稍后再继续
+
+Based on selection:
+- **进入规划** → 调用 `/workflows:plan`
+- **继续探索** → 回到 Phase 1 或 Phase 2 继续对话
+- **停止** → 结束流程
 
 ## Output Summary
 

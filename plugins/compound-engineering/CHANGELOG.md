@@ -5,6 +5,24 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.42.5] - 2026-03-05
+
+### 改进
+- **Handoff 协议合规修复**: 修复 7 个 workflow 命令的 Handoff 合规问题
+  - `brainstorm` 补 `Based on selection:` 行为约束 + 中文化选项
+  - `plan` 重排选项（`/workflows:work` 第一）+ 补"停止"选项 + 中文化 + 标题改为 Handoff
+  - `review` 补 `Based on selection:` 行为约束
+  - `load` 合并两个 Handoff 为统一出口 + 补行为约束
+  - `sync-upstream` 补 `Based on selection:` 行为约束
+  - `deepen-plan` 重排选项（`/plan_review` 第一）+ 补"停止"选项 + 中文化
+- **协议分级制度**: 区分主链档（brainstorm/plan/work/review/compound）和工具档（load/sync-upstream/deepen-plan/plan_review）
+- **lint 脚本增强**: `check-handoff.sh` 增加检查 `Based on selection` + 显示档位分级
+
+### Summary
+- 29 agents, 32 commands, 23 skills, 1 MCP server
+
+---
+
 ## [2.42.4] - 2026-03-05
 
 ### 新功能

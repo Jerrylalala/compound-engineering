@@ -476,21 +476,23 @@ Before finalizing:
 
 After writing the enhanced plan, use the **AskUserQuestion tool** to present these options:
 
-**Question:** "Plan deepened at `[plan_path]`. What would you like to do next?"
+**Question:** "计划已深化完成。下一步？"
 
 **Options:**
-1. **View diff** - Show what was added/changed
-2. **Run `/plan_review`** - Get feedback from reviewers on enhanced plan
-3. **Start `/workflows:work`** - Begin implementing this enhanced plan
-4. **Deepen further** - Run another round of research on specific sections
-5. **Revert** - Restore original plan (if backup exists)
+1. **运行 `/plan_review`** - 多代理审查增强后的计划（推荐）
+2. **执行 `/workflows:work`** - 开始实现此增强计划
+3. **查看变更** - 显示增强前后差异
+4. **继续深化** - 对特定章节再做一轮研究
+5. **还原** - 恢复原始计划（如有备份）
+6. **停止** - 不执行，稍后处理
 
 Based on selection:
-- **View diff** → Run `git diff [plan_path]` or show before/after
-- **`/plan_review`** → Call the /plan_review command with the plan file path
-- **`/workflows:work`** → Call the /workflows:work command with the plan file path
-- **Deepen further** → Ask which sections need more research, then re-run those agents
-- **Revert** → Restore from git or backup
+- **运行 `/plan_review`** → 调用 `/plan_review <plan_path>`
+- **执行 `/workflows:work`** → 调用 `/workflows:work <plan_path>`
+- **查看变更** → 运行 `git diff <plan_path>` 或显示前后对比
+- **继续深化** → 询问需要深化哪些章节，重新运行研究代理
+- **还原** → 从 git 或备份恢复
+- **停止** → 结束流程
 
 ## Example Enhancement
 

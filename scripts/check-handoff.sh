@@ -4,6 +4,7 @@
 
 COMMANDS_DIR="plugins/compound-engineering/commands/workflows"
 SKIP_FILES="save.md doctor.md"  # 终端命令，无需 Handoff
+MAIN_CHAIN="brainstorm.md plan.md work.md review.md compound.md"  # 主链档：6 条全满足
 ERRORS=0
 
 echo "=== Workflow Handoff 检查 ==="
@@ -18,33 +19,54 @@ for f in "$COMMANDS_DIR"/*.md; do
     continue
   fi
 
+  # 判断档位
+  if echo "$MAIN_CHAIN" | grep -q "$filename"; then
+    tier="主链档"
+  else
+    tier="工具档"
+  fi
+
   # 检查 AskUserQuestion
   if ! grep -q "AskUserQuestion" "$f"; then
-    echo "FAIL: $filename - 缺少 AskUserQuestion (无 Handoff)"
+    echo "FAIL: $filename [$tier] - 缺少 AskUserQuestion (无 Handoff)"
     ERRORS=$((ERRORS + 1))
-  else
-    echo "PASS: $filename"
+    continue
   fi
+
+  # 检查 Based on selection
+  if ! grep -q "Based on selection" "$f"; then
+    echo "FAIL: $filename [$tier] - 缺少 Based on selection (无行为约束)"
+    ERRORS=$((ERRORS + 1))
+    continue
+  fi
+
+  echo "PASS: $filename [$tier]"
 done
 
 # 也检查非 workflow 的关键命令
-EXTRA_COMMANDS="plugins/compound-engineering/commands/plan_review.md"
+EXTRA_COMMANDS="plugins/compound-engineering/commands/plan_review.md plugins/compound-engineering/commands/deepen-plan.md"
 for f in $EXTRA_COMMANDS; do
   if [ -f "$f" ]; then
     filename=$(basename "$f")
-    if ! grep -q "AskUserQuestion" "$f"; then
-      echo "FAIL: $filename - 缺少 AskUserQuestion (无 Handoff)"
+    has_ask=$(grep -c "AskUserQuestion" "$f" || true)
+    has_based=$(grep -c "Based on selection" "$f" || true)
+
+    if [ "$has_ask" -eq 0 ]; then
+      echo "FAIL: $filename [工具档] - 缺少 AskUserQuestion"
+      ERRORS=$((ERRORS + 1))
+    elif [ "$has_based" -eq 0 ]; then
+      echo "FAIL: $filename [工具档] - 缺少 Based on selection"
       ERRORS=$((ERRORS + 1))
     else
-      echo "PASS: $filename"
+      echo "PASS: $filename [工具档]"
     fi
   fi
 done
 
 echo ""
 if [ $ERRORS -eq 0 ]; then
-  echo "全部通过！所有 workflow 命令都有 Handoff。"
+  echo "全部通过！所有 workflow 命令都有完整 Handoff。"
 else
-  echo "发现 $ERRORS 个命令缺少 Handoff，请修复。"
+  echo "发现 $ERRORS 个命令 Handoff 不完整，请修复。"
   exit 1
 fi

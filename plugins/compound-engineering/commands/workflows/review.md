@@ -479,6 +479,11 @@ After all findings are addressed (or triaged), use **AskUserQuestion tool**:
 2. **保存上下文** - 运行 `/workflows:save` 保存项目状态
 3. **完成** - 审查流程结束，无需额外操作
 
+Based on selection:
+- **记录解决方案** → 调用 `/workflows:compound`
+- **保存上下文** → 调用 `/workflows:save`
+- **完成** → 结束流程
+
 ### Severity Breakdown:
 
 **🔴 P1 (Critical - Blocks Merge):**
