@@ -137,6 +137,39 @@ description: ① 描述内容
 
 新增 workflow 命令时，按顺序分配 Step 编号。
 
+### Workflow Handoff 协议（铁律）
+
+所有 `commands/workflows/*.md` 命令必须遵循（终端命令 save/doctor 除外）：
+
+1. 命令的最后一个 Phase 必须是 Handoff
+2. Handoff 必须使用 **AskUserQuestion tool** 呈现选项
+3. 第一个选项必须是流程中的下一步命令（含完整参数如文件路径）
+4. 必须有"跳过/停止"选项
+5. Handoff 后需内嵌行为约束（禁止 AI 在选项外自由发挥）
+6. 选项描述使用中文，命令名保持英文
+
+**流程链路**：
+```
+brainstorm → plan → [deepen-plan] → [plan_review] → work → review → [compound] → save
+```
+
+**快速验证**：
+```bash
+# 检查所有 workflow 命令是否包含 AskUserQuestion
+for f in plugins/compound-engineering/commands/workflows/*.md; do
+  if ! grep -q "AskUserQuestion" "$f"; then
+    echo "WARNING: $f 缺少 Handoff"
+  fi
+done
+```
+
+**检查清单**（新增/修改 workflow 命令时验证）：
+- [ ] 最后一个 Phase 是否为 Handoff？
+- [ ] 是否使用 AskUserQuestion？
+- [ ] 第一个选项是否为流程中的下一步命令 + 完整路径？
+- [ ] 是否有内嵌行为约束？
+- [ ] 描述语言是否为中文？
+
 ## Command Frontmatter 参考
 
 ### `claude-code-only: true`

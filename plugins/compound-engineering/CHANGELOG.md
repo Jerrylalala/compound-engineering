@@ -5,6 +5,25 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.42.4] - 2026-03-05
+
+### 新功能
+- **Workflow Handoff 协议**: 建立统一的工作流命令衔接机制
+  - `plan_review` 增加 Post-Review Options，防止 AI 跳过 `/workflows:work`
+  - `work` 增加空参数回退逻辑（自动扫描 `docs/plans/`）
+  - `work` 增加 Phase 5 Handoff 引导到 `/workflows:review`
+  - `review` 增加 Workflow Handoff 引导到 `/workflows:compound` 和 `/workflows:save`
+  - `compound` 选项 1 改为显式的 `/workflows:save`
+  - `load` 增加未完成计划检测
+  - plugin CLAUDE.md 增加 Handoff 协议规范
+  - 新增 `scripts/check-handoff.sh` lint 脚本
+- `plan` 选项 4 显式传递 plan 文件路径给 `/workflows:work`
+
+### Summary
+- 29 agents, 32 commands, 23 skills, 1 MCP server
+
+---
+
 ## [2.42.3] - 2026-02-15
 
 ### Enhanced

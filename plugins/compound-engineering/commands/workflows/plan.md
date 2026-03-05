@@ -571,7 +571,7 @@ Based on selection:
 - **Open plan in editor** → Run `open docs/plans/<plan_filename>.md` to open the file in the user's default editor
 - **`/deepen-plan`** → Call the /deepen-plan command with the plan file path to enhance with research
 - **`/plan_review`** → Call the /plan_review command with the plan file path
-- **`/workflows:work`** → Call the /workflows:work command (自动检测：1任务=标准模式，≥2任务=Subagent模式)
+- **`/workflows:work`** → Call `/workflows:work docs/plans/<plan_filename>.md` (自动检测：1任务=标准模式，≥2任务=Subagent模式)
 - **`/workflows:work` on remote** → Run `/workflows:work docs/plans/<plan_filename>.md &` to start work in background for Claude Code web
 - **Create Issue** → See "Issue Creation" section below
 - **Simplify** → Ask "What should I simplify?" then regenerate simpler version

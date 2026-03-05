@@ -468,6 +468,17 @@ After creating all todo files, present comprehensive summary:
    - Update Work Log as you work
    - Commit todos: `git add todos/ && git commit -m "refactor: add code review findings"`
 
+### Workflow Handoff
+
+After all findings are addressed (or triaged), use **AskUserQuestion tool**:
+
+**Question:** "代码审查流程完成。下一步？"
+
+**Options:**
+1. **记录解决方案** - 运行 `/workflows:compound` 记录本次解决的问题（推荐，如有非 trivial 修复）
+2. **保存上下文** - 运行 `/workflows:save` 保存项目状态
+3. **完成** - 审查流程结束，无需额外操作
+
 ### Severity Breakdown:
 
 **🔴 P1 (Critical - Blocks Merge):**
