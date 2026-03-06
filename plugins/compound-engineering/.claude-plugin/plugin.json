@@ -1,32 +1,32 @@
 {
-  "name": "compound-engineering",
-  "version": "2.42.3",
-  "description": "AI-powered development tools. 29 agents, 32 commands, 23 skills, 1 MCP server for code review, research, design, and workflow automation.",
-  "author": {
-    "name": "Jerry Jian (fork of Kieran Klaassen)",
-    "url": "https://github.com/Jerrylalala"
-  },
-  "homepage": "https://github.com/Jerrylalala/compound-engineering-plugin-private",
-  "repository": "https://github.com/Jerrylalala/compound-engineering-plugin-private",
-  "license": "MIT",
-  "keywords": [
-    "ai-powered",
-    "compound-engineering",
-    "workflow-automation",
-    "code-review",
-    "rails",
-    "ruby",
-    "python",
-    "typescript",
-    "knowledge-management",
-    "image-generation",
-    "agent-browser",
-    "browser-automation"
-  ],
-  "mcpServers": {
-    "context7": {
-      "type": "http",
-      "url": "https://mcp.context7.com/mcp"
-    }
-  }
+    "name":  "compound-engineering",
+    "version":  "2.43.0",
+    "description":  "AI-powered development tools. 29 agents, 41 commands, 29 skills, 1 MCP server for code review, research, design, and workflow automation.",
+    "author":  {
+                   "name":  "Jerry Jian (fork of Kieran Klaassen)",
+                   "url":  "https://github.com/Jerrylalala"
+               },
+    "homepage":  "https://github.com/Jerrylalala/compound-engineering-plugin-private",
+    "repository":  "https://github.com/Jerrylalala/compound-engineering-plugin-private",
+    "license":  "MIT",
+    "keywords":  [
+                     "ai-powered",
+                     "compound-engineering",
+                     "workflow-automation",
+                     "code-review",
+                     "rails",
+                     "ruby",
+                     "python",
+                     "typescript",
+                     "knowledge-management",
+                     "image-generation",
+                     "agent-browser",
+                     "browser-automation"
+                 ],
+    "mcpServers":  {
+                       "context7":  {
+                                        "type":  "http",
+                                        "url":  "https://mcp.context7.com/mcp"
+                                    }
+                   }
 }

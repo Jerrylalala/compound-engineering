@@ -123,6 +123,24 @@ skills/
 | 独立:   | `/workflows:sync-upstream` | 上游仓库同步检测 |
 | 独立:   | `/workflows:doctor`    | 健康检查（Codex/Gemini CLI） |
 
+### 双命名兼容
+
+所有 `workflows:*` 命令均有对应的 `ce:*` 别名（与上游 EveryInc 保持术语兼容）：
+
+```
+/ce:plan        → /workflows:plan
+/ce:brainstorm  → /workflows:brainstorm
+/ce:work        → /workflows:work
+/ce:review      → /workflows:review
+/ce:compound    → /workflows:compound
+/ce:load        → /workflows:load
+/ce:save        → /workflows:save
+/ce:sync-upstream → /workflows:sync-upstream
+/ce:doctor      → /workflows:doctor
+```
+
+**本仓库以 `workflows:*` 为主命令**，`ce:*` 仅为转发别名。
+
 ### 序号格式规范
 
 > ⚠️ 避免使用 Unicode 特殊字符（①②③），在某些终端显示异常。
@@ -136,6 +154,44 @@ description: ① 描述内容
 ```
 
 新增 workflow 命令时，按顺序分配 Step 编号。
+
+### Workflow Handoff 协议（铁律）
+
+所有 `commands/workflows/*.md` 命令必须遵循（终端命令 save/doctor 除外）。
+
+#### 协议分级
+
+| 档位 | 适用命令 | 规则要求 |
+|------|----------|----------|
+| **主链档** | brainstorm, plan, work, review, compound | 6 条全满足 |
+| **工具档** | load, sync-upstream, deepen-plan, plan_review | 至少满足规则 2/4/5 |
+
+#### 6 条规则
+
+1. 命令的最后一个 Phase 必须是 Handoff（主链档严格，工具档宽松）
+2. Handoff 必须使用 **AskUserQuestion tool** 呈现选项 ✅ 必须
+3. 第一个选项必须是流程中的下一步命令（含完整参数如文件路径）（主链档严格，工具档宽松）
+4. 必须有"跳过/停止"选项 ✅ 必须
+5. Handoff 后需 `Based on selection:` 内嵌行为约束（禁止 AI 在选项外自由发挥）✅ 必须
+6. 选项描述使用中文，命令名保持英文（主链档严格，工具档宽松）
+
+**流程链路**：
+```
+brainstorm → plan → [deepen-plan] → [plan_review] → work → review → [compound] → save
+```
+
+**快速验证**：
+```bash
+bash scripts/check-handoff.sh
+```
+
+**检查清单**（新增/修改 workflow 命令时验证）：
+- [ ] 最后一个 Phase 是否为 Handoff？
+- [ ] 是否使用 AskUserQuestion？
+- [ ] 第一个选项是否为流程中的下一步命令 + 完整路径？
+- [ ] 是否有"停止"选项？
+- [ ] 是否有 `Based on selection:` 行为约束？
+- [ ] 描述语言是否为中文？
 
 ## Command Frontmatter 参考
 

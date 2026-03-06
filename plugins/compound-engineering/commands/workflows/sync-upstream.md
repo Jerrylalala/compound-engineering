@@ -313,6 +313,12 @@ powershell -c "Test-Path '$HOME/.claude/hooks/speak.ps1'"
 3. **执行上游合并** — 对 parent 角色仓库执行 git merge
 4. **稍后处理** — 报告已保存，随时回顾
 
+Based on selection:
+- **逐项讨论** → 依次展示高相关变更，逐个评估
+- **创建整合计划** → 调用 `/workflows:plan`
+- **执行上游合并** → 执行 `git merge upstream/main --squash`
+- **稍后处理** → 结束流程
+
 ## Related Commands
 
 | 命令 | 关系 |

@@ -5,6 +5,68 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.43.0] - 2026-03-06
+
+### Added
+- 跨平台 AskUserQuestion 回退 preamble（EveryInc #204 移植）
+- brainstorming no-overwrite 保护（BMAD-METHOD 移植）
+- Edge-Case-Hunter 审查步骤（BMAD-METHOD 移植）
+- 3 个新 skill：findings-triage、review-prompt、root-cause-analysis（BMAD-METHOD 移植）
+- ce:* 转发命令（9 个，轻量双命名兼容）
+- plan.md brainstorm 集成增强（7 点指令，EveryInc 移植）
+- setup skill（EveryInc 移植，交互式配置工具）
+
+### Fixed
+- SessionStart hook async 竞态条件（superpowers 移植）
+- Windows hook 路径引号问题（superpowers 移植，确认已正确）
+- review.md 格式渲染问题（代码块提前闭合 + 末尾孤立标记）
+
+### Changed
+- CLAUDE.md 添加双命名兼容说明
+- 组件数量更新：29 agents, 41 commands, 29 skills
+
+### Summary
+- 29 agents, 41 commands, 29 skills, 1 MCP server
+
+---
+
+## [2.42.5] - 2026-03-05
+
+### 改进
+- **Handoff 协议合规修复**: 修复 7 个 workflow 命令的 Handoff 合规问题
+  - `brainstorm` 补 `Based on selection:` 行为约束 + 中文化选项
+  - `plan` 重排选项（`/workflows:work` 第一）+ 补"停止"选项 + 中文化 + 标题改为 Handoff
+  - `review` 补 `Based on selection:` 行为约束
+  - `load` 合并两个 Handoff 为统一出口 + 补行为约束
+  - `sync-upstream` 补 `Based on selection:` 行为约束
+  - `deepen-plan` 重排选项（`/plan_review` 第一）+ 补"停止"选项 + 中文化
+- **协议分级制度**: 区分主链档（brainstorm/plan/work/review/compound）和工具档（load/sync-upstream/deepen-plan/plan_review）
+- **lint 脚本增强**: `check-handoff.sh` 增加检查 `Based on selection` + 显示档位分级
+
+### Summary
+- 29 agents, 32 commands, 23 skills, 1 MCP server
+
+---
+
+## [2.42.4] - 2026-03-05
+
+### 新功能
+- **Workflow Handoff 协议**: 建立统一的工作流命令衔接机制
+  - `plan_review` 增加 Post-Review Options，防止 AI 跳过 `/workflows:work`
+  - `work` 增加空参数回退逻辑（自动扫描 `docs/plans/`）
+  - `work` 增加 Phase 5 Handoff 引导到 `/workflows:review`
+  - `review` 增加 Workflow Handoff 引导到 `/workflows:compound` 和 `/workflows:save`
+  - `compound` 选项 1 改为显式的 `/workflows:save`
+  - `load` 增加未完成计划检测
+  - plugin CLAUDE.md 增加 Handoff 协议规范
+  - 新增 `scripts/check-handoff.sh` lint 脚本
+- `plan` 选项 4 显式传递 plan 文件路径给 `/workflows:work`
+
+### Summary
+- 29 agents, 32 commands, 23 skills, 1 MCP server
+
+---
+
 ## [2.42.3] - 2026-02-15
 
 ### Enhanced

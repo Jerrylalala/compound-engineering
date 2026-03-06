@@ -36,11 +36,19 @@ ls -la docs/brainstorms/*.md 2>/dev/null | head -10
 - If multiple candidates match, use the most recent one
 
 **If a relevant brainstorm exists:**
-1. Read the brainstorm document
-2. Announce: "Found brainstorm from [date]: [topic]. Using as context for planning."
-3. Extract key decisions, chosen approach, and open questions
-4. **Skip the idea refinement questions below** - the brainstorm already answered WHAT to build
-5. Use brainstorm decisions as input to the research phase
+1. Read the brainstorm document **thoroughly** — every section matters
+2. Announce: "Found brainstorm from [date]: [topic]. Using as foundation for planning."
+3. Extract and carry forward **ALL** of the following into the plan:
+   - Key decisions and their rationale
+   - Chosen approach and why alternatives were rejected
+   - Constraints and requirements discovered during brainstorming
+   - Open questions (flag these for resolution during planning)
+   - Success criteria and scope boundaries
+   - Any specific technical choices or patterns discussed
+4. **Skip the idea refinement questions below** — the brainstorm already answered WHAT to build
+5. Use brainstorm content as the **primary input** to research and planning phases
+6. **Critical: The brainstorm is the origin document.** Throughout the plan, reference specific decisions with `(see brainstorm: docs/brainstorms/<filename>)` when carrying forward conclusions. Do not paraphrase decisions in a way that loses their original context — link back to the source.
+7. **Do not omit brainstorm content** — if the brainstorm discussed it, the plan must address it (even if briefly). Scan each brainstorm section before finalizing the plan to verify nothing was dropped.
 
 **If multiple brainstorms could match:**
 Use **AskUserQuestion tool** to ask which brainstorm to use, or whether to proceed without one.
@@ -552,34 +560,35 @@ Examples:
 - ❌ `docs/plans/2026-01-15-feat: user auth-plan.md` (invalid characters - colon and space)
 - ❌ `docs/plans/feat-user-auth-plan.md` (missing date prefix)
 
-## Post-Generation Options
+## Handoff
 
 After writing the plan file, use the **AskUserQuestion tool** to present these options:
 
-**Question:** "Plan ready at `docs/plans/YYYY-MM-DD-<type>-<name>-plan.md`. What would you like to do next?"
+**Question:** "计划已生成至 `docs/plans/YYYY-MM-DD-<type>-<name>-plan.md`。下一步？"
 
 **Options:**
-1. **Open plan in editor** - Open the plan file for review
-2. **Run `/deepen-plan`** - Enhance each section with parallel research agents (best practices, performance, UI)
-3. **Run `/plan_review`** - Get feedback from reviewers (DHH, Kieran, Simplicity)
-4. **Start `/workflows:work`** - Begin implementing (1任务=标准模式，≥2任务=自动Subagent模式)
-5. **Start `/workflows:work` on remote** - Begin implementing in Claude Code on the web (use `&` to run in background)
-6. **Create Issue** - Create issue in project tracker (GitHub/Linear)
-7. **Simplify** - Reduce detail level
+1. **执行 `/workflows:work`** - 开始实现（1任务=标准模式，≥2任务=自动Subagent模式）（推荐）
+2. **运行 `/plan_review`** - 多代理审查计划
+3. **运行 `/deepen-plan`** - 用研究代理增强各节
+4. **在编辑器中打开** - 打开计划文件查看
+5. **远程执行 `/workflows:work`** - 在 Claude Code Web 后台执行（使用 `&`）
+6. **创建 Issue** - 在项目追踪器中创建（GitHub/Linear）
+7. **简化** - 降低细节层级
+8. **停止** - 不执行，稍后处理
 
 Based on selection:
-- **Open plan in editor** → Run `open docs/plans/<plan_filename>.md` to open the file in the user's default editor
-- **`/deepen-plan`** → Call the /deepen-plan command with the plan file path to enhance with research
-- **`/plan_review`** → Call the /plan_review command with the plan file path
-- **`/workflows:work`** → Call the /workflows:work command (自动检测：1任务=标准模式，≥2任务=Subagent模式)
-- **`/workflows:work` on remote** → Run `/workflows:work docs/plans/<plan_filename>.md &` to start work in background for Claude Code web
-- **Create Issue** → See "Issue Creation" section below
-- **Simplify** → Ask "What should I simplify?" then regenerate simpler version
-- **Other** (automatically provided) → Accept free text for rework or specific changes
+- **执行 `/workflows:work`** → 调用 `/workflows:work docs/plans/<plan_filename>.md`（自动检测：1任务=标准模式，≥2任务=Subagent模式）
+- **运行 `/plan_review`** → 调用 `/plan_review <plan_path>`
+- **运行 `/deepen-plan`** → 调用 `/deepen-plan <plan_path>`
+- **在编辑器中打开** → 运行 `open docs/plans/<plan_filename>.md`
+- **远程执行** → 运行 `/workflows:work docs/plans/<plan_filename>.md &`
+- **创建 Issue** → 见下方 "Issue Creation" 部分
+- **简化** → 询问 "需要简化哪些部分？" 然后重新生成
+- **停止** → 结束流程
 
 **Note:** If running `/workflows:plan` with ultrathink enabled, automatically run `/deepen-plan` after plan creation for maximum depth and grounding.
 
-Loop back to options after Simplify or Other changes until user selects `/workflows:work` or `/plan_review`.
+Loop back to options after 简化 or Other changes until user selects `/workflows:work` or `/plan_review`.
 
 ## Issue Creation
 

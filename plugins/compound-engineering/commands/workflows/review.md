@@ -455,7 +455,6 @@ After creating all todo files, present comprehensive summary:
    ls todos/*-pending-*.md  # View all pending todos
    /triage                  # Use slash command for interactive triage
    ```
-````
 
 3. **Work on Approved Todos**:
 
@@ -490,8 +489,34 @@ After creating all todo files, present comprehensive summary:
 - Code cleanup
 - Optimization opportunities
 - Documentation updates
+````
 
-```
+### 可选：边缘案例狩猎
+
+如果审查范围涉及用户输入处理、状态管理或并发逻辑，执行边缘案例分析：
+
+1. **识别输入边界**：空值、极端值、非法格式、Unicode 特殊字符
+2. **状态转换**：是否有未覆盖的状态组合？中间状态是否安全？
+3. **并发场景**：多用户/多会话同时操作是否安全？
+4. **失败路径**：网络断开、文件锁定、权限不足时的行为
+
+将发现的边缘案例添加到审查报告的"风险"部分。
+
+### Workflow Handoff
+
+After all findings are addressed (or triaged), use **AskUserQuestion tool**:
+
+**Question:** "代码审查流程完成。下一步？"
+
+**Options:**
+1. **记录解决方案** - 运行 `/workflows:compound` 记录本次解决的问题（推荐，如有非 trivial 修复）
+2. **保存上下文** - 运行 `/workflows:save` 保存项目状态
+3. **完成** - 审查流程结束，无需额外操作
+
+Based on selection:
+- **记录解决方案** → 调用 `/workflows:compound`
+- **保存上下文** → 调用 `/workflows:save`
+- **完成** → 结束流程
 
 ### 6. End-to-End Testing (Optional)
 
@@ -888,6 +913,3 @@ Step 4: 处理结果
 ### Important: P1 Findings Block Merge
 
 Any **🔴 P1 (CRITICAL)** findings must be addressed before merging the PR. Present these prominently and ensure they're resolved before accepting the PR.
-```
-
-

@@ -277,13 +277,29 @@ This documentation will be searchable for future reference when similar
 issues occur in the Email Processing or Brief System modules.
 
 What's next?
-1. Continue workflow (recommended)
+1. 运行 `/workflows:save` - 保存项目上下文（推荐）
 2. Link related documentation
 3. Update CHANGELOG.md (if this was a feature/fix)
 4. Update CLAUDE.md Key Learnings (if important lesson)
 5. View documentation
 6. Other
 ```
+
+### Workflow Handoff
+
+After displaying the success output above, use **AskUserQuestion tool** to present next steps:
+
+**Question:** "解决方案已记录。下一步？"
+
+**Options:**
+1. **运行 `/workflows:save`** - 保存项目上下文（推荐）
+2. **更新 CHANGELOG** - 更新 CHANGELOG.md 记录本次修复
+3. **完成** - 不需要额外操作
+
+Based on selection:
+- **`/workflows:save`** → 调用 `/workflows:save` 保存项目状态
+- **更新 CHANGELOG** → 协助更新 CHANGELOG.md
+- **完成** → 结束流程
 
 ## The Compounding Philosophy
 

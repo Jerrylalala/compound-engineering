@@ -271,6 +271,29 @@ brainstorm 主流程结果仍然有效。
 
 ### Phase 3: Capture the Design
 
+Before writing, check for existing brainstorm documents with matching topic:
+
+```bash
+ls -la docs/brainstorms/*-<topic>-brainstorm.md 2>/dev/null
+```
+
+**If a matching brainstorm already exists:**
+Use **AskUserQuestion tool** to present options:
+
+**Question:** "发现已有同主题的 brainstorm 文档。如何处理？"
+
+**Options:**
+1. **续接** - 在现有文档基础上追加新内容
+2. **新建** - 创建新文档（添加日期区分）
+3. **查看已有** - 先查看现有内容再决定
+
+Based on selection:
+- **续接** → 读取现有文档，在末尾追加新章节
+- **新建** → 使用新日期创建独立文档
+- **查看已有** → 展示现有文档内容，然后重新呈现选项
+
+**禁止**：检测到存在就自动覆盖或自动续接。
+
 Write a brainstorm document to `docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md`.
 
 **Document structure:** See the `brainstorming` skill for the template format. Key sections: What We're Building, Why This Approach, Key Decisions, Open Questions.
@@ -285,12 +308,17 @@ Ensure `docs/brainstorms/` directory exists before writing.
 
 Use **AskUserQuestion tool** to present next steps:
 
-**Question:** "Brainstorm captured. What would you like to do next?"
+**Question:** "头脑风暴已记录。下一步？"
 
 **Options:**
-1. **Proceed to planning** - Run `/workflows:plan` (will auto-detect this brainstorm)
-2. **Refine design further** - Continue exploring
-3. **Done for now** - Return later
+1. **进入规划** - 运行 `/workflows:plan`（将自动检测此 brainstorm）（推荐）
+2. **继续探索** - 继续细化设计
+3. **停止** - 稍后再继续
+
+Based on selection:
+- **进入规划** → 调用 `/workflows:plan`
+- **继续探索** → 回到 Phase 1 或 Phase 2 继续对话
+- **停止** → 结束流程
 
 ## Output Summary
 

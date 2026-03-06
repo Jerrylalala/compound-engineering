@@ -18,6 +18,31 @@ This command takes a work document (plan, specification, or todo file) and execu
 
 <input_document> #$ARGUMENTS </input_document>
 
+**如果输入文档为空或不是有效文件路径，自动扫描最近的计划文件：**
+
+```
+判断逻辑:
+
+1. 如果 $ARGUMENTS 非空且是一个存在的文件路径:
+   → 使用该文件作为输入文档
+
+2. 如果 $ARGUMENTS 非空但不是有效文件路径:
+   → 当作功能描述，提示用户："这似乎不是文件路径。要运行 /workflows:plan 创建计划，还是指定计划文件？"
+
+3. 如果 $ARGUMENTS 为空:
+   → 自动扫描 docs/plans/*.md，按修改时间排序
+   → 筛选包含未完成任务（含 - [ ]）且在 30 天内修改的文件
+   → 如果唯一匹配 → 提示确认："发现未完成计划 <filename>，N 个任务中完成了 M 个。是否继续？"
+   → 如果多个匹配 → 使用 AskUserQuestion 让用户选择
+   → 如果无匹配 → 使用 AskUserQuestion 提示：
+     选项:
+     1. 运行 /workflows:plan 创建新计划（推荐）
+     2. 指定计划文件路径
+     3. 直接描述要做的工作
+```
+
+Do not proceed until you have a valid input document.
+
 ## Execution Mode Detection（自动）
 
 在 Phase 1 Step 4（Create Todo List）完成后，根据 TodoWrite 中的任务数量自动选择执行模式：
@@ -471,6 +496,24 @@ rclone copy screenshot.png <remote>:<path>
    - [ ] `CLAUDE.md` Key Learnings - 记录重要经验（如有）
    - [ ] `docs/solutions/` - 非 trivial 问题记录（使用 `/workflows:compound`）
    - [ ] 组件数量 - 如果添加了新的 agents/commands/skills
+
+### Phase 5: Handoff
+
+Use **AskUserQuestion tool** to present next steps:
+
+**Question:** "功能已完成并创建了 PR。下一步？"
+
+**Options:**
+1. **运行 `/workflows:review`** - 多代理代码审查（推荐）
+2. **运行 `/workflows:review [C]`** - Claude + Codex 双重审查
+3. **运行 `/workflows:review [G]`** - Claude + Gemini 双重审查
+4. **跳过审查** - PR 已准备好，不需要额外审查
+
+Based on selection:
+- **`/workflows:review`** → 调用 `/workflows:review` 审查当前分支或 PR
+- **`/workflows:review [C]`** → 调用 `/workflows:review [C]`
+- **`/workflows:review [G]`** → 调用 `/workflows:review [G]`
+- **跳过审查** → 提醒用户后续可手动运行 `/workflows:review`
 
 ---
 

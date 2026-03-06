@@ -1,4 +1,12 @@
 {
   "description": "Compound engineering plugin hooks",
-  "hooks": {}
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "bash hooks/session-start.sh",
+        "async": false
+      }
+    ]
+  }
 }
