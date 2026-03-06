@@ -123,6 +123,24 @@ skills/
 | 独立:   | `/workflows:sync-upstream` | 上游仓库同步检测 |
 | 独立:   | `/workflows:doctor`    | 健康检查（Codex/Gemini CLI） |
 
+### 双命名兼容
+
+所有 `workflows:*` 命令均有对应的 `ce:*` 别名（与上游 EveryInc 保持术语兼容）：
+
+```
+/ce:plan        → /workflows:plan
+/ce:brainstorm  → /workflows:brainstorm
+/ce:work        → /workflows:work
+/ce:review      → /workflows:review
+/ce:compound    → /workflows:compound
+/ce:load        → /workflows:load
+/ce:save        → /workflows:save
+/ce:sync-upstream → /workflows:sync-upstream
+/ce:doctor      → /workflows:doctor
+```
+
+**本仓库以 `workflows:*` 为主命令**，`ce:*` 仅为转发别名。
+
 ### 序号格式规范
 
 > ⚠️ 避免使用 Unicode 特殊字符（①②③），在某些终端显示异常。

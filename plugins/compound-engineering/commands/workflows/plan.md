@@ -36,11 +36,19 @@ ls -la docs/brainstorms/*.md 2>/dev/null | head -10
 - If multiple candidates match, use the most recent one
 
 **If a relevant brainstorm exists:**
-1. Read the brainstorm document
-2. Announce: "Found brainstorm from [date]: [topic]. Using as context for planning."
-3. Extract key decisions, chosen approach, and open questions
-4. **Skip the idea refinement questions below** - the brainstorm already answered WHAT to build
-5. Use brainstorm decisions as input to the research phase
+1. Read the brainstorm document **thoroughly** — every section matters
+2. Announce: "Found brainstorm from [date]: [topic]. Using as foundation for planning."
+3. Extract and carry forward **ALL** of the following into the plan:
+   - Key decisions and their rationale
+   - Chosen approach and why alternatives were rejected
+   - Constraints and requirements discovered during brainstorming
+   - Open questions (flag these for resolution during planning)
+   - Success criteria and scope boundaries
+   - Any specific technical choices or patterns discussed
+4. **Skip the idea refinement questions below** — the brainstorm already answered WHAT to build
+5. Use brainstorm content as the **primary input** to research and planning phases
+6. **Critical: The brainstorm is the origin document.** Throughout the plan, reference specific decisions with `(see brainstorm: docs/brainstorms/<filename>)` when carrying forward conclusions. Do not paraphrase decisions in a way that loses their original context — link back to the source.
+7. **Do not omit brainstorm content** — if the brainstorm discussed it, the plan must address it (even if briefly). Scan each brainstorm section before finalizing the plan to verify nothing was dropped.
 
 **If multiple brainstorms could match:**
 Use **AskUserQuestion tool** to ask which brainstorm to use, or whether to proceed without one.

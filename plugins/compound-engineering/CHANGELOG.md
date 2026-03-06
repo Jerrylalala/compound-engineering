@@ -5,6 +5,31 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.43.0] - 2026-03-06
+
+### Added
+- 跨平台 AskUserQuestion 回退 preamble（EveryInc #204 移植）
+- brainstorming no-overwrite 保护（BMAD-METHOD 移植）
+- Edge-Case-Hunter 审查步骤（BMAD-METHOD 移植）
+- 3 个新 skill：findings-triage、review-prompt、root-cause-analysis（BMAD-METHOD 移植）
+- ce:* 转发命令（9 个，轻量双命名兼容）
+- plan.md brainstorm 集成增强（7 点指令，EveryInc 移植）
+- setup skill（EveryInc 移植，交互式配置工具）
+
+### Fixed
+- SessionStart hook async 竞态条件（superpowers 移植）
+- Windows hook 路径引号问题（superpowers 移植，确认已正确）
+- review.md 格式渲染问题（代码块提前闭合 + 末尾孤立标记）
+
+### Changed
+- CLAUDE.md 添加双命名兼容说明
+- 组件数量更新：29 agents, 41 commands, 29 skills
+
+### Summary
+- 29 agents, 41 commands, 29 skills, 1 MCP server
+
+---
+
 ## [2.42.5] - 2026-03-05
 
 ### 改进
