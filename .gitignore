@@ -5,6 +5,12 @@ node_modules/
 .gemini/
 .compound/
 .claude/settings.local.json
+.claude/agent-memory/
+
+# 工作流临时产物（brainstorms 和 plans 保留提交）
+docs/context/
+docs/analysis/
+docs/reviews/
 
 # 临时输出文件
 nul
