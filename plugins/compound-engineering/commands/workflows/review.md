@@ -510,11 +510,13 @@ After all findings are addressed (or triaged), use **AskUserQuestion tool**:
 
 **Options:**
 1. **记录解决方案** - 运行 `/workflows:compound` 记录本次解决的问题（推荐，如有非 trivial 修复）
-2. **保存上下文** - 运行 `/workflows:save` 保存项目状态
-3. **完成** - 审查流程结束，无需额外操作
+2. **创建 PR `/workflows:pr`** - 创建 Pull Request 并可选合并
+3. **保存上下文** - 运行 `/workflows:save` 保存项目状态
+4. **完成** - 审查流程结束，无需额外操作
 
 Based on selection:
 - **记录解决方案** → 调用 `/workflows:compound`
+- **创建 PR `/workflows:pr`** → 调用 `/workflows:pr`
 - **保存上下文** → 调用 `/workflows:save`
 - **完成** → 结束流程
 

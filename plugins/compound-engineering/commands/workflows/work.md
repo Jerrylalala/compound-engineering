@@ -497,23 +497,50 @@ rclone copy screenshot.png <remote>:<path>
    - [ ] `docs/solutions/` - 非 trivial 问题记录（使用 `/workflows:compound`）
    - [ ] 组件数量 - 如果添加了新的 agents/commands/skills
 
-### Phase 5: Handoff
+### Phase 5: Handoff（风险感知）
 
-Use **AskUserQuestion tool** to present next steps:
+使用 **AskUserQuestion tool** 呈现选项，根据 Phase 1 读取的风险等级动态调整推荐：
 
-**Question:** "功能已完成并创建了 PR。下一步？"
+**如果 risk_level = low 或无风险评分：**
+
+**Question:** "工作完成。下一步？"
 
 **Options:**
-1. **运行 `/workflows:review`** - 多代理代码审查（推荐）
-2. **运行 `/workflows:review [C]`** - Claude + Codex 双重审查
-3. **运行 `/workflows:review [G]`** - Claude + Gemini 双重审查
-4. **跳过审查** - PR 已准备好，不需要额外审查
+1. **运行 `/workflows:review`** - Claude 多代理代码审查
+2. **创建 PR `/workflows:pr`** - 创建 Pull Request 并可选合并
+3. **跳过审查，直接完成（推荐）** - 冒烟测试已通过，低风险可选
+4. **记录解决方案 `/workflows:compound`** - 如有重要经验值得记录
+5. **停止** - 完成
+
+**如果 risk_level = medium：**
+
+**Question:** "工作完成。中风险任务，建议代码审查。"
+
+**Options:**
+1. **运行 `/workflows:review`（推荐）** - Claude 多代理代码审查
+2. **创建 PR `/workflows:pr`** - 创建 Pull Request 并可选合并
+3. **跳过审查，直接完成** - 如果你对代码有信心
+4. **记录解决方案 `/workflows:compound`** - 如有重要经验值得记录
+5. **停止** - 完成
+
+**如果 risk_level = high：**
+
+**Question:** "工作完成。高风险任务，强烈建议完整审查。"
+
+**Options:**
+1. **运行 `/workflows:review [C]`（推荐）** - Claude + Codex 双重代码审查
+2. **运行 `/workflows:review`** - 仅 Claude 代码审查
+3. **创建 PR `/workflows:pr`** - 创建 Pull Request 并可选合并
+4. **跳过审查** - 高风险不推荐跳过
+5. **停止** - 完成
 
 Based on selection:
-- **`/workflows:review`** → 调用 `/workflows:review` 审查当前分支或 PR
+- **跳过审查** → 提示用户推送 Git，流程结束
+- **`/workflows:review`** → 调用 `/workflows:review`
 - **`/workflows:review [C]`** → 调用 `/workflows:review [C]`
-- **`/workflows:review [G]`** → 调用 `/workflows:review [G]`
-- **跳过审查** → 提醒用户后续可手动运行 `/workflows:review`
+- **`/workflows:pr`** → 调用 `/workflows:pr`
+- **`/workflows:compound`** → 调用 `/workflows:compound`
+- **停止** → 结束流程
 
 ---
 
