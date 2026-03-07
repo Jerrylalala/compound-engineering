@@ -122,6 +122,7 @@ skills/
 | Step 6: | `/workflows:save`       | 保存项目上下文 |
 | 独立:   | `/workflows:sync-upstream` | 上游仓库同步检测 |
 | 独立:   | `/workflows:doctor`    | 健康检查（Codex/Gemini CLI） |
+| 独立:   | `/workflows:pr`        | PR 创建与合并   |
 
 ### 双命名兼容
 
@@ -137,6 +138,7 @@ skills/
 /ce:save        → /workflows:save
 /ce:sync-upstream → /workflows:sync-upstream
 /ce:doctor      → /workflows:doctor
+/ce:pr          → /workflows:pr
 ```
 
 **本仓库以 `workflows:*` 为主命令**，`ce:*` 仅为转发别名。
