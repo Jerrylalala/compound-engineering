@@ -5,6 +5,28 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.3] - 2026-03-11
+
+### Fixed
+- 修复 `/workflows:plan` Handoff 部分：增强命令调用指令的明确性，防止 AI "忘记"可用命令
+- 添加 Pre-flight check：在呈现选项前验证命令存在性
+- 添加命令调用格式规范：明确 Skill() 工具的调用语法
+- 为每个选项添加详细的执行步骤（代码块格式），消除歧义
+
+### Changed
+- Handoff 部分从"简短描述"改为"可执行指令"格式
+- 所有命令调用统一使用 `Skill("command-name", args="<plan_path>")` 格式
+
+### Context
+- 问题来源：用户报告 AI 在生成计划后未正确调用 `/plan_review`
+- 根本原因：Handoff 指令过于模糊，AI 在压力状态下会"忘记"可用工具
+- 解决方案：将隐式指令改为显式可执行代码块
+
+### Summary
+- 29 agents, 43 commands, 26 skills, 1 MCP server
+
+---
+
 ## [2.44.2] - 2026-03-11
 
 ### Changed
