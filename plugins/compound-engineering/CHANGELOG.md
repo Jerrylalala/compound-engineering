@@ -5,6 +5,28 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.4] - 2026-03-11
+
+### Fixed
+- 修复 `/workflows:brainstorm` 派对模式从未真正工作的问题
+- 添加 `[P]` 参数解析逻辑（Step 0）
+- 添加派对模式自动调用机制（Phase 1.2）
+- 移除 Phase 2 中冗余的派对模式选项（已在 Phase 1.2 执行）
+
+### Changed
+- 派对模式现在通过 `[P]` 参数在 Phase 1.2 自动激活
+- 统一参数解析：`[P]`（派对模式）、`[C]`（Codex）、`[G]`（Gemini）
+
+### Context
+- 问题来源：用户报告派对模式输出格式不对（输出"现象层/本质层/哲学层"而非多代理对话）
+- 根本原因：从一开始就没有正确实现 `Skill("party-mode")` 调用，只有描述性文本
+- 解决方案：在 Step 0 解析 `[P]` 参数，在 Phase 1.2 根据标志自动调用 party-mode skill
+
+### Summary
+- 29 agents, 43 commands, 26 skills, 1 MCP server
+
+---
+
 ## [2.44.3] - 2026-03-11
 
 ### Fixed
