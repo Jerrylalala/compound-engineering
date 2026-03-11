@@ -5,6 +5,17 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.43.4] - 2026-03-11
+
+**Summary**: 修复 SessionStart hook 在 Windows 上导致 startup hook error 的回归问题。
+
+### Fixed
+- hooks/hooks.json: 清空 SessionStart hook（回归到 9d841bb 的正确状态）。根因：b9d80fa 上游整合时从 superpowers 仓库引入了 `type: "command"` hook，在 Windows 上 stdin 被占用导致 `SessionStart:startup hook error`；217995d 只修了 schema 格式，未识别为已知回归问题
+- docs/solutions: 补充回归记录和防回归规则到 sessionstart-hook-prompt-type-not-supported.md
+
+### Summary
+- 29 agents, 43 commands, 24 skills, 1 MCP server
+
 ## [2.43.3] - 2026-03-11
 
 **Summary**: 修复 hooks.json schema 格式，适配 Claude Code 最新 hooks 验证规则。

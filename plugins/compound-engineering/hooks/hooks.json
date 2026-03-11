@@ -1,16 +1,4 @@
 {
   "description": "Compound engineering plugin hooks",
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash hooks/session-start.sh"
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }

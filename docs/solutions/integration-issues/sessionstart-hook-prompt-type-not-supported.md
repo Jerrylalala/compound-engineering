@@ -61,6 +61,15 @@ date_resolved: "2026-02-04"
 3. 换 type:command → 确认 command 可用但会卡
 4. 对比官方插件 → 确认没有先例
 
+## ⚠️ 回归记录（2026-03-06 / 2026-03-11）
+
+**第二次发生**：上游整合 `b9d80fa` 时，从 superpowers 仓库移植了 `SessionStart hook async→false`，把已清空的 hooks.json 重新写回 `type: "command"`，导致问题回归。`217995d` 只修了 schema 格式（旧格式→新嵌套格式），未识别为回归。
+
+**防止回归的规则**：
+- 上游整合时，**凡涉及 hooks.json 的改动，必须对照此文档检查**
+- SessionStart 下绝对不放任何 hook（type:command 在 Windows 卡终端）
+- hooks.json 的正确状态是 `"hooks": {}`（空对象）
+
 ## 关联
 
 - 全局经验：`~/.compound/solutions/claude-code-sessionstart-hook-prompt-type-bug.md`
