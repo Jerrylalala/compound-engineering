@@ -233,6 +233,16 @@ After planning the issue structure, run SpecFlow Analyzer to validate and refine
 
 Select how comprehensive you want the issue to be, simpler is mostly better.
 
+> **每个计划必须以此 Header 开头**：
+
+```markdown
+## Overview
+
+**Goal**: [一句话描述要构建什么]
+**Tech Stack**: [关键技术/库]
+**Architecture** (可选): [2-3 句话描述方法]
+```
+
 #### 📄 MINIMAL (Quick Issue)
 
 **Best for:** Simple bugs, small improvements, clear features

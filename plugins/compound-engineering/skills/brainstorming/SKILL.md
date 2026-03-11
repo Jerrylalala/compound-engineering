@@ -45,22 +45,67 @@ If requirements are clear, suggest: "Your requirements seem clear. Consider proc
 
 Ask questions **one at a time** to understand the user's intent. Avoid overwhelming with multiple questions.
 
-**Question Techniques:**
+## Questioning Techniques
 
-1. **Prefer multiple choice when natural options exist**
-   - Good: "Should the notification be: (a) email only, (b) in-app only, or (c) both?"
-   - Avoid: "How should users be notified?"
+Effective brainstorming relies on asking the right questions in the right way.
 
-2. **Start broad, then narrow**
-   - First: What is the core purpose?
-   - Then: Who are the users?
-   - Finally: What constraints exist?
+### 1. Multiple Choice Priority
 
-3. **Validate assumptions explicitly**
-   - "I'm assuming users will be logged in. Is that correct?"
+When natural options exist, use AskUserQuestion to provide multiple choice.
 
-4. **Ask about success criteria early**
-   - "How will you know this feature is working well?"
+**Good:**
+```
+Should the notification be:
+(a) email only
+(b) in-app only
+(c) both email and in-app
+```
+
+**Avoid:**
+```
+How should users be notified?
+```
+
+**Why:** Multiple choice reduces cognitive load and surfaces options the user might not have considered.
+
+### 2. Broad to Narrow
+
+Start with purpose and users, gradually narrow to constraints and edge cases.
+
+**Question Sequence:**
+1. **Purpose:** What problem does this solve?
+2. **Users:** Who will use this? What's their context?
+3. **Constraints:** Any technical limitations? Timeline?
+4. **Edge Cases:** What shouldn't happen? Error states?
+
+**Why:** Starting narrow (e.g., "What color should the button be?") misses the bigger picture.
+
+### 3. Explicit Assumption Validation
+
+Don't hide assumptions—state them and let the user confirm or correct.
+
+**Good:**
+```
+I'm assuming users will be logged in when they access this feature. Is that correct?
+```
+
+**Avoid:**
+```
+[Silently assuming authentication and building on that assumption]
+```
+
+**Why:** Hidden assumptions lead to misaligned designs that need rework.
+
+### 4. Early Success Criteria
+
+Ask "what counts as done" in the first round of questions.
+
+**Good:**
+```
+How will you know this feature is working well? What's the success metric?
+```
+
+**Why:** Success criteria prevent scope creep and guide all subsequent decisions.
 
 **Key Topics to Explore:**
 
@@ -166,14 +211,16 @@ This prevents wasted effort on misaligned designs.
 
 ## Anti-Patterns to Avoid
 
-| Anti-Pattern | Better Approach |
-|--------------|-----------------|
-| Asking 5 questions at once | Ask one at a time |
-| Jumping to implementation details | Stay focused on WHAT, not HOW |
-| Proposing overly complex solutions | Start simple, add complexity only if needed |
-| Ignoring existing codebase patterns | Research what exists first |
-| Making assumptions without validating | State assumptions explicitly and confirm |
-| Creating lengthy design documents | Keep it concise—details go in the plan |
+| Anti-Pattern | Better Approach | Why It Matters |
+|--------------|-----------------|----------------|
+| Asking 5 questions at once | Ask one at a time, wait for answer | Overwhelming users leads to incomplete answers |
+| Jumping to implementation details | Stay focused on WHAT, not HOW | Implementation is for planning phase, not brainstorming |
+| Ignoring existing codebase patterns | Research repo first, then ask questions | Consistency with existing patterns reduces friction |
+| Not validating assumptions | State assumptions explicitly and confirm | Hidden assumptions cause misaligned designs |
+| Converging too early | Keep options open until user says "proceed" | Premature convergence misses better alternatives |
+| Skipping success criteria | Ask "what counts as done" in first round | Without success criteria, scope creeps endlessly |
+| Proposing overly complex solutions | Start simple, add complexity only if needed | YAGNI—complexity should be justified, not default |
+| Creating lengthy design documents | Keep it concise—details go in the plan | Brainstorm captures decisions, not implementation |
 
 ## Integration with Planning
 
