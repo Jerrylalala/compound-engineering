@@ -5,6 +5,30 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.0] - 2026-03-11
+
+### Added
+- 新增 `finishing-a-feature` skill：功能分支收尾闭环（测试→合并/PR→清理）
+- 新增 `receiving-code-review` skill：接收审查响应规范（6步协议 + 禁止表演性同意）
+- 增强根目录 CLAUDE.md：补充 Agent 委派验证和 TDD 红绿循环验证模式
+
+### Changed
+- 增强 `test-driven-development` skill：添加「当卡住时」表格、2 条危险信号
+- 增强 `brainstorming` skill：添加提问技术、反模式表
+- 增强 `create-agent-skills` skill：添加 TDD for Skills 框架、Description 优化
+- 增强 `workflows:work`：添加 STOP 协议、finishing-a-feature 引用
+- 增强 `workflows:plan`：添加 Plan Header 强制模板（Goal + Tech Stack 必填）
+
+### Source
+- 精华内容来源：[obra/superpowers](https://github.com/obra/superpowers) v4.1.1
+- 对比分析：docs/brainstorms/2026-03-11-superpowers-fusion-brainstorm.md
+- 审查优化：应用 Kieran、代码简洁性、DHH 三位专家的一致建议
+
+### Summary
+- 29 agents, 43 commands, 26 skills, 1 MCP server
+
+---
+
 ## [2.43.4] - 2026-03-11
 
 **Summary**: 修复 SessionStart hook 在 Windows 上导致 startup hook error 的回归问题。
