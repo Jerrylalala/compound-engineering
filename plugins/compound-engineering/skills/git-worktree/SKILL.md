@@ -96,6 +96,12 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/worktree-manager.sh creat
 3. Creates new worktree and branch
 4. **Copies all .env files from main repo** (.env, .env.local, .env.test, etc.)
 5. Shows path for cd-ing to the worktree
+6. **（推荐）运行基线测试验证环境**：
+   ```bash
+   # 在新 worktree 中验证环境完整性
+   npm test --bail 2>/dev/null || echo "⚠️ 基线测试失败，环境可能需要额外配置（检查依赖安装、数据库迁移等）"
+   ```
+   如果基线测试失败，先解决环境问题再开始开发，否则后续所有测试结果不可信。
 
 ### `list` or `ls`
 

@@ -253,6 +253,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | [上游同步整合的完整工作流](docs/solutions/integration-issues/upstream-sync-integration-workflow.md) | git merge --squash、YAML frontmatter、CHANGELOG 标准、多方审核 |
 | [Claude Code 运行时更新整合决策](docs/solutions/integration-issues/claude-code-runtime-updates-decisions-2026-02.md) | **runtime updates、Agent Teams、memory frontmatter、hooks、PDF pages、fast mode** |
 | [Superpowers 插件精华融合代码审查整合](docs/solutions/integration-issues/superpowers-fusion-code-review-2026-03-11.md) | **superpowers 融合、验证门控、finishing-a-feature、receiving-code-review、TDD for Skills** |
+| [Superpowers 插件架构深度分析](docs/solutions/integration-issues/superpowers-architecture-deep-dive-2026-03-11.md) | **架构分析、强制 TDD、硬性检查点、YAGNI、Git Worktrees、Socratic 设计、移植评估** |
 
 ### 开发规范
 
