@@ -53,10 +53,17 @@ Do not proceed until you have a feature description from the user.
 
 <argument_parsing>
 
-**检查参数中是否包含 `[C]` 和 `[G]` 标志：**
+**检查参数中是否包含 `[P]`、`[C]` 和 `[G]` 标志：**
 
 ```
 参数: $ARGUMENTS
+
+检测 [P] 标志：
+  如果包含 [P] 或 [p]：
+    → PARTY_MODE_ENABLED = true
+    → 从参数中移除 [P]
+  否则：
+    → PARTY_MODE_ENABLED = false
 
 检测 [C] 标志：
   如果包含 [C] 或 [c]：
@@ -75,7 +82,10 @@ Do not proceed until you have a feature description from the user.
 剩余部分作为功能描述（feature_description）
 ```
 
-**记住这些标志，Phase 2 完成后根据它们决定是否自动调用 Codex/Gemini。**
+**记住这些标志，在相应阶段根据它们决定是否自动调用对应功能。**
+
+如果 PARTY_MODE_ENABLED 为 true，在 Phase 1.2 开始前提示用户：
+"🎉 派对模式已激活！将邀请多位专家参与讨论。"
 
 如果 CODEX_ENABLED 或 GEMINI_ENABLED 为 true，在 Phase 2 提出方案时提示用户：
 "方案提出后将自动咨询 [Codex/Gemini/Codex+Gemini] 寻求更优解。"
@@ -109,6 +119,25 @@ Focus on: similar features, established patterns, CLAUDE.md guidance.
 
 #### 1.2 Collaborative Dialogue
 
+**检查 PARTY_MODE_ENABLED 标志（来自 Step 0）：**
+
+**如果 PARTY_MODE_ENABLED = true：**
+```
+立即执行派对模式：
+  Execute: Skill("party-mode")
+
+派对模式会：
+  1. 激活多代理讨论（2-3 个专家）
+  2. 每个代理以自己的人格发言
+  3. 代理之间可以互相引用、质疑、补充
+  4. 用户可随时输入 [E] 退出派对模式
+  5. 讨论结果自动整合到 brainstorm 文档
+
+派对模式结束后，继续 Phase 2。
+```
+
+**如果 PARTY_MODE_ENABLED = false（默认）：**
+
 Use the **AskUserQuestion tool** to ask questions **one at a time**.
 
 **Guidelines (see `brainstorming` skill for detailed techniques):**
@@ -132,8 +161,7 @@ Lead with your recommendation and explain why. Apply YAGNI—prefer simpler solu
 
 Use **AskUserQuestion tool** to ask which approach the user prefers.
 
-**Party Mode option:** If the decision involves complex trade-offs or would benefit from multiple expert perspectives, offer:
-- Option: "[P] Party Mode - 听听多位专家的意见" - Loads `party-mode` skill for multi-agent discussion
+**Note:** If user wants multi-agent discussion at this stage, they can restart with `/workflows:brainstorm [P]` parameter.
 
 <!-- CLAUDE-CODE-ONLY-START -->
 
