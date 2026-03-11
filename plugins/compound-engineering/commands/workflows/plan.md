@@ -615,6 +615,23 @@ Examples:
 
 The plan file has been written with risk assessment in frontmatter. Use `<plan_path>` (the actual path of the file just written, e.g. `docs/plans/2026-03-11-feat-example-plan.md`) and `<risk_score>` (the total from Section 6.5) in the questions below.
 
+**CRITICAL: You MUST use the AskUserQuestion tool to present options. Do NOT skip this step.**
+
+**Pre-flight check (verify before presenting options):**
+```
+Required commands for handoff:
+✓ /workflows:work - Execute plan (Skill tool with "workflows:work")
+✓ /plan_review - Multi-agent review (Skill tool with "plan_review")
+✓ /deepen-plan - Enhance with research (Skill tool with "deepen-plan")
+
+If any command is missing from system prompt, DO NOT present that option.
+```
+
+**Command invocation format (MUST follow exactly):**
+- `/workflows:work` → `Skill("workflows:work", args="<plan_path>")`
+- `/plan_review` → `Skill("plan_review", args="<plan_path>")`
+- `/deepen-plan` → `Skill("deepen-plan", args="<plan_path>")`
+
 Use the **AskUserQuestion tool** to present risk-aware options based on `risk_level`:
 
 **根据风险等级动态调整选项和推荐：**
@@ -631,13 +648,43 @@ Use the **AskUserQuestion tool** to present risk-aware options based on `risk_le
 5. **打开 Plan 文件** - 在编辑器中查看完整内容
 6. **停止** - 稍后处理
 
-Based on selection:
-- **开始 `/workflows:work`** → 调用 `/workflows:work <plan_path>`
-- **运行 `/plan_review`** → 调用 `/plan_review <plan_path>`，完成后用 **AskUserQuestion** 询问是否继续执行 `/workflows:work <plan_path>`
-- **运行 `/deepen-plan`** → 调用 `/deepen-plan <plan_path>`，完成后重新呈现本 Handoff 选项
-- **简化** → 询问"需要简化哪些部分？"，按用户指示修改计划文件，完成后重新呈现本 Handoff 选项
-- **打开 Plan 文件** → 运行 `open <plan_path>`
-- **停止** → 结束流程
+**Based on selection (MUST execute exactly as specified):**
+
+1. **开始 `/workflows:work`** →
+   ```
+   Execute: Skill("workflows:work", args="<plan_path>")
+   ```
+
+2. **运行 `/plan_review`** →
+   ```
+   Execute: Skill("plan_review", args="<plan_path>")
+   After completion: Use AskUserQuestion to ask "审查完成。是否继续执行 /workflows:work?"
+   If yes: Skill("workflows:work", args="<plan_path>")
+   ```
+
+3. **运行 `/deepen-plan`** →
+   ```
+   Execute: Skill("deepen-plan", args="<plan_path>")
+   After completion: Re-present this Handoff section with updated plan
+   ```
+
+4. **简化** →
+   ```
+   Ask: "需要简化哪些部分？（例如：减少任务数量、移除详细代码、降低细节层级）"
+   Then: Edit the plan file based on user feedback
+   After completion: Re-present this Handoff section
+   ```
+
+5. **打开 Plan 文件** →
+   ```
+   Execute: Bash command `open <plan_path>` (macOS) or `start <plan_path>` (Windows)
+   ```
+
+6. **停止** →
+   ```
+   Acknowledge: "计划已保存至 <plan_path>。稍后可用 /workflows:work <plan_path> 继续。"
+   End workflow.
+   ```
 
 #### 🟡 中风险 (4-6)：
 
@@ -651,13 +698,43 @@ Based on selection:
 5. **打开 Plan 文件** - 在编辑器中查看完整内容
 6. **停止** - 稍后处理
 
-Based on selection:
-- **运行 `/plan_review`** → 调用 `/plan_review <plan_path>`，完成后用 **AskUserQuestion** 询问是否继续执行 `/workflows:work <plan_path>`
-- **直接开始 `/workflows:work`** → 调用 `/workflows:work <plan_path>`
-- **运行 `/deepen-plan`** → 调用 `/deepen-plan <plan_path>`，完成后重新呈现本 Handoff 选项
-- **简化** → 询问"需要简化哪些部分？"，按用户指示修改计划文件，完成后重新呈现本 Handoff 选项
-- **打开 Plan 文件** → 运行 `open <plan_path>`
-- **停止** → 结束流程
+**Based on selection (MUST execute exactly as specified):**
+
+1. **运行 `/plan_review`（推荐）** →
+   ```
+   Execute: Skill("plan_review", args="<plan_path>")
+   After completion: Use AskUserQuestion to ask "审查完成。是否继续执行 /workflows:work?"
+   If yes: Skill("workflows:work", args="<plan_path>")
+   ```
+
+2. **直接开始 `/workflows:work`** →
+   ```
+   Execute: Skill("workflows:work", args="<plan_path>")
+   ```
+
+3. **运行 `/deepen-plan`** →
+   ```
+   Execute: Skill("deepen-plan", args="<plan_path>")
+   After completion: Re-present this Handoff section with updated plan
+   ```
+
+4. **简化** →
+   ```
+   Ask: "需要简化哪些部分？（例如：减少任务数量、移除详细代码、降低细节层级）"
+   Then: Edit the plan file based on user feedback
+   After completion: Re-present this Handoff section
+   ```
+
+5. **打开 Plan 文件** →
+   ```
+   Execute: Bash command `open <plan_path>` (macOS) or `start <plan_path>` (Windows)
+   ```
+
+6. **停止** →
+   ```
+   Acknowledge: "计划已保存至 <plan_path>。稍后可用 /workflows:work <plan_path> 继续。"
+   End workflow.
+   ```
 
 #### 🔴 高风险 (7+)：
 
@@ -671,13 +748,44 @@ Based on selection:
 5. **打开 Plan 文件** - 在编辑器中查看完整内容
 6. **停止** - 稍后处理
 
-Based on selection:
-- **运行 `/plan_review`** → 调用 `/plan_review <plan_path>`，完成后用 **AskUserQuestion** 询问是否继续执行 `/workflows:work <plan_path>`
-- **运行 `/deepen-plan`** → 调用 `/deepen-plan <plan_path>`，完成后重新呈现本 Handoff 选项
-- **直接开始 `/workflows:work`** → 调用 `/workflows:work <plan_path>`
-- **简化** → 询问"需要简化哪些部分？"，按用户指示修改计划文件，完成后重新呈现本 Handoff 选项
-- **打开 Plan 文件** → 运行 `open <plan_path>`
-- **停止** → 结束流程
+**Based on selection (MUST execute exactly as specified):**
+
+1. **运行 `/plan_review`（强烈推荐）** →
+   ```
+   Execute: Skill("plan_review", args="<plan_path>")
+   After completion: Use AskUserQuestion to ask "审查完成。是否继续执行 /workflows:work?"
+   If yes: Skill("workflows:work", args="<plan_path>")
+   ```
+
+2. **运行 `/deepen-plan`** →
+   ```
+   Execute: Skill("deepen-plan", args="<plan_path>")
+   After completion: Re-present this Handoff section with updated plan
+   ```
+
+3. **直接开始 `/workflows:work`** →
+   ```
+   Execute: Skill("workflows:work", args="<plan_path>")
+   Warning: "⚠️ 跳过审查，直接执行高风险计划"
+   ```
+
+4. **简化** →
+   ```
+   Ask: "需要简化哪些部分？（例如：减少任务数量、移除详细代码、降低细节层级）"
+   Then: Edit the plan file based on user feedback
+   After completion: Re-present this Handoff section
+   ```
+
+5. **打开 Plan 文件** →
+   ```
+   Execute: Bash command `open <plan_path>` (macOS) or `start <plan_path>` (Windows)
+   ```
+
+6. **停止** →
+   ```
+   Acknowledge: "计划已保存至 <plan_path>。稍后可用 /workflows:work <plan_path> 继续。"
+   End workflow.
+   ```
 
 **Note:** If running `/workflows:plan` with ultrathink enabled, automatically run `/deepen-plan` after plan creation for maximum depth and grounding.
 
