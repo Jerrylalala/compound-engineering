@@ -113,6 +113,61 @@ Rules and constraints...
 3. **Add component** - Add workflow/reference/example
 4. **Get guidance** - Understand skill design
 
+## TDD for Skills（铁律）
+
+### 核心原则
+
+**如果你没有观察到 Agent 在没有该 Skill 时失败，你就不知道 Skill 教的是对的。**
+
+创建 Skill 不是写文档，而是修复 Agent 的失败模式。没有失败测试，就没有新 Skill。
+
+### RED-GREEN-REFACTOR 循环
+
+| TDD 概念 | Skill 创建 |
+|----------|-----------|
+| **RED** - 写失败测试 | 观察 Agent 在真实任务中失败（没有 Skill） |
+| **GREEN** - 写最小代码让测试通过 | 创建 Skill，观察 Agent 成功完成任务 |
+| **REFACTOR** - 优化代码 | 精简 Skill 内容，移除冗余指导 |
+
+### 铁律：没有失败测试，就没有新 Skill
+
+**禁止行为：**
+- ❌ 凭想象写 Skill（"Agent 可能需要知道..."）
+- ❌ 预防性文档（"以防万一..."）
+- ❌ 复制粘贴现有文档（"这些信息应该有用..."）
+
+**正确流程：**
+1. 给 Agent 一个真实任务（不加载 Skill）
+2. 观察 Agent 在哪里卡住/失败/产生错误输出
+3. 记录失败模式（具体的错误行为）
+4. 创建 Skill 针对该失败模式
+5. 用同样任务测试，验证 Agent 现在成功
+6. 精简 Skill，只保留让 Agent 从失败到成功的最小指导
+
+### Description 优化：何时使用，不是做什么
+
+**Description = 触发条件，不是功能说明**
+
+**错误示例：**
+```yaml
+description: Helps create and manage PDF files
+```
+
+**正确示例：**
+```yaml
+description: Extracts text and tables from PDF files, fills forms, merges documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
+```
+
+**公式：**
+```
+Description = [核心能力列表] + "Use when [触发关键词/场景]"
+```
+
+**触发关键词包括：**
+- 用户可能说的词（"PDF", "form", "extract"）
+- 任务类型（"working with", "analyzing", "debugging"）
+- 失败场景（"when tests fail", "when build breaks"）
+
 ## Creating a New Skill
 
 ### Step 1: Choose Type

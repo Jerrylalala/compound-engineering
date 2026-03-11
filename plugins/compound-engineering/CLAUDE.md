@@ -46,6 +46,8 @@
 | 规划实现 | `/workflows:plan`（生成 Bite-Sized 任务格式） |
 | 执行计划 | `/workflows:work`（自动选择执行模式） |
 | 声称完成之前 | 完成前验证（见 CLAUDE.md） |
+| 任务完成后收尾 | `finishing-a-feature`（测试验证 → 合并/PR 决策 → worktree 清理） |
+| 收到审查反馈 | `receiving-code-review`（6 步响应 + 禁止表演性同意 + YAGNI 检查） |
 
 ### `/workflows:work` 自动执行模式
 

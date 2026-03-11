@@ -56,6 +56,13 @@ Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
 | Bug 已修复 | 测试原始症状：通过 | 代码改了、假设修好了 |
 | 需求满足 | 逐行清单验证 | 测试通过 |
 
+**验证模式**：
+
+| 模式 | 适用场景 | 执行方式 |
+|------|----------|----------|
+| **Agent 委派验证** | 复杂验证、多文件检查、需要推理 | 创建专门的验证 agent，输入：待验证声明 + 证据要求，输出：通过/失败 + 证据 |
+| **TDD 红绿循环验证** | 功能开发、Bug 修复 | 先写失败测试 → 实现 → 测试通过 → 重构（可选）→ 再次验证 |
+
 **危险信号 - 停下来**：
 - 使用「应该」「可能」「似乎」
 - 在验证前表达满意（「太好了！」「完成！」）
@@ -93,7 +100,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 | ----------- | ---- | ---------------------------------------- |
 | Agents      | 29   | `plugins/compound-engineering/agents/`   |
 | Commands    | 43   | `plugins/compound-engineering/commands/` |
-| Skills      | 29   | `plugins/compound-engineering/skills/`   |
+| Skills      | 26   | `plugins/compound-engineering/skills/`   |
 | MCP Servers | 1    | Context7（HTTP 服务）                    |
 
 ### 安装方式
@@ -245,6 +252,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | [SessionStart hook type:prompt 不被支持](docs/solutions/integration-issues/sessionstart-hook-prompt-type-not-supported.md) | SessionStart、type:prompt、终端卡死、CLAUDE.md |
 | [上游同步整合的完整工作流](docs/solutions/integration-issues/upstream-sync-integration-workflow.md) | git merge --squash、YAML frontmatter、CHANGELOG 标准、多方审核 |
 | [Claude Code 运行时更新整合决策](docs/solutions/integration-issues/claude-code-runtime-updates-decisions-2026-02.md) | **runtime updates、Agent Teams、memory frontmatter、hooks、PDF pages、fast mode** |
+| [Superpowers 插件精华融合代码审查整合](docs/solutions/integration-issues/superpowers-fusion-code-review-2026-03-11.md) | **superpowers 融合、验证门控、finishing-a-feature、receiving-code-review、TDD for Skills** |
 
 ### 开发规范
 
