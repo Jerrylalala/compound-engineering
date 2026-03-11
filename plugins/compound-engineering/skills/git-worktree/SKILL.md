@@ -103,6 +103,21 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/worktree-manager.sh creat
    ```
    如果基线测试失败，先解决环境问题再开始开发，否则后续所有测试结果不可信。
 
+7. **环境初始化（自动检测）**
+
+创建 worktree 后，检测项目类型并提醒安装依赖：
+
+| 检测文件 | 包管理器 | 安装命令 |
+|----------|----------|----------|
+| `package-lock.json` | npm | `npm ci` |
+| `yarn.lock` | yarn | `yarn install --frozen-lockfile` |
+| `pnpm-lock.yaml` | pnpm | `pnpm install --frozen-lockfile` |
+| `Gemfile.lock` | bundler | `bundle install` |
+| `requirements.txt` | pip | `pip install -r requirements.txt` |
+| `go.sum` | go | `go mod download` |
+
+> **重要**：优先使用 lockfile 对应的包管理器（如有 `yarn.lock` 则用 yarn 而非 npm），确保依赖版本一致。
+
 ### `list` or `ls`
 
 Lists all available worktrees with their branches and current status.
@@ -207,6 +222,20 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/worktree-manager.sh clean
 - **Confirms before cleanup** to prevent accidental removal
 - **Won't remove current worktree**
 - **Clear error messages** for issues
+
+## 目录选择优先级协议
+
+创建 worktree 后，配置文件读取遵循三级优先级：
+
+| 优先级 | 来源 | 示例 |
+|:---:|------|------|
+| 1 | **项目配置** | worktree 内的 `.claude/CLAUDE.md`、`CLAUDE.md` |
+| 2 | **用户偏好** | `~/.claude/CLAUDE.md`（全局配置） |
+| 3 | **插件默认** | 插件内置的 `CLAUDE.md`、skill 定义 |
+
+**冲突规则**：高优先级覆盖低优先级。同级别冲突时，以更具体的配置为准。
+
+> 注意：worktree 内的项目配置是隔离的副本，修改不影响主仓库。
 
 ## Integration with Workflows
 
