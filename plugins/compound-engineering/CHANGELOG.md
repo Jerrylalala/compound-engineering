@@ -5,6 +5,16 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.43.3] - 2026-03-11
+
+**Summary**: 修复 hooks.json schema 格式，适配 Claude Code 最新 hooks 验证规则。
+
+### Fixed
+- hooks/hooks.json: 将 SessionStart hook 格式从旧版（直接 type/command）更新为新版（带 matcher + hooks 子数组），修复 `expected array, received undefined` 错误
+
+### Summary
+- 29 agents, 43 commands, 24 skills, 1 MCP server
+
 ## [2.43.2] - 2026-03-11
 
 **Summary**: Fixed workflow consistency issues found in code review (Handoff protocol, plan risk assessment, missing mappings, component counts).
