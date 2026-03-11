@@ -460,15 +460,15 @@ description: Dispatches subagent per task with code review between tasks
 ### Task 10: Wave 2 提交
 
 **操作**:
-- [ ] `git add plugins/compound-engineering/skills/test-driven-development/SKILL.md`
-- [ ] `git add plugins/compound-engineering/skills/brainstorming/SKILL.md`
-- [ ] `git add plugins/compound-engineering/skills/create-agent-skills/SKILL.md`
-- [ ] `git add plugins/compound-engineering/commands/workflows/work.md`
-- [ ] `git add plugins/compound-engineering/commands/workflows/plan.md`
-- [ ] 提交消息：`Enhance 5 docs with superpowers insights (Wave 2): TDD, brainstorming, create-agent-skills, work.md, plan.md`
+- [x] `git add plugins/compound-engineering/skills/test-driven-development/SKILL.md`
+- [x] `git add plugins/compound-engineering/skills/brainstorming/SKILL.md`
+- [x] `git add plugins/compound-engineering/skills/create-agent-skills/SKILL.md`
+- [x] `git add plugins/compound-engineering/commands/workflows/work.md`
+- [x] `git add plugins/compound-engineering/commands/workflows/plan.md`
+- [x] 提交消息：`Enhance 5 docs with superpowers insights (Wave 2): TDD, brainstorming, create-agent-skills, work.md, plan.md`
 
 **验证**:
-- [ ] `git log -1` 确认提交成功
+- [x] `git log -1` 确认提交成功
 
 ---
 
@@ -482,9 +482,9 @@ description: Dispatches subagent per task with code review between tasks
 - `plugins/compound-engineering/.claude-plugin/plugin.json`
 
 **操作**:
-- [ ] 在 CHANGELOG.md 顶部添加新版本记录
-- [ ] 运行 `powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType minor` 更新版本号
-- [ ] **手动更新** marketplace.json 和 plugin.json 中的 `skills` 数量（24 → 26）
+- [x] 在 CHANGELOG.md 顶部添加新版本记录
+- [x] 运行 `powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType minor` 更新版本号
+- [x] **手动更新** marketplace.json 和 plugin.json 中的 `skills` 数量（24 → 26）
 
 **CHANGELOG 内容**:
 ```markdown
@@ -509,25 +509,25 @@ description: Dispatches subagent per task with code review between tasks
 ```
 
 **验证**:
-- [ ] 运行 `powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1` 确认版本一致
-- [ ] 确认 marketplace.json 和 plugin.json 的 skills 数量 = 26
-- [ ] 确认 CHANGELOG 格式正确
+- [x] 运行 `powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1` 确认版本一致
+- [x] 确认 marketplace.json 和 plugin.json 的 skills 数量 = 26
+- [x] 确认 CHANGELOG 格式正确
 
 ---
 
 ### Task 12: 集成测试
 
 **操作**:
-- [ ] 重启 Claude Code，确认插件加载无错误
-- [ ] 运行 `/skills` 命令，确认 26 个 skills 全部显示
-- [ ] 在 CLAUDE.md 中搜索新增的 2 个技能，确认映射表正确
-- [ ] 运行 `bash scripts/check-handoff.sh` 确认 Handoff 协议未破坏
+- [x] 重启 Claude Code，确认插件加载无错误
+- [x] 运行 `/skills` 命令，确认 26 个 skills 全部显示
+- [x] 在 CLAUDE.md 中搜索新增的 2 个技能，确认映射表正确
+- [x] 运行 `bash scripts/check-handoff.sh` 确认 Handoff 协议未破坏
 
 **验证**:
-- [ ] 插件加载无 YAML 解析错误
-- [ ] 新 Skill 的 description 正确显示
-- [ ] 技能映射表场景描述准确
-- [ ] Handoff 协议检查通过
+- [x] 插件加载无 YAML 解析错误
+- [x] 新 Skill 的 description 正确显示
+- [x] 技能映射表场景描述准确
+- [x] Handoff 协议检查通过
 
 ---
 
@@ -542,20 +542,20 @@ description: Dispatches subagent per task with code review between tasks
 ```
 
 **验证**:
-- [ ] `ls -d plugins/compound-engineering/skills/*/ | wc -l` 确认目录数 = 26
+- [x] `ls -d plugins/compound-engineering/skills/*/ | wc -l` 确认目录数 = 26
 
 ---
 
 ### Task 14: Wave 3 最终提交
 
 **操作**:
-- [ ] `git add -A`（审查所有变更后）
-- [ ] 提交消息：`Complete superpowers fusion (Wave 3): versioning, integration tests — v2.44.0`
+- [x] `git add -A`（审查所有变更后）
+- [x] 提交消息：`Complete superpowers fusion (Wave 3): versioning, integration tests — v2.44.0`
 
 **验证**:
-- [ ] `git log -1` 确认提交成功
-- [ ] `powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1` 确认版本一致
-- [ ] `ls -d plugins/compound-engineering/skills/*/ | wc -l` 确认 26 个 skills
+- [x] `git log -1` 确认提交成功
+- [x] `powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1` 确认版本一致
+- [x] `ls -d plugins/compound-engineering/skills/*/ | wc -l` 确认 26 个 skills
 
 ---
 

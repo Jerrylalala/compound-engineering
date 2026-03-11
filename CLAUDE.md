@@ -100,7 +100,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 | ----------- | ---- | ---------------------------------------- |
 | Agents      | 29   | `plugins/compound-engineering/agents/`   |
 | Commands    | 43   | `plugins/compound-engineering/commands/` |
-| Skills      | 29   | `plugins/compound-engineering/skills/`   |
+| Skills      | 26   | `plugins/compound-engineering/skills/`   |
 | MCP Servers | 1    | Context7（HTTP 服务）                    |
 
 ### 安装方式
