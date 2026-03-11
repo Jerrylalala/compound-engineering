@@ -5,6 +5,19 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.1] - 2026-03-11
+
+### Fixed
+- 修复 `finishing-a-feature` skill 的 3 个断裂关联链接
+- 修复 `finishing-a-feature` skill 的 description 格式（符合插件规范）
+
+### Changed
+- 硬化 `finishing-a-feature` 关键路径：测试失败 = 流程终止（不提供跳过选项）
+- 增强 `git-worktree` skill：创建 worktree 后添加基线测试验证提醒
+- 增强 `workflows:work` 标准模式：添加 TDD 触发提醒
+
+---
+
 ## [2.44.0] - 2026-03-11
 
 ### Added

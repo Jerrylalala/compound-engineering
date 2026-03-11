@@ -1,6 +1,6 @@
 ---
 name: finishing-a-feature
-description: Guides the user through completing a feature by verifying tests, presenting merge/PR options, and cleaning up worktrees
+description: This skill should be used when completing a feature branch and deciding how to integrate changes (merge, PR, or push). It verifies tests, presents options, and cleans up worktrees.
 disable-model-invocation: true
 ---
 
@@ -27,7 +27,7 @@ echo $?  # 必须为 0
 - 构建成功（exit 0）
 - 无 lint 错误
 
-如果测试失败，停止流程并修复问题。
+**铁律：测试失败 = 流程终止。** 不提供"继续"或"跳过"选项。修复所有测试后重新进入此流程。
 
 ### 2. 确认基础分支
 
@@ -104,6 +104,6 @@ git worktree remove <worktree-path>
 
 ## 关联技能
 
-- [`references/skills/worktree.md`](../../skills/worktree/SKILL.md) - Worktree 管理
-- [`references/skills/review-pr.md`](../../skills/review-pr/SKILL.md) - PR 审核
-- [`references/commands/workflows-work.md`](../../commands/workflows-work/COMMAND.md) - 工作流执行
+- [git-worktree](../git-worktree/SKILL.md) - Worktree 管理
+- [test-driven-development](../test-driven-development/SKILL.md) - TDD 流程
+- [workflows:work](../../commands/workflows/work.md) - 工作流执行

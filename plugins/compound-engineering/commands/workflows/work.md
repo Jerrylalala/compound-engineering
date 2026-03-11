@@ -192,6 +192,8 @@ else:
 
    For each task in priority order:
 
+   > **TDD 提醒**：如果当前任务涉及新功能实现或 bug 修复，在编写任何代码前先调用 `test-driven-development` skill 写失败测试。
+
    ```
    while (tasks remain):
      - Mark task as in_progress in TodoWrite
