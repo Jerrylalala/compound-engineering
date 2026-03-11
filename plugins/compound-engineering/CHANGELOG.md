@@ -5,6 +5,24 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.2] - 2026-03-11
+
+### Changed
+- 增强 `systematic-debugging` skill：添加"无根因"分支处理、协作者信号解读表、跨技能引用闭环
+- 增强 `git-worktree` skill：添加目录选择优先级协议、多语言依赖安装提醒
+- 增强 `workflows:work` Subagent-Driven 模式：添加上下文预注入、全局最终审查、失败任务处理规范
+- 增强 CLAUDE.md：添加 Rigid/Flexible 技能分类标签、Announce 宣告惯例
+- 增强 `workflows:load`：添加未完成计划自动检测（30 天内修改 + 完成度计算）
+
+### Source
+- 实现 Superpowers Wave 4 的 P2-P3 遗留问题（5 项）
+- 来源：docs/brainstorms/2026-03-11-superpowers-fusion-brainstorm.md
+
+### Summary
+- 29 agents, 43 commands, 26 skills, 1 MCP server
+
+---
+
 ## [2.44.1] - 2026-03-11
 
 ### Fixed

@@ -107,6 +107,30 @@ ls -la docs/plans/*.md 2>/dev/null | head -10
 
 对每个计划文件，检查是否有未完成任务（`- [ ]`）且在 30 天内修改。
 
+### 计划完成度检测
+
+恢复上下文后，自动扫描未完成的计划：
+
+```bash
+# 扫描 30 天内修改的计划文件
+find docs/plans/ -name "*.md" -mtime -30 2>/dev/null
+```
+
+对每个文件计算完成度：
+```bash
+total=$(grep -c '^\- \[' "$plan_file")
+done=$(grep -c '^\- \[x\]' "$plan_file")
+percent=$((done * 100 / total))
+```
+
+**在 Handoff 选项中展示**：
+> "发现未完成计划：`<plan_path>`（完成度 XX%，Y/Z 项已完成）"
+
+**显示规则**：
+- 仅显示完成度 < 100% 且 30 天内有修改的计划
+- 多个计划时按修改时间倒序，最多显示 3 个
+- 完成度 100% 的计划不显示
+
 使用 **AskUserQuestion tool** 呈现选项（根据扫描结果动态调整）：
 
 **Question:** "上下文已恢复。下一步？"
