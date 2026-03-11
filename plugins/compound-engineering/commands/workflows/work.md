@@ -80,6 +80,21 @@ else:
 1. **Read Plan and Clarify**
 
    - Read the work document completely
+   - **Read risk assessment from plan frontmatter** (if present):
+     ```yaml
+     risk_score: [0-10]
+     risk_level: [low|medium|high]
+     ```
+
+     If risk assessment exists, announce using this exact mapping:
+
+     | risk_level 值 | 宣告格式 |
+     |--------------|---------|
+     | `low` | `"风险评估：X/10 — 低风险 🟢"` |
+     | `medium` | `"风险评估：X/10 — 中风险 🟡"` |
+     | `high` | `"风险评估：X/10 — 高风险 🔴"` |
+
+     If no risk assessment in frontmatter (or frontmatter exists but has no risk fields), skip this step entirely.
    - Review any references or links provided in the plan
    - If anything is unclear or ambiguous, ask clarifying questions now
    - Get user approval to proceed

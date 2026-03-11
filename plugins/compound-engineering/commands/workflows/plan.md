@@ -531,6 +531,47 @@ end
 - [ ] Emphasize comprehensive testing given rapid implementation
 - [ ] Document any AI-generated code that needs human review
 
+### 6.5. Risk Assessment（自动执行，在写入文件前完成评估，随文件一起写入）
+
+对计划内容进行风险评估，评分结果写入 plan frontmatter。
+
+**评估 5 个维度（每项 0-2 分）：**
+
+| 维度 | 0 分（低） | 1 分（中） | 2 分（高） |
+|------|-----------|-----------|-----------|
+| **安全/隐私** | 无敏感数据 | 涉及用户数据 | 认证/支付/PII |
+| **可逆性** | 完全可逆（Markdown/配置文件始终为 0） | 部分可逆（代码重构） | 不可逆（数据迁移/删除） |
+| **影响范围** | 本地/个人项目 | 团队/内部系统 | 生产环境/外部用户 |
+| **变更规模** | ≤5 个源文件（计划任务将修改或创建的文件数，不是任务数） | 6-20 文件 | >20 文件 |
+| **外部依赖** | 无 | 内部 API | 第三方 API/服务 |
+
+**计算总分（0-10）并分级：**
+
+```
+总分 0-3  → 低风险 🟢
+总分 4-6  → 中风险 🟡
+总分 7-10 → 高风险 🔴
+```
+
+**将评分与计划内容一起写入文件（frontmatter）：**
+
+```yaml
+---
+risk_score: 3
+risk_level: low
+risk_note: "主要风险来源描述（必须用双引号包裹；若描述含双引号则改用单引号）"
+---
+```
+
+**向用户展示：**
+
+```
+风险评估：[总分]/10 — [低/中/高]风险 [🟢/🟡/🔴]
+  安全/隐私: [0-2]  可逆性: [0-2]  影响范围: [0-2]
+  变更规模: [0-2]  外部依赖: [0-2]
+主要风险：[risk_note]
+```
+
 ### 7. Final Review & Submission
 
 **Pre-submission Checklist:**
@@ -562,62 +603,72 @@ Examples:
 
 ## Handoff
 
-After writing the plan file, use the **AskUserQuestion tool** to present these options:
+The plan file has been written with risk assessment in frontmatter. Use `<plan_path>` (the actual path of the file just written, e.g. `docs/plans/2026-03-11-feat-example-plan.md`) and `<risk_score>` (the total from Section 6.5) in the questions below.
 
-**Question:** "计划已生成至 `docs/plans/YYYY-MM-DD-<type>-<name>-plan.md`。下一步？"
+Use the **AskUserQuestion tool** to present risk-aware options based on `risk_level`:
+
+**根据风险等级动态调整选项和推荐：**
+
+#### 🟢 低风险 (0-3)：
+
+**Question:** "计划已生成：`<plan_path>`。风险评估：<risk_score>/10 🟢 低风险。下一步？"
 
 **Options:**
-1. **执行 `/workflows:work`** - 开始实现（1任务=标准模式，≥2任务=自动Subagent模式）（推荐）
-2. **运行 `/plan_review`** - 多代理审查计划
+1. **开始 `/workflows:work`（推荐）** - 直接开始实施（1任务=标准模式，≥2任务=自动Subagent模式）
+2. **运行 `/plan_review`** - 多代理审查计划（低风险通常不需要）
 3. **运行 `/deepen-plan`** - 用研究代理增强各节
-4. **在编辑器中打开** - 打开计划文件查看
-5. **远程执行 `/workflows:work`** - 在 Claude Code Web 后台执行（使用 `&`）
-6. **创建 Issue** - 在项目追踪器中创建（GitHub/Linear）
-7. **简化** - 降低细节层级
-8. **停止** - 不执行，稍后处理
+4. **简化** - 计划过于复杂，降低细节层级后重新生成
+5. **打开 Plan 文件** - 在编辑器中查看完整内容
+6. **停止** - 稍后处理
 
 Based on selection:
-- **执行 `/workflows:work`** → 调用 `/workflows:work docs/plans/<plan_filename>.md`（自动检测：1任务=标准模式，≥2任务=Subagent模式）
-- **运行 `/plan_review`** → 调用 `/plan_review <plan_path>`
-- **运行 `/deepen-plan`** → 调用 `/deepen-plan <plan_path>`
-- **在编辑器中打开** → 运行 `open docs/plans/<plan_filename>.md`
-- **远程执行** → 运行 `/workflows:work docs/plans/<plan_filename>.md &`
-- **创建 Issue** → 见下方 "Issue Creation" 部分
-- **简化** → 询问 "需要简化哪些部分？" 然后重新生成
+- **开始 `/workflows:work`** → 调用 `/workflows:work <plan_path>`
+- **运行 `/plan_review`** → 调用 `/plan_review <plan_path>`，完成后用 **AskUserQuestion** 询问是否继续执行 `/workflows:work <plan_path>`
+- **运行 `/deepen-plan`** → 调用 `/deepen-plan <plan_path>`，完成后重新呈现本 Handoff 选项
+- **简化** → 询问"需要简化哪些部分？"，按用户指示修改计划文件，完成后重新呈现本 Handoff 选项
+- **打开 Plan 文件** → 运行 `open <plan_path>`
+- **停止** → 结束流程
+
+#### 🟡 中风险 (4-6)：
+
+**Question:** "计划已生成：`<plan_path>`。风险评估：<risk_score>/10 🟡 中风险。建议先审查计划。"
+
+**Options:**
+1. **运行 `/plan_review`（推荐）** - 多代理审查计划后再执行
+2. **直接开始 `/workflows:work`** - 跳过审查直接实施（1任务=标准模式，≥2任务=自动Subagent模式）
+3. **运行 `/deepen-plan`** - 深化研究后再审查
+4. **简化** - 计划过于复杂，降低细节层级后重新生成
+5. **打开 Plan 文件** - 在编辑器中查看完整内容
+6. **停止** - 稍后处理
+
+Based on selection:
+- **运行 `/plan_review`** → 调用 `/plan_review <plan_path>`，完成后用 **AskUserQuestion** 询问是否继续执行 `/workflows:work <plan_path>`
+- **直接开始 `/workflows:work`** → 调用 `/workflows:work <plan_path>`
+- **运行 `/deepen-plan`** → 调用 `/deepen-plan <plan_path>`，完成后重新呈现本 Handoff 选项
+- **简化** → 询问"需要简化哪些部分？"，按用户指示修改计划文件，完成后重新呈现本 Handoff 选项
+- **打开 Plan 文件** → 运行 `open <plan_path>`
+- **停止** → 结束流程
+
+#### 🔴 高风险 (7+)：
+
+**Question:** "计划已生成：`<plan_path>`。风险评估：<risk_score>/10 🔴 高风险！强烈建议审查后再执行。"
+
+**Options:**
+1. **运行 `/plan_review`（强烈推荐）** - 多代理审查，确认方案可行性
+2. **运行 `/deepen-plan`** - 深化研究，进一步降低风险
+3. **直接开始 `/workflows:work`** - 跳过审查（高风险不推荐）
+4. **简化** - 计划范围过大，缩减范围后重新生成
+5. **打开 Plan 文件** - 在编辑器中查看完整内容
+6. **停止** - 稍后处理
+
+Based on selection:
+- **运行 `/plan_review`** → 调用 `/plan_review <plan_path>`，完成后用 **AskUserQuestion** 询问是否继续执行 `/workflows:work <plan_path>`
+- **运行 `/deepen-plan`** → 调用 `/deepen-plan <plan_path>`，完成后重新呈现本 Handoff 选项
+- **直接开始 `/workflows:work`** → 调用 `/workflows:work <plan_path>`
+- **简化** → 询问"需要简化哪些部分？"，按用户指示修改计划文件，完成后重新呈现本 Handoff 选项
+- **打开 Plan 文件** → 运行 `open <plan_path>`
 - **停止** → 结束流程
 
 **Note:** If running `/workflows:plan` with ultrathink enabled, automatically run `/deepen-plan` after plan creation for maximum depth and grounding.
-
-Loop back to options after 简化 or Other changes until user selects `/workflows:work` or `/plan_review`.
-
-## Issue Creation
-
-When user selects "Create Issue", detect their project tracker from CLAUDE.md:
-
-1. **Check for tracker preference** in user's CLAUDE.md (global or project):
-   - Look for `project_tracker: github` or `project_tracker: linear`
-   - Or look for mentions of "GitHub Issues" or "Linear" in their workflow section
-
-2. **If GitHub:**
-
-   Use the title and type from Step 2 (already in context - no need to re-read the file):
-
-   ```bash
-   gh issue create --title "<type>: <title>" --body-file <plan_path>
-   ```
-
-3. **If Linear:**
-
-   ```bash
-   linear issue create --title "<title>" --description "$(cat <plan_path>)"
-   ```
-
-4. **If no tracker configured:**
-   Ask user: "Which project tracker do you use? (GitHub/Linear/Other)"
-   - Suggest adding `project_tracker: github` or `project_tracker: linear` to their CLAUDE.md
-
-5. **After creation:**
-   - Display the issue URL
-   - Ask if they want to proceed to `/workflows:work` or `/plan_review`
 
 NEVER CODE! Just research and write the plan.

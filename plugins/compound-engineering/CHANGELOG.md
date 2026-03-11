@@ -5,6 +5,21 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.43.2] - 2026-03-11
+
+**Summary**: Fixed workflow consistency issues found in code review (Handoff protocol, plan risk assessment, missing mappings, component counts).
+
+### Fixed
+- work.md: 添加 Phase 1 风险评分读取逻辑（从 plan frontmatter 读取 risk_score/risk_level）
+- work.md: 添加风险评分冲突处理规则（risk_level 优先于 risk_score）
+- plan.md: 添加 Section 6.5 风险评估（5维度评分系统）
+- plan.md: Handoff 改为风险分级动态推荐（低/中/高三档）
+- plan.md: 移除遗留的 Issue Creation 章节
+- marketplace.json, plugin.json: 修正 skills 组件数量（24，原来错误标注为 29）
+
+### Summary
+- 29 agents, 43 commands, 24 skills, 1 MCP server
+
 ## [2.43.1] - 2026-03-07
 
 **Summary**: Added `/workflows:pr` command for PR creation and merge workflow.
