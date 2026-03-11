@@ -149,7 +149,7 @@ gh pr create --title "$pr_title" --body "$pr_body" --base "$default_branch"
 **Question:** "PR 已创建: $pr_url。下一步？"
 
 **Options:**
-1. **立即合并到 $default_branch** - 使用 squash merge 合并并删除分支
+1. **立即合并到 $default_branch** - 使用 regular merge 合并并删除分支
 2. **在浏览器中查看 PR** - 打开 GitHub PR 页面
 3. **完成** - PR 已创建，不合并
 
@@ -161,8 +161,8 @@ Based on selection:
 ### 合并执行
 
 ```bash
-# Squash merge：将所有 commit 压缩为一个，保持主分支整洁
-gh pr merge --squash --delete-branch
+# Regular merge：保留所有 commit 历史，显示合并图标
+gh pr merge --merge --delete-branch
 
 # 切换回主分支并拉取最新
 git checkout "$default_branch"
