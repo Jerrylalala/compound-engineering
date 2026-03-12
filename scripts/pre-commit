@@ -1,6 +1,26 @@
 #!/bin/bash
-# Git pre-commit hook - 版本一致性检查
+# Git pre-commit hook - 版本一致性检查 + 组件变更检查
 # 安装方法: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+# 检查是否有组件文件被修改
+COMPONENT_FILES_CHANGED=$(git diff --cached --name-only | grep -E "plugins/compound-engineering/(agents|commands|skills)/" || true)
+
+if [ -n "$COMPONENT_FILES_CHANGED" ]; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "⚠️  检测到组件变更，请确认是否已更新版本号"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "变更的组件:"
+    echo "$COMPONENT_FILES_CHANGED"
+    echo ""
+    echo "如果这是新功能/修改，请运行:"
+    echo "  powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch"
+    echo ""
+    echo "如果已更新版本号，请忽略此提示。"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+fi
 
 # 检查是否有版本相关文件被修改
 VERSION_FILES_CHANGED=$(git diff --cached --name-only | grep -E "(marketplace\.json|plugin\.json)" || true)

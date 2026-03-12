@@ -84,6 +84,20 @@ Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
 
 **Git 提交使用中文**：commit message 使用中文书写。
 
+**临时文档清理（铁律）**：工作流完成后，立即清理临时文档：
+- brainstorm 完成 → 删除 `docs/brainstorms/[当前文件].md`
+- plan 最终版确定 → 删除 `docs/plans/*-original.md` 和 `*-summary.md`
+- 草稿文档不提交到 Git
+
+**版本号更新（铁律）**：新增/修改 Agent/Command/Skill 后：
+```bash
+# 自动更新版本号
+powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch
+
+# 验证版本一致性
+powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+```
+
 **新功能/修改必须更新文档（铁律）**：
 
 > 添加新功能或修改现有功能时，**必须同步更新相关文档**，否则不算完成。
