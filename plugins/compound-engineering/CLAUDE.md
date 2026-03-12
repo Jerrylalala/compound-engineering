@@ -42,12 +42,6 @@
 | 想法 | 现实 |
 |------|------|
 | 「这只是个简单问题」 | 问题也是任务。检查技能。 |
-| 「我需要先了解上下文」 | 技能检查在了解上下文之前。 |
-| 「让我先探索代码库」 | 技能告诉你怎么探索。先检查。 |
-| 「我可以快速检查一下」 | 技能提供系统化方法。 |
-| 「这不需要正式技能」 | 如果技能存在，使用它。 |
-| 「我记得这个技能」 | 技能会演化。读当前版本。 |
-| 「这不算任务」 | 动作 = 任务。检查技能。 |
 | 「技能太重了」 | 简单事情会变复杂。使用它。 |
 | 「我先做这一件事」 | 做任何事之前先检查。 |
 
@@ -144,39 +138,21 @@ skills/
 
 **Why `workflows:`?** Claude Code has built-in `/plan` and `/review` commands. Using `name: workflows:plan` in frontmatter creates a unique `/workflows:plan` command with no collision.
 
-### Workflow 命令列表
+### Workflow 命令
 
-| 序号    | 命令                    | 说明           |
-| ------- | ----------------------- | -------------- |
-| Step 0: | `/workflows:load`       | 加载项目上下文 |
-| Step 1: | `/workflows:brainstorm` | 探索需求和方案（支持 [P][C][G]） |
-| Step 2: | `/workflows:plan`       | 创建实施计划   |
-| Step 3: | `/workflows:work`       | 执行工作计划   |
-| Step 4: | `/workflows:review`     | 代码审查       |
-| Step 5: | `/workflows:compound`   | 记录解决方案   |
-| Step 6: | `/workflows:save`       | 保存项目上下文 |
-| 独立:   | `/workflows:sync-upstream` | 上游仓库同步检测 |
-| 独立:   | `/workflows:doctor`    | 健康检查（Codex/Gemini CLI） |
-| 独立:   | `/workflows:pr`        | PR 创建与合并   |
+主命令使用 `workflows:` 前缀，避免与内置命令冲突。
 
-### 双命名兼容
+| 序号 | 命令 | 说明 |
+|------|------|------|
+| Step 0 | `/workflows:load` | 加载项目上下文 |
+| Step 1 | `/workflows:brainstorm` | 探索需求和方案 |
+| Step 2 | `/workflows:plan` | 创建实施计划 |
+| Step 3 | `/workflows:work` | 执行工作计划 |
+| Step 4 | `/workflows:review` | 代码审查 |
+| Step 5 | `/workflows:compound` | 记录解决方案 |
+| Step 6 | `/workflows:save` | 保存项目上下文 |
 
-所有 `workflows:*` 命令均有对应的 `ce:*` 别名（与上游 EveryInc 保持术语兼容）：
-
-```
-/ce:plan        → /workflows:plan
-/ce:brainstorm  → /workflows:brainstorm
-/ce:work        → /workflows:work
-/ce:review      → /workflows:review
-/ce:compound    → /workflows:compound
-/ce:load        → /workflows:load
-/ce:save        → /workflows:save
-/ce:sync-upstream → /workflows:sync-upstream
-/ce:doctor      → /workflows:doctor
-/ce:pr          → /workflows:pr
-```
-
-**本仓库以 `workflows:*` 为主命令**，`ce:*` 仅为转发别名。
+**别名兼容**: 所有命令均有 `/ce:*` 别名（如 `/ce:plan` → `/workflows:plan`）
 
 ### 序号格式规范
 
@@ -246,41 +222,9 @@ claude-code-only: true
 ---
 ```
 
-## Skill Compliance Checklist
-
-When adding or modifying skills, verify compliance with skill-creator spec:
-
-### YAML Frontmatter (Required)
-
-- [ ] `name:` present and matches directory name (lowercase-with-hyphens)
-- [ ] `description:` present and uses **third person** ("This skill should be used when..." NOT "Use this skill when...")
-
-### Reference Links (Required if references/ exists)
-
-- [ ] All files in `references/` are linked as `[filename.md](./references/filename.md)`
-- [ ] All files in `assets/` are linked as `[filename](./assets/filename)`
-- [ ] All files in `scripts/` are linked as `[filename](./scripts/filename)`
-- [ ] No bare backtick references like `` `references/file.md` `` - use proper markdown links
-
-### Writing Style
-
-- [ ] Use imperative/infinitive form (verb-first instructions)
-- [ ] Avoid second person ("you should") - use objective language ("To accomplish X, do Y")
-
-### Quick Validation Command
-
-```bash
-# Check for unlinked references in a skill
-grep -E '`(references|assets|scripts)/[^`]+`' skills/*/SKILL.md
-# Should return nothing if all refs are properly linked
-
-# Check description format
-grep -E '^description:' skills/*/SKILL.md | grep -v 'This skill'
-# Should return nothing if all use third person
-```
-
 ## Documentation
 
 - [版本管理规范](../../docs/development/VERSIONING.md)
 - [脚本使用说明](../../docs/zh-CN/SCRIPTS.md)
 - [核心概念](../../docs/zh-CN/CONCEPTS.md)
+- [Skill 开发规范](../../docs/development/SKILL-DEVELOPMENT.md)（Skill Compliance Checklist 已移至此处）

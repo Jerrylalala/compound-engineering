@@ -104,14 +104,6 @@ Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
 powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 ```
 
-### 当前组件统计
-
-| 组件        | 数量 | 位置                                     |
-| ----------- | ---- | ---------------------------------------- |
-| Agents      | 29   | `plugins/compound-engineering/agents/`   |
-| Commands    | 43   | `plugins/compound-engineering/commands/` |
-| Skills      | 26   | `plugins/compound-engineering/skills/`   |
-| MCP Servers | 1    | Context7（HTTP 服务）                    |
 
 ### 安装方式
 
@@ -133,86 +125,34 @@ claude --plugin-dir "完整路径\plugins\compound-engineering"
 
 ```
 compound-engineering-plugin-private/
-├── .claude-plugin/
-│   └── marketplace.json
-├── docs/
-│   └── zh-CN/                        # 📌 中文文档
-│       ├── INSTALL.md                # 安装与使用指南
-│       ├── SYNC.md                   # 上游同步指南
-│       ├── VERSION-STRATEGY.md       # 📌 版本管理预防策略
-│       └── FORK-SETUP.md             # 📌 Fork 初始化清单
-├── scripts/                          # 📌 自动化工具
-│   ├── check-versions.ps1            # 版本一致性检查
-│   ├── check-versions.sh             # Bash 版本
-│   ├── bump-version.ps1              # 自动更新版本号
-│   └── pre-commit                    # Git hook
-├── plugins/
-│   └── compound-engineering/
-│       ├── .claude-plugin/plugin.json
-│       ├── agents/                   # 29 个 agents
-│       ├── commands/                 # 31 个 commands
-│       ├── skills/                   # 23 个 skills
-│       └── skills-custom/            # 📌 本地自定义技能
-├── README.md                         # 上游英文说明（不修改）
-└── CLAUDE.md                         # 本文件
+├── .claude-plugin/marketplace.json
+├── docs/zh-CN/                        # 中文文档
+├── scripts/                           # 自动化工具
+├── plugins/compound-engineering/
+│   ├── agents/
+│   ├── commands/
+│   ├── skills/
+│   └── skills-custom/                 # 本地自定义技能
+├── README.md
+└── CLAUDE.md
 ```
-
-**📌 标记** = 本地新增内容
 
 ---
 
 ## 常用操作
 
-| 操作         | 命令                                     |
-| ------------ | ---------------------------------------- |
-| 同步上游     | 见 `docs/zh-CN/SYNC.md`                  |
-| 添加自定义技能 | 直接在 `skills-custom/` 创建目录       |
-| 统计组件数量 | 见下方                                   |
-
-### 统计组件数量
-
-```powershell
-(Get-ChildItem -Recurse plugins/compound-engineering/agents/*.md).Count
-(Get-ChildItem -Recurse plugins/compound-engineering/commands/*.md).Count
-(Get-ChildItem -Directory plugins/compound-engineering/skills/).Count
-```
+| 操作 | 命令 |
+|------|------|
+| 同步上游 | 见 `docs/zh-CN/SYNC.md` |
+| 添加自定义技能 | 直接在 `skills-custom/` 创建目录 |
+| 统计组件数量 | `(Get-ChildItem -Recurse plugins/compound-engineering/agents/*.md).Count` |
 
 ---
 
-## 更新插件时的检查清单
+## 更新插件
 
-> **⚠️ 版本号必须同步！** 详见 [版本管理预防策略](docs/zh-CN/VERSION-STRATEGY.md)
-
-### 自动化工具（推荐）
-
-```powershell
-# 自动更新版本号（推荐）
-powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch
-
-# 验证版本一致性
-powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
-
-# 安装 pre-commit hook（一次性）
-copy scripts\pre-commit .git\hooks\pre-commit
-```
-
-### 手动检查清单
-
-- [ ] **同步版本号** - `marketplace.json` = `plugin.json`
-- [ ] **更新组件数量** - 本文件、`marketplace.json`、`plugin.json`、README.md
-- [ ] **更新 CHANGELOG.md** - 在 `plugins/compound-engineering/CHANGELOG.md` 添加版本记录
-- [ ] **更新 README.md** - 在 `plugins/compound-engineering/README.md` 更新功能描述
-- [ ] **更新使用说明** - 在 `docs/zh-CN/INSTALL.md` 添加新命令/功能说明
-- [ ] **🔄 更新工作流可视化** - 若修改了 workflows 命令，同步更新 `docs/zh-CN/WORKFLOW-VISUAL.md`
-- [ ] **更新 Key Learnings** - 在本文件添加重要学习经验（如有）
-- [ ] **创建解决方案文档** - 非 trivial 问题添加到 `docs/solutions/`
-
-### 快速检查版本
-
-```powershell
-(Get-Content .claude-plugin/marketplace.json | ConvertFrom-Json).plugins[0].version
-(Get-Content plugins/compound-engineering/.claude-plugin/plugin.json | ConvertFrom-Json).version
-```
+**推荐**: `scripts/bump-version.ps1 -BumpType patch`（自动更新 + 验证）
+**手动**: 见 [版本管理预防策略](docs/zh-CN/VERSION-STRATEGY.md)
 
 ---
 
@@ -246,37 +186,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---
 
-## 经验与解决方案索引
+## 经验库
 
-本项目积累的解决方案文档在 `docs/solutions/`。遇到问题时先搜索这里。
+使用 Grep 搜索：
+- 全局: `~/.compound/solutions/`
+- 项目: `docs/solutions/`
 
-### 集成问题
-
-| 文档 | 关键词 |
-|------|--------|
-| [🚨 上游合并架构影响分析](docs/solutions/integration-issues/upstream-merge-architectural-analysis-2026-02-10.md) | **上游合并、架构分析、选择性合并、文件删除风险** |
-| [Subagent-Driven 工作流整合](docs/solutions/integration-issues/subagent-driven-workflow-integration.md) | 多任务执行、上下文污染、两阶段审查 |
-| [Skill 与 Agent 调用方式](docs/solutions/integration-issues/skill-vs-agent-invocation.md) | Task 工具、skills 目录、agents 目录 |
-| [Marketplace 更新与终端显示](docs/solutions/integration-issues/marketplace-update-failure-and-unicode-display.md) | 版本号同步、Unicode 特殊字符 |
-| [幻影 Agent 引用问题](docs/solutions/integration-issues/phantom-agent-references-in-workflows.md) | 不存在的 agent、上游同步、YAGNI |
-| [SessionStart hook type:prompt 不被支持](docs/solutions/integration-issues/sessionstart-hook-prompt-type-not-supported.md) | SessionStart、type:prompt、终端卡死、CLAUDE.md |
-| [上游同步整合的完整工作流](docs/solutions/integration-issues/upstream-sync-integration-workflow.md) | git merge --squash、YAML frontmatter、CHANGELOG 标准、多方审核 |
-| [Claude Code 运行时更新整合决策](docs/solutions/integration-issues/claude-code-runtime-updates-decisions-2026-02.md) | **runtime updates、Agent Teams、memory frontmatter、hooks、PDF pages、fast mode** |
-| [Superpowers 插件精华融合代码审查整合](docs/solutions/integration-issues/superpowers-fusion-code-review-2026-03-11.md) | **superpowers 融合、验证门控、finishing-a-feature、receiving-code-review、TDD for Skills** |
-| [Superpowers 插件架构深度分析](docs/solutions/integration-issues/superpowers-architecture-deep-dive-2026-03-11.md) | **架构分析、强制 TDD、硬性检查点、YAGNI、Git Worktrees、Socratic 设计、移植评估** |
-
-### 开发规范
-
-| 文档 | 用途 |
-|------|------|
-| [版本管理策略](docs/zh-CN/VERSION-STRATEGY.md) | 版本号同步、发版检查清单 |
-| [脚本使用说明](docs/zh-CN/SCRIPTS.md) | check-versions、bump-version、pre-commit |
-| [核心概念](docs/zh-CN/CONCEPTS.md) | Skills vs Agents、组件类型 |
-
-### 快速参考
-
-- **MCP 服务器限制**：插件只能配置无需认证的 HTTP 类型 MCP（如 Context7）
-- **安装方式**：`/plugins → Add marketplace → Jerrylalala/compound-engineering-plugin-private`
+或使用 `/workflows:plan`，它会自动搜索两个目录。
 
 ---
 
