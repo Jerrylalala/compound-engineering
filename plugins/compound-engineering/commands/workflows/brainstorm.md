@@ -1,6 +1,6 @@
 ---
 name: workflows:brainstorm
-description: "Step 1: [P][C][G] 探索需求和方案，在规划前进行协作对话"
+description: "[P][C][G] 探索需求和方案，在规划前进行协作对话"
 argument-hint: "[feature idea or problem to explore] [P] [C] [G]"
 ---
 

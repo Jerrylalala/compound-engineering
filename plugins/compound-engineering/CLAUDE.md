@@ -62,6 +62,7 @@
 | 声称完成之前 | 完成前验证（见 CLAUDE.md） |
 | 任务完成后收尾 | `finishing-a-feature`（测试验证 → 合并/PR 决策 → worktree 清理） |
 | 收到审查反馈 | `receiving-code-review`（6 步响应 + 禁止表演性同意 + YAGNI 检查） |
+| 记录解决方案（可选） | `/workflows:compound`（手动调用） |
 
 ### 技能分类（刚性 vs 柔性）
 
@@ -142,15 +143,20 @@ skills/
 
 主命令使用 `workflows:` 前缀，避免与内置命令冲突。
 
-| 序号 | 命令 | 说明 |
-|------|------|------|
-| Step 0 | `/workflows:load` | 加载项目上下文 |
-| Step 1 | `/workflows:brainstorm` | 探索需求和方案 |
-| Step 2 | `/workflows:plan` | 创建实施计划 |
-| Step 3 | `/workflows:work` | 执行工作计划 |
-| Step 4 | `/workflows:review` | 代码审查 |
-| Step 5 | `/workflows:compound` | 记录解决方案 |
-| Step 6 | `/workflows:save` | 保存项目上下文 |
+| 命令 | 说明 |
+|------|------|
+| `/workflows:brainstorm` | 探索需求和方案 |
+| `/workflows:plan` | 创建实施计划 |
+| `/workflows:work` | 执行工作计划 |
+| `/workflows:review` | 代码审查 |
+
+**独立工具（手动调用）：**
+
+| 命令 | 说明 |
+|------|------|
+| `/workflows:compound` | 记录解决方案（可选） |
+| `/workflows:sync-upstream` | 检测上游更新 |
+| `/workflows:pr` | 创建 PR |
 
 **别名兼容**: 所有命令均有 `/ce:*` 别名（如 `/ce:plan` → `/workflows:plan`）
 
@@ -190,8 +196,13 @@ description: ① 描述内容
 
 **流程链路**：
 ```
-brainstorm → plan → [deepen-plan] → [plan_review] → work → review → [compound] → save
+brainstorm → plan → [deepen-plan] → [plan_review] → work → review
 ```
+
+**可选工具（手动调用）**：
+- `/workflows:compound` - 记录解决方案
+- `/workflows:sync-upstream` - 检测上游更新
+- `/workflows:pr` - 创建 PR
 
 **快速验证**：
 ```bash

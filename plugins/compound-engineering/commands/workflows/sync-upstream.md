@@ -323,6 +323,5 @@ Based on selection:
 
 | 命令 | 关系 |
 |------|------|
-| `/workflows:load` | 加载项目上下文（可在 sync 前运行） |
 | `/workflows:plan` | 自动检测 docs/sync-reports/ 中的报告，创建整合计划 |
 | `/workflows:work` | 执行整合工作 |

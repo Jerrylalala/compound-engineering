@@ -1,6 +1,6 @@
 ---
 name: workflows:work
-description: "Step 3: 高效执行工作计划（1任务=标准，≥2任务=自动Subagent）"
+description: "高效执行工作计划（1任务=标准，≥2任务=自动Subagent）"
 argument-hint: "[plan file, specification, or todo file path]"
 ---
 

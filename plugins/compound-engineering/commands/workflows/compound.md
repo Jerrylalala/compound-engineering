@@ -1,6 +1,6 @@
 ---
 name: workflows:compound
-description: "Step 5: 记录已解决的问题，积累团队知识"
+description: "记录已解决的问题，积累团队知识"
 argument-hint: "[optional: brief context about the fix]"
 ---
 
@@ -277,12 +277,11 @@ This documentation will be searchable for future reference when similar
 issues occur in the Email Processing or Brief System modules.
 
 What's next?
-1. 运行 `/workflows:save` - 保存项目上下文（推荐）
-2. Link related documentation
-3. Update CHANGELOG.md (if this was a feature/fix)
-4. Update CLAUDE.md Key Learnings (if important lesson)
-5. View documentation
-6. Other
+1. 完成 - 不需要额外操作（推荐）
+2. Update CHANGELOG.md (if this was a feature/fix)
+3. Update CLAUDE.md Key Learnings (if important lesson)
+4. View documentation
+5. Other
 ```
 
 ### Workflow Handoff
@@ -292,14 +291,14 @@ After displaying the success output above, use **AskUserQuestion tool** to prese
 **Question:** "解决方案已记录。下一步？"
 
 **Options:**
-1. **运行 `/workflows:save`** - 保存项目上下文（推荐）
+1. **完成** - 不需要额外操作（推荐）
 2. **更新 CHANGELOG** - 更新 CHANGELOG.md 记录本次修复
-3. **完成** - 不需要额外操作
+3. **查看文档** - 查看生成的文档内容
 
 Based on selection:
-- **`/workflows:save`** → 调用 `/workflows:save` 保存项目状态
-- **更新 CHANGELOG** → 协助更新 CHANGELOG.md
 - **完成** → 结束流程
+- **更新 CHANGELOG** → 协助更新 CHANGELOG.md
+- **查看文档** → 读取并展示生成的文档
 
 ## The Compounding Philosophy
 

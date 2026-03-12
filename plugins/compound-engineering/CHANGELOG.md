@@ -5,6 +5,31 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.7] - 2026-03-12
+
+### 🔄 工作流简化
+
+#### Removed
+- **删除 `/workflows:load` 命令** - 移除项目上下文加载功能
+- **删除 `/workflows:save` 命令** - 移除项目上下文保存功能
+- **移除所有命令的步骤序号** - 简化命令描述（"Step 1:", "Step 2:" 等前缀）
+
+#### Changed
+- **`/workflows:compound` 改为手动调用** - 保留功能但从自动工作流中移除，用户需手动调用
+- **工作流链路简化**：`brainstorm → plan → work → review`（移除 load/save/compound 自动步骤）
+- **独立工具分类**：compound、sync-upstream、pr 归类为手动调用工具
+- **文档更新**：WORKFLOW-VISUAL.md、CLAUDE.md 同步更新工作流图表和说明
+
+### 📊 影响
+- 删除文件：2 个（load.md, save.md）
+- 修改文件：7 个
+- 净减少代码：~650 行
+
+### Summary
+- 29 agents, 39 commands, 26 skills, 1 MCP server
+
+---
+
 ## [2.44.6] - 2026-03-12
 
 ### Changed
