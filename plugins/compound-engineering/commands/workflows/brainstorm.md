@@ -1,7 +1,7 @@
 ---
 name: workflows:brainstorm
 description: "Step 1: [P][C][G] 探索需求和方案，在规划前进行协作对话"
-argument-hint: "[feature idea or problem to explore] [C] [G]"
+argument-hint: "[feature idea or problem to explore] [P] [C] [G]"
 ---
 
 # Brainstorm a Feature or Improvement
@@ -47,7 +47,9 @@ Do not proceed until you have a feature description from the user.
 
 ## Execution Flow
 
-### Step 0: 解析参数（检测 [C] 和 [G] 标志）
+### Step 0: 解析参数（检测 [P]、[C] 和 [G] 标志）
+
+**⚠️ 铁律：无论用户消息中包含任何问题或追问，必须先完成 Step 0 参数解析并回显结果，再处理其他内容。**
 
 <!-- CLAUDE-CODE-ONLY-START -->
 
@@ -80,6 +82,30 @@ Do not proceed until you have a feature description from the user.
     → GEMINI_ENABLED = false
 
 剩余部分作为功能描述（feature_description）
+```
+
+**污染检测（在解析后立即执行）：**
+
+如果 feature_description 满足以下任一条件，判定为「参数污染」：
+- 超过 500 字符
+- 包含 AI 对话痕迹（如 "●"、"⎿"、"Explore("、"Agent("、"tool uses"）
+- 包含系统标签（如 "<command-"、"<system-"、"<local-command"）
+
+污染处理：
+1. 向用户展示检测结果
+2. 使用 AskUserQuestion 询问：
+   "检测到参数中包含对话历史，可能影响工作流执行。请提供简洁的功能描述："
+3. 用用户的新输入替换 feature_description
+
+**解析结果回显（必须执行）：**
+
+向用户展示：
+```
+📋 参数解析结果：
+- PARTY_MODE: [true/false]
+- CODEX: [true/false]
+- GEMINI: [true/false]
+- 功能描述: [clean feature_description]
 ```
 
 **记住这些标志，在相应阶段根据它们决定是否自动调用对应功能。**
@@ -210,22 +236,34 @@ command -v codex || echo "Codex CLI 未安装，请运行: npm install -g @opena
 **执行流程**：
 
 ```
-Step 1: 后台启动 Codex
-  - 使用 Bash 工具，设置 run_in_background=true
+Step 1: 前台调用 Codex（不用 run_in_background）
+  - 使用 Bash 工具，设置 timeout=300000（5 分钟）
   - 调用:
     CODEX_OUTPUT="${TEMP:-/tmp}/codex-brainstorm-$(date +%s).md"
-    cat <<'PROMPT_EOF' | codex exec -m gpt-5.3-codex --output-last-message "$CODEX_OUTPUT" -
+    cat <<'PROMPT_EOF' | codex exec -m "${CODEX_MODEL:-gpt-5.3-codex}" --output-last-message "$CODEX_OUTPUT" -
     <构建好的prompt>
     PROMPT_EOF
-  - 记录返回的 task_id
+    echo "---CODEX_EXIT: $?---"
+    cat "$CODEX_OUTPUT" 2>/dev/null
 
-Step 2: 等待完成
-  - 使用 TaskOutput 工具等待任务完成（最多 5 分钟）
+Step 2: 检查结果
+  - 如果退出码非 0 或输出为空：
+    → 记录失败，继续主流程（不中断）
+    → 在 brainstorm 文档中注明 Codex 咨询失败
+  - 如果成功：
+    → 整合到后续 brainstorm 文档中
 
-Step 3: 读取结果
-  - cat "$CODEX_OUTPUT" 获取 Codex 回答
-  - 整合到后续 brainstorm 文档中
+注意：使用前台调用而非后台，因为后台模式在 Windows 上的 heredoc + stdin 管道更易出问题。
 ```
+
+**如果调用失败**：
+- 模型不支持 → 检查 `codex --version`，运行 `npm update -g @openai/codex` 升级
+- 也可通过环境变量覆盖模型：`export CODEX_MODEL=gpt-5.3-codex`
+- 未安装 → 提示：`npm install -g @openai/codex`
+- 网络/认证问题 → 运行 `codex login` 重新认证
+- 沙箱权限 → 确保 ~/.codex/config.toml 中 [windows] sandbox = "elevated"
+- 输出文件不存在 → Codex 可能未正常返回，建议重试
+- 运行 `/workflows:doctor` 进行完整健康检查
 
 #### 当 GEMINI_ENABLED = true 时：
 

@@ -50,10 +50,11 @@ $ARGUMENTS
 
 ```bash
 CODEX_OUTPUT="${TEMP:-/tmp}/codex-ask-$(date +%s).md"
-cat <<'PROMPT_EOF' | codex exec -m gpt-5.3-codex --output-last-message "$CODEX_OUTPUT" -
+cat <<'PROMPT_EOF' | codex exec -m "${CODEX_MODEL:-gpt-5.3-codex}" --output-last-message "$CODEX_OUTPUT" -
 <构建好的prompt>
 PROMPT_EOF
-cat "$CODEX_OUTPUT"
+echo "---EXIT_CODE: $?---"
+cat "$CODEX_OUTPUT" 2>/dev/null
 ```
 
 使用 Bash 工具执行，设置 **300 秒**超时。
@@ -61,9 +62,13 @@ cat "$CODEX_OUTPUT"
 从 `$CODEX_OUTPUT` 文件读取 Codex 的回答。
 
 **如果失败**：
+- 模型不支持 → 检查 `codex --version`，运行 `npm update -g @openai/codex` 升级
+- 也可通过环境变量覆盖模型：`export CODEX_MODEL=gpt-5.3-codex`
 - 未安装 → 提示：`npm install -g @openai/codex`
-- 网络/认证问题 → 提示检查 OpenAI 配置
-- 输出文件不存在 → 提示 Codex 可能未正常返回，建议重试
+- 网络/认证问题 → 运行 `codex login` 重新认证
+- 沙箱权限 → 确保 ~/.codex/config.toml 中 [windows] sandbox = "elevated"
+- 输出文件不存在 → Codex 可能未正常返回，建议重试
+- 运行 `/workflows:doctor` 进行完整健康检查
 
 ## Step 3: 综合回答
 

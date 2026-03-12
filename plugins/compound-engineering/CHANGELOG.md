@@ -5,6 +5,32 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.5] - 2026-03-12
+
+### Fixed
+- 修复 `/workflows:brainstorm [P][C]` 参数被对话噪音淹没、跳过解析的问题
+- argument-hint 补充缺失的 `[P]` 参数提示
+- Step 0 标题修正为同时包含 `[P]`、`[C]`、`[G]` 三个标志
+
+### Changed
+- **Step 0 加硬门控**：添加铁律声明，强制在处理其他内容前先完成参数解析
+- **参数污染检测**：自动识别对话历史混入参数（>500字符、AI 对话痕迹、系统标签），触发用户重新输入
+- **解析结果回显**：解析后必须向用户展示 PARTY_MODE/CODEX/GEMINI 状态和清洗后的功能描述
+- **Codex 调用改前台模式**：从 `run_in_background=true` 改为前台调用（`timeout=300000`），避免 Windows 上 heredoc + stdin 管道问题
+- **Codex 模型可配置**：硬编码 `gpt-5.3-codex` 改为 `${CODEX_MODEL:-gpt-5.3-codex}` 环境变量 fallback
+- **Codex 失败诊断增强**：brainstorm.md 和 codex.md 统一增加 7 项失败诊断提示（版本升级、环境变量、认证、沙箱权限、doctor 检查等）
+- **Codex 失败不中断主流程**：调用失败时记录并在文档中注明，不阻断 brainstorm 主流程
+
+### Context
+- 问题来源：用户使用 `[P][C]` 参数时，AI 被对话上下文竞争覆盖，跳过参数解析
+- 根本原因：prompt 中的「软约束」在长对话中被淹没，缺少硬门控机制
+- 解决方案：铁律声明 + 污染检测 + 强制回显三重防护
+
+### Summary
+- 29 agents, 43 commands, 26 skills, 1 MCP server
+
+---
+
 ## [2.44.4] - 2026-03-11
 
 ### Fixed
