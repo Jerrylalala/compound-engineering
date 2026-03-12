@@ -5,6 +5,22 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.6] - 2026-03-12
+
+### Changed
+- 项目 `CLAUDE.md` 新增「本项目的特殊性」段落（8 行），说明本项目是胶水编程的元层
+- 插件 `CLAUDE.md` 简化「设计哲学」段落（2 行），引用 `/glue-coding` 技能
+
+### Removed
+- 删除过度工程的胶水编程文档（209 行冗余内容）
+- 删除工作流中的强制检查点（会造成认知干扰）
+
+**架构决策**：
+- 胶水编程思维已在全局 `~/.claude/CLAUDE.md` 定义（默认生效）
+- 本项目是元层（创建编排组件本身），不需要在工作流中强制检查"有没有现成库"
+- 最小化文档（8 行）足以消除新人推断成本，维护成本降低 98%
+- 详见：`docs/solutions/architecture-decisions/glue-programming-implementation-analysis-2026-03-12.md`
+
 ## [2.44.5] - 2026-03-12
 
 ### Fixed

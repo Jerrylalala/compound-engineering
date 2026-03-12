@@ -1,5 +1,9 @@
 # Compounding Engineering Plugin
 
+## 设计哲学
+
+本插件是编排层：Skills、Agents、Commands 组合现有工具（Claude Code、git、GitHub CLI、Codex、Gemini、Context7）。详见 `/glue-coding` 技能。
+
 ## 技能检查协议（每次会话自动生效）
 
 **铁律：如果有技能可能适用于你的任务，你必须使用它。**
