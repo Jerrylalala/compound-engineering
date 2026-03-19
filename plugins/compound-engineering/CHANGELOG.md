@@ -5,6 +5,19 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.9] - 2026-03-19
+
+### 🐛 修复 & 🚀 增强
+
+#### Fixed
+- **party-mode 退出条件过于敏感** - 改为白名单机制：只有明确的退出指令才退出，「好的，但是…」+ 新约束不再触发退出
+
+#### Added
+- **party-mode 执行链分析** - 功能/bug 类话题时，代理必须推演完整因果链（触发点→分支→异常→解法）
+- **全局需求理解协议** - 用户描述需求时，Claude 必须先重述意图并等用户确认，再开始工作
+
+---
+
 ## [2.44.7] - 2026-03-12
 
 ### 🔄 工作流简化
