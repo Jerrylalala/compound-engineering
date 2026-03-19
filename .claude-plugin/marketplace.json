@@ -12,7 +12,7 @@
                     {
                         "name":  "compound-engineering",
                         "description":  "AI-powered development tools that get smarter with every use. Make each unit of engineering work easier than the last. Includes 29 specialized agents, 39 commands, and 26 skills.",
-                        "version":  "2.44.8",
+                        "version":  "2.44.9",
                         "author":  {
                                        "name":  "Jerry Jian (fork of Kieran Klaassen)",
                                        "url":  "https://github.com/Jerrylalala"
