@@ -413,7 +413,7 @@ Next: Run `/workflows:plan` when ready to implement.
 - User can activate anytime with `[P]` or "开启派对模式"
 - In party mode: 2-3 agents discuss from different perspectives
 - Each agent maintains consistent personality and communication style
-- User can exit with `[E]` or "结束派对"
+- User can exit with `[E]`, "结束派对", or a pure execution command ("直接实现", "去做吧"). Ambiguous messages default to continuing. See party-mode skill for full state transition rules.
 - Party mode output integrates into the brainstorm document
 
 NEVER CODE! Just explore and document decisions.

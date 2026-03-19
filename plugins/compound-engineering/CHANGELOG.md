@@ -5,6 +5,17 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.10] - 2026-03-19
+
+### 🐛 修复（基于三方代码审查）
+
+#### Fixed
+- **party-mode 状态切换规则重写** - 改为意图优先的状态机，删除冗余的白名单+黑名单双列表，用"继续/退出/歧义三分类"替代
+- **执行链分析位置修正** - 移至代理发言步骤内，改为"至少一个代理"触发，不再强制所有代理推演
+- **brainstorm.md 同步更新** - 与 SKILL.md 的状态切换规则保持一致
+
+---
+
 ## [2.44.9] - 2026-03-19
 
 ### 🐛 修复 & 🚀 增强
