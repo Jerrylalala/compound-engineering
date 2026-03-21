@@ -5,6 +5,17 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.12] - 2026-03-22
+
+### 🚀 新增
+
+#### Added
+- **新代理：周运维（DevOps 专家）** - CI/CD、容器、部署策略、可观测性、故障恢复
+- **新代理：谭多语（i18n 专家）** - 国际化架构、本地化适配、RTL 支持、翻译流程
+- **_index.md 更新** - 新增领域匹配：`部署/运维/DevOps`、`国际化/多语言`
+
+---
+
 ## [2.44.11] - 2026-03-22
 
 ### 🚀 新增
