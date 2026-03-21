@@ -5,6 +5,16 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.11] - 2026-03-22
+
+### 🚀 新增
+
+#### Added
+- **新代理：韩系统（设计系统专家）** - 负责 CSS 变量/design token 分析、主题一致性、a11y 技术层、实现偏离检测；与林小雨（感知层）+ 张晓峰（修复层）三层互补
+- **_index.md 更新** - 新增领域匹配行：`CSS/主题/设计系统 → designer + design-system + developer`
+
+---
+
 ## [2.44.10] - 2026-03-19
 
 ### 🐛 修复（基于三方代码审查）

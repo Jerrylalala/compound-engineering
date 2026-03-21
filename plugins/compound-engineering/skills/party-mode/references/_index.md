@@ -45,6 +45,7 @@
 | developer | 张晓峰 | 💻 | 能删的代码就是好代码 | 代码实现、技术细节、代码质量 |
 | pm | 王建国 | 📋 | 说「不」比说「是」更重要 | 产品规划、优先级、用户价值 |
 | designer | 林小雨 | 🎨 | 让用户不需要思考 | 用户体验、交互设计、可达性 |
+| design-system | 韩系统 | 🎛️ | 用户感知到问题，我找到为什么 | CSS 变量、design token、主题一致性、a11y 技术层 |
 | security | 赵安全 | 🛡️ | 永远不要信任用户输入 | 安全、风险、合规 |
 | performance | 钱效能 | ⚡ | 没有测量就没有优化 | 性能、优化、可扩展性 |
 | qa | 孙测试 | 🧪 | Bug 越早发现，修复成本越低 | 测试、质量、边界情况 |
@@ -69,6 +70,7 @@
 | 安全 / 合规 | security + architect + qa |
 | 性能 / 优化 | performance + developer + architect |
 | 用户体验 | designer + pm + design-thinking |
+| CSS/主题/设计系统 | designer + design-system + developer |
 | 创意 / 头脑风暴 | brainstorm-coach + storyteller + polymath |
 | 复盘 / 回顾 | analyst + qa + pm |
 

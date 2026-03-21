@@ -329,5 +329,5 @@ MIT 许可证，文档齐全。大概 20 行代码就能跑起来。」
 1. 先读取 [代理索引](./references/_index.md) 了解全部 14 个代理
 2. 根据话题领域选择 2-3 个代理
 3. 按需加载对应人格文件：
-   - 核心团队：[architect](./references/core/architect.md) | [analyst](./references/core/analyst.md) | [developer](./references/core/developer.md) | [pm](./references/core/pm.md) | [designer](./references/core/designer.md) | [security](./references/core/security.md) | [performance](./references/core/performance.md) | [qa](./references/core/qa.md)
+   - 核心团队：[architect](./references/core/architect.md) | [analyst](./references/core/analyst.md) | [developer](./references/core/developer.md) | [pm](./references/core/pm.md) | [designer](./references/core/designer.md) | [design-system](./references/core/design-system.md) | [security](./references/core/security.md) | [performance](./references/core/performance.md) | [qa](./references/core/qa.md)
    - 创意团队：[brainstorm-coach](./references/creative/brainstorm-coach.md) | [design-thinking](./references/creative/design-thinking.md) | [storyteller](./references/creative/storyteller.md) | [innovator](./references/creative/innovator.md) | [presenter](./references/creative/presenter.md) | [polymath](./references/creative/polymath.md)
