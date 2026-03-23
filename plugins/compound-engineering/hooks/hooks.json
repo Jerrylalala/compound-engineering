@@ -1,4 +1,25 @@
 {
-  "description": "Compound engineering plugin hooks",
-  "hooks": {}
+  "description": "Compound engineering plugin hooks - 音效通知 + 技能检查",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/notify-sound.sh stop"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/notify-sound.sh notification"
+          }
+        ]
+      }
+    ]
+  }
 }
