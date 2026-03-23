@@ -5,6 +5,29 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.13] - 2026-03-23
+
+### 🚀 新增
+
+#### Added
+- **插件自带音效通知 Hook** - Stop 和 Notification 事件自动播放音效，安装插件后无需手动配置
+  - 跨平台支持：macOS（afplay）、Windows（SoundPlayer）、Linux（paplay/aplay）
+  - 用户可通过 `~/.claude/sounds/done.wav` 和 `confirm.wav` 自定义音效
+  - 参考社区最佳实践：[wasabeef/claude-code-cookbook](https://github.com/wasabeef/claude-code-cookbook)
+
+### 🔧 修复
+
+#### Changed
+- **移除 sync-upstream.md 中的 speak.ps1 调用** - 语音通知已由插件 hooks 自动处理
+- **清理旧版 TTS 语音残留** - 不再依赖 SAPI.SpVoice 的 TTS 方式
+
+### ⚠️ 迁移说明
+
+如果你之前在 `~/.claude/settings.json` 中手动配置了 Stop/Notification hooks 的音效，
+更新到此版本后请移除 settings.json 中的 hooks 配置，避免音效重复播放。
+
+---
+
 ## [2.44.12] - 2026-03-22
 
 ### 🚀 新增

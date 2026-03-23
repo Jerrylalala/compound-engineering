@@ -282,19 +282,6 @@ items:
 4. **暂不需要**：[列表]
 ```
 
-#### 3.2 语音通知
-
-如果 `$HOME/.claude/hooks/speak.ps1` 文件存在：
-```bash
-# 检查脚本是否存在
-powershell -c "Test-Path '$HOME/.claude/hooks/speak.ps1'"
-```
-
-- 发现高相关变更 → `powershell -ExecutionPolicy Bypass -File "$HOME/.claude/hooks/speak.ps1" "发现重要上游更新"`
-- 所有仓库无更新 → `powershell -ExecutionPolicy Bypass -File "$HOME/.claude/hooks/speak.ps1" "上游无新更新"`
-
-如果脚本不存在 → 跳过语音，仅文字输出。
-
 ### Phase 4: 讨论
 
 #### 4.1 展示摘要
