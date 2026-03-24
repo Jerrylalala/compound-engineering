@@ -1,0 +1,2 @@
+# Shell 脚本始终使用 LF 换行符（防止 Windows 上 Git 自动转换为 CRLF 导致 bash 执行失败）
+*.sh text eol=lf

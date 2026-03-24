@@ -16,8 +16,10 @@ play_sound() {
     # macOS
     afplay "$sound_file" &
   elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    # Windows (Git Bash / MSYS2)
-    powershell -c "(New-Object Media.SoundPlayer '$sound_file').PlaySync()" &
+    # Windows (Git Bash / MSYS2) - 转换 MSYS 路径为 Windows 路径
+    local win_path
+    win_path=$(cygpath -w "$sound_file" 2>/dev/null || echo "$sound_file")
+    powershell -c "(New-Object Media.SoundPlayer '$win_path').PlaySync()"
   elif [[ "$OSTYPE" == "linux"* ]]; then
     # Linux
     if command -v paplay &>/dev/null; then
@@ -39,9 +41,9 @@ play_system_sound() {
     fi
   elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
     if [[ "$sound_type" == "done" ]]; then
-      powershell -c "(New-Object Media.SoundPlayer 'C:/Windows/Media/tada.wav').PlaySync()" &
+      powershell -c "(New-Object Media.SoundPlayer 'C:/Windows/Media/tada.wav').PlaySync()"
     else
-      powershell -c "(New-Object Media.SoundPlayer 'C:/Windows/Media/Windows Notify.wav').PlaySync()" &
+      powershell -c "(New-Object Media.SoundPlayer 'C:/Windows/Media/Windows Notify.wav').PlaySync()"
     fi
   elif [[ "$OSTYPE" == "linux"* ]]; then
     # Linux: 用 beep 作为 fallback
