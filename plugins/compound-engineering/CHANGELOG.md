@@ -5,6 +5,32 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.44.15] - 2026-03-24
+
+### 🚀 新增
+
+#### Added
+- **Review 报告裁决过滤可选展开** - `/workflows:review` 的 Summary Report 新增裁决过滤统计区块（默认折叠），展示 refuted/ambiguous/dependency collapse 数量
+- **Review Handoff 新增选项** - 「查看被过滤的建议」选项，与 `/plan_review` 的选项 4 对齐
+- **WORKFLOW-VISUAL.md 更新** - 流程图补充 Step 4.5 事实核查 + Step 4.6 裁决过滤的可视化
+
+### 📊 影响
+- 修改文件：4 个（review.md、WORKFLOW-VISUAL.md、marketplace.json、plugin.json）
+- 用户可见性改进：裁决链从完全静默变为可选展开
+
+---
+
+## [2.44.14] - 2026-03-24
+
+### 🚀 新增
+
+#### Added
+- **审查代理四段式裁决链** - 在 `/workflows:review` 和 `/plan_review` 中插入 Fact-Check + Adjudicator 阶段，防止事实性错误直接影响用户决策
+- **13 个 review agent 结构化输出** - 所有审查代理新增事实性声明规范（铁律）和 Structured Findings 格式
+- **伪共识检测** - Dependency Collapse 机制：多个代理基于同一前提的 finding 合并为 1 票
+
+---
+
 ## [2.44.13] - 2026-03-23
 
 ### 🚀 新增

@@ -437,6 +437,14 @@ After creating all todo files, present comprehensive summary:
 - **🟡 IMPORTANT (P2):** [count] - Should Fix
 - **🔵 NICE-TO-HAVE (P3):** [count] - Enhancements
 
+### 🔽 裁决过滤统计：[N] 条被过滤
+
+- ❌ refuted: [X] 条（事实核查未通过）
+- ⚠️ ambiguous → P3: [Y] 条（证据不足，已降级）
+- 🔗 dependency collapse: [Z] 条（伪共识合并）
+
+> 输入「展开过滤详情」或选择 Handoff 选项「查看被过滤的建议」查看每条被过滤 finding 的详情（原始声明、来源代理、验证过程、过滤原因）
+
 ### Created Todo Files:
 
 **P1 - Critical (BLOCKS MERGE):**
@@ -531,11 +539,13 @@ After all findings are addressed (or triaged), use **AskUserQuestion tool**:
 **Options:**
 1. **记录解决方案** - 运行 `/workflows:compound` 记录本次解决的问题（推荐，如有非 trivial 修复）
 2. **创建 PR `/workflows:pr`** - 创建 Pull Request 并可选合并
-3. **完成** - 审查流程结束，无需额外操作
+3. **查看被过滤的建议** - 查看事实核查过程中被移除或降级的建议详情
+4. **完成** - 审查流程结束，无需额外操作
 
 Based on selection:
 - **记录解决方案** → 调用 `/workflows:compound`
 - **创建 PR `/workflows:pr`** → 调用 `/workflows:pr`
+- **查看被过滤的建议** → 展示所有被 Adjudicator 处理的建议（原始声明、来源代理、验证过程、过滤原因），展示后回到选项菜单
 - **完成** → 结束流程
 
 ### 6. End-to-End Testing (Optional)
