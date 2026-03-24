@@ -28,6 +28,5 @@
                                         "type":  "http",
                                         "url":  "https://mcp.context7.com/mcp"
                                     }
-                   },
-    "hooks":  "./hooks/hooks.json"
+                   }
 }
