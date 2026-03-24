@@ -260,6 +260,23 @@ Complete system context map with component interactions
 
 Run the Task code-simplicity-reviewer() to see if we can simplify the code.
 
+### 4.5. Fact-Check Phase（代理审查完成后自动执行）
+
+对所有代理产出的 Structured Findings 进行事实核查。
+
+**效率控制：** 如果所有代理产出的 finding 总数 > 20，只对 type=dead_work/exists/missing 且 proposed_action 涉及代码修改的 finding 执行 L2 验证。其余 finding 标记为 `not_checked`。
+
+执行与 plan_review 相同的三步验证流程（Step 1 提取 → Step 2 分级验证 → Step 3 标注），差异点：
+- **Evidence 验证基于 diff**：使用 `git diff` 确认 finding 引用的代码行在当前 PR 中是否存在
+- **Scope Check 使用 PR 文件列表**：只在 PR 变更的文件中搜索，而非全项目
+
+### 4.6. Adjudicator Phase
+
+执行与 plan_review 相同的四条裁决规则（过滤已证伪的高风险建议、Dependency Collapse 伪共识检测、降级未验证的高风险建议、保留已验证的建议）。
+
+额外规则（code review 特有）：
+- **规则 5: Protected Artifacts 过滤** — 任何建议删除 `docs/plans/*.md` 或 `docs/solutions/*.md` 的 finding，自动标记为 `refuted`（与 Step 1 Protected Artifacts 一致）
+
 ### 5. Findings Synthesis and Todo Creation Using file-todos Skill
 
 <critical_requirement> ALL findings MUST be stored in the todos/ directory using the file-todos skill. Create todo files immediately after synthesis - do NOT present findings for user approval first. Use the skill for structured todo management. </critical_requirement>
@@ -275,9 +292,12 @@ Remove duplicates, prioritize by severity and impact.
 
 - [ ] Collect findings from all parallel agents
 - [ ] Discard any findings that recommend deleting or gitignoring files in `docs/plans/` or `docs/solutions/` (see Protected Artifacts above)
+- [ ] **Discard findings with `verification: refuted`**（事实核查未通过的建议）
+- [ ] **将 `verification: ambiguous` 的高风险 finding 降级为 P3**，并标注需人工确认
 - [ ] Categorize by type: security, performance, architecture, quality, etc.
 - [ ] Assign severity levels: 🔴 CRITICAL (P1), 🟡 IMPORTANT (P2), 🔵 NICE-TO-HAVE (P3)
 - [ ] Remove duplicate or overlapping findings
+- [ ] **Apply dependency collapse**: 多个 finding 基于同一前提时合并为一条
 - [ ] Estimate effort for each finding (Small/Medium/Large)
 
 </synthesis_tasks>
