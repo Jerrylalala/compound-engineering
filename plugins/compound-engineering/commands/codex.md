@@ -50,7 +50,7 @@ $ARGUMENTS
 
 ```bash
 CODEX_OUTPUT="${TEMP:-/tmp}/codex-ask-$(date +%s).md"
-cat <<'PROMPT_EOF' | codex exec -m "${CODEX_MODEL:-gpt-5.3-codex}" --output-last-message "$CODEX_OUTPUT" -
+cat <<'PROMPT_EOF' | codex exec -m "${CODEX_MODEL:-gpt-5.4}" --output-last-message "$CODEX_OUTPUT" -
 <构建好的prompt>
 PROMPT_EOF
 echo "---EXIT_CODE: $?---"
@@ -63,7 +63,7 @@ cat "$CODEX_OUTPUT" 2>/dev/null
 
 **如果失败**：
 - 模型不支持 → 检查 `codex --version`，运行 `npm update -g @openai/codex` 升级
-- 也可通过环境变量覆盖模型：`export CODEX_MODEL=gpt-5.3-codex`
+- 也可通过环境变量覆盖模型：`export CODEX_MODEL=gpt-5.4`
 - 未安装 → 提示：`npm install -g @openai/codex`
 - 网络/认证问题 → 运行 `codex login` 重新认证
 - 沙箱权限 → 确保 ~/.codex/config.toml 中 [windows] sandbox = "elevated"
