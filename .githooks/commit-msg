@@ -1,0 +1,68 @@
+#!/bin/bash
+# 项目级 commit-msg hook：同时支持 Conventional Commits 和项目原生格式
+# 文件位置：.githooks/commit-msg（项目内，优先于全局 ~/.githooks）
+# 启用方式：git config core.hooksPath .githooks（已在项目 git config 中设置）
+#
+# 允许格式 1（Conventional Commits）：
+#   <type>(<scope>): <description>
+#   type: feat fix hotfix refactor chore docs test perf ci build revert
+#
+# 允许格式 2（项目原生格式）：
+#   Add <description>
+#   Update <description>
+#   Fix <description>
+#   Remove <description>
+#
+# 跳过校验：git commit --no-verify
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# 跳过 merge commit 和 revert commit
+if echo "$COMMIT_MSG" | grep -qE '^(Merge|Revert) '; then
+  exit 0
+fi
+
+# 跳过空消息
+if [ -z "$(echo "$COMMIT_MSG" | tr -d '[:space:]')" ]; then
+  exit 0
+fi
+
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -1)
+
+# 格式 1：Conventional Commits
+CONVENTIONAL_PATTERN='^(feat|fix|hotfix|refactor|chore|docs|test|perf|ci|build|revert)(\([a-zA-Z0-9_/-]+\))?: .{1,100}$'
+
+# 格式 2：项目原生格式（Add/Update/Fix/Remove + 空格 + 描述）
+NATIVE_PATTERN='^(Add|Update|Fix|Remove|Improve|Refactor|Bump) .{1,100}$'
+
+if echo "$FIRST_LINE" | grep -qE "$CONVENTIONAL_PATTERN"; then
+  exit 0
+fi
+
+if echo "$FIRST_LINE" | grep -qE "$NATIVE_PATTERN"; then
+  exit 0
+fi
+
+echo ""
+echo "❌ commit 消息格式不符"
+echo ""
+echo "   你的消息：${FIRST_LINE}"
+echo ""
+echo "   支持以下两种格式："
+echo ""
+echo "   格式 1 - Conventional Commits（推荐）："
+echo "     feat(scope): 描述"
+echo "     fix: 修复某问题"
+echo "     chore: 更新依赖"
+echo "     type: feat fix hotfix refactor chore docs test perf ci build revert"
+echo ""
+echo "   格式 2 - 项目原生格式："
+echo "     Add 新功能描述"
+echo "     Update 更新描述"
+echo "     Fix 修复描述"
+echo "     Remove 删除描述"
+echo ""
+echo "   跳过校验：git commit --no-verify"
+echo ""
+exit 1

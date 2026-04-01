@@ -1,0 +1,89 @@
+#!/bin/bash
+# 项目级 pre-commit hook：全局保护 + 组件版本一致性检查
+# 文件位置：.githooks/pre-commit（项目内，优先于全局 ~/.githooks）
+# 启用方式：git config core.hooksPath .githooks（已在项目 git config 中设置）
+
+# === 第一道防线：阻止在 main/master 上直接 commit ===
+current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
+  echo ""
+  echo "❌ 已阻止：不允许在 ${current_branch} 分支上直接 commit"
+  echo "   请先创建功能分支：git checkout -b feat/your-feature"
+  echo ""
+  echo "   如果你确定要直接提交（例如 README.md 修改），使用："
+  echo "   git commit --no-verify"
+  echo ""
+  exit 1
+fi
+
+# === 第二道防线：密钥扫描（仅当 gitleaks 已安装）===
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "🔍 运行 gitleaks 密钥扫描..."
+  gitleaks protect --staged --no-banner --exit-code 1 2>/dev/null
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ gitleaks 检测到潜在密钥！请检查 staged 文件。"
+    echo "   如果确认是误报，可用：git commit --no-verify"
+    echo "   查看详情：gitleaks protect --staged --verbose"
+    echo ""
+    exit 1
+  fi
+  echo "✅ 密钥扫描通过"
+else
+  staged_files=$(git diff --cached --name-only 2>/dev/null)
+  if [ -n "$staged_files" ]; then
+    text_files=$(echo "$staged_files" | grep -v -E '\.(png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|mp4|zip|tar|gz|bin|exe|dll|so|dylib|lock|sum)$' 2>/dev/null)
+    if [ -n "$text_files" ]; then
+      leak=$(git diff --cached -- $text_files 2>/dev/null | grep -E '^\+' | grep -v '^\+\+\+' | grep -iE '(api[_-]?key|secret[_-]?key|private[_-]?key|access[_-]?token|auth[_-]?token|password|passwd|credential)[[:space:]]*[=:][[:space:]]*[A-Za-z0-9/+_-]{20,}' 2>/dev/null)
+      if [ -n "$leak" ]; then
+        echo ""
+        echo "⚠️  检测到可能的密钥（正则扫描）："
+        echo "$leak" | head -5
+        echo ""
+        echo "   请确认这不是真实密钥，或使用：git commit --no-verify 跳过"
+        echo ""
+        exit 1
+      fi
+    fi
+  fi
+fi
+
+# === 第三道防线：组件变更版本提示（项目专属）===
+COMPONENT_FILES_CHANGED=$(git diff --cached --name-only | grep -E "plugins/compound-engineering/(agents|commands|skills)/" || true)
+
+if [ -n "$COMPONENT_FILES_CHANGED" ]; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "⚠️  检测到组件变更，请确认是否已更新版本号"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "变更的组件:"
+    echo "$COMPONENT_FILES_CHANGED"
+    echo ""
+    echo "如果这是新功能/修改，请运行:"
+    echo "  powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch"
+    echo ""
+    echo "如果已更新版本号，请忽略此提示。"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+fi
+
+# === 版本文件一致性检查（项目专属）===
+VERSION_FILES_CHANGED=$(git diff --cached --name-only | grep -E "(marketplace\.json|plugin\.json)" || true)
+
+if [ -n "$VERSION_FILES_CHANGED" ]; then
+    echo "检测到版本文件变更，执行一致性检查..."
+    if [ -f "scripts/check-versions.sh" ]; then
+        bash scripts/check-versions.sh
+        exit $?
+    elif command -v powershell &> /dev/null; then
+        powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+        exit $?
+    else
+        echo "警告: 无法运行版本检查脚本，请手动确认版本号一致性"
+        exit 0
+    fi
+fi
+
+exit 0
