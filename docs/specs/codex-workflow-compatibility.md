@@ -9,6 +9,12 @@ This repository now supports a dual-runtime workflow split:
 
 The bridge between the two runtimes is **shared document protocol**, not shared command implementation.
 
+For this private fork, the Codex-side entrypoints are the three repo-scoped skills:
+
+- `workflows-brainstorm`
+- `workflows-plan`
+- `workflows-review`
+
 ## Non-Goals
 
 - Do not rewrite Claude workflow commands to be runtime-agnostic
@@ -156,7 +162,6 @@ Treat them as the authoritative execution implementation.
 
 Keep Codex entry points in:
 
-- `.codex/prompts/`
 - `.codex/skills/`
 
 If behavior changes, update the compatibility contract first, then update Codex prompts.

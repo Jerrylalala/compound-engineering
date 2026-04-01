@@ -54,15 +54,17 @@ bunx @every-env/compound-plugin install compound-engineering --to gemini
 
 ## Repo-Scoped Codex Workflows
 
-This private fork also includes repo-scoped Codex workflow entry points under `.codex/`.
+This private fork also includes repo-scoped Codex workflow skills under `.codex/skills/`.
 
 Current Codex-owned workflows:
 
-- `/prompts:workflows-brainstorm`
-- `/prompts:workflows-plan`
-- `/prompts:workflows-review`
+- `$workflows-brainstorm`
+- `$workflows-plan`
+- `$workflows-review`
 
-These prompts are designed to write shared artifacts that remain compatible with the Claude workflows in this repository:
+Preferred Codex entrypoint is **skills**, because custom prompts are deprecated and may not be exposed as slash commands in every Codex CLI build.
+
+These workflow skills are designed to write shared artifacts that remain compatible with the Claude workflows in this repository:
 
 - brainstorms go to `docs/brainstorms/`
 - plans go to `docs/plans/`
@@ -77,7 +79,15 @@ For this private fork, future Claude-side development should run the project com
 - `plan`
 - `review`
 - shared document protocol
-- Codex install-chain behavior
+- Codex minimal skill sync behavior
+
+Do not use `install --to codex` as the day-to-day sync path for this private fork's Codex workflows. That installs the full converted plugin.
+
+Use the dedicated minimal sync script instead:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
+```
 
 > Note: `COMPOUND_PLUGIN_GITHUB_SOURCE` only affects this CLI tool. Use temporary env vars, not permanent ones.
 

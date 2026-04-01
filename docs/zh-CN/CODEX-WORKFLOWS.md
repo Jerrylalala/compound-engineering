@@ -5,12 +5,12 @@
 如果你只想知道最短怎么用，按这个顺序：
 
 1. 在当前仓库里打开 Codex
-2. 使用：
+2. 优先使用 skills 入口：
 
 ```text
-/prompts:workflows-brainstorm
-/prompts:workflows-plan
-/prompts:workflows-review
+$workflows-brainstorm
+$workflows-plan
+$workflows-review
 ```
 
 3. 让 Codex 产出共享文档到：
@@ -22,7 +22,7 @@
 /workflows:work docs/plans/<your-plan>.md
 ```
 
-如果你后续修改了本仓库里与 `brainstorm / plan / review` 或 Codex 安装链路相关的功能，开发完成后在 Claude 里执行：
+如果你后续修改了本仓库里与 `brainstorm / plan / review` 或 Codex 最小技能同步相关的功能，开发完成后在 Claude 里执行：
 
 ```text
 /sil
@@ -30,12 +30,11 @@
 
 它是这个仓库的“同步 Codex 适配层”检查步骤。
 
-本仓库现在提供一套 repo-scoped Codex 工作流入口，位置在：
+本仓库现在提供一套 repo-scoped Codex 工作流技能，位置在：
 
-- `.codex/prompts/workflows-brainstorm.md`
-- `.codex/prompts/workflows-plan.md`
-- `.codex/prompts/workflows-review.md`
-- `.codex/skills/compound-workflow-documents/`
+- `.codex/skills/workflows-brainstorm/`
+- `.codex/skills/workflows-plan/`
+- `.codex/skills/workflows-review/`
 
 它们的目标不是替换 Claude 的执行工作流，而是补一层适合 Codex 的“思考与审查层”：
 
@@ -51,32 +50,49 @@
 
 ## 本地直接使用
 
-如果你已经在这个仓库里运行 Codex，且 Codex 会读取 repo-scoped `.codex/`，可以直接使用：
+如果你已经在这个仓库里运行 Codex，推荐直接通过 skills 调用：
 
 ```text
-/prompts:workflows-brainstorm
-/prompts:workflows-plan
-/prompts:workflows-review
+$workflows-brainstorm
+$workflows-plan
+$workflows-review
 ```
+
+更稳的自然语言写法：
+
+```text
+Use $workflows-plan to create a plan for ...
+Use $workflows-brainstorm to explore ...
+Use $workflows-review to review ...
+```
+
+## 为什么不用 `/prompts:` 作为主入口
+
+因为 Codex 官方已经把 custom prompts 标记为 deprecated，而且不同 CLI / UI 版本里不一定还会把它们暴露成可执行 slash commands。
+
+所以本仓库现在的原则是：
+
+- **skills 是主入口**
+- 不再把 `.codex/prompts/` 当成主交互入口
 
 ### 推荐使用顺序
 
 1. 需求不明确时：
 
 ```text
-/prompts:workflows-brainstorm
+$workflows-brainstorm
 ```
 
 2. 需要生成 Claude 可执行的计划时：
 
 ```text
-/prompts:workflows-plan
+$workflows-plan
 ```
 
 3. 需要审查代码或计划时：
 
 ```text
-/prompts:workflows-review
+$workflows-review
 ```
 
 ## 给维护者的规则
@@ -121,26 +137,39 @@ Codex 产物写入：
 
 ## 通过安装链路写入到全局 Codex
 
-当前仓库的 CLI 已支持把 repo-scoped Codex 文件一起带到目标 `.codex`。
+当前仓库已经提供最小同步脚本，只同步这 3 个 Codex workflow skill。
 
-### 安装到默认 `~/.codex`
+### 推荐：同步到默认 `~/.codex`
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
+```
+
+### 同步到自定义 Codex 根目录
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1 -CodexHome "C:\Users\你的用户名\.codex"
+```
+
+安装完成后，目标目录里应包含：
+
+- `skills/workflows-brainstorm/SKILL.md`
+- `skills/workflows-plan/SKILL.md`
+- `skills/workflows-review/SKILL.md`
+
+## 不推荐的做法
+
+不要把下面这条命令当成日常同步 Codex 的方法：
 
 ```bash
 bun run src/index.ts install ./plugins/compound-engineering --to codex
 ```
 
-### 安装到自定义 Codex 根目录
+原因：
 
-```bash
-bun run src/index.ts install ./plugins/compound-engineering --to codex --codex-home "C:\Users\你的用户名\.codex"
-```
-
-安装完成后，目标目录里应包含：
-
-- `prompts/workflows-brainstorm.md`
-- `prompts/workflows-plan.md`
-- `prompts/workflows-review.md`
-- `skills/compound-workflow-documents/SKILL.md`
+- 它会安装整个转换后的插件
+- 会把额外的 `ce-*`、其他 `workflows-*` 也带到 `~/.codex`
+- 不符合“Codex 只保留这 3 个主入口”的目标
 
 ## 兼容性要求
 

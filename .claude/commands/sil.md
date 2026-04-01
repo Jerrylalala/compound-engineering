@@ -1,6 +1,6 @@
 ---
 name: sil
-description: Sync Codex integration layer after changing shared workflows, protocol, or install chain
+description: Sync the minimal Codex workflow layer after changing brainstorm, plan, or review behavior
 ---
 
 # /sil
@@ -15,8 +15,8 @@ Run `/sil` after any of these:
 - changed `plugins/compound-engineering/commands/workflows/plan.md`
 - changed `plugins/compound-engineering/commands/workflows/review.md`
 - changed shared document contract for `docs/brainstorms/` or `docs/plans/`
-- changed Codex install behavior in `src/converters/claude-to-codex.ts`, `src/targets/codex.ts`, or related types
-- changed user-facing Codex workflow docs or README install guidance
+- changed the minimal Codex workflow sync script
+- changed user-facing Codex workflow docs or README guidance
 
 Do not use `/sil` for unrelated changes that do not affect the Codex mirror.
 
@@ -26,10 +26,9 @@ Keep the Codex-side workflow layer aligned without mutating Claude execution wor
 
 Codex-owned layer:
 
-- `.codex/prompts/workflows-brainstorm.md`
-- `.codex/prompts/workflows-plan.md`
-- `.codex/prompts/workflows-review.md`
-- `.codex/skills/compound-workflow-documents/SKILL.md`
+- `.codex/skills/workflows-brainstorm/SKILL.md`
+- `.codex/skills/workflows-plan/SKILL.md`
+- `.codex/skills/workflows-review/SKILL.md`
 
 Shared contract and usage docs:
 
@@ -37,11 +36,9 @@ Shared contract and usage docs:
 - `docs/zh-CN/CODEX-WORKFLOWS.md`
 - `README.md`
 
-Install-chain files when needed:
+Sync mechanism:
 
-- `src/types/codex.ts`
-- `src/converters/claude-to-codex.ts`
-- `src/targets/codex.ts`
+- `scripts/sync-codex-workflows.ps1`
 
 ## Procedure
 
@@ -50,10 +47,15 @@ Install-chain files when needed:
    - plan document structure
    - review output expectations
    - Codex installation or discovery
-2. Update the matching `.codex` prompt or skill files.
+2. Update the matching `.codex` skill files.
 3. If the shared document contract changed, update `docs/specs/codex-workflow-compatibility.md` first.
 4. If local or installed usage changed, update `docs/zh-CN/CODEX-WORKFLOWS.md` and `README.md`.
-5. If install behavior changed, verify with a fresh `install --to codex` run against a temporary target.
+5. Run:
+   `powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1`
+6. Verify only these three skills remain as top-level workflow entrypoints in `~/.codex/skills/`:
+   - `workflows-brainstorm`
+   - `workflows-plan`
+   - `workflows-review`
 6. Report exactly what was synced and what was intentionally left unchanged.
 
 ## Guardrails
@@ -61,7 +63,7 @@ Install-chain files when needed:
 - Do not rewrite Claude `workflows:work` to fit Codex.
 - Do not change Claude source workflows unless the user explicitly asked for Claude-side behavior changes.
 - Keep shared artifact protocol stable unless there is a strong reason to change it.
-- Prefer updating compatibility docs before updating prompts.
+- Prefer updating compatibility docs before updating skills.
 
 ## Expected Result
 
@@ -69,3 +71,4 @@ After `/sil`, this repository should satisfy both:
 
 1. Claude-only usage still works unchanged.
 2. Codex-owned `brainstorm / plan / review` remains aligned with the current repository behavior.
+3. The sync process only updates the three Codex workflow skills instead of reinstalling the full plugin into Codex.
