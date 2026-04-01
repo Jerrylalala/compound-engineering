@@ -1,3 +1,5 @@
+import { existsSync } from "fs"
+import path from "path"
 import { formatFrontmatter } from "../utils/frontmatter"
 import { filterClaudeCodeOnly } from "../utils/filter-claude-code-only"
 import type { ClaudeAgent, ClaudeCommand, ClaudePlugin } from "../types/claude"
@@ -32,11 +34,14 @@ export function convertClaudeToCodex(
 
   const agentSkills = plugin.agents.map((agent) => convertAgent(agent, usedSkillNames))
   const generatedSkills = [...commandSkills, ...agentSkills]
+  const repoCodexRoot = findNearestCodexRoot(plugin.root)
 
   return {
     prompts,
     skillDirs,
     generatedSkills,
+    repoPromptDirs: repoCodexRoot ? [path.join(repoCodexRoot, "prompts")] : [],
+    repoSkillDirs: repoCodexRoot ? [path.join(repoCodexRoot, "skills")] : [],
     mcpServers: plugin.mcpServers,
   }
 }
@@ -186,4 +191,15 @@ function uniqueName(base: string, used: Set<string>): string {
   const name = `${base}-${index}`
   used.add(name)
   return name
+}
+
+function findNearestCodexRoot(startDir: string): string | null {
+  let current = path.resolve(startDir)
+  while (true) {
+    const candidate = path.join(current, ".codex")
+    if (existsSync(candidate)) return candidate
+    const parent = path.dirname(current)
+    if (parent === current) return null
+    current = parent
+  }
 }

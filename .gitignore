@@ -2,6 +2,14 @@
 *.log
 node_modules/
 .codex/
+!.codex/
+!.codex/prompts/
+!.codex/prompts/workflows-brainstorm.md
+!.codex/prompts/workflows-plan.md
+!.codex/prompts/workflows-review.md
+!.codex/skills/
+!.codex/skills/compound-workflow-documents/
+!.codex/skills/compound-workflow-documents/SKILL.md
 .gemini/
 .compound/
 .claude/settings.local.json

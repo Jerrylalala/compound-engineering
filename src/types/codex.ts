@@ -19,5 +19,7 @@ export type CodexBundle = {
   prompts: CodexPrompt[]
   skillDirs: CodexSkillDir[]
   generatedSkills: CodexGeneratedSkill[]
+  repoPromptDirs?: string[]
+  repoSkillDirs?: string[]
   mcpServers?: Record<string, ClaudeMcpServer>
 }

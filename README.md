@@ -52,6 +52,33 @@ bunx @every-env/compound-plugin install compound-engineering --to gemini
 - Codex: `~/.codex/prompts/` and `~/.codex/skills/` (skill descriptions truncated to 1024 chars)
 - Gemini: `.gemini/GEMINI.md` in project root (from CLAUDE.md + command summaries)
 
+## Repo-Scoped Codex Workflows
+
+This private fork also includes repo-scoped Codex workflow entry points under `.codex/`.
+
+Current Codex-owned workflows:
+
+- `/prompts:workflows-brainstorm`
+- `/prompts:workflows-plan`
+- `/prompts:workflows-review`
+
+These prompts are designed to write shared artifacts that remain compatible with the Claude workflows in this repository:
+
+- brainstorms go to `docs/brainstorms/`
+- plans go to `docs/plans/`
+- Claude can later continue execution with `/workflows:work`
+
+Compatibility details live in `docs/specs/codex-workflow-compatibility.md`.
+Quick usage notes live in `docs/zh-CN/CODEX-WORKFLOWS.md`.
+
+For this private fork, future Claude-side development should run the project command `/sil` after changes that affect:
+
+- `brainstorm`
+- `plan`
+- `review`
+- shared document protocol
+- Codex install-chain behavior
+
 > Note: `COMPOUND_PLUGIN_GITHUB_SOURCE` only affects this CLI tool. Use temporary env vars, not permanent ones.
 
 ## Workflow

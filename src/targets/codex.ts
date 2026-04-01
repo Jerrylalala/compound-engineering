@@ -1,5 +1,5 @@
 import path from "path"
-import { backupFile, copyDir, ensureDir, writeText } from "../utils/files"
+import { backupFile, copyDir, ensureDir, pathExists, writeText } from "../utils/files"
 import type { CodexBundle } from "../types/codex"
 import type { ClaudeMcpServer } from "../types/claude"
 
@@ -25,6 +25,24 @@ export async function writeCodexBundle(outputRoot: string, bundle: CodexBundle):
     const skillsRoot = path.join(codexRoot, "skills")
     for (const skill of bundle.generatedSkills) {
       await writeText(path.join(skillsRoot, skill.name, "SKILL.md"), skill.content + "\n")
+    }
+  }
+
+  if (bundle.repoPromptDirs && bundle.repoPromptDirs.length > 0) {
+    const promptsDir = path.join(codexRoot, "prompts")
+    for (const sourceDir of bundle.repoPromptDirs) {
+      if (await pathExists(sourceDir)) {
+        await copyDir(sourceDir, promptsDir)
+      }
+    }
+  }
+
+  if (bundle.repoSkillDirs && bundle.repoSkillDirs.length > 0) {
+    const skillsRoot = path.join(codexRoot, "skills")
+    for (const sourceDir of bundle.repoSkillDirs) {
+      if (await pathExists(sourceDir)) {
+        await copyDir(sourceDir, skillsRoot)
+      }
     }
   }
 

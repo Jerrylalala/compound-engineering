@@ -109,6 +109,35 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 | 修改工作流 | CHANGELOG.md、版本号、WORKFLOW-VISUAL.md |
 | Bug 修复 | CHANGELOG.md、版本号（如重要） |
 
+**Codex 集成同步（铁律）**：
+
+> 当修改本仓库中会影响 `brainstorm / plan / review`、共享文档协议、或 Codex 安装链路的内容时，必须同步更新 Codex 层。
+
+触发条件：
+- 修改 `plugins/compound-engineering/commands/workflows/brainstorm.md`
+- 修改 `plugins/compound-engineering/commands/workflows/plan.md`
+- 修改 `plugins/compound-engineering/commands/workflows/review.md`
+- 修改 `docs/brainstorms/` / `docs/plans/` 的共享协议
+- 修改 `src/converters/claude-to-codex.ts`、`src/targets/codex.ts`、`src/types/codex.ts`
+- 修改 Codex 工作流使用说明或安装说明
+
+同步目标：
+- `.codex/prompts/workflows-brainstorm.md`
+- `.codex/prompts/workflows-plan.md`
+- `.codex/prompts/workflows-review.md`
+- `.codex/skills/compound-workflow-documents/SKILL.md`
+- `docs/specs/codex-workflow-compatibility.md`
+- `docs/zh-CN/CODEX-WORKFLOWS.md`
+- `README.md`
+
+推荐在相关改动完成后运行项目命令：
+
+```text
+/sil
+```
+
+`/sil` 是本仓库的同步检查步骤，用于确保 Claude 侧改动没有让 Codex 适配层漂移。
+
 **版本号位置（必须同步）：**
 - `.claude-plugin/marketplace.json` → `plugins[0].version`
 - `plugins/compound-engineering/.claude-plugin/plugin.json` → `version`
