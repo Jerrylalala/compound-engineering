@@ -89,6 +89,11 @@ Use the dedicated minimal sync script instead:
 powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
 ```
 
+If an AI agent or Claude Code is doing the sync for you, that instruction still means the same thing:
+
+- use `scripts/sync-codex-workflows.ps1`
+- do **not** use any full-plugin `install --to codex` command
+
 > Note: `COMPOUND_PLUGIN_GITHUB_SOURCE` only affects this CLI tool. Use temporary env vars, not permanent ones.
 
 ## Workflow

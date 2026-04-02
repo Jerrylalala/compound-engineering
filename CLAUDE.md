@@ -113,6 +113,12 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 
 > 当修改本仓库中会影响 `brainstorm / plan / review`、共享文档协议、或 Codex 最小技能同步机制的内容时，必须同步更新 Codex 层。
 
+> **严禁**把下面这条命令当作本仓库的日常 Codex 同步方式：
+>
+> `bun run src/index.ts install ./plugins/compound-engineering --to codex`
+>
+> 原因：它会把整个转换后的插件重新装进 `~/.codex`，导致多余的 `ce-*`、额外 `workflows-*` 回流，破坏“只保留 3 个主入口”的目标。
+
 触发条件：
 - 修改 `plugins/compound-engineering/commands/workflows/brainstorm.md`
 - 修改 `plugins/compound-engineering/commands/workflows/plan.md`
@@ -137,6 +143,21 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 ```
 
 `/sil` 是本仓库的同步检查步骤，用于确保 Claude 侧改动没有让 Codex 适配层漂移，而且只同步这 3 个 Codex workflow skill。
+
+**AI 执行规范（必须遵守）**：
+
+当你是 Claude Code 或其他 AI 代理，并需要把这 3 个 workflow skill 同步到 Codex 时：
+
+1. **只允许**运行：
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
+   ```
+2. **禁止**运行任何 `install --to codex`
+3. 如果用户只是说“同步到 Codex”“更新 Codex 里的版本”“让 Codex 用最新 skill”，默认理解为运行 `scripts/sync-codex-workflows.ps1`
+4. 完成后检查 `~/.codex/skills/` 顶层是否只保留：
+   - `workflows-brainstorm`
+   - `workflows-plan`
+   - `workflows-review`
 
 **版本号位置（必须同步）：**
 - `.claude-plugin/marketplace.json` → `plugins[0].version`

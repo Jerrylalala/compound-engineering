@@ -171,6 +171,37 @@ bun run src/index.ts install ./plugins/compound-engineering --to codex
 - 会把额外的 `ce-*`、其他 `workflows-*` 也带到 `~/.codex`
 - 不符合“Codex 只保留这 3 个主入口”的目标
 
+## 给 AI 的明确规则
+
+如果后续是 Claude Code、Codex 或其他 AI 代理帮你做同步，不要让它自己猜同步方式。
+
+本仓库的默认规则应理解为：
+
+1. 用户说“同步到 Codex”“更新 Codex 里的版本”“让 Codex 用最新版本”
+   - 默认执行：
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
+   ```
+2. 不允许改用任何 `install --to codex`
+3. 如果 AI 想执行完整安装，应视为违反本仓库规则，除非用户明确要求“重新安装整插件到 Codex”
+
+项目内可直接使用：
+
+```text
+/sync-codex-workflows
+```
+
+或者：
+
+```text
+/sil
+```
+
+其中：
+
+- `/sync-codex-workflows` = 直接执行最小同步
+- `/sil` = 同步检查 + 最小同步
+
 ## 兼容性要求
 
 Codex 写出的 plan 要满足 Claude 兼容协议：
