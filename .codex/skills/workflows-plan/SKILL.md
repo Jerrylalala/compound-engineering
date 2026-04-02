@@ -9,6 +9,8 @@ description: 基于需求或 brainstorm 产出 Claude 可执行、风险明确�
 
 这是 Codex 中的 plan 主入口。目标不是做一篇泛泛的分析报告，而是产出一份真正能交给 Claude `/workflows:work` 继续执行的计划。
 
+**铁律**：输出必须优先满足 Claude `/workflows:work` 的消费协议，而不是追求漂亮或自由发挥的文风。
+
 ## 目标
 
 写入：
@@ -113,6 +115,21 @@ description: 基于需求或 brainstorm 产出 Claude 可执行、风险明确�
 
 ## 计划格式要求
 
+### 1. 文件名必须固定模式
+
+必须写到：
+
+`docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
+
+要求：
+
+- `type` 只能是 `feat`、`fix`、`refactor`
+- `<descriptive-name>` 必须具体，不要用 `thing`、`feature`、`update` 这类空名字
+- 文件名必须可搜索
+- 不允许省略日期前缀
+
+### 2. frontmatter 必须固定输出
+
 frontmatter 必须包含：
 
 ```yaml
@@ -120,8 +137,18 @@ frontmatter 必须包含：
 risk_score: 0
 risk_level: low
 risk_note: "主要风险描述"
+source_brainstorm: docs/brainstorms/...   # 如果有
 ---
 ```
+
+要求：
+
+- `risk_score` 必须是 0-10 整数
+- `risk_level` 必须是 `low|medium|high`
+- `risk_note` 必须是单句风险摘要
+- 如果本计划基于 brainstorm，必须写 `source_brainstorm`
+
+### 3. Header 必须固定输出
 
 正文必须包含：
 
@@ -132,6 +159,15 @@ risk_note: "主要风险描述"
 **Tech Stack**: ...
 **Architecture**: ...
 ```
+
+要求：
+
+- `## Overview` 必须出现
+- `**Goal**:` 必须出现
+- `**Tech Stack**:` 必须出现
+- `**Architecture**:` 强烈建议出现；如果确实简单到不需要，也要用一句话说明采用的方式
+
+### 4. 任务块必须固定结构
 
 任务必须使用可勾选格式，并尽量原子化：
 
@@ -152,6 +188,34 @@ risk_note: "主要风险描述"
 - [ ] 运行 `...`
 ````
 
+要求：
+
+- 每个任务标题必须是 `### Task N: ...`
+- 必须包含 `**文件**`
+- 必须包含 `**操作**`
+- 必须包含 `**代码**`
+- 必须包含 `**验证**`
+- `**操作**` 下必须至少有一个真实 `- [ ]`
+- `**验证**` 下必须至少有一个真实 `- [ ]`
+- 不允许把一整个功能写成一个大 Task
+- 如果某任务没有明确代码片段，也要写出目标修改形式，不能空着
+
+### 5. Claude work 兼容检查（写完后必须自检）
+
+在输出最终计划前，必须逐项自检：
+
+- [ ] 文件是否在 `docs/plans/`
+- [ ] frontmatter 是否包含 `risk_score`
+- [ ] frontmatter 是否包含 `risk_level`
+- [ ] 是否包含 `## Overview`
+- [ ] 是否包含 `**Goal**`
+- [ ] 是否包含 `**Tech Stack**`
+- [ ] 是否包含至少一个 `### Task N`
+- [ ] 是否包含真实未完成 checkbox `- [ ]`
+- [ ] 每个 Task 是否都有 `文件 / 操作 / 代码 / 验证`
+
+如果任一项不满足，不要输出“计划已完成”，先修正文档。
+
 ## 质量要求
 
 - 计划必须让 Claude 后续可以继续执行
@@ -161,6 +225,21 @@ risk_note: "主要风险描述"
 - 验证步骤必须可执行
 - 标题、文件名、任务描述都要可搜索
 - 如果计划过大，应主动收敛范围或拆阶段
+- 不要遗漏 brainstorm 中的关键结论
+- 不要把开放问题伪装成已决事项
+
+## 输出顺序要求
+
+最终对用户的输出必须按这个顺序：
+
+1. 写入 plan 文件
+2. 自检 Claude work 兼容性
+3. 告知：
+   - `plan_path`
+   - `risk_score / risk_level`
+   - 是否建议直接交给 Claude `/workflows:work`
+
+不要只在聊天里给计划摘要却不落盘。
 
 ## 输出后的处理
 
