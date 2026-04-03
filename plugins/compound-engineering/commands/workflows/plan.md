@@ -191,6 +191,16 @@ validates :email, presence: true
 **验证**: `git log -1` 确认提交成功
 ```
 
+**执行状态协议（最终 plan 必须遵循）**：
+
+- 最终写入 `docs/plans/*.md` 的活状态 checkbox，只能出现在 `### Task N:` 任务块内部
+- 只有任务块里的 `**操作**` 与 `**验证**` 下的 `- [ ]` / `- [x]` 才表示执行进度
+- 最终 plan 中，任务块之外的说明性内容、验收标准、补充备注，优先使用普通列表 `-`，不要使用 checkbox
+- 不要把模板示例、占位说明、`未检查 [具体内容]` 这类演示性 checkbox 写进最终 plan
+- 已完成项一旦标记为 `- [x]`，后续 review 不应改回 `- [ ]`；若发现返工需求，应追加 follow-up task 或新计划
+
+参见共享协议：`docs/specs/executable-plan-protocol.md`
+
 ### 3. Issue Planning & Structure
 
 <thinking>
@@ -570,6 +580,7 @@ end
 risk_score: 3
 risk_level: low
 risk_note: "主要风险来源描述（必须用双引号包裹；若描述含双引号则改用单引号）"
+plan_protocol: executable_checkboxes_v1
 ---
 ```
 
@@ -610,6 +621,19 @@ Examples:
 - ❌ `docs/plans/2026-01-15-feat-new-feature-plan.md` (too vague - what feature?)
 - ❌ `docs/plans/2026-01-15-feat: user auth-plan.md` (invalid characters - colon and space)
 - ❌ `docs/plans/feat-user-auth-plan.md` (missing date prefix)
+
+**Executable Plan self-check（写入后必须自检）**：
+
+- [ ] frontmatter 包含 `risk_score`
+- [ ] frontmatter 包含 `risk_level`
+- [ ] frontmatter 包含 `risk_note`
+- [ ] frontmatter 包含 `plan_protocol: executable_checkboxes_v1`
+- [ ] 正文包含 `## Overview`
+- [ ] 正文包含 `**Goal**`
+- [ ] 正文包含 `**Tech Stack**`
+- [ ] 至少包含一个 `### Task N:`
+- [ ] 活状态 checkbox 只出现在任务块的 `**操作**` / `**验证**` 下
+- [ ] 没有把模板或示例性 checkbox 写进最终 plan
 
 ## Handoff
 

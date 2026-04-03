@@ -137,6 +137,7 @@ frontmatter 必须包含：
 risk_score: 0
 risk_level: low
 risk_note: "主要风险描述"
+plan_protocol: executable_checkboxes_v1
 source_brainstorm: docs/brainstorms/...   # 如果有
 ---
 ```
@@ -146,6 +147,7 @@ source_brainstorm: docs/brainstorms/...   # 如果有
 - `risk_score` 必须是 0-10 整数
 - `risk_level` 必须是 `low|medium|high`
 - `risk_note` 必须是单句风险摘要
+- `plan_protocol` 必须是 `executable_checkboxes_v1`
 - 如果本计划基于 brainstorm，必须写 `source_brainstorm`
 
 ### 3. Header 必须固定输出
@@ -200,6 +202,18 @@ source_brainstorm: docs/brainstorms/...   # 如果有
 - 不允许把一整个功能写成一个大 Task
 - 如果某任务没有明确代码片段，也要写出目标修改形式，不能空着
 
+### 4.1 可执行 checkbox 协议
+
+最终写入 `docs/plans/*.md` 的活状态 checkbox 必须满足：
+
+- 只能出现在 `### Task N:` 任务块内部
+- 只能出现在该任务的 `**操作**` 或 `**验证**` 下
+- 任务块之外的说明性内容、验收标准、注释、补充说明，优先使用普通列表 `-`
+- 不要把模板示例、占位说明、`未检查 [具体内容]` 这类演示性 checkbox 写入最终 plan
+- 已完成项之后如果发现返工需求，新增 follow-up task，不要把 `- [x]` 改回 `- [ ]`
+
+共享协议见：`docs/specs/executable-plan-protocol.md`
+
 ### 5. Claude work 兼容检查（写完后必须自检）
 
 在输出最终计划前，必须逐项自检：
@@ -207,12 +221,15 @@ source_brainstorm: docs/brainstorms/...   # 如果有
 - [ ] 文件是否在 `docs/plans/`
 - [ ] frontmatter 是否包含 `risk_score`
 - [ ] frontmatter 是否包含 `risk_level`
+- [ ] frontmatter 是否包含 `plan_protocol: executable_checkboxes_v1`
 - [ ] 是否包含 `## Overview`
 - [ ] 是否包含 `**Goal**`
 - [ ] 是否包含 `**Tech Stack**`
 - [ ] 是否包含至少一个 `### Task N`
 - [ ] 是否包含真实未完成 checkbox `- [ ]`
 - [ ] 每个 Task 是否都有 `文件 / 操作 / 代码 / 验证`
+- [ ] 活状态 checkbox 是否只出现在任务块的 `操作 / 验证` 下
+- [ ] 是否避免把模板或示例性 checkbox 写进最终 plan
 
 如果任一项不满足，不要输出“计划已完成”，先修正文档。
 

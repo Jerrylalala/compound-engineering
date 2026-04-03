@@ -117,6 +117,12 @@ The following paths are compound-engineering pipeline artifacts and must never b
 - `docs/solutions/*.md` — Solution documents created during the pipeline.
 
 If a review agent flags any file in these directories for cleanup or removal, discard that finding during synthesis. Do not create a todo for it.
+
+Review must also preserve plan execution state:
+
+- Never recommend changing a completed plan checkbox from `- [x]` back to `- [ ]`
+- If implementation gaps are found after a task was completed, recommend a follow-up task or a new plan
+- Treat `docs/plans/*.md` as execution history, not disposable scratch notes
 </protected_artifacts>
 
 #### Parallel Agents to review the PR:

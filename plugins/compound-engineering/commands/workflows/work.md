@@ -31,7 +31,10 @@ This command takes a work document (plan, specification, or todo file) and execu
 
 3. 如果 $ARGUMENTS 为空:
    → 自动扫描 docs/plans/*.md，按修改时间排序
-   → 筛选包含未完成任务（含 - [ ]）且在 30 天内修改的文件
+   → 优先筛选 `plan_protocol: executable_checkboxes_v1` 的计划文件
+   → 只统计 `### Task N:` 任务块内 `**操作**` / `**验证**` 下的未完成 checkbox（`- [ ]`）
+   → 忽略代码块、模板示例、说明性 checklist、任务块之外的 checkbox
+   → 对旧计划兼容降级：若没有 `plan_protocol`，仍可继续，但必须按同样规则只统计任务块内的活状态 checkbox
    → 如果唯一匹配 → 提示确认："发现未完成计划 <filename>，N 个任务中完成了 M 个。是否继续？"
    → 如果多个匹配 → 使用 AskUserQuestion 让用户选择
    → 如果无匹配 → 使用 AskUserQuestion 提示：
@@ -209,6 +212,14 @@ else:
 
    **IMPORTANT**: Always update the original plan document by checking off completed items. Use the Edit tool to change `- [ ]` to `- [x]` for each task you finish. This keeps the plan as a living document showing progress and ensures no checkboxes are left unchecked.
 
+   **Executable Plan Protocol**:
+   - Only mutate checkbox state inside the active `### Task N:` block
+   - Only `**操作**` and `**验证**` checkboxes count as execution state
+   - Never mark example/template checkboxes outside task blocks as completed
+   - Never revert a completed checkbox from `- [x]` back to `- [ ]`
+   - If review or implementation uncovers additional work, append a follow-up task instead of unchecking a completed one
+   - Before pausing or exiting, reconcile the active task block so completed code + completed verification are reflected in the plan file
+
 #### Execution Mode B: Subagent-Driven（≥2 任务自动启用）
 
 每任务派遣新子代理，避免上下文污染，适合复杂任务。
@@ -273,7 +284,7 @@ else:
 
        # 3. 更新任务状态
        - Mark task as completed in TodoWrite
-       - Mark off checkbox in plan file ([ ] → [x])
+       - Mark off checkbox in plan file ([ ] → [x]) only for the current task block's `操作 / 验证`
 
      # 4. 人工检查点
      AskUserQuestion: "已完成 [batch_size] 个任务。继续下一批？"
