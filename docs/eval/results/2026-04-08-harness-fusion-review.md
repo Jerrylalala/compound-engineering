@@ -244,14 +244,16 @@ context_hash: null         # 检测漂移的 SHA256 哈希
 
 ---
 
-## Codex 审核（已完成）
+## Codex 审核（已完成 × 2）
+
+### 审核 Round 1（脚本层，last-commit scope）
 
 **审核范围**: last-commit（ae67a19 feat(harness-fusion): Phase 1-4）  
 **模型**: gpt-5.4（via Codex cloud backend）  
 **完成时间**: 2026-04-08  
 **Token 消耗**: input 5,090,438 / output 16,661
 
-### Codex 发现（5 条，补充 Claude 9-agent 审核）
+### 审核 Round 1 发现（5 条，补充 Claude 9-agent 审核）
 
 #### 🔴 Codex-C1: 版本链路漂移（上游合并副作用）
 
@@ -352,3 +354,81 @@ env:
 
 ### 可选（P3 简化）
 14. 删除约 93 行冗余内容（见 P3 列表）
+
+---
+
+### 审核 Round 2（skills-custom 层，commit ae67a19 完整审核）
+
+**审核范围**: ae67a19 commit（skills-custom/ 全部新增 overlay）  
+**模型**: gpt-5.4（via Codex cloud backend）  
+**完成时间**: 2026-04-08
+
+**总结**: 核心问题是 Codex 审批/门控路径依赖未验证或无效的检查，FSM 跳过了必要的确认状态，新的 review contract 未接入标准入口，端到端功能在正常使用中不可靠。
+
+### 审核 Round 2 发现（7 条，与 Claude 审核交叉验证）
+
+#### 🔴 Codex-R2-P1: `codex --dry-run` 不可靠（确认 P1-1）
+
+**文件**: `patch-approval/SKILL.md:30-31`
+
+同 P1-1。补充说明：在任何没有实现 `--dry-run` 的 Codex 安装上，Step 1 无法产生 patch，整个 Patch Approval 功能实际无法使用。
+
+---
+
+#### 🔴 Codex-R2-P2: Check 2 用 `codex --version` 检测登录（确认 P1-2）
+
+**文件**: `executor-capability-gate/SKILL.md:37`
+
+同 P1-2。Codex 已安装但未认证时仍打印版本号，Check 2 永远返回 OK。
+
+---
+
+#### 🔴 Codex-R2-P3: Check 3 用 `OPENAI_API_KEY` 检测 Codex 认证（**新发现，P1 级**）
+
+**文件**: `executor-capability-gate/SKILL.md:53-54`
+
+**问题**:
+```bash
+curl -s --max-time 5 "https://api.openai.com/v1/models" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+```
+Codex CLI 使用独立的 session 认证（`~/.codex/auth.json`），与 `OPENAI_API_KEY` 环境变量无关。
+
+**影响**: 已正常登录 Codex CLI 但未设置 `OPENAI_API_KEY` 的用户 → Check 3 返回 401 → Codex 被完全禁用。这与实际使用路径相反。
+
+**修复建议**: 将 Check 3 改为检查 `~/.codex/auth.json` 是否存在且未过期：
+```bash
+[ -f ~/.codex/auth.json ] && echo "OK" || echo "NOT_LOGGED_IN"
+```
+
+---
+
+#### 🔴 Codex-R2-P4: `replanned → active` 跳过用户确认（确认 P1-4）
+
+**文件**: `ce-work-integration/SKILL.md:57-61`
+
+同 P1-4。FSM 规范要求 `replanned → resumed（用户确认）→ active`，但实现直接 `replanned → active`，去掉了重启计划时的人工确认门。
+
+---
+
+#### 🟡 Codex-R2-W1: `.last_call` 从未写入（确认 P1-3）
+
+**文件**: `executor-capability-gate/SKILL.md:69-71`
+
+同 P1-3。整个仓库无写入 `~/.codex/.last_call` 的代码，Rate Limit 检查永远通过。
+
+---
+
+#### 🟡 Codex-R2-W2: `review-contract` 未接入 ce:review 入口（确认 P2-1）
+
+**文件**: `review-contract/SKILL.md:81-83`
+
+overlay 明确不修改 `ce:review`，但 `ce:review` 及所有命令/入口中均无对 review-contract 的引用。在正常 ce:review 工作流中，分级规则和反宽松规则永远不会加载。
+
+---
+
+#### 🟡 Codex-R2-W3: Review Contract tier 名称与 persona-catalog 不匹配（确认 P1-6）
+
+**文件**: `review-contract/SKILL.md:18-20`
+
+Codex 补充：上游实际名称为 `performance-reviewer`、`data-migrations-reviewer` 等，与 review-contract 中列出的名称不符，导致分级逻辑无法可靠路由。
