@@ -33,7 +33,8 @@ Task Bundle 是任务的统一工件结构。每个任务由三个文件组成�
 
 ## 与现有工作流的关系
 
-> Phase 0 说明：当前 Task Bundle 是独立的文档协议，不与 workflow 命令自动集成。
+> Phase 0 说明：当前 Task Bundle 是独立的文档协议，自身不含自动集成机制。
+> 如需在 ce:work 执行时自动读写 state.md，需配合加载 `ce-work-integration` overlay（见 skills-custom/ce-work-integration/SKILL.md）。
 > Phase 2 将在上游合并后，将 Task Bundle 读写集成到 ce-work/ce-review 中。
 
 手动使用方式：

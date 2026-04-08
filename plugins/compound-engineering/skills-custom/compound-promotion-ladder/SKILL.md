@@ -1,6 +1,6 @@
 ---
 name: compound-promotion-ladder
-description: "私有 Overlay：经验分层沉淀升级阶梯。在 ce:compound 后自动检测是否值得将 solution 升级为 pattern 或 skill。使用时机：ce:compound 完成后自动触发检测；或手动调用时分析 docs/solutions/ 中的重复模式。"
+description: "私有 Overlay：经验分层沉淀升级阶梯。检测是否值得将 solution 升级为 pattern 或 skill。使用时机：ce:compound 完成后手动调用，分析 docs/solutions/ 中的重复模式。（不会自动触发，需主动加载此 skill）"
 ---
 
 # Compound Promotion Ladder — 经验分层沉淀

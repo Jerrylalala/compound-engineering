@@ -64,6 +64,19 @@
 | 收到审查反馈 | `receiving-code-review`（6 步响应 + 禁止表演性同意 + YAGNI 检查） |
 | 记录解决方案（可选） | `/ce:compound`（手动调用） |
 
+### Overlay 技能触发时机
+
+以下私有 overlay 技能需**手动加载**，不会自动触发：
+
+| 触发场景 | 加载技能 |
+|----------|----------|
+| 执行 `ce:work`，任务有 Task Bundle | `ce-work-integration`（启用持久化状态跟踪）|
+| 执行 `ce:work`，处理 bare prompt 时分类意图 | `intent-gate`（意图分类路由）|
+| 调用 `codex exec` 执行任务 | `executor-capability-gate` + `codex-first-executor`（Codex 路由决策）|
+| 完成 `ce:compound` 后，评估是否升级经验 | `compound-promotion-ladder`（经验分层沉淀）|
+| 做 UI 相关代码审查 | `ui-review-contract`（UI 审查 Tier 分类）|
+| 做代码审查，需严格分类 | `review-contract`（三档 Tier 分类框架）|
+
 ### 技能分类（刚性 vs 柔性）
 
 | 分类 | 含义 | 技能 |
