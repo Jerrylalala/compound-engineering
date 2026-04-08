@@ -24,10 +24,40 @@ description: "私有 Overlay：Codex Patch Approval 咨询版。当 Codex 返回
 
 ## 审批流程
 
+### Step 0: 检测 `--dry-run` 支持（每次激活时执行）
+
+```bash
+# 检测 Codex CLI 是否支持 --dry-run 参数
+codex --help 2>&1 | grep -q "dry-run"
+DRY_RUN_SUPPORTED=$?
+```
+
+| 结果 | 说明 | 后续方案 |
+|------|------|----------|
+| `DRY_RUN_SUPPORTED=0`（支持） | 正常使用 `--dry-run` 生成 patch | 走 Step 1 标准流程 |
+| `DRY_RUN_SUPPORTED=1`（不支持） | `--dry-run` 不存在，直接执行会写入文件 | 走隔离目录方案（见下） |
+
+**隔离目录方案（`--dry-run` 不存在时）**：
+
+```bash
+# 1. 在临时目录创建仓库副本
+ISOLATED_DIR=$(mktemp -d /tmp/codex-isolated-XXXX)
+git clone . "$ISOLATED_DIR" --local --quiet
+
+# 2. 在隔离目录执行 Codex（真实写入，不影响工作区）
+cd "$ISOLATED_DIR" && codex "$TASK_PROMPT"
+
+# 3. 用 git diff 捕获改动作为 patch
+git diff HEAD > /tmp/codex-patch.diff
+
+# 4. 回到原工作区，继续 Step 2 审批
+cd - && rm -rf "$ISOLATED_DIR"
+```
+
 ### Step 1: Codex 生成 Patch
 
 ```bash
-# Codex 以 dry-run 模式生成 patch
+# Codex 以 dry-run 模式生成 patch（需 Step 0 确认支持）
 codex --dry-run "$TASK_PROMPT" > /tmp/codex-patch.diff
 ```
 
