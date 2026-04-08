@@ -31,6 +31,10 @@ description: "私有 Overlay：Review Contract 三档 Tier 分类 + Anti-Lenienc
 
 ## 结论类型系统（`conclusion_type` 覆盖层）
 
+> **注意**：`conclusion_type` 是本 overlay 新增的**本地语义字段**，不存在于上游 findings-schema.json。
+> 上游 schema 使用 `autofix_class`、`severity`、`confidence` 等字段。
+> 本字段仅在此 overlay 内部使用，不写入上游 schema。
+
 上游 schema 已有 `autofix_class` 路由。本 overlay 增加一个更语义化的 `conclusion_type` 字段，与上游字段并存：
 
 | `conclusion_type` | 映射关系 | 何时使用 |

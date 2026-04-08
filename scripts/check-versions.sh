@@ -48,8 +48,13 @@ if ! command -v jq &> /dev/null; then
     exit 0
 fi
 
-MARKETPLACE_VERSION=$(jq -r '.plugins[0].version' "$MARKETPLACE_FILE")
-PLUGIN_VERSION=$(jq -r '.version' "$PLUGIN_FILE")
+MARKETPLACE_VERSION=$(jq -r '.plugins[0].version // "null"' "$MARKETPLACE_FILE")
+PLUGIN_VERSION=$(jq -r '.version // "null"' "$PLUGIN_FILE")
+
+if [ "$MARKETPLACE_VERSION" = "null" ] || [ "$PLUGIN_VERSION" = "null" ]; then
+    error "版本字段缺失: marketplace=$MARKETPLACE_VERSION, plugin=$PLUGIN_VERSION"
+    exit 1
+fi
 
 echo "  marketplace.json: $MARKETPLACE_VERSION"
 echo "  plugin.json:      $PLUGIN_VERSION"
