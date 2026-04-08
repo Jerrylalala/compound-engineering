@@ -3,8 +3,8 @@
 # 用法: bash scripts/check-handoff.sh
 
 COMMANDS_DIR="plugins/compound-engineering/commands/workflows"
-SKIP_FILES="save.md doctor.md"  # 终端命令，无需 Handoff
-MAIN_CHAIN="brainstorm.md plan.md work.md review.md compound.md"  # 主链档：6 条全满足
+SKIP_FILES=("save.md" "doctor.md")  # 终端命令，无需 Handoff
+MAIN_CHAIN=("brainstorm.md" "plan.md" "work.md" "review.md" "compound.md")  # 主链档：6 条全满足
 ERRORS=0
 
 echo "=== Workflow Handoff 检查 ==="
@@ -13,18 +13,17 @@ echo ""
 for f in "$COMMANDS_DIR"/*.md; do
   filename=$(basename "$f")
 
-  # 跳过终端命令（-qF 使用字面匹配，防止文件名被当作正则）
-  if echo "$SKIP_FILES" | grep -qF "$filename"; then
+  # 跳过终端命令
+  skip=false
+  for s in "${SKIP_FILES[@]}"; do [ "$filename" = "$s" ] && skip=true && break; done
+  if $skip; then
     echo "SKIP: $filename (终端命令)"
     continue
   fi
 
   # 判断档位
-  if echo "$MAIN_CHAIN" | grep -qF "$filename"; then
-    tier="主链档"
-  else
-    tier="工具档"
-  fi
+  tier="工具档"
+  for s in "${MAIN_CHAIN[@]}"; do [ "$filename" = "$s" ] && tier="主链档" && break; done
 
   # 检查 AskUserQuestion
   if ! grep -qF "AskUserQuestion" "$f"; then
@@ -44,8 +43,11 @@ for f in "$COMMANDS_DIR"/*.md; do
 done
 
 # 也检查非 workflow 的关键命令
-EXTRA_COMMANDS="plugins/compound-engineering/commands/plan_review.md plugins/compound-engineering/commands/deepen-plan.md"
-for f in $EXTRA_COMMANDS; do
+EXTRA_COMMANDS=(
+  "plugins/compound-engineering/commands/plan_review.md"
+  "plugins/compound-engineering/commands/deepen-plan.md"
+)
+for f in "${EXTRA_COMMANDS[@]}"; do
   if [ -f "$f" ]; then
     filename=$(basename "$f")
     has_ask=$(grep -c "AskUserQuestion" "$f" || true)

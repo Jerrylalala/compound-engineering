@@ -57,6 +57,12 @@ if ($Version) {
 
 Write-Info "New version: $newVersion"
 
+# Validate semver format
+if ($newVersion -notmatch '^\d+\.\d+\.\d+$') {
+    Write-Err "Invalid semver format: '$newVersion'. Expected X.Y.Z (e.g. 2.45.7)"
+    exit 1
+}
+
 # Confirm
 $confirm = Read-Host "Confirm update $currentVersion -> $newVersion ? (y/n)"
 if ($confirm -ne 'y') {

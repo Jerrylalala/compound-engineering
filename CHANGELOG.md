@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.45.7] — 2026-04-08
+
+### 修复与优化（P3 可选优化批次）
+
+* **fix(codex-first-executor)**: 澄清 Gemini 策略 — 区分「审核视角」（已激活 `[G]`）与「执行器路由」（暂缓），修正"暂缓"措辞造成的误解
+* **fix(codex-first-executor)**: `codex "$TASK_PROMPT"` 添加 `--` 分隔符防止参数注入（`codex -- "$TASK_PROMPT"`）
+* **fix(review-contract)**: 为 `conclusion_type` 字段添加显式说明——此为本地 overlay 字段，不存在于上游 findings-schema.json
+* **fix(user-first-design)**: 删除与全局 CLAUDE.md「UI 设计理念」章节重复的内容，改为指针引用
+* **fix(check-handoff.sh)**: 将 `$SKIP_FILES` 和 `$EXTRA_COMMANDS` 改为 bash 数组，避免 word splitting 和 glob 展开风险
+* **fix(bump-version.ps1)**: 新增 semver 格式验证，拒绝非 `X.Y.Z` 格式的版本号
+* **fix(sync-codex-workflows.ps1)**: 将 `$CodexHome` 默认值改为函数体内 `Join-Path $HOME ".codex"`，避免参数默认值中的路径拼接问题
+* **fix(check-versions.sh)**: 添加 jq null 值处理，防止字段缺失时静默使用 "null" 字符串进行比较
+* **refactor**: 删除零引用私有 skill `root-cause-analysis`（功能已被 `systematic-debugging` 覆盖）
+* **refactor**: 删除零引用私有 skill `review-prompt`（无任何引用）
+* **chore**: 将 `technical_review.md` 重命名为 `technical-review.md`（符合 kebab-case 命名规范）
+
 ## [2.45.6] - 2026-04-08
 
 ### Bug Fixes

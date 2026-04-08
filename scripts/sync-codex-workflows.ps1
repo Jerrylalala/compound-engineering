@@ -1,6 +1,9 @@
 param(
-    [string]$CodexHome = "$HOME\.codex"
+    [string]$CodexHome
 )
+if (-not $CodexHome) {
+    $CodexHome = Join-Path $HOME ".codex"
+}
 
 $ErrorActionPreference = "Stop"
 

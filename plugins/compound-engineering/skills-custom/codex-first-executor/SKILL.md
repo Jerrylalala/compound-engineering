@@ -46,7 +46,7 @@ description: "私有 Overlay：Codex-first 外部执行器策略。按任务特�
 
 ```bash
 # Codex 调用超时（180s）
-timeout 180 codex "$TASK_PROMPT"
+timeout 180 codex -- "$TASK_PROMPT"
 EXIT_CODE=$?
 if [ $EXIT_CODE -eq 124 ]; then
   echo "Codex 超时，降级到 Claude 执行"
@@ -86,17 +86,19 @@ Codex 独立审核（仅审核，不修改代码）
 
 ---
 
-## Gemini 策略（暂缓）
+## Gemini 策略
 
-> **Codex 审核结论（P5 Finding 5）**：Gemini 暂不进入主线。
->
-> 现状：`SIMPLIFICATION-ANALYSIS.md` 说已废弃，但 `ce:review` 的部分文档仍保留 `[G]`。
-> 架构立场需要先收敛，再决定 Gemini 的定位。
+> **架构澄清**：Gemini 有两种使用模式，定位不同：
+
+| 模式 | 状态 | 入口 |
+|------|------|------|
+| **审核视角**（交叉审核，不执行代码） | ✅ 已激活 | `ce:review [G]`、`ce:brainstorm [G]` |
+| **执行器路由**（Gemini 作为主执行引擎） | ⏸ 暂缓 | 无 |
 
 **当前决策**：
-- `[G]` 参数保留接口，但 Executor Capability Gate 对 Gemini 的检查结果会告知用户现状
-- 不实现 Gemini 的主线路由
-- 等 Gemini 地位收敛后（遗留问题 #8）再激活
+- `[G]` 审核参数已可用：Gemini 作为独立视角交叉审核 PR 或方案，结果整合进 review/brainstorm 报告
+- Gemini 作为**主线执行器**（类似 Codex 替代 Claude 执行任务）暂不实现
+- 本 Executor 路由矩阵目前只路由 Claude ↔ Codex，不包含 Gemini 执行路径
 
 ---
 
