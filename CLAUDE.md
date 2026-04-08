@@ -1,19 +1,19 @@
-# Compound Engineering Plugin（私有镜像）
+# Compound Engineering Plugin
 
-> **重要**：这是 `EveryInc/compound-engineering-plugin` 的私有镜像仓库。
+> 本仓库基于 [compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin) 独立开发，包含中文化、本地扩展和私有覆盖层。
 
 ## AI 助手快速入门
 
 ### 仓库定位
 
 ```
-本仓库 = 上游镜像 + 中文化层 + 本地扩展
+本仓库 = 上游灵感参考 + 中文化层 + 本地扩展（Harness Fusion 覆盖层）
 ```
 
 | 角色         | 仓库                                            | 说明                 |
 | ------------ | ----------------------------------------------- | -------------------- |
-| **upstream** | EveryInc/compound-engineering-plugin            | 上游原始仓库（只读） |
-| **origin**   | Jerrylalala/compound-engineering-plugin-private | 用户的私有仓库       |
+| **参考上游** | EveryInc/compound-engineering-plugin            | 参考方向，不强制同步 |
+| **本仓库**   | Jerrylalala/compound-engineering-plugin-private | 独立维护的主仓库     |
 
 ### 核心原则
 

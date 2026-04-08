@@ -99,6 +99,25 @@
 
 ---
 
+## Agent Teams 集成
+
+**Claude Code Teammates 功能**：在 Claude Code 设置中开启 "Agent Teams" / "Teammates" 实验性功能后，`ce:work` 会在任务数量 ≥10 时自动启用 Swarm 模式。
+
+| 启用方式 | 说明 |
+|---------|------|
+| Claude Code 设置 → 开启 Teammates | 平台层功能，一次性配置 |
+| 自动触发 | `ce:work` 检测到 ≥10 个任务时自动路由到 Swarm |
+| 手动触发 | 在 `ce:work` 中说「启用 swarm」或「use swarm mode」 |
+
+**Swarm 模式特点**：
+- 每个子任务由独立的 Teammate 实例执行（真正的并行）
+- Teammate 之间互相验证输出，减少单点失误
+- 相比 `parallel-subagents` 模式，Teammates 有独立上下文窗口
+
+**与插件的关系**：Agent Teams 是 Claude Code 平台能力，本插件通过 `ce:work` 的任务路由策略自动利用它，用户无需手动选择。
+
+---
+
 # Plugin Development
 
 ## Versioning Requirements
