@@ -65,6 +65,7 @@ curl -s --max-time 5 "https://api.openai.com" -o /dev/null -w "%{http_code}"
 
 ```bash
 # 检查最近 Codex 调用记录（简单本地记录）
+# 注意：~/.codex/.last_call 由本 gate 在调用通过后写入（见门控输出格式末尾）
 LAST_CALL=$(cat ~/.codex/.last_call 2>/dev/null || echo "0")
 NOW=$(date +%s)
 ELAPSED=$((NOW - LAST_CALL))
@@ -72,19 +73,24 @@ ELAPSED=$((NOW - LAST_CALL))
 if [ $ELAPSED -lt 60 ]; then
   echo "RATE_LIMITED: 距上次调用 ${ELAPSED}s，建议等待至少 60s"
 fi
+
+# 调用通过后，写入时间戳（防止频繁调用）：
+# echo $(date +%s) > ~/.codex/.last_call
 ```
+
+**重要**：调用 Codex 成功完成后，必须执行 `echo $(date +%s) > ~/.codex/.last_call` 以更新记录，否则 rate limit 检查永远通过（文件不存在时 ELAPSED 极大）。
 
 ### Check 5: 任务适配性检查
 
-根据任务特征判断是否适合外部执行器：
+根据任务特征快速判断（详细决策逻辑见 `codex-first-executor` skill）：
 
-| 任务特征 | Codex 适合？ | 说明 |
-|---------|------------|------|
-| 大量机械 patch（格式化、重命名） | ✅ 适合 | Codex 擅长批量代码操作 |
-| 高风险改动（auth、payment、migration） | ❌ 不适合 | 用 Claude 主做 + review |
-| 纯分析/research 任务 | ✅ 适合 | Codex 审核视角有价值 |
-| 视觉/UI 任务 | ❌ 不适合 | Codex 无视觉理解能力 |
-| 需要项目上下文的重构 | ⚠️ 谨慎 | Codex 缺少上下文可能误改 |
+| 任务特征 | Codex 适合？ |
+|---------|------------|
+| 大量机械 patch（格式化、重命名） | ✅ 适合 |
+| 高风险改动（auth、payment、migration） | ❌ 不适合 |
+| 纯分析/research 任务 | ✅ 适合 |
+| 视觉/UI 任务 | ❌ 不适合 |
+| 需要项目上下文的重构 | ⚠️ 谨慎 |
 
 ---
 

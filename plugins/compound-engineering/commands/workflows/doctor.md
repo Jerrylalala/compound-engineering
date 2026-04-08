@@ -19,29 +19,48 @@ disable-model-invocation: true
 
 ## 执行步骤
 
-### Step 1: 运行检测脚本
+### Step 1: 运行健康检查
 
-确定项目根目录（包含 `scripts/doctor.sh` 的目录），然后执行：
+直接调用现有脚本（不依赖不存在的 doctor.sh）：
 
-```bash
-# 自动修复模式
-bash scripts/doctor.sh --fix
-
-# 自动修复 + 冒烟测试
-bash scripts/doctor.sh --fix --smoke
-
-# 仅检测（默认）
-bash scripts/doctor.sh
-
-# 检测 + 冒烟测试
-bash scripts/doctor.sh --smoke
+**版本一致性检查**（始终执行）：
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 ```
 
-使用 Bash 工具执行，设置 **60 秒**超时（默认模式）或 **120 秒**超时（`--smoke` 模式）。
+**CLI 工具检查**（始终执行）：
+```bash
+# 检查 Codex
+command -v codex && codex --version 2>/dev/null || echo "FAIL: Codex 未安装"
 
-根据 `$ARGUMENTS` 传递对应参数：
-- 包含 `--fix` → 传递 `--fix`
-- 包含 `--smoke` → 传递 `--smoke`
+# 检查 Gemini
+command -v gemini && gemini --version 2>/dev/null || echo "FAIL: Gemini 未安装"
+
+# 检查 GitHub CLI
+gh --version 2>/dev/null || echo "FAIL: GitHub CLI 未安装"
+```
+
+**MCP 服务器检查**（始终执行）：
+```bash
+# 检查 GitHub MCP
+claude mcp list 2>/dev/null | grep -i github || echo "WARN: GitHub MCP 未配置"
+
+# 检查 Context7 MCP
+claude mcp list 2>/dev/null | grep -i context7 || echo "WARN: Context7 MCP 未配置"
+```
+
+**Handoff 协议检查**（始终执行）：
+```bash
+bash scripts/check-handoff.sh
+```
+
+如果 `$ARGUMENTS` 包含 `--smoke`，额外执行：
+```bash
+# 冒烟测试：验证 Codex 可执行简单任务
+echo "echo hello" | codex exec - 2>/dev/null && echo "PASS: Codex smoke test" || echo "FAIL: Codex smoke test"
+```
+
+如果 `$ARGUMENTS` 包含 `--fix`，对 FAIL 项给出修复命令（见 Step 3）。
 
 ### Step 2: 格式化输出
 
