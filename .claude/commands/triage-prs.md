@@ -3,7 +3,7 @@ name: triage-prs
 description: Triage all open PRs with parallel agents, label, group, and review one-by-one
 argument-hint: "[optional: repo owner/name or GitHub PRs URL]"
 disable-model-invocation: true
-allowed-tools: Bash(gh *), Bash(git log *)
+allowed-tools: Bash(gh *), Bash(git log *), Task, AskUserQuestion, Read
 ---
 
 # Triage Open Pull Requests

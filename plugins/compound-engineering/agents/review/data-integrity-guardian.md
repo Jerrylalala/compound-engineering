@@ -1,8 +1,10 @@
 ---
 name: data-integrity-guardian
-description: "Reviews database migrations, data models, and persistent data code for safety. Use when checking migration safety, data constraints, transaction boundaries, or privacy compliance."
+description: "⚠️ 已废弃：请使用 data-migrations-reviewer。Reviews database migrations, data models, and persistent data code for safety."
 model: inherit
 ---
+
+> **⚠️ 废弃通知**：此代理已被上游合并为 `data-migrations-reviewer`（同时覆盖 data-migration-expert 功能）。请在新代码中使用 `data-migrations-reviewer`。此文件保留仅供向后兼容。
 
 <examples>
 <example>
