@@ -244,29 +244,111 @@ context_hash: null         # 检测漂移的 SHA256 哈希
 
 ---
 
-## Codex 审核
+## Codex 审核（已完成）
 
-**状态**: 已启动 last-commit 范围审核（后台运行中）
+**审核范围**: last-commit（ae67a19 feat(harness-fusion): Phase 1-4）  
+**模型**: gpt-5.4（via Codex cloud backend）  
+**完成时间**: 2026-04-08  
+**Token 消耗**: input 5,090,438 / output 16,661
+
+### Codex 发现（5 条，补充 Claude 9-agent 审核）
+
+#### 🔴 Codex-C1: 版本链路漂移（上游合并副作用）
+
+**证据**:
+- `plugins/compound-engineering/.claude-plugin/plugin.json:3` → `"version": "2.45.2"`（私有版本）
+- `plugins/compound-engineering/.cursor-plugin/plugin.json:4` → `"version": "2.63.1"`（上游版本，随合并带入）
+- `package.json:3` → `"version": "2.63.1"`（上游版本）
+- `.github/.release-please-manifest.json:3` → `2.63.1`（上游版本）
+
+**影响**: 上游合并后 cursor-plugin/package.json 版本（2.63.1）与私有 claude-plugin 版本（2.45.2）不一致，CI release:validate 未覆盖此检查。
+
+**修复建议**: 统一决策：要么将 cursor-plugin/package.json 回落到 2.45.2，要么说明这是"私有 claude 版本 vs 上游 cursor 版本"的预期差异，并在 CLAUDE.md 中说明。
+
+---
+
+#### 🔴 Codex-C2: `deploy-docs.yml` 指向不存在的目录
+
+**文件**: `.github/workflows/deploy-docs.yml:7,35`
+
+**问题**:
+```yaml
+paths: ['plugins/compound-engineering/docs/**']  # 不存在
+path: 'plugins/compound-engineering/docs'         # 不存在
+```
+实际文档在根目录 `docs/`，该 workflow 永远不会被触发，artifact 路径也会失效。
+
+**修复建议**: 改为 `docs/**` 和 `docs`，与实际文档目录对齐。
+
+---
+
+#### 🟡 Codex-W1: `release-preview.yml` Shell 注入风险
+
+**文件**: `.github/workflows/release-preview.yml:83-84`
+
+**问题**:
+```yaml
+TITLE='${{ steps.inputs.outputs.title }}'
+FILES='${{ steps.inputs.outputs.files }}'
+```
+commit title 或文件名含单引号会破坏脚本，且可被构造为命令注入。
+
+**修复建议**: 通过 `env:` 传值，在 bash 中安全读取：
+```yaml
+env:
+  TITLE: ${{ steps.inputs.outputs.title }}
+  FILES: ${{ steps.inputs.outputs.files }}
+```
+
+---
+
+#### 🟡 Codex-W2: `triage-prs` 命令 frontmatter 与正文不一致
+
+**文件**: `.claude/commands/triage-prs.md:5-6,57,120`
+
+**问题**:
+- `disable-model-invocation: true`，只允许 `Bash(gh *)` 和 `Bash(git log *)`
+- 正文需要 `Task`/`AskUserQuestion`（第 57、120 行）和 `git branch`（第 17 行）
+
+命令大概率无法执行。
+
+**修复建议**: 对齐 frontmatter，开放实际需要的工具；或重写正文去掉不支持的工具调用。
+
+---
+
+#### 🔵 Codex-I1: `deploy-docs` skill 文档路径旧引用
+
+**文件**: `plugins/compound-engineering/skills/deploy-docs/SKILL.md:26,37,69,92`
+
+仍引用 `plugins/compound-engineering/docs`（不存在路径），与 Codex-C2 同根。建议随 workflow 一起修复。
 
 ---
 
 ## 后续行动优先级
 
-### 立即（P1 修复）
-1. `scripts/bump-version.ps1` — 删除 marketplace 更新逻辑
-2. `scripts/check-versions.ps1` — 修复版本比较逻辑  
-3. `skills-custom/executor-capability-gate/SKILL.md` — Check 2 登录检测 + Check 4 写入逻辑
-4. `skills-custom/ce-work-integration/SKILL.md` — 补充 `resumed` 中间状态
-5. `skills-custom/patch-approval/SKILL.md` — 标注 `--dry-run` 前提条件为未验证
-6. `skills-custom/review-contract/SKILL.md` — 对齐 6 个 agent 名称
+### 已完成 ✅
+- [x] `scripts/bump-version.ps1` — 删除 marketplace 更新逻辑（已修复并合并）
+- [x] `scripts/check-versions.ps1` — 修复版本比较逻辑（已修复并合并）
+- [x] 提交 `docs/eval/` 全部文件（RUNBOOK/SCORING/cases/fixtures/results）
+- [x] 提交 `docs/sync-reports/` + 删除 nul 文件
+- [x] Codex 审核结果已追加（Codex-C1/C2/W1/W2/I1）
+
+### 立即（P1 修复，未完成）
+1. **Codex-C2** + **Codex-I1**: `.github/workflows/deploy-docs.yml` 路径错误 → 改为 `docs/`
+2. **P1-4**: `skills-custom/ce-work-integration/SKILL.md` — 补充 `resumed` 中间状态
+3. **P1-1**: `skills-custom/patch-approval/SKILL.md` — 标注 `--dry-run` 前提条件为未验证
+4. **P1-2/3**: `skills-custom/executor-capability-gate/SKILL.md` — Check 2 登录检测 + Check 4 写入逻辑
+5. **P1-6**: `skills-custom/review-contract/SKILL.md` — 对齐 6 个 agent 名称
+6. **Codex-C1**: 决策版本策略（cursor-plugin 2.63.1 vs claude-plugin 2.45.2）
 
 ### 本周（P2 核心修复）
-7. 在 ce-work/ce-review/ce-compound 中添加 Overlay 触发入口
-8. 更新 task-bundle/SKILL.md 说明集成现状
-9. 修复 Advisory Tier 规则 3 与 AL-D 矛盾
-10. 补充 state.md.tpl 缺失字段
-11. 统一 Eval 三份文档的阈值
+7. **Codex-W2**: `triage-prs.md` frontmatter 对齐
+8. **Codex-W1**: `release-preview.yml` 参数注入修复
+9. 在 ce-work/ce-review/ce-compound 中添加 Overlay 触发入口
+10. 更新 task-bundle/SKILL.md 说明集成现状
+11. 修复 Advisory Tier 规则 3 与 AL-D 矛盾
+12. 补充 state.md.tpl 缺失字段
+13. 统一 Eval 三份文档的阈值
 
 ### 可选（P3 简化）
-12. 删除约 93 行冗余内容（见 P3 列表）
-13. 提交 docs/sync-reports/ + 删除 nul 文件
+14. 删除约 93 行冗余内容（见 P3 列表）
