@@ -1,7 +1,7 @@
 ---
 name: ce:review
 description: "Structured code review using tiered persona agents, confidence-gated findings, and a merge/dedup pipeline. Use when reviewing code changes before creating a PR."
-argument-hint: "[PR# 或留空=当前分支] [mode:autofix|report-only|headless] [plan:路径] [base:ref] [C=Codex审核] [G=Gemini审核]"
+argument-hint: "[PR# 或留空=当前分支] [mode:autofix|report-only|headless] [plan:路径] [base:ref] [C=Codex审核] [G=Gemini审核] [team=合约白名单门控,需.team-contract.md]"
 ---
 
 # Code Review
@@ -27,6 +27,7 @@ Parse `$ARGUMENTS` for the following optional tokens. Strip each recognized toke
 | `mode:headless` | `mode:headless` | Select headless mode for programmatic callers (see Mode Detection below) |
 | `base:<sha-or-ref>` | `base:abc1234` or `base:origin/main` | Skip scope detection — use this as the diff base directly |
 | `plan:<path>` | `plan:docs/plans/2026-03-25-001-feat-foo-plan.md` | Load this plan for requirements verification |
+| `[team]` | `[team]` | TEAM_GATE_ENABLED = true. Load `.team-contract.md` and execute Deterministic Patch Gate in Stage 5 (see below). Has no effect in `mode:report-only` or `mode:headless`. |
 
 All tokens are optional. Each one present means one less thing to infer. When absent, fall back to existing behavior for that stage.
 
@@ -428,6 +429,47 @@ Convert multiple reviewer JSON payloads into one deduplicated, confidence-gated 
 5. **Separate pre-existing.** Pull out findings with `pre_existing: true` into a separate list.
 5. **Resolve disagreements.** When reviewers flag the same code region but disagree on severity, autofix_class, or owner, record the disagreement in the finding's evidence (e.g., "security rated P0, correctness rated P1 -- keeping P0"). This transparency helps the user understand why a finding was routed the way it was.
 6. **Normalize routing.** For each merged finding, set the final `autofix_class`, `owner`, and `requires_verification`. If reviewers disagree, keep the most conservative route. Synthesis may narrow a finding from `safe_auto` to `gated_auto` or `manual`, but must not widen it without new evidence.
+
+6.5. **Deterministic Patch Gate（仅当 TEAM_GATE_ENABLED = true AND mode == autofix）**
+
+This is a rule engine, not an agent — it consumes no extra tokens. Execute immediately after step 6 routing normalization, before partitioning the fixer queue.
+
+```
+if TEAM_GATE_ENABLED AND mode == autofix:
+  Load .team-contract.md from repo root
+  If not found: skip this gate, log warning "未找到 .team-contract.md，Patch Gate 已禁用"
+  Read: allowed_files, forbidden_surfaces, max_files_per_patch, required_invariants
+
+  For each finding where autofix_class == safe_auto:
+
+    Rule 1 — File scope:
+      if ANY(patch_file NOT IN allowed_files):
+        downgrade: safe_auto → gated_auto
+        note: "合约白名单：{file} 不在 allowed_files 中"
+
+    Rule 2 — Forbidden surface:
+      if ANY(patch_file IN forbidden_surfaces):
+        downgrade: safe_auto → advisory (remove from fixer queue entirely)
+        note: "合约禁止区域：{file} 在 forbidden_surfaces 中，拒绝自动修复"
+
+    Rule 3 — One-finding-one-patch:
+      if count(affected_files) > max_files_per_patch (default: 1):
+        downgrade: safe_auto → gated_auto
+        note: "单补丁约束：此 finding 涉及 {N} 个文件，超过 max_files_per_patch={max}"
+
+    Rule 4 — Invariant verification:
+      if required_invariants is non-empty:
+        mark finding with requires_verification: true
+        fixer subagent must verify all required_invariants after applying the patch
+        if invariant check fails: revert patch, re-route finding as gated_auto
+
+  Additionally, apply review-contract Tier overrides (if review-contract skill has been loaded):
+    Blocking Tier agents (security-reviewer, data-migrations-reviewer, deployment-verification):
+      findings from these agents: force to gated_auto regardless of original autofix_class
+    Analytical Tier: maintain original routing, add requires_verification: true
+    Advisory Tier: maintain original routing, no changes
+```
+
 7. **Partition the work.** Build three sets:
    - in-skill fixer queue: only `safe_auto -> review-fixer`
    - residual actionable queue: unresolved `gated_auto` or `manual` findings whose owner is `downstream-resolver`

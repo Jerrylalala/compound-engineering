@@ -1,7 +1,7 @@
 ---
 name: ce:brainstorm
 description: 'Explore requirements and approaches through collaborative dialogue before writing a right-sized requirements document and planning implementation. Use for feature ideas, problem framing, when the user says ''let''s brainstorm'', or when they want to think through options before deciding what to build. Also use when a user describes a vague or ambitious feature request, asks ''what should we build'', ''help me think through X'', presents a problem with multiple valid solutions, or seems unsure about scope or direction — even if they don''t explicitly ask to brainstorm.'
-argument-hint: "[功能描述] [P=派对模式/多代理讨论] [C=Codex咨询] [G=Gemini咨询]"
+argument-hint: "[功能描述] [P=派对模式/多代理讨论] [C=Codex咨询] [G=Gemini咨询] [team=结构化探索:探索者+挑战者]"
 ---
 
 # Brainstorm a Feature or Improvement
@@ -44,6 +44,39 @@ This skill does not implement code. It explores, clarifies, and documents decisi
 **If the feature description above is empty, ask the user:** "What would you like to explore? Please describe the feature, problem, or improvement you're thinking about."
 
 Do not proceed until you have a feature description from the user.
+
+## Parameter Handling
+
+Parse `$ARGUMENTS` for the following optional tokens before entering the Execution Flow. Strip each recognized token from the arguments before using the remainder as the feature description.
+
+| Token | Effect |
+|-------|--------|
+| `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. |
+| `[C]` | Auto-consult Codex after Phase 2. |
+| `[G]` | Auto-consult Gemini after Phase 2. |
+| `[team]` | TEAM_MODE = true. Activate structured exploration: **探索者 + 挑战者** role pair (see below). |
+
+### `[team]` Structured Exploration Mode
+
+When `[team]` is detected, activate a 2-role structured exploration before Phase 1:
+
+```
+探索者：聚焦「这个想法在技术上可行吗？」，提出具体验证路径和可达条件
+挑战者：质疑假设，寻找边界条件和反例，防止过早收敛
+
+退出条件（满足任一即退出角色对，继续正常流程）：
+  - 双方达成「方向共识」：可行性已确认 + 主要风险已识别
+  - 用户输入 [E]
+
+与 [P] 的区别：
+  [P]      = 发散（14位专家自由讨论，无明确收敛条件）
+  [team]   = 收敛（2个角色结构化验证，有明确退出条件）
+  [P][team] = 先 [P] 发散 → 退出 → [team] 结构化挑战验证（顺序执行）
+```
+
+Load the `team-mode` skill for full role definitions and behavioral rules.
+
+---
 
 ## Execution Flow
 

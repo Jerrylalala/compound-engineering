@@ -1,7 +1,7 @@
 ---
 name: ce:work
 description: Execute work efficiently while maintaining quality and finishing features
-argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc]"
+argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:light=2角色:执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration]"
 ---
 
 # Work Execution Command
@@ -17,6 +17,88 @@ This command takes a work document (plan, specification, or todo file) or a bare
 <input_document> #$ARGUMENTS </input_document>
 
 ## Execution Workflow
+
+### Phase -1: Team Mode 初始化（仅当 `[team]`、`[team:light]`、`[team:full]` 时）
+
+**触发条件**: `$ARGUMENTS` 包含 team token
+
+**Step 1 — 检测 token 变体**:
+
+| Token | TEAM_VARIANT | 激活角色 |
+|-------|-------------|---------|
+| `[team]` | default | 合约主 + 执行者 + 验证者 |
+| `[team:light]` | light | 执行者 + 验证者 |
+| `[team:full]` | full | 合约主 + 执行者 + 验证者 + 风险卫 |
+
+Strip the team token from arguments before passing to Phase 0.
+
+**Step 2 — 加载合约**:
+
+检查 `.team-contract.md` 是否存在于 repo 根目录：
+- **存在**：读取 `allowed_files`、`forbidden_surfaces`、`required_invariants`、`max_files_per_patch`
+- **不存在**：提示用户"未找到 `.team-contract.md`，建议先运行 `/ce:plan [team]` 生成合约。是否继续（无合约模式，不执行边界检查）？"如用户选择继续，TEAM_CONTRACT_LOADED = false；边界检查和 Patch Gate 跳过，其他 team 行为正常
+
+**Step 3 — 宣告角色**:
+
+```
+🤝 Team Mode 已激活 [TEAM_VARIANT]
+
+  合约主：持有 .team-contract.md，监督边界合约
+          （通过文件持久化，非独立 subagent）
+  执行者：唯一可写代码的角色（单写者原则）
+  验证者：每任务后运行集成测试（只读）
+  [风险卫：仅 full 模式 — 拦截 auth/payment/migration 路径]
+
+  合约文件：[.team-contract.md 存在/未找到]
+  allowed_files: [N] 个文件
+  forbidden_surfaces: [N] 个禁区
+  required_invariants: [N] 条不变式
+```
+
+**单写者原则（Iron Law）**:
+
+ONLY 执行者 writes to shared checkout.
+
+在每个 Implementation Unit 开始执行前，检查该单元的 Files 字段（如合约已加载）：
+- 如果任何文件 ∉ allowed_files → **暂停**，报告越界，等待用户确认是否更新合约
+- 如果任何文件 ∈ forbidden_surfaces → **拒绝执行**，提示修改计划
+
+**验证者 Hook（每 Implementation Unit 完成后，team mode 下自动执行）**:
+
+如果 TEAM_VARIANT ≠ off：
+```
+验证者（只读）执行：
+  1. 运行该单元的 Verification 步骤中指定的测试命令
+  2. 逐一检查 required_invariants（如合约已加载）
+  3. 如测试失败或不变式违反：
+     - 立即停止（不执行下一单元）
+     - 将失败信息写入 .team-contract.md 的 last_verification_failure 字段
+     - 报告：验证者 Hook 失败 — [原因]
+     - 执行者（唯一可修改代码的角色）负责修复
+  4. 如全部通过：继续下一单元
+注意：验证者不修改任何代码文件。
+```
+
+**[team:full] 风险卫 Hook（在执行者开始每个单元之前）**:
+
+如果 TEAM_VARIANT == full：
+```
+检查该单元的 Files 和 Approach 是否包含高风险模式：
+  - 认证/授权：auth、session、permission、role、credential
+  - 支付：payment、billing、stripe、invoice、checkout
+  - 数据迁移：migration、schema、db/migrate
+
+如果命中任一模式：
+  风险卫执行只读分析：
+  1. 识别变更的安全/数据影响（3-5条）
+  2. 检查 forbidden_surfaces 中的相关条目
+  3. 使用 AskUserQuestion 呈现风险摘要，要求用户确认继续
+  4. 用户确认后，执行者继续
+```
+
+Load the `team-mode` skill for complete role specifications and behavioral rules.
+
+---
 
 ### Phase 0: Input Triage
 

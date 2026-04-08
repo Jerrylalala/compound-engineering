@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.45.8] - 2026-04-08
+
+### Added
+
+* **feat(team-mode)**: 新增 `[team]` 参数 — 多代理协作稳定性框架，适用于 ce:brainstorm/plan/work/review
+  * 单写者原则（Iron Law）：执行者是唯一可写共享代码的角色，其他角色只读
+  * 合约白名单：`ce:plan [team]` 在 Phase 4.5 自动生成 `.team-contract.md`（allowed_files/forbidden_surfaces/required_invariants）
+  * 验证者集成：`ce:work [team]` 每任务完成后自动运行验证者 Hook（集成测试 + 不变式检查）
+  * Deterministic Patch Gate：`ce:review mode:autofix [team]` 在 Stage 5 执行规则引擎门控（不消耗额外 token）
+  * 三个变体：`[team]`（3角色默认）/ `[team:light]`（2角色快速）/ `[team:full]`（4角色含风险卫）
+  * `[P][team]` 组合支持：Party Mode 发散 → [team] 结构化验证（顺序执行）
+* **feat(team-mode)**: 新增 `skills-custom/team-mode/SKILL.md` — overlay skill，定义角色规范、单写者原则、合约文件格式
+* **feat(team-mode)**: 新增 `skills-custom/team-mode/templates/team-contract.md.tpl` — `.team-contract.md` 生成模板
+
+### Fixed
+
+* **fix(review-contract)**: 虚拟字段（`conclusion_type`/Tier 分类）现在由 `[team]` Patch Gate 自动消费 — "入口未接通、虚拟字段无消费者"问题已解决
+* **fix(review-contract)**: 新增 Integration with [team] Mode 节，明确 Tier → Patch Gate 行为映射
+
 ## [2.45.7] — 2026-04-08
 
 ### 修复与优化（P3 可选优化批次）

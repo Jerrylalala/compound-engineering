@@ -175,10 +175,10 @@ skills/
 
 | 命令 | 说明 |
 |------|------|
-| `/ce:brainstorm` | 探索需求和方案 `[P][C][G]` |
-| `/ce:plan` | 创建实施计划 |
-| `/ce:work` | 执行工作计划 |
-| `/ce:review` | 代码审查 `[mode:autofix] [C][G]` |
+| `/ce:brainstorm` | 探索需求和方案 `[P][C][G][team]` |
+| `/ce:plan` | 创建实施计划 `[team]` |
+| `/ce:work` | 执行工作计划 `[team][team:light][team:full]` |
+| `/ce:review` | 代码审查 `[mode:autofix] [C][G][team]` |
 
 **独立工具命令（手动调用）：**
 
@@ -188,6 +188,28 @@ skills/
 | `/workflows:sync-upstream` | 检测上游更新 |
 | `/workflows:pr` | 创建 PR |
 | `/workflows:doctor` | 健康检查 |
+
+### `[team]` 参数说明
+
+多代理协作稳定性框架。核心机制：合约白名单 + 单写者原则 + 事件驱动验证前移。
+
+| 参数 | 阶段 | 效果 |
+|------|------|------|
+| `[team]` | ce:brainstorm | 探索者 + 挑战者结构化验证角色对 |
+| `[team]` | ce:plan | 合约主 + 追溯审查，自动生成 `.team-contract.md` |
+| `[team]` | ce:work | 3角色默认（合约主+执行者+验证者），每任务后运行验证者 Hook |
+| `[team:light]` | ce:work | 2角色（执行者+验证者），快速小任务 |
+| `[team:full]` | ce:work | 4角色（加风险卫），适合 auth/payment/migration 高风险路径 |
+| `[team]` | ce:review | autofix 路径增加 Deterministic Patch Gate（规则引擎，不耗额外 token） |
+
+**使用流程**：
+```bash
+/ce:plan [team]           # 生成计划 + .team-contract.md
+/ce:work [team]           # 执行（合约边界保护 + 验证者 Hook）
+/ce:review mode:autofix [team]  # autofix 受合约白名单门控
+```
+
+加载 `team-mode` skill 查看完整角色定义和行为规则。
 
 ### 序号格式规范
 

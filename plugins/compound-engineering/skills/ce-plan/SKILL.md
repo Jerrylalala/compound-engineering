@@ -1,7 +1,7 @@
 ---
 name: ce:plan
 description: "Create structured plans for any multi-step task -- software features, research workflows, events, study plans, or any goal that benefits from structured breakdown. Also deepen existing plans with interactive review of sub-agent findings. Use for plan creation when the user says 'plan this', 'create a plan', 'write a tech plan', 'plan the implementation', 'how should we build', 'what's the approach for', 'break this down', 'plan a trip', 'create a study plan', or when a brainstorm/requirements document is ready for planning. Use for plan deepening when the user says 'deepen the plan', 'deepen my plan', 'deepening pass', or uses 'deepen' in reference to a plan. For exploratory or ambiguous requests where the user is unsure what to do, prefer ce:brainstorm first."
-argument-hint: "[optional: feature description, requirements doc path, plan path to deepen, or any task to plan]"
+argument-hint: "[optional: feature description, requirements doc path, plan path to deepen, or any task to plan] [team=合约主+追溯审查+自动生成.team-contract.md]"
 ---
 
 # Create Technical Plan
@@ -606,6 +606,39 @@ For larger `Deep` plans, extend the core template only when useful with sections
 #### 4.4 Visual Communication in Plan Documents
 
 When the plan contains 4+ implementation units with non-linear dependencies, 3+ interacting surfaces in System-Wide Impact, 3+ behavioral modes/variants in Overview or Problem Frame, or 3+ interacting decisions in Key Technical Decisions or alternatives in Alternative Approaches, read `references/visual-communication.md` for diagram and table guidance. This covers plan-structure visuals (dependency graphs, interaction diagrams, comparison tables) — not solution-design diagrams, which are covered in Section 3.4.
+
+### Phase 4.5: Contract Generation（仅当 `[team]` 标志存在时）
+
+**触发条件**: `$ARGUMENTS` 包含 `[team]`、`[team:light]` 或 `[team:full]`
+
+**执行时机**: Phase 4（Write the Plan）完成后，Phase 5（Final Review）之前
+
+#### 合约主角色激活
+
+合约主读取刚生成的计划文件，提取边界合约：
+
+1. **`allowed_files`**：遍历所有 Implementation Units 的 Files 字段，收集完整文件路径列表
+2. **`forbidden_surfaces`**：从计划描述和技术方案中识别高风险文件：
+   - 版本文件：`**/plugin.json`、`package.json`（当版本管理是明确任务时例外）
+   - 数据库 schema：`db/schema.rb`、`**/*_schema.*`
+   - 认证/授权配置：含 `auth`、`credential`、`secret`、`permission` 的配置文件
+   - 如无明显高风险文件，保留为空列表
+3. **`required_invariants`**：从计划的 Acceptance Criteria 提取可检查的不变式（转换为命令式短句）
+4. **`max_files_per_patch`**：默认 1（one-finding-one-patch 原则）
+
+**生成合约文件**：将 `plugins/compound-engineering/skills-custom/team-mode/templates/team-contract.md.tpl` 作为模板，填充提取的值，写入 `.team-contract.md`（repo 根目录）。
+
+#### 追溯审查角色激活
+
+追溯审查者（只读角色）执行历史经验检查：
+
+1. 搜索 `docs/solutions/` 查找与当前计划相关的历史案例
+2. 检查计划的技术决策是否与已记录的 gotcha 或失败模式矛盾
+3. 将有价值的发现追加到计划文件的 **Open Questions** 节（如无此节则新建）
+
+**输出**：`.team-contract.md` 写入根目录；追溯审查结果（如有）写入计划文件末尾
+
+---
 
 ### Phase 5: Final Review, Write File, and Handoff
 
