@@ -159,8 +159,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
    - `workflows-plan`
    - `workflows-review`
 
-**版本号位置（必须同步）：**
-- `.claude-plugin/marketplace.json` → `plugins[0].version`
+**版本号位置（唯一权威来源）：**
 - `plugins/compound-engineering/.claude-plugin/plugin.json` → `version`
 
 **快速检查命令：**

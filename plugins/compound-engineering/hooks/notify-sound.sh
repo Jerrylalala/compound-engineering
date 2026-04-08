@@ -19,7 +19,8 @@ play_sound() {
     # Windows (Git Bash / MSYS2) - 转换 MSYS 路径为 Windows 路径
     local win_path
     win_path=$(cygpath -w "$sound_file" 2>/dev/null || echo "$sound_file")
-    powershell -c "(New-Object Media.SoundPlayer '$win_path').PlaySync()"
+    # 通过环境变量传路径，避免单引号注入
+    SOUND_PATH="$win_path" powershell -c "(New-Object Media.SoundPlayer \$Env:SOUND_PATH).PlaySync()"
   elif [[ "$OSTYPE" == "linux"* ]]; then
     # Linux
     if command -v paplay &>/dev/null; then

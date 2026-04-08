@@ -146,7 +146,9 @@ Gate 结果缓存 5 分钟（同一会话内）：
 
 ```bash
 GATE_CACHE=~/.codex/.gate_cache
-CACHE_AGE=$(( $(date +%s) - $(stat -c %Y $GATE_CACHE 2>/dev/null || echo 0) ))
+# stat -c %Y 仅 Linux 有效；macOS 用 -f %m；用两者 fallback 实现跨平台
+CACHE_MOD=$(stat -c %Y "$GATE_CACHE" 2>/dev/null || stat -f %m "$GATE_CACHE" 2>/dev/null || echo 0)
+CACHE_AGE=$(( $(date +%s) - CACHE_MOD ))
 
 if [ $CACHE_AGE -lt 300 ]; then
   # 使用缓存结果，不重新检查
