@@ -1,4 +1,5 @@
 import type { ClaudeMcpServer } from "./claude"
+import type { CodexInvocationTargets } from "../utils/codex-content"
 
 export type CodexPrompt = {
   name: string
@@ -19,7 +20,6 @@ export type CodexBundle = {
   prompts: CodexPrompt[]
   skillDirs: CodexSkillDir[]
   generatedSkills: CodexGeneratedSkill[]
-  repoPromptDirs?: string[]
-  repoSkillDirs?: string[]
+  invocationTargets?: CodexInvocationTargets
   mcpServers?: Record<string, ClaudeMcpServer>
 }

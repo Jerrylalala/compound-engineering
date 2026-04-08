@@ -1,173 +1,197 @@
-import type { ClaudeCommand, ClaudePlugin } from "../types/claude"
-import type { GeminiBundle, GeminiCommand } from "../types/gemini"
+import { formatFrontmatter } from "../utils/frontmatter"
+import type { ClaudeAgent, ClaudeCommand, ClaudeMcpServer, ClaudePlugin } from "../types/claude"
+import type { GeminiBundle, GeminiCommand, GeminiMcpServer, GeminiSkill } from "../types/gemini"
 import type { ClaudeToOpenCodeOptions } from "./claude-to-opencode"
-import { filterClaudeCodeOnly } from "../utils/filter-claude-code-only"
 
 export type ClaudeToGeminiOptions = ClaudeToOpenCodeOptions
 
-/**
- * 将 Claude 插件转换为 Gemini CLI 格式
- *
- * 注意：Gemini CLI 当前仅支持以下功能：
- * - ✅ commands → TOML 命令文件
- * - ✅ claudeMd → GEMINI.md 系统上下文
- *
- * 以下功能不被 Gemini CLI 支持，将被忽略：
- * - ❌ agents（Gemini CLI 无 agent 概念）
- * - ❌ skills（Gemini CLI 无 skill 概念）
- * - ❌ hooks（Gemini CLI 无 hook 支持）
- * - ❌ mcpServers（Gemini CLI 无 MCP 支持）
- *
- * @param plugin Claude 插件对象
- * @param _options 选项（保留用于未来扩展）
- */
+const GEMINI_DESCRIPTION_MAX_LENGTH = 1024
+
 export function convertClaudeToGemini(
   plugin: ClaudePlugin,
   _options: ClaudeToGeminiOptions,
 ): GeminiBundle {
-  // 提前过滤 claude-code-only 命令，避免后续函数重复过滤
-  const convertibleCommands = plugin.commands.filter((cmd) => !cmd.claudeCodeOnly)
-  return {
-    geminiMd: renderGeminiMarkdown({ ...plugin, commands: convertibleCommands }),
-    commands: convertCommands(convertibleCommands),
+  const usedSkillNames = new Set<string>()
+  const usedCommandNames = new Set<string>()
+
+  const skillDirs = plugin.skills.map((skill) => ({
+    name: skill.name,
+    sourceDir: skill.sourceDir,
+  }))
+
+  // Reserve skill names from pass-through skills
+  for (const skill of skillDirs) {
+    usedSkillNames.add(normalizeName(skill.name))
   }
+
+  const generatedSkills = plugin.agents.map((agent) => convertAgentToSkill(agent, usedSkillNames))
+
+  const commands = plugin.commands.map((command) => convertCommand(command, usedCommandNames))
+
+  const mcpServers = convertMcpServers(plugin.mcpServers)
+
+  if (plugin.hooks && Object.keys(plugin.hooks.hooks).length > 0) {
+    console.warn("Warning: Gemini CLI hooks use a different format (BeforeTool/AfterTool with matchers). Hooks were skipped during conversion.")
+  }
+
+  return { generatedSkills, skillDirs, commands, mcpServers }
+}
+
+function convertAgentToSkill(agent: ClaudeAgent, usedNames: Set<string>): GeminiSkill {
+  const name = uniqueName(normalizeName(agent.name), usedNames)
+  const description = sanitizeDescription(
+    agent.description ?? `Use this skill for ${agent.name} tasks`,
+  )
+
+  const frontmatter: Record<string, unknown> = { name, description }
+
+  let body = transformContentForGemini(agent.body.trim())
+  if (agent.capabilities && agent.capabilities.length > 0) {
+    const capabilities = agent.capabilities.map((c) => `- ${c}`).join("\n")
+    body = `## Capabilities\n${capabilities}\n\n${body}`.trim()
+  }
+  if (body.length === 0) {
+    body = `Instructions converted from the ${agent.name} agent.`
+  }
+
+  const content = formatFrontmatter(frontmatter, body)
+  return { name, content }
+}
+
+function convertCommand(command: ClaudeCommand, usedNames: Set<string>): GeminiCommand {
+  // Preserve namespace structure: workflows:plan -> workflows/plan
+  const commandPath = resolveCommandPath(command.name)
+  const pathKey = commandPath.join("/")
+  uniqueName(pathKey, usedNames) // Track for dedup
+
+  const description = command.description ?? `Converted from Claude command ${command.name}`
+  const transformedBody = transformContentForGemini(command.body.trim())
+
+  let prompt = transformedBody
+  if (command.argumentHint) {
+    prompt += `\n\nUser request: {{args}}`
+  }
+
+  const content = toToml(description, prompt)
+  return { name: pathKey, content }
 }
 
 /**
- * 将 Claude 命令转换为 Gemini TOML 命令格式
+ * Transform Claude Code content to Gemini-compatible content.
+ *
+ * 1. Task agent calls: Task agent-name(args) -> Use the agent-name skill to: args
+ * 2. Path rewriting: .claude/ -> .gemini/, ~/.claude/ -> ~/.gemini/
+ * 3. Agent references: @agent-name -> the agent-name skill
  */
-function convertCommands(commands: ClaudeCommand[]): GeminiCommand[] {
-  return commands.map((cmd) => {
-    const name = cmd.name.startsWith("/") ? cmd.name.slice(1) : cmd.name
-    const relativePath = buildCommandPath(name)
-    const description = cmd.description || `Run ${name} command`
-    const prompt = buildCommandPrompt(cmd)
+export function transformContentForGemini(body: string): string {
+  let result = body
 
-    return {
-      name,
-      description,
-      prompt,
-      relativePath,
-    }
+  // 1. Transform Task agent calls (supports namespaced names like compound-engineering:research:agent-name)
+  const taskPattern = /^(\s*-?\s*)Task\s+([a-z][a-z0-9:-]*)\(([^)]*)\)/gm
+  result = result.replace(taskPattern, (_match, prefix: string, agentName: string, args: string) => {
+    const finalSegment = agentName.includes(":") ? agentName.split(":").pop()! : agentName
+    const skillName = normalizeName(finalSegment)
+    const trimmedArgs = args.trim()
+    return trimmedArgs
+      ? `${prefix}Use the ${skillName} skill to: ${trimmedArgs}`
+      : `${prefix}Use the ${skillName} skill`
   })
+
+  // 2. Rewrite .claude/ paths to .gemini/
+  result = result
+    .replace(/~\/\.claude\//g, "~/.gemini/")
+    .replace(/\.claude\//g, ".gemini/")
+
+  // 3. Transform @agent-name references
+  const agentRefPattern = /@([a-z][a-z0-9-]*-(?:agent|reviewer|researcher|analyst|specialist|oracle|sentinel|guardian|strategist))/gi
+  result = result.replace(agentRefPattern, (_match, agentName: string) => {
+    return `the ${normalizeName(agentName)} skill`
+  })
+
+  return result
 }
 
-/**
- * 根据命令名生成相对路径
- * 例如: "workflows:plan" -> "workflows/plan.toml"
- */
-function buildCommandPath(name: string): string {
-  // 清理命令名：移除路径遍历字符和危险字符
-  const sanitized = sanitizeCommandName(name)
-  // P2 修复：空结果回退到默认名称
-  const sanitizedName = sanitized || "unnamed-command"
-  const parts = sanitizedName.split(":")
-  if (parts.length === 1) {
-    return `${sanitizedName}.toml`
+function convertMcpServers(
+  servers?: Record<string, ClaudeMcpServer>,
+): Record<string, GeminiMcpServer> | undefined {
+  if (!servers || Object.keys(servers).length === 0) return undefined
+
+  const result: Record<string, GeminiMcpServer> = {}
+  for (const [name, server] of Object.entries(servers)) {
+    const entry: GeminiMcpServer = {}
+    if (server.command) {
+      entry.command = server.command
+      if (server.args && server.args.length > 0) entry.args = server.args
+      if (server.env && Object.keys(server.env).length > 0) entry.env = server.env
+    } else if (server.url) {
+      entry.url = server.url
+      if (server.headers && Object.keys(server.headers).length > 0) entry.headers = server.headers
+    }
+    result[name] = entry
   }
-  // workflows:plan -> workflows/plan.toml
-  const namespace = parts[0]
-  const commandName = parts.slice(1).join("-")
-  return `${namespace}/${commandName}.toml`
+  return result
 }
 
 /**
- * 清理命令名，防止路径遍历攻击
- * 注意：保留 `:` 作为命名空间分隔符
+ * Resolve command name to path segments.
+ * workflows:plan -> ["workflows", "plan"]
+ * plan -> ["plan"]
  */
-function sanitizeCommandName(name: string): string {
+function resolveCommandPath(name: string): string[] {
+  return name.split(":").map((segment) => normalizeName(segment))
+}
+
+/**
+ * Serialize to TOML command format.
+ * Uses multi-line strings (""") for prompt field.
+ */
+export function toToml(description: string, prompt: string): string {
+  const lines: string[] = []
+  lines.push(`description = ${formatTomlString(description)}`)
+
+  // Use multi-line string for prompt
+  const escapedPrompt = prompt.replace(/\\/g, "\\\\").replace(/"""/g, '\\"\\"\\"')
+  lines.push(`prompt = """`)
+  lines.push(escapedPrompt)
+  lines.push(`"""`)
+
+  return lines.join("\n")
+}
+
+function formatTomlString(value: string): string {
+  return JSON.stringify(value)
+}
+
+function normalizeName(value: string): string {
+  const trimmed = value.trim()
+  if (!trimmed) return "item"
+  const normalized = trimmed
+    .toLowerCase()
+    .replace(/[\\/]+/g, "-")
+    .replace(/[:\s]+/g, "-")
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+  return normalized || "item"
+}
+
+function sanitizeDescription(value: string, maxLength = GEMINI_DESCRIPTION_MAX_LENGTH): string {
+  const normalized = value.replace(/\s+/g, " ").trim()
+  if (normalized.length <= maxLength) return normalized
+  const ellipsis = "..."
+  return normalized.slice(0, Math.max(0, maxLength - ellipsis.length)).trimEnd() + ellipsis
+}
+
+function uniqueName(base: string, used: Set<string>): string {
+  if (!used.has(base)) {
+    used.add(base)
+    return base
+  }
+  let index = 2
+  while (used.has(`${base}-${index}`)) {
+    index += 1
+  }
+  const name = `${base}-${index}`
+  used.add(name)
   return name
-    .replace(/\.\./g, "") // 移除 ..
-    .replace(/[/\\]/g, "-") // 替换路径分隔符
-    .replace(/[<>"|?*\x00-\x1f]/g, "") // 移除 Windows 非法文件名字符（保留 : 用于命名空间）
-    .replace(/^\.+/, "") // 移除开头的点
-    .replace(/\.+$/, "") // 移除结尾的点
-    .replace(/^-+$/, "") // 如果只剩下横杠，视为空
-    .replace(/-+/g, "-") // 合并连续横杠
-    .replace(/^-|-$/g, "") // 移除首尾横杠
-}
-
-/**
- * 构建命令的 prompt 内容
- * 过滤 Claude Code 专属内容（[C] [G] 参数等）
- */
-function buildCommandPrompt(cmd: ClaudeCommand): string {
-  const body = filterClaudeCodeOnly(cmd.body?.trim() || "")
-  const header = cmd.argumentHint ? "## Arguments" : "## User Input"
-  const filteredHint = cmd.argumentHint ? filterClaudeCodeOnly(cmd.argumentHint) : null
-  const argLine = filteredHint ? `${filteredHint}: {{args}}` : "{{args}}"
-  return [body, "", header, argLine].filter(Boolean).join("\n")
-}
-
-function renderGeminiMarkdown(plugin: ClaudePlugin): string {
-  const sections: string[] = []
-  sections.push(...renderSystemContext(plugin))
-  sections.push("")
-  sections.push(...renderConventions(plugin))
-  sections.push("")
-  sections.push(...renderCommands(plugin.commands))
-
-  return sections.join("\n").trimEnd() + "\n"
-}
-
-function renderSystemContext(plugin: ClaudePlugin): string[] {
-  const { name, description, version } = plugin.manifest
-  return [
-    "# System Context",
-    "",
-    `- Project: ${name}`,
-    `- Description: ${description || "(not provided in plugin manifest)"}`,
-    ...(version ? [`- Version: ${version}`] : []),
-  ]
-}
-
-function renderConventions(plugin: ClaudePlugin): string[] {
-  const lines: string[] = []
-  lines.push("# Conventions")
-  lines.push("")
-  if (plugin.claudeMd && plugin.claudeMd.trim().length > 0) {
-    lines.push("Source: CLAUDE.md")
-    lines.push("")
-    lines.push(demoteHeadings(plugin.claudeMd.trim()))
-  } else {
-    lines.push("No CLAUDE.md found in the plugin root. Add one to define conventions.")
-  }
-  return lines
-}
-
-function renderCommands(commands: ClaudeCommand[]): string[] {
-  const lines: string[] = []
-  lines.push("# Commands/Tools")
-  lines.push("")
-  if (commands.length === 0) {
-    lines.push("No commands defined in this plugin.")
-    return lines
-  }
-
-  for (const command of commands) {
-    lines.push(renderCommandLine(command))
-  }
-
-  return lines
-}
-
-function renderCommandLine(command: ClaudeCommand): string {
-  const name = command.name.startsWith("/") ? command.name : `/${command.name}`
-  // 过滤 Claude Code 专属内容（[C] [G] 参数等）
-  const filteredDesc = command.description ? filterClaudeCodeOnly(command.description) : null
-  const filteredHint = command.argumentHint ? filterClaudeCodeOnly(command.argumentHint) : null
-  const details = [
-    filteredDesc,
-    filteredHint && `Arguments: ${filteredHint}`,
-    command.allowedTools?.length && `Allowed tools: ${command.allowedTools.join(", ")}`,
-  ].filter(Boolean)
-
-  return `- To run \`${name}\`: ${details.join(" ") || "No description or metadata provided."}`
-}
-
-function demoteHeadings(markdown: string): string {
-  return markdown
-    .split("\n")
-    .map((line) => line.replace(/^(#{1,5})(\s+)/, (_match, hashes: string, space: string) => `#${hashes}${space}`))
-    .join("\n")
 }

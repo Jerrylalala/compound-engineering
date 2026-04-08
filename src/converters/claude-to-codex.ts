@@ -1,10 +1,12 @@
-import { existsSync } from "fs"
-import path from "path"
 import { formatFrontmatter } from "../utils/frontmatter"
-import { filterClaudeCodeOnly } from "../utils/filter-claude-code-only"
-import type { ClaudeAgent, ClaudeCommand, ClaudePlugin } from "../types/claude"
+import type { ClaudeAgent, ClaudeCommand, ClaudePlugin, ClaudeSkill } from "../types/claude"
 import type { CodexBundle, CodexGeneratedSkill } from "../types/codex"
 import type { ClaudeToOpenCodeOptions } from "./claude-to-opencode"
+import {
+  normalizeCodexName,
+  transformContentForCodex,
+  type CodexInvocationTargets,
+} from "../utils/codex-content"
 
 export type ClaudeToCodexOptions = ClaudeToOpenCodeOptions
 
@@ -14,46 +16,102 @@ export function convertClaudeToCodex(
   plugin: ClaudePlugin,
   _options: ClaudeToCodexOptions,
 ): CodexBundle {
-  const promptNames = new Set<string>()
-  const skillDirs = plugin.skills.map((skill) => ({
+  const invocableCommands = plugin.commands.filter((command) => !command.disableModelInvocation)
+  const applyCompoundWorkflowModel = shouldApplyCompoundWorkflowModel(plugin)
+  const canonicalWorkflowSkills = applyCompoundWorkflowModel
+    ? plugin.skills.filter((skill) => isCanonicalCodexWorkflowSkill(skill.name))
+    : []
+  const deprecatedWorkflowAliases = applyCompoundWorkflowModel
+    ? plugin.skills.filter((skill) => isDeprecatedCodexWorkflowAlias(skill.name))
+    : []
+  const copiedSkills = applyCompoundWorkflowModel
+    ? plugin.skills.filter((skill) => !isDeprecatedCodexWorkflowAlias(skill.name))
+    : plugin.skills
+  const skillDirs = copiedSkills.map((skill) => ({
     name: skill.name,
     sourceDir: skill.sourceDir,
   }))
+  const promptNames = new Set<string>()
+  const usedSkillNames = new Set<string>(skillDirs.map((skill) => normalizeCodexName(skill.name)))
 
-  const usedSkillNames = new Set<string>(skillDirs.map((skill) => normalizeName(skill.name)))
+  const commandPromptNames = new Map<string, string>()
+  for (const command of invocableCommands) {
+    commandPromptNames.set(
+      command.name,
+      uniqueName(normalizeCodexName(command.name), promptNames),
+    )
+  }
+
+  const workflowPromptNames = new Map<string, string>()
+  for (const skill of canonicalWorkflowSkills) {
+    workflowPromptNames.set(
+      skill.name,
+      uniqueName(normalizeCodexName(skill.name), promptNames),
+    )
+  }
+
+  const promptTargets: Record<string, string> = {}
+  for (const [commandName, promptName] of commandPromptNames) {
+    promptTargets[normalizeCodexName(commandName)] = promptName
+  }
+  for (const [skillName, promptName] of workflowPromptNames) {
+    promptTargets[normalizeCodexName(skillName)] = promptName
+  }
+  for (const alias of deprecatedWorkflowAliases) {
+    const canonicalName = toCanonicalWorkflowSkillName(alias.name)
+    const promptName = canonicalName ? workflowPromptNames.get(canonicalName) : undefined
+    if (promptName) {
+      promptTargets[normalizeCodexName(alias.name)] = promptName
+    }
+  }
+
+  const skillTargets: Record<string, string> = {}
+  for (const skill of copiedSkills) {
+    if (applyCompoundWorkflowModel && isCanonicalCodexWorkflowSkill(skill.name)) continue
+    skillTargets[normalizeCodexName(skill.name)] = skill.name
+  }
+
+  const invocationTargets: CodexInvocationTargets = { promptTargets, skillTargets }
+
   const commandSkills: CodexGeneratedSkill[] = []
-  // 跳过 claude-code-only 命令（如 /gemini、/codex），这些只在 Claude Code 中有意义
-  const convertibleCommands = plugin.commands.filter((cmd) => !cmd.claudeCodeOnly)
-  const prompts = convertibleCommands.map((command) => {
-    const promptName = uniqueName(normalizeName(command.name), promptNames)
-    const commandSkill = convertCommandSkill(command, usedSkillNames)
+  const prompts = invocableCommands.map((command) => {
+    const promptName = commandPromptNames.get(command.name)!
+    const commandSkill = convertCommandSkill(command, usedSkillNames, invocationTargets)
     commandSkills.push(commandSkill)
-    const content = renderPrompt(command, commandSkill.name)
+    const content = renderPrompt(command, commandSkill.name, invocationTargets)
     return { name: promptName, content }
   })
+  const workflowPrompts = canonicalWorkflowSkills.map((skill) => ({
+    name: workflowPromptNames.get(skill.name)!,
+    content: renderWorkflowPrompt(skill),
+  }))
 
-  const agentSkills = plugin.agents.map((agent) => convertAgent(agent, usedSkillNames))
+  const agentSkills = plugin.agents.map((agent) =>
+    convertAgent(agent, usedSkillNames, invocationTargets),
+  )
   const generatedSkills = [...commandSkills, ...agentSkills]
-  const repoCodexRoot = findNearestCodexRoot(plugin.root)
 
   return {
-    prompts,
+    prompts: [...prompts, ...workflowPrompts],
     skillDirs,
     generatedSkills,
-    repoPromptDirs: repoCodexRoot ? [path.join(repoCodexRoot, "prompts")] : [],
-    repoSkillDirs: repoCodexRoot ? [path.join(repoCodexRoot, "skills")] : [],
+    invocationTargets,
     mcpServers: plugin.mcpServers,
   }
 }
 
-function convertAgent(agent: ClaudeAgent, usedNames: Set<string>): CodexGeneratedSkill {
-  const name = uniqueName(normalizeName(agent.name), usedNames)
+function convertAgent(
+  agent: ClaudeAgent,
+  usedNames: Set<string>,
+  invocationTargets: CodexInvocationTargets,
+): CodexGeneratedSkill {
+  const name = uniqueName(normalizeCodexName(agent.name), usedNames)
   const description = sanitizeDescription(
     agent.description ?? `Converted from Claude agent ${agent.name}`,
   )
   const frontmatter: Record<string, unknown> = { name, description }
 
-  let body = agent.body.trim()
+  let body = transformContentForCodex(agent.body.trim(), invocationTargets)
   if (agent.capabilities && agent.capabilities.length > 0) {
     const capabilities = agent.capabilities.map((capability) => `- ${capability}`).join("\n")
     body = `## Capabilities\n${capabilities}\n\n${body}`.trim()
@@ -66,110 +124,74 @@ function convertAgent(agent: ClaudeAgent, usedNames: Set<string>): CodexGenerate
   return { name, content }
 }
 
-function convertCommandSkill(command: ClaudeCommand, usedNames: Set<string>): CodexGeneratedSkill {
-  const name = uniqueName(normalizeName(command.name), usedNames)
-  // 过滤 Claude Code 专属内容（[C] [G] 参数等）
-  const filteredDescription = filterClaudeCodeOnly(
-    command.description ?? `Converted from Claude command ${command.name}`,
-  )
+function convertCommandSkill(
+  command: ClaudeCommand,
+  usedNames: Set<string>,
+  invocationTargets: CodexInvocationTargets,
+): CodexGeneratedSkill {
+  const name = uniqueName(normalizeCodexName(command.name), usedNames)
   const frontmatter: Record<string, unknown> = {
     name,
-    description: sanitizeDescription(filteredDescription),
+    description: sanitizeDescription(
+      command.description ?? `Converted from Claude command ${command.name}`,
+    ),
   }
   const sections: string[] = []
   if (command.argumentHint) {
-    // 过滤 argumentHint 中的 [C] [G]
-    const filteredHint = filterClaudeCodeOnly(command.argumentHint)
-    sections.push(`## Arguments\n${filteredHint}`)
+    sections.push(`## Arguments\n${command.argumentHint}`)
   }
   if (command.allowedTools && command.allowedTools.length > 0) {
     sections.push(`## Allowed tools\n${command.allowedTools.map((tool) => `- ${tool}`).join("\n")}`)
   }
-  // 过滤 body 中的 Claude Code Only 内容，然后转换 Task 调用
-  const filteredBody = filterClaudeCodeOnly(command.body.trim())
-  const transformedBody = transformTaskCalls(filteredBody)
+  const transformedBody = transformContentForCodex(command.body.trim(), invocationTargets)
   sections.push(transformedBody)
   const body = sections.filter(Boolean).join("\n\n").trim()
-  const content = formatFrontmatter(frontmatter, body.length > 0 ? body : filterClaudeCodeOnly(command.body))
+  const content = formatFrontmatter(frontmatter, body.length > 0 ? body : command.body)
   return { name, content }
 }
 
-/**
- * Transform Claude Code content to Codex-compatible content.
- *
- * Handles multiple syntax differences:
- * 1. Task agent calls: Task agent-name(args) → Use the $agent-name skill to: args
- * 2. Slash commands: /command-name → /prompts:command-name
- * 3. Agent references: @agent-name → $agent-name skill
- *
- * This bridges the gap since Claude Code and Codex have different syntax
- * for invoking commands, agents, and skills.
- */
-function transformContentForCodex(body: string): string {
-  let result = body
-
-  // 1. Transform Task agent calls
-  // Match: Task repo-research-analyst(feature_description)
-  // Match: - Task learnings-researcher(args)
-  const taskPattern = /^(\s*-?\s*)Task\s+([a-z][a-z0-9-]*)\(([^)]+)\)/gm
-  result = result.replace(taskPattern, (_match, prefix: string, agentName: string, args: string) => {
-    const skillName = normalizeName(agentName)
-    const trimmedArgs = args.trim()
-    return `${prefix}Use the $${skillName} skill to: ${trimmedArgs}`
-  })
-
-  // 2. Transform slash command references
-  // Match: /command-name or /workflows:command but NOT /path/to/file or URLs
-  // Look for slash commands in contexts like "Run /command", "use /command", etc.
-  // Avoid matching file paths (contain multiple slashes) or URLs (contain ://)
-  const slashCommandPattern = /(?<![:\w])\/([a-z][a-z0-9_:-]*?)(?=[\s,."')\]}`]|$)/gi
-  result = result.replace(slashCommandPattern, (match, commandName: string) => {
-    // Skip if it looks like a file path (contains /)
-    if (commandName.includes('/')) return match
-    // Skip common non-command patterns
-    if (['dev', 'tmp', 'etc', 'usr', 'var', 'bin', 'home'].includes(commandName)) return match
-    // Transform to Codex prompt syntax
-    const normalizedName = normalizeName(commandName)
-    return `/prompts:${normalizedName}`
-  })
-
-  // 3. Transform @agent-name references
-  // Match: @agent-name in text (not emails)
-  const agentRefPattern = /@([a-z][a-z0-9-]*-(?:agent|reviewer|researcher|analyst|specialist|oracle|sentinel|guardian|strategist))/gi
-  result = result.replace(agentRefPattern, (_match, agentName: string) => {
-    const skillName = normalizeName(agentName)
-    return `$${skillName} skill`
-  })
-
-  return result
-}
-
-// Alias for backward compatibility
-const transformTaskCalls = transformContentForCodex
-
-function renderPrompt(command: ClaudeCommand, skillName: string): string {
+function renderPrompt(
+  command: ClaudeCommand,
+  skillName: string,
+  invocationTargets: CodexInvocationTargets,
+): string {
   const frontmatter: Record<string, unknown> = {
     description: command.description,
     "argument-hint": command.argumentHint,
   }
   const instructions = `Use the $${skillName} skill for this command and follow its instructions.`
-  // Transform Task calls in prompt body too (not just skill body)
-  const transformedBody = transformTaskCalls(command.body)
+  const transformedBody = transformContentForCodex(command.body, invocationTargets)
   const body = [instructions, "", transformedBody].join("\n").trim()
   return formatFrontmatter(frontmatter, body)
 }
 
-function normalizeName(value: string): string {
-  const trimmed = value.trim()
-  if (!trimmed) return "item"
-  const normalized = trimmed
-    .toLowerCase()
-    .replace(/[\\/]+/g, "-")
-    .replace(/[:\s]+/g, "-")
-    .replace(/[^a-z0-9_-]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "")
-  return normalized || "item"
+function renderWorkflowPrompt(skill: ClaudeSkill): string {
+  const frontmatter: Record<string, unknown> = {
+    description: skill.description,
+    "argument-hint": skill.argumentHint,
+  }
+  const body = [
+    `Use the ${skill.name} skill for this workflow and follow its instructions exactly.`,
+    "Treat any text after the prompt name as the workflow context to pass through.",
+  ].join("\n\n")
+  return formatFrontmatter(frontmatter, body)
+}
+
+function isCanonicalCodexWorkflowSkill(name: string): boolean {
+  return name.startsWith("ce:")
+}
+
+function isDeprecatedCodexWorkflowAlias(name: string): boolean {
+  return name.startsWith("workflows:")
+}
+
+function toCanonicalWorkflowSkillName(name: string): string | null {
+  if (!isDeprecatedCodexWorkflowAlias(name)) return null
+  return `ce:${name.slice("workflows:".length)}`
+}
+
+function shouldApplyCompoundWorkflowModel(plugin: ClaudePlugin): boolean {
+  return plugin.manifest.name === "compound-engineering"
 }
 
 function sanitizeDescription(value: string, maxLength = CODEX_DESCRIPTION_MAX_LENGTH): string {
@@ -191,15 +213,4 @@ function uniqueName(base: string, used: Set<string>): string {
   const name = `${base}-${index}`
   used.add(name)
   return name
-}
-
-function findNearestCodexRoot(startDir: string): string | null {
-  let current = path.resolve(startDir)
-  while (true) {
-    const candidate = path.join(current, ".codex")
-    if (existsSync(candidate)) return candidate
-    const parent = path.dirname(current)
-    if (parent === current) return null
-    current = parent
-  }
 }

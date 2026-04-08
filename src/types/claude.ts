@@ -39,7 +39,7 @@ export type ClaudeCommand = {
   argumentHint?: string
   model?: string
   allowedTools?: string[]
-  claudeCodeOnly?: boolean
+  disableModelInvocation?: boolean
   body: string
   sourcePath: string
 }
@@ -47,6 +47,8 @@ export type ClaudeCommand = {
 export type ClaudeSkill = {
   name: string
   description?: string
+  argumentHint?: string
+  disableModelInvocation?: boolean
   sourceDir: string
   skillPath: string
 }
@@ -59,7 +61,6 @@ export type ClaudePlugin = {
   skills: ClaudeSkill[]
   hooks?: ClaudeHooks
   mcpServers?: Record<string, ClaudeMcpServer>
-  claudeMd?: string
 }
 
 export type ClaudeHookCommand = {

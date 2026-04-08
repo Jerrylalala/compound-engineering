@@ -1,794 +1,528 @@
 # Changelog
 
+This file is no longer the canonical changelog for compound-engineering releases.
+
+Historical entries are preserved below, but new release history is recorded in the root [`CHANGELOG.md`](../../CHANGELOG.md).
+
 All notable changes to the compound-engineering plugin will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.44.15] - 2026-03-24
+## [2.63.1](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.63.0...compound-engineering-v2.63.1) (2026-04-07)
 
-### 🚀 新增
 
-#### Added
-- **Review 报告裁决过滤可选展开** - `/workflows:review` 的 Summary Report 新增裁决过滤统计区块（默认折叠），展示 refuted/ambiguous/dependency collapse 数量
-- **Review Handoff 新增选项** - 「查看被过滤的建议」选项，与 `/plan_review` 的选项 4 对齐
-- **WORKFLOW-VISUAL.md 更新** - 流程图补充 Step 4.5 事实核查 + Step 4.6 裁决过滤的可视化
+### Bug Fixes
 
-### 📊 影响
-- 修改文件：4 个（review.md、WORKFLOW-VISUAL.md、marketplace.json、plugin.json）
-- 用户可见性改进：裁决链从完全静默变为可选展开
+* **ce-review:** add recursion guard to reviewer subagent template ([#527](https://github.com/EveryInc/compound-engineering-plugin/issues/527)) ([bafe9f0](https://github.com/EveryInc/compound-engineering-plugin/commit/bafe9f0968054c78db23e7e7f4d5dbc2ddb4a450))
+* **document-review:** widen autofix classification beyond trivial fixes ([#524](https://github.com/EveryInc/compound-engineering-plugin/issues/524)) ([9a82222](https://github.com/EveryInc/compound-engineering-plugin/commit/9a82222aba25d6e64355053fca5954f3dfbd8285))
 
----
+## [2.63.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.62.1...compound-engineering-v2.63.0) (2026-04-06)
 
-## [2.44.14] - 2026-03-24
 
-### 🚀 新增
+### Features
 
-#### Added
-- **审查代理四段式裁决链** - 在 `/workflows:review` 和 `/plan_review` 中插入 Fact-Check + Adjudicator 阶段，防止事实性错误直接影响用户决策
-- **13 个 review agent 结构化输出** - 所有审查代理新增事实性声明规范（铁律）和 Structured Findings 格式
-- **伪共识检测** - Dependency Collapse 机制：多个代理基于同一前提的 finding 合并为 1 票
+* **ce-plan,ce-brainstorm:** universal planning and brainstorming for non-software tasks ([#519](https://github.com/EveryInc/compound-engineering-plugin/issues/519)) ([320a045](https://github.com/EveryInc/compound-engineering-plugin/commit/320a04524142830a40a44bd72c4bf5d30931221c))
+* **slack-researcher:** add Slack organizational context research agent ([#495](https://github.com/EveryInc/compound-engineering-plugin/issues/495)) ([b3960ec](https://github.com/EveryInc/compound-engineering-plugin/commit/b3960ec64b212d1c8f3885370762e0f124354c28))
 
----
 
-## [2.44.13] - 2026-03-23
+### Bug Fixes
 
-### 🚀 新增
+* **document-review:** add recursion guard to reviewer subagent template ([#523](https://github.com/EveryInc/compound-engineering-plugin/issues/523)) ([36d8119](https://github.com/EveryInc/compound-engineering-plugin/commit/36d811916637b3436aafd548319e077b6248bae3))
+* **review,work:** omit mode parameter in subagent dispatch to respect user permissions ([#522](https://github.com/EveryInc/compound-engineering-plugin/issues/522)) ([949bdef](https://github.com/EveryInc/compound-engineering-plugin/commit/949bdef909ea71e9c5b885e31c028809f0f25017))
+* **slack-researcher:** make Slack research opt-in, surface workspace identity ([#521](https://github.com/EveryInc/compound-engineering-plugin/issues/521)) ([6f9069d](https://github.com/EveryInc/compound-engineering-plugin/commit/6f9069df7ac3551677f8f7a1cd7ad51946f88847))
 
-#### Added
-- **插件自带音效通知 Hook** - Stop 和 Notification 事件自动播放音效，安装插件后无需手动配置
-  - 跨平台支持：macOS（afplay）、Windows（SoundPlayer）、Linux（paplay/aplay）
-  - 用户可通过 `~/.claude/sounds/done.wav` 和 `confirm.wav` 自定义音效
-  - 参考社区最佳实践：[wasabeef/claude-code-cookbook](https://github.com/wasabeef/claude-code-cookbook)
+## [2.62.1](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.62.0...compound-engineering-v2.62.1) (2026-04-05)
 
-### 🔧 修复
 
-#### Changed
-- **移除 sync-upstream.md 中的 speak.ps1 调用** - 语音通知已由插件 hooks 自动处理
-- **清理旧版 TTS 语音残留** - 不再依赖 SAPI.SpVoice 的 TTS 方式
+### Bug Fixes
 
-### ⚠️ 迁移说明
+* **ce-brainstorm:** reduce token cost by extracting late-sequence content ([#511](https://github.com/EveryInc/compound-engineering-plugin/issues/511)) ([bdeb793](https://github.com/EveryInc/compound-engineering-plugin/commit/bdeb7935fcdb147b73107177769c2e968463d93f))
+* **ce-ideate,ce-review:** reduce token cost and latency ([#515](https://github.com/EveryInc/compound-engineering-plugin/issues/515)) ([f4e0904](https://github.com/EveryInc/compound-engineering-plugin/commit/f4e09044ba4073f9447d783bfb7a72326ff7bf6b))
+* **document-review:** promote pattern-resolved findings to auto ([#507](https://github.com/EveryInc/compound-engineering-plugin/issues/507)) ([b223e39](https://github.com/EveryInc/compound-engineering-plugin/commit/b223e39a6374566fcc4ae269811d62a2e97c4827))
+* **document-review:** reduce token cost and latency ([#509](https://github.com/EveryInc/compound-engineering-plugin/issues/509)) ([9da73a6](https://github.com/EveryInc/compound-engineering-plugin/commit/9da73a60919bfc025efc2ca8b4000c45a7a27b42))
+* **git-commit-push-pr:** simplify PR probe pre-resolution ([#513](https://github.com/EveryInc/compound-engineering-plugin/issues/513)) ([f6544eb](https://github.com/EveryInc/compound-engineering-plugin/commit/f6544eba0e6851b8772bb9920583ffda5c80cccc))
 
-如果你之前在 `~/.claude/settings.json` 中手动配置了 Stop/Notification hooks 的音效，
-更新到此版本后请移除 settings.json 中的 hooks 配置，避免音效重复播放。
+## [2.62.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.61.0...compound-engineering-v2.62.0) (2026-04-03)
 
----
 
-## [2.44.12] - 2026-03-22
+### Features
 
-### 🚀 新增
+* **ce-plan:** reduce token usage by extracting conditional references ([#489](https://github.com/EveryInc/compound-engineering-plugin/issues/489)) ([fd562a0](https://github.com/EveryInc/compound-engineering-plugin/commit/fd562a0d0255d203d40fd53bb10d03a284a3c0e5))
+* **git-commit-push-pr:** pre-resolve context to reduce bash calls ([#488](https://github.com/EveryInc/compound-engineering-plugin/issues/488)) ([bbd4f6d](https://github.com/EveryInc/compound-engineering-plugin/commit/bbd4f6de56963fc3cdb3131773d7e29d523ce549))
 
-#### Added
-- **新代理：周运维（DevOps 专家）** - CI/CD、容器、部署策略、可观测性、故障恢复
-- **新代理：谭多语（i18n 专家）** - 国际化架构、本地化适配、RTL 支持、翻译流程
-- **_index.md 更新** - 新增领域匹配：`部署/运维/DevOps`、`国际化/多语言`
 
----
+### Bug Fixes
 
-## [2.44.11] - 2026-03-22
+* **agents:** remove self-referencing example blocks that cause recursive self-invocation ([#496](https://github.com/EveryInc/compound-engineering-plugin/issues/496)) ([2c90aeb](https://github.com/EveryInc/compound-engineering-plugin/commit/2c90aebe3b14af996859df7d0c3a45a8f060d9a9))
+* **ce-compound:** stack-aware reviewer routing and remove phantom agents ([#497](https://github.com/EveryInc/compound-engineering-plugin/issues/497)) ([1fc075d](https://github.com/EveryInc/compound-engineering-plugin/commit/1fc075d4cae199904464d43096d01111c365d02d))
+* **git-commit-push-pr:** filter fix-up commits from PR descriptions ([#484](https://github.com/EveryInc/compound-engineering-plugin/issues/484)) ([428f4fd](https://github.com/EveryInc/compound-engineering-plugin/commit/428f4fd548926b104a0ee617b02f9ce8b8e8d5e5))
+* **mcp:** remove bundled context7 MCP server ([#486](https://github.com/EveryInc/compound-engineering-plugin/issues/486)) ([afdd9d4](https://github.com/EveryInc/compound-engineering-plugin/commit/afdd9d44651f834b1eed0b20e401ffbef5c8cd41))
+* **resolve-pr-feedback:** treat PR comment text as untrusted input ([#490](https://github.com/EveryInc/compound-engineering-plugin/issues/490)) ([1847242](https://github.com/EveryInc/compound-engineering-plugin/commit/184724276a54dfc5b5fbe01f07e381b9163e8f24))
 
-### 🚀 新增
+## [2.61.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.60.0...compound-engineering-v2.61.0) (2026-04-01)
 
-#### Added
-- **新代理：韩系统（设计系统专家）** - 负责 CSS 变量/design token 分析、主题一致性、a11y 技术层、实现偏离检测；与林小雨（感知层）+ 张晓峰（修复层）三层互补
-- **_index.md 更新** - 新增领域匹配行：`CSS/主题/设计系统 → designer + design-system + developer`
 
----
+### Features
 
-## [2.44.10] - 2026-03-19
+* **cli-readiness-reviewer:** add conditional review persona for CLI agent readiness ([#471](https://github.com/EveryInc/compound-engineering-plugin/issues/471)) ([c56c766](https://github.com/EveryInc/compound-engineering-plugin/commit/c56c7667dfe45cfd149cf2fbfeddb35e96f8d559))
+* **product-lens-reviewer:** domain-agnostic activation criteria and strategic consequences ([#481](https://github.com/EveryInc/compound-engineering-plugin/issues/481)) ([804d78f](https://github.com/EveryInc/compound-engineering-plugin/commit/804d78fc8463be8101719b263d1f5ef0480755a6))
+* **resolve-pr-feedback:** add cross-invocation cluster analysis ([#480](https://github.com/EveryInc/compound-engineering-plugin/issues/480)) ([7b8265b](https://github.com/EveryInc/compound-engineering-plugin/commit/7b8265bd81410b28a4160657a7c6ac0d7f1f1cb2))
 
-### 🐛 修复（基于三方代码审查）
 
-#### Fixed
-- **party-mode 状态切换规则重写** - 改为意图优先的状态机，删除冗余的白名单+黑名单双列表，用"继续/退出/歧义三分类"替代
-- **执行链分析位置修正** - 移至代理发言步骤内，改为"至少一个代理"触发，不再强制所有代理推演
-- **brainstorm.md 同步更新** - 与 SKILL.md 的状态切换规则保持一致
+### Bug Fixes
 
----
+* **ce-plan, ce-brainstorm:** enforce repo-relative paths in generated documents ([#473](https://github.com/EveryInc/compound-engineering-plugin/issues/473)) ([33a8d9d](https://github.com/EveryInc/compound-engineering-plugin/commit/33a8d9dc118a53a35cd15e0e6e44b3592f58ac4f))
 
-## [2.44.9] - 2026-03-19
+## [2.60.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.59.0...compound-engineering-v2.60.0) (2026-03-31)
 
-### 🐛 修复 & 🚀 增强
 
-#### Fixed
-- **party-mode 退出条件过于敏感** - 改为白名单机制：只有明确的退出指令才退出，「好的，但是…」+ 新约束不再触发退出
+### Features
 
-#### Added
-- **party-mode 执行链分析** - 功能/bug 类话题时，代理必须推演完整因果链（触发点→分支→异常→解法）
-- **全局需求理解协议** - 用户描述需求时，Claude 必须先重述意图并等用户确认，再开始工作
+* **ce-brainstorm:** add conditional visual aids to requirements documents ([#437](https://github.com/EveryInc/compound-engineering-plugin/issues/437)) ([bd02ca7](https://github.com/EveryInc/compound-engineering-plugin/commit/bd02ca7df04cf2c1c6301de3774e99d283d3d3ca))
+* **ce-compound:** add discoverability check for docs/solutions/ in instruction files ([#456](https://github.com/EveryInc/compound-engineering-plugin/issues/456)) ([5ac8a2c](https://github.com/EveryInc/compound-engineering-plugin/commit/5ac8a2c2c8c258458307e476d6693cc387deb27e))
+* **ce-compound:** add track-based schema for bug vs knowledge learnings ([#445](https://github.com/EveryInc/compound-engineering-plugin/issues/445)) ([739109c](https://github.com/EveryInc/compound-engineering-plugin/commit/739109c03ccd45474331625f35730924d17f63ef))
+* **ce-plan:** add conditional visual aids to plan documents ([#440](https://github.com/EveryInc/compound-engineering-plugin/issues/440)) ([4c7f51f](https://github.com/EveryInc/compound-engineering-plugin/commit/4c7f51f35bae56dd9c9dc2653372910c39b8b504))
+* **ce-plan:** add interactive deepening mode for on-demand plan strengthening ([#443](https://github.com/EveryInc/compound-engineering-plugin/issues/443)) ([ca78057](https://github.com/EveryInc/compound-engineering-plugin/commit/ca78057241ec64f36c562e3720a388420bdb347f))
+* **ce-review:** enforce table format, require question tool, fix autofix_class calibration ([#454](https://github.com/EveryInc/compound-engineering-plugin/issues/454)) ([847ce3f](https://github.com/EveryInc/compound-engineering-plugin/commit/847ce3f156a5cdf75667d9802e95d68e6b3c53a4))
+* **ce-review:** improve signal-to-noise with confidence rubric, FP suppression, and intent verification ([#434](https://github.com/EveryInc/compound-engineering-plugin/issues/434)) ([03f5aa6](https://github.com/EveryInc/compound-engineering-plugin/commit/03f5aa65b098e2ab8e25670594e0f554ea3cafbe))
+* **ce-work:** suggest branch rename when worktree name is meaningless ([#451](https://github.com/EveryInc/compound-engineering-plugin/issues/451)) ([e872e15](https://github.com/EveryInc/compound-engineering-plugin/commit/e872e15efa5514dcfea84a1a9e276bad3290cbc3))
+* **cli-agent-readiness-reviewer:** add smart output defaults criterion ([#448](https://github.com/EveryInc/compound-engineering-plugin/issues/448)) ([a01a8aa](https://github.com/EveryInc/compound-engineering-plugin/commit/a01a8aa0d29474c031a5b403f4f9bfc42a23ad78))
+* **git-commit-push-pr:** add conditional visual aids to PR descriptions ([#444](https://github.com/EveryInc/compound-engineering-plugin/issues/444)) ([44e3e77](https://github.com/EveryInc/compound-engineering-plugin/commit/44e3e77dc039d31a86194b0254e4e92839d9d5e9))
+* **git-commit-push-pr:** precompute shield badge version via skill preprocessing ([#464](https://github.com/EveryInc/compound-engineering-plugin/issues/464)) ([6ca7aef](https://github.com/EveryInc/compound-engineering-plugin/commit/6ca7aef7f33ebdf29f579cb4342c209d2bd40aad))
+* **resolve-pr-feedback:** add gated feedback clustering to detect systemic issues ([#441](https://github.com/EveryInc/compound-engineering-plugin/issues/441)) ([a301a08](https://github.com/EveryInc/compound-engineering-plugin/commit/a301a082057494e122294f4e7c1c3f5f87103f35))
+* **skills:** clean up argument-hint across ce:* skills ([#436](https://github.com/EveryInc/compound-engineering-plugin/issues/436)) ([d2b24e0](https://github.com/EveryInc/compound-engineering-plugin/commit/d2b24e07f6f2fde11cac65258cb1e76927238b5d))
+* **test-xcode:** add triggering context to skill description ([#466](https://github.com/EveryInc/compound-engineering-plugin/issues/466)) ([87facd0](https://github.com/EveryInc/compound-engineering-plugin/commit/87facd05dac94603780d75acb9da381dd7c61f1b))
+* **testing:** close the testing gap in ce:work, ce:plan, and testing-reviewer ([#438](https://github.com/EveryInc/compound-engineering-plugin/issues/438)) ([35678b8](https://github.com/EveryInc/compound-engineering-plugin/commit/35678b8add6a603cf9939564bcd2df6b83338c52))
 
----
 
-## [2.44.7] - 2026-03-12
+### Bug Fixes
 
-### 🔄 工作流简化
+* **ce-brainstorm:** distinguish verification from technical design in Phase 1.1 ([#465](https://github.com/EveryInc/compound-engineering-plugin/issues/465)) ([8ec31d7](https://github.com/EveryInc/compound-engineering-plugin/commit/8ec31d703fc9ed19bf6377da0a9a29da935b719d))
+* **ce-compound:** require question tool for "What's next?" prompt ([#460](https://github.com/EveryInc/compound-engineering-plugin/issues/460)) ([9bf3b07](https://github.com/EveryInc/compound-engineering-plugin/commit/9bf3b07185a4aeb6490116edec48599b736dc86f))
+* **ce-plan:** reinforce mandatory document-review after auto deepening ([#450](https://github.com/EveryInc/compound-engineering-plugin/issues/450)) ([42fa8c3](https://github.com/EveryInc/compound-engineering-plugin/commit/42fa8c3e084db464ee0e04673f7c38cd422b32d6))
+* **ce-plan:** route confidence-gate pass to document-review ([#462](https://github.com/EveryInc/compound-engineering-plugin/issues/462)) ([1962f54](https://github.com/EveryInc/compound-engineering-plugin/commit/1962f546b5e5288c7ce5d8658f942faf71651c81))
+* **ce-work:** make code review invocation mandatory by default ([#453](https://github.com/EveryInc/compound-engineering-plugin/issues/453)) ([7f3aba2](https://github.com/EveryInc/compound-engineering-plugin/commit/7f3aba29e84c3166de75438d554455a71f4f3c22))
+* **document-review:** show contextual next-step in Phase 5 menu ([#459](https://github.com/EveryInc/compound-engineering-plugin/issues/459)) ([2b7283d](https://github.com/EveryInc/compound-engineering-plugin/commit/2b7283da7b48dc073670c5f4d116e58255f0ffcb))
+* **git-commit-push-pr:** quiet expected no-pr gh exit ([#439](https://github.com/EveryInc/compound-engineering-plugin/issues/439)) ([1f49948](https://github.com/EveryInc/compound-engineering-plugin/commit/1f499482bc65456fa7dd0f73fb7f2fa58a4c5910))
+* **resolve-pr-feedback:** add actionability filter and lower cluster gate to 3+ ([#461](https://github.com/EveryInc/compound-engineering-plugin/issues/461)) ([2619ad9](https://github.com/EveryInc/compound-engineering-plugin/commit/2619ad9f58e6c45968ec10d7f8aa7849fe43eb25))
+* **review:** harden ce-review base resolution ([#452](https://github.com/EveryInc/compound-engineering-plugin/issues/452)) ([638b38a](https://github.com/EveryInc/compound-engineering-plugin/commit/638b38abd267d415ad2d6b72eba3dfe12beefad9))
 
-#### Removed
-- **删除 `/workflows:load` 命令** - 移除项目上下文加载功能
-- **删除 `/workflows:save` 命令** - 移除项目上下文保存功能
-- **移除所有命令的步骤序号** - 简化命令描述（"Step 1:", "Step 2:" 等前缀）
-
-#### Changed
-- **`/workflows:compound` 改为手动调用** - 保留功能但从自动工作流中移除，用户需手动调用
-- **工作流链路简化**：`brainstorm → plan → work → review`（移除 load/save/compound 自动步骤）
-- **独立工具分类**：compound、sync-upstream、pr 归类为手动调用工具
-- **文档更新**：WORKFLOW-VISUAL.md、CLAUDE.md 同步更新工作流图表和说明
+## [2.59.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.58.1...compound-engineering-v2.59.0) (2026-03-29)
 
-### 📊 影响
-- 删除文件：2 个（load.md, save.md）
-- 修改文件：7 个
-- 净减少代码：~650 行
-
-### Summary
-- 29 agents, 39 commands, 26 skills, 1 MCP server
 
----
+### Features
 
-## [2.44.6] - 2026-03-12
+* **ce-review:** add headless mode for programmatic callers ([#430](https://github.com/EveryInc/compound-engineering-plugin/issues/430)) ([3706a97](https://github.com/EveryInc/compound-engineering-plugin/commit/3706a9764b6e73b7a155771956646ddef73f04a5))
+* **ce-work:** accept bare prompts and add test discovery ([#423](https://github.com/EveryInc/compound-engineering-plugin/issues/423)) ([6dabae6](https://github.com/EveryInc/compound-engineering-plugin/commit/6dabae6683fb2c37dc47616f172835eacc105d11))
+* **document-review:** collapse batch_confirm tier into auto ([#432](https://github.com/EveryInc/compound-engineering-plugin/issues/432)) ([0f5715d](https://github.com/EveryInc/compound-engineering-plugin/commit/0f5715d562fffc626ddfde7bd0e1652143710a44))
+* **review:** make review mandatory across pipeline skills ([#433](https://github.com/EveryInc/compound-engineering-plugin/issues/433)) ([9caaf07](https://github.com/EveryInc/compound-engineering-plugin/commit/9caaf071d9b74fd938567542167768f6cdb7a56f))
 
-### Changed
-- 项目 `CLAUDE.md` 新增「本项目的特殊性」段落（8 行），说明本项目是胶水编程的元层
-- 插件 `CLAUDE.md` 简化「设计哲学」段落（2 行），引用 `/glue-coding` 技能
+## [2.58.1](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.58.0...compound-engineering-v2.58.1) (2026-03-28)
 
-### Removed
-- 删除过度工程的胶水编程文档（209 行冗余内容）
-- 删除工作流中的强制检查点（会造成认知干扰）
 
-**架构决策**：
-- 胶水编程思维已在全局 `~/.claude/CLAUDE.md` 定义（默认生效）
-- 本项目是元层（创建编排组件本身），不需要在工作流中强制检查"有没有现成库"
-- 最小化文档（8 行）足以消除新人推断成本，维护成本降低 98%
-- 详见：`docs/solutions/architecture-decisions/glue-programming-implementation-analysis-2026-03-12.md`
+### Miscellaneous Chores
 
-## [2.44.5] - 2026-03-12
+* **compound-engineering:** Synchronize compound-engineering versions
 
-### Fixed
-- 修复 `/workflows:brainstorm [P][C]` 参数被对话噪音淹没、跳过解析的问题
-- argument-hint 补充缺失的 `[P]` 参数提示
-- Step 0 标题修正为同时包含 `[P]`、`[C]`、`[G]` 三个标志
+## [2.57.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.56.1...compound-engineering-v2.57.0) (2026-03-28)
 
-### Changed
-- **Step 0 加硬门控**：添加铁律声明，强制在处理其他内容前先完成参数解析
-- **参数污染检测**：自动识别对话历史混入参数（>500字符、AI 对话痕迹、系统标签），触发用户重新输入
-- **解析结果回显**：解析后必须向用户展示 PARTY_MODE/CODEX/GEMINI 状态和清洗后的功能描述
-- **Codex 调用改前台模式**：从 `run_in_background=true` 改为前台调用（`timeout=300000`），避免 Windows 上 heredoc + stdin 管道问题
-- **Codex 模型可配置**：硬编码 `gpt-5.3-codex` 改为 `${CODEX_MODEL:-gpt-5.3-codex}` 环境变量 fallback
-- **Codex 失败诊断增强**：brainstorm.md 和 codex.md 统一增加 7 项失败诊断提示（版本升级、环境变量、认证、沙箱权限、doctor 检查等）
-- **Codex 失败不中断主流程**：调用失败时记录并在文档中注明，不阻断 brainstorm 主流程
 
-### Context
-- 问题来源：用户使用 `[P][C]` 参数时，AI 被对话上下文竞争覆盖，跳过参数解析
-- 根本原因：prompt 中的「软约束」在长对话中被淹没，缺少硬门控机制
-- 解决方案：铁律声明 + 污染检测 + 强制回显三重防护
+### Features
 
-### Summary
-- 29 agents, 43 commands, 26 skills, 1 MCP server
+* **document-review:** add headless mode for programmatic callers ([#425](https://github.com/EveryInc/compound-engineering-plugin/issues/425)) ([4e4a656](https://github.com/EveryInc/compound-engineering-plugin/commit/4e4a6563b4aa7375e9d1c54bd73442f3b675f100))
 
----
+## [2.56.1](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.56.0...compound-engineering-v2.56.1) (2026-03-28)
 
-## [2.44.4] - 2026-03-11
 
-### Fixed
-- 修复 `/workflows:brainstorm` 派对模式从未真正工作的问题
-- 添加 `[P]` 参数解析逻辑（Step 0）
-- 添加派对模式自动调用机制（Phase 1.2）
-- 移除 Phase 2 中冗余的派对模式选项（已在 Phase 1.2 执行）
+### Bug Fixes
 
-### Changed
-- 派对模式现在通过 `[P]` 参数在 Phase 1.2 自动激活
-- 统一参数解析：`[P]`（派对模式）、`[C]`（Codex）、`[G]`（Gemini）
+* **onboarding:** resolve section count contradiction with skip rule ([#421](https://github.com/EveryInc/compound-engineering-plugin/issues/421)) ([d2436e7](https://github.com/EveryInc/compound-engineering-plugin/commit/d2436e7c933129784c67799a5b9555bccce2e46d))
 
-### Context
-- 问题来源：用户报告派对模式输出格式不对（输出"现象层/本质层/哲学层"而非多代理对话）
-- 根本原因：从一开始就没有正确实现 `Skill("party-mode")` 调用，只有描述性文本
-- 解决方案：在 Step 0 解析 `[P]` 参数，在 Phase 1.2 根据标志自动调用 party-mode skill
+## [2.56.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.55.0...compound-engineering-v2.56.0) (2026-03-28)
 
-### Summary
-- 29 agents, 43 commands, 26 skills, 1 MCP server
 
----
+### Features
 
-## [2.44.3] - 2026-03-11
+* **ce-plan:** add decision matrix form, unchanged invariants, and risk table format ([#417](https://github.com/EveryInc/compound-engineering-plugin/issues/417)) ([ccb371e](https://github.com/EveryInc/compound-engineering-plugin/commit/ccb371e0b7917420f5ca2c58433f5fc057211f04))
 
-### Fixed
-- 修复 `/workflows:plan` Handoff 部分：增强命令调用指令的明确性，防止 AI "忘记"可用命令
-- 添加 Pre-flight check：在呈现选项前验证命令存在性
-- 添加命令调用格式规范：明确 Skill() 工具的调用语法
-- 为每个选项添加详细的执行步骤（代码块格式），消除歧义
 
-### Changed
-- Handoff 部分从"简短描述"改为"可执行指令"格式
-- 所有命令调用统一使用 `Skill("command-name", args="<plan_path>")` 格式
+### Bug Fixes
 
-### Context
-- 问题来源：用户报告 AI 在生成计划后未正确调用 `/plan_review`
-- 根本原因：Handoff 指令过于模糊，AI 在压力状态下会"忘记"可用工具
-- 解决方案：将隐式指令改为显式可执行代码块
+* **cli-agent-readiness-reviewer:** remove top-5 cap on improvements ([#419](https://github.com/EveryInc/compound-engineering-plugin/issues/419)) ([16eb8b6](https://github.com/EveryInc/compound-engineering-plugin/commit/16eb8b660790f8de820d0fba709316c7270703c1))
+* **document-review:** enforce interactive questions and fix autofix classification ([#415](https://github.com/EveryInc/compound-engineering-plugin/issues/415)) ([d447296](https://github.com/EveryInc/compound-engineering-plugin/commit/d44729603da0c73d4959c372fac0198125a39c60))
 
-### Summary
-- 29 agents, 43 commands, 26 skills, 1 MCP server
+## [2.55.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.54.1...compound-engineering-v2.55.0) (2026-03-27)
 
----
 
-## [2.44.2] - 2026-03-11
+### Features
 
-### Changed
-- 增强 `systematic-debugging` skill：添加"无根因"分支处理、协作者信号解读表、跨技能引用闭环
-- 增强 `git-worktree` skill：添加目录选择优先级协议、多语言依赖安装提醒
-- 增强 `workflows:work` Subagent-Driven 模式：添加上下文预注入、全局最终审查、失败任务处理规范
-- 增强 CLAUDE.md：添加 Rigid/Flexible 技能分类标签、Announce 宣告惯例
-- 增强 `workflows:load`：添加未完成计划自动检测（30 天内修改 + 完成度计算）
+* add adversarial review agents for code and documents ([#403](https://github.com/EveryInc/compound-engineering-plugin/issues/403)) ([5e6cd5c](https://github.com/EveryInc/compound-engineering-plugin/commit/5e6cd5c90950588fb9b0bc3a5cbecba2a1387080))
+* add CLI agent-readiness reviewer and principles guide ([#391](https://github.com/EveryInc/compound-engineering-plugin/issues/391)) ([13aa3fa](https://github.com/EveryInc/compound-engineering-plugin/commit/13aa3fa8465dce6c037e1bb8982a2edad13f199a))
+* add project-standards-reviewer as always-on ce:review persona ([#402](https://github.com/EveryInc/compound-engineering-plugin/issues/402)) ([b30288c](https://github.com/EveryInc/compound-engineering-plugin/commit/b30288c44e500013afe30b34f744af57cae117db))
+* **ce-brainstorm:** group requirements by logical concern, tighten autofix classification ([#412](https://github.com/EveryInc/compound-engineering-plugin/issues/412)) ([90684c4](https://github.com/EveryInc/compound-engineering-plugin/commit/90684c4e8272b41c098ef2452c40d86d460ea578))
+* **ce-plan:** strengthen test scenario guidance across plan and work skills ([#410](https://github.com/EveryInc/compound-engineering-plugin/issues/410)) ([615ec5d](https://github.com/EveryInc/compound-engineering-plugin/commit/615ec5d3feb14785530bbfe2b4a50afe29ccbc47))
+* **ce-review:** add base: and plan: arguments, extract scope detection ([#405](https://github.com/EveryInc/compound-engineering-plugin/issues/405)) ([914f9b0](https://github.com/EveryInc/compound-engineering-plugin/commit/914f9b0d9822786d9ba6dc2307a543ae5a25c6e9))
+* **document-review:** smarter autofix, batch-confirm, and error/omission classification ([#401](https://github.com/EveryInc/compound-engineering-plugin/issues/401)) ([0863cfa](https://github.com/EveryInc/compound-engineering-plugin/commit/0863cfa4cbebcd121b0757abf374e5095d42f989))
+* **onboarding:** add consumer perspective and split architecture diagrams ([#413](https://github.com/EveryInc/compound-engineering-plugin/issues/413)) ([31326a5](https://github.com/EveryInc/compound-engineering-plugin/commit/31326a54584a12c473944fa488bea26410fd6fce))
 
-### Source
-- 实现 Superpowers Wave 4 的 P2-P3 遗留问题（5 项）
-- 来源：docs/brainstorms/2026-03-11-superpowers-fusion-brainstorm.md
 
-### Summary
-- 29 agents, 43 commands, 26 skills, 1 MCP server
+### Bug Fixes
 
----
+* add strict YAML validation for plugin frontmatter ([#399](https://github.com/EveryInc/compound-engineering-plugin/issues/399)) ([0877b69](https://github.com/EveryInc/compound-engineering-plugin/commit/0877b693ced341cec699ea959dc39f8bd78f33ef))
+* consolidate compound-docs into ce-compound skill ([#390](https://github.com/EveryInc/compound-engineering-plugin/issues/390)) ([daddb7d](https://github.com/EveryInc/compound-engineering-plugin/commit/daddb7d72f280a3bd9645c54d091844c198a324d))
+* document SwiftUI Text link tap limitation in test-xcode skill ([#400](https://github.com/EveryInc/compound-engineering-plugin/issues/400)) ([6ddaec3](https://github.com/EveryInc/compound-engineering-plugin/commit/6ddaec3b6ed5b6a91aeaddadff3960714ef10dc1))
+* harden git workflow skills with better state handling ([#406](https://github.com/EveryInc/compound-engineering-plugin/issues/406)) ([f83305e](https://github.com/EveryInc/compound-engineering-plugin/commit/f83305e22af09c37f452cf723c1b08bb0e7c8bdf))
+* improve agent-native-reviewer with triage, prioritization, and stack-aware search ([#387](https://github.com/EveryInc/compound-engineering-plugin/issues/387)) ([e792166](https://github.com/EveryInc/compound-engineering-plugin/commit/e7921660ad42db8e9af56ec36f36ce8d1af13238))
+* replace broken markdown link refs in skills ([#392](https://github.com/EveryInc/compound-engineering-plugin/issues/392)) ([506ad01](https://github.com/EveryInc/compound-engineering-plugin/commit/506ad01b4f056b0d8d0d440bfb7821f050aba156))
 
-## [2.44.1] - 2026-03-11
+## [2.54.1](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.54.0...compound-engineering-v2.54.1) (2026-03-26)
 
-### Fixed
-- 修复 `finishing-a-feature` skill 的 3 个断裂关联链接
-- 修复 `finishing-a-feature` skill 的 description 格式（符合插件规范）
 
-### Changed
-- 硬化 `finishing-a-feature` 关键路径：测试失败 = 流程终止（不提供跳过选项）
-- 增强 `git-worktree` skill：创建 worktree 后添加基线测试验证提醒
-- 增强 `workflows:work` 标准模式：添加 TDD 触发提醒
+### Bug Fixes
 
----
+* prevent orphaned opening paragraphs in PR descriptions ([#393](https://github.com/EveryInc/compound-engineering-plugin/issues/393)) ([4b44a94](https://github.com/EveryInc/compound-engineering-plugin/commit/4b44a94e23c8621771b8813caebce78060a61611))
 
-## [2.44.0] - 2026-03-11
+## [2.54.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.53.0...compound-engineering-v2.54.0) (2026-03-26)
 
-### Added
-- 新增 `finishing-a-feature` skill：功能分支收尾闭环（测试→合并/PR→清理）
-- 新增 `receiving-code-review` skill：接收审查响应规范（6步协议 + 禁止表演性同意）
-- 增强根目录 CLAUDE.md：补充 Agent 委派验证和 TDD 红绿循环验证模式
 
-### Changed
-- 增强 `test-driven-development` skill：添加「当卡住时」表格、2 条危险信号
-- 增强 `brainstorming` skill：添加提问技术、反模式表
-- 增强 `create-agent-skills` skill：添加 TDD for Skills 框架、Description 优化
-- 增强 `workflows:work`：添加 STOP 协议、finishing-a-feature 引用
-- 增强 `workflows:plan`：添加 Plan Header 强制模板（Goal + Tech Stack 必填）
+### Features
 
-### Source
-- 精华内容来源：[obra/superpowers](https://github.com/obra/superpowers) v4.1.1
-- 对比分析：docs/brainstorms/2026-03-11-superpowers-fusion-brainstorm.md
-- 审查优化：应用 Kieran、代码简洁性、DHH 三位专家的一致建议
+* add new `onboarding` skill to create onboarding guide for repo ([#384](https://github.com/EveryInc/compound-engineering-plugin/issues/384)) ([27b9831](https://github.com/EveryInc/compound-engineering-plugin/commit/27b9831084d69c4c8cf13d0a45c901268420de59))
+* replace manual review agent config with ce:review delegation ([#381](https://github.com/EveryInc/compound-engineering-plugin/issues/381)) ([fed9fd6](https://github.com/EveryInc/compound-engineering-plugin/commit/fed9fd68db283c64ec11293f88a8ad7a6373e2fe))
 
-### Summary
-- 29 agents, 43 commands, 26 skills, 1 MCP server
 
----
+### Bug Fixes
 
-## [2.43.4] - 2026-03-11
+* add default-branch guard to commit skills ([#386](https://github.com/EveryInc/compound-engineering-plugin/issues/386)) ([31f07c0](https://github.com/EveryInc/compound-engineering-plugin/commit/31f07c00473e9d8bd6d447cf04081c0a9631e34a))
+* scope commit-push-pr descriptions to full branch diff ([#385](https://github.com/EveryInc/compound-engineering-plugin/issues/385)) ([355e739](https://github.com/EveryInc/compound-engineering-plugin/commit/355e7392b21a28c8725f87a8f9c473a86543ce4a))
 
-**Summary**: 修复 SessionStart hook 在 Windows 上导致 startup hook error 的回归问题。
+## [2.53.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.52.0...compound-engineering-v2.53.0) (2026-03-25)
 
-### Fixed
-- hooks/hooks.json: 清空 SessionStart hook（回归到 9d841bb 的正确状态）。根因：b9d80fa 上游整合时从 superpowers 仓库引入了 `type: "command"` hook，在 Windows 上 stdin 被占用导致 `SessionStart:startup hook error`；217995d 只修了 schema 格式，未识别为已知回归问题
-- docs/solutions: 补充回归记录和防回归规则到 sessionstart-hook-prompt-type-not-supported.md
 
-### Summary
-- 29 agents, 43 commands, 24 skills, 1 MCP server
+### Features
 
-## [2.43.3] - 2026-03-11
+* add git commit and branch helper skills ([#378](https://github.com/EveryInc/compound-engineering-plugin/issues/378)) ([fe08af2](https://github.com/EveryInc/compound-engineering-plugin/commit/fe08af2b417b707b6d3192a954af7ff2ab0fe667))
+* improve `resolve-pr-feedback` skill ([#379](https://github.com/EveryInc/compound-engineering-plugin/issues/379)) ([2ba4f3f](https://github.com/EveryInc/compound-engineering-plugin/commit/2ba4f3fd58d4e57dfc6c314c2992c18ba1fb164b))
+* improve commit-push-pr skill with net-result focus and badging ([#380](https://github.com/EveryInc/compound-engineering-plugin/issues/380)) ([efa798c](https://github.com/EveryInc/compound-engineering-plugin/commit/efa798c52cb9d62e9ef32283227a8df68278ff3a))
+* integrate orphaned stack-specific reviewers into ce:review ([#375](https://github.com/EveryInc/compound-engineering-plugin/issues/375)) ([ce9016f](https://github.com/EveryInc/compound-engineering-plugin/commit/ce9016fac5fde9a52753cf94a4903088f05aeece))
 
-**Summary**: 修复 hooks.json schema 格式，适配 Claude Code 最新 hooks 验证规则。
 
-### Fixed
-- hooks/hooks.json: 将 SessionStart hook 格式从旧版（直接 type/command）更新为新版（带 matcher + hooks 子数组），修复 `expected array, received undefined` 错误
+### Bug Fixes
 
-### Summary
-- 29 agents, 43 commands, 24 skills, 1 MCP server
+* guard CONTEXTUAL_RISK_FLAGS lookup against prototype pollution ([#377](https://github.com/EveryInc/compound-engineering-plugin/issues/377)) ([8ebc77b](https://github.com/EveryInc/compound-engineering-plugin/commit/8ebc77b8e6c71e5bef40fcded9131c4457a387d7))
 
-## [2.43.2] - 2026-03-11
+## [2.52.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.51.0...compound-engineering-v2.52.0) (2026-03-25)
 
-**Summary**: Fixed workflow consistency issues found in code review (Handoff protocol, plan risk assessment, missing mappings, component counts).
 
-### Fixed
-- work.md: 添加 Phase 1 风险评分读取逻辑（从 plan frontmatter 读取 risk_score/risk_level）
-- work.md: 添加风险评分冲突处理规则（risk_level 优先于 risk_score）
-- plan.md: 添加 Section 6.5 风险评估（5维度评分系统）
-- plan.md: Handoff 改为风险分级动态推荐（低/中/高三档）
-- plan.md: 移除遗留的 Issue Creation 章节
-- marketplace.json, plugin.json: 修正 skills 组件数量（24，原来错误标注为 29）
+### Features
 
-### Summary
-- 29 agents, 43 commands, 24 skills, 1 MCP server
+* add consolidation support and overlap detection to `ce:compound` and `ce:compound-refresh` skills ([#372](https://github.com/EveryInc/compound-engineering-plugin/issues/372)) ([fe27f85](https://github.com/EveryInc/compound-engineering-plugin/commit/fe27f85810268a8e713ef2c921f0aec1baf771d7))
+* optimize `ce:compound` speed and effectiveness ([#370](https://github.com/EveryInc/compound-engineering-plugin/issues/370)) ([4e3af07](https://github.com/EveryInc/compound-engineering-plugin/commit/4e3af079623ae678b9a79fab5d1726d78f242ec2))
+* promote `ce:review-beta` to stable `ce:review` ([#371](https://github.com/EveryInc/compound-engineering-plugin/issues/371)) ([7c5ff44](https://github.com/EveryInc/compound-engineering-plugin/commit/7c5ff445e3065fd13e00bcd57041f6c35b36f90b))
+* rationalize todo skill names and optimize skills ([#368](https://github.com/EveryInc/compound-engineering-plugin/issues/368)) ([2612ed6](https://github.com/EveryInc/compound-engineering-plugin/commit/2612ed6b3d86364c74dc024e4ce35dde63fefbf6))
 
-## [2.43.1] - 2026-03-07
+## [2.51.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.50.0...compound-engineering-v2.51.0) (2026-03-24)
 
-**Summary**: Added `/workflows:pr` command for PR creation and merge workflow.
 
-### Added
-- `/workflows:pr` PR 创建与合并命令（自动检测主分支、生成 PR 标题描述、询问合并）
-- `ce:pr` 别名转发命令
+### Features
 
-### Changed
-- work.md: Handoff 添加 `/workflows:pr` 选项（三个风险等级均支持）
-- review.md: Handoff 添加 `/workflows:pr` 选项
+* add `ce:review-beta` with structured persona pipeline ([#348](https://github.com/EveryInc/compound-engineering-plugin/issues/348)) ([e932276](https://github.com/EveryInc/compound-engineering-plugin/commit/e9322768664e194521894fe770b87c7dabbb8a22))
+* promote ce:plan-beta and deepen-plan-beta to stable ([#355](https://github.com/EveryInc/compound-engineering-plugin/issues/355)) ([169996a](https://github.com/EveryInc/compound-engineering-plugin/commit/169996a75e98a29db9e07b87b0911cc80270f732))
+* redesign `document-review` skill with persona-based review ([#359](https://github.com/EveryInc/compound-engineering-plugin/issues/359)) ([18d22af](https://github.com/EveryInc/compound-engineering-plugin/commit/18d22afde2ae08a50c94efe7493775bc97d9a45a))
 
-### Summary
-- 29 agents, 43 commands, 24 skills, 1 MCP server
+## [2.50.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.49.0...compound-engineering-v2.50.0) (2026-03-23)
 
-## [2.43.0] - 2026-03-06
 
-### Added
-- 跨平台 AskUserQuestion 回退 preamble（EveryInc #204 移植）
-- brainstorming no-overwrite 保护（BMAD-METHOD 移植）
-- Edge-Case-Hunter 审查步骤（BMAD-METHOD 移植）
-- 3 个新 skill：findings-triage、review-prompt、root-cause-analysis（BMAD-METHOD 移植）
-- ce:* 转发命令（9 个，轻量双命名兼容）
-- plan.md brainstorm 集成增强（7 点指令，EveryInc 移植）
-- setup skill（EveryInc 移植，交互式配置工具）
+### Features
 
-### Fixed
-- SessionStart hook async 竞态条件（superpowers 移植）
-- Windows hook 路径引号问题（superpowers 移植，确认已正确）
-- review.md 格式渲染问题（代码块提前闭合 + 末尾孤立标记）
+* **ce-work:** add Codex delegation mode ([#328](https://github.com/EveryInc/compound-engineering-plugin/issues/328)) ([341c379](https://github.com/EveryInc/compound-engineering-plugin/commit/341c37916861c8bf413244de72f83b93b506575f))
+* improve `feature-video` skill with GitHub native video upload ([#344](https://github.com/EveryInc/compound-engineering-plugin/issues/344)) ([4aa50e1](https://github.com/EveryInc/compound-engineering-plugin/commit/4aa50e1bada07e90f36282accb3cd81134e706cd))
+* rewrite `frontend-design` skill with layered architecture and visual verification ([#343](https://github.com/EveryInc/compound-engineering-plugin/issues/343)) ([423e692](https://github.com/EveryInc/compound-engineering-plugin/commit/423e69272619e9e3c14750f5219cbf38684b6c96))
 
-### Changed
-- CLAUDE.md 添加双命名兼容说明
-- 组件数量更新：29 agents, 41 commands, 29 skills
 
-### Summary
-- 29 agents, 41 commands, 29 skills, 1 MCP server
+### Bug Fixes
 
----
+* quote frontend-design skill description ([#353](https://github.com/EveryInc/compound-engineering-plugin/issues/353)) ([86342db](https://github.com/EveryInc/compound-engineering-plugin/commit/86342db36c0d09b65afe11241e095dda2ad2cdb0))
 
-## [2.42.5] - 2026-03-05
+## [2.49.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.48.0...compound-engineering-v2.49.0) (2026-03-22)
 
-### 改进
-- **Handoff 协议合规修复**: 修复 7 个 workflow 命令的 Handoff 合规问题
-  - `brainstorm` 补 `Based on selection:` 行为约束 + 中文化选项
-  - `plan` 重排选项（`/workflows:work` 第一）+ 补"停止"选项 + 中文化 + 标题改为 Handoff
-  - `review` 补 `Based on selection:` 行为约束
-  - `load` 合并两个 Handoff 为统一出口 + 补行为约束
-  - `sync-upstream` 补 `Based on selection:` 行为约束
-  - `deepen-plan` 重排选项（`/plan_review` 第一）+ 补"停止"选项 + 中文化
-- **协议分级制度**: 区分主链档（brainstorm/plan/work/review/compound）和工具档（load/sync-upstream/deepen-plan/plan_review）
-- **lint 脚本增强**: `check-handoff.sh` 增加检查 `Based on selection` + 显示档位分级
 
-### Summary
-- 29 agents, 32 commands, 23 skills, 1 MCP server
+### Features
 
----
+* add execution mode toggle and context pressure bounds to parallel skills ([#336](https://github.com/EveryInc/compound-engineering-plugin/issues/336)) ([216d6df](https://github.com/EveryInc/compound-engineering-plugin/commit/216d6dfb2c9320c3354f8c9f30e831fca74865cd))
+* fix skill transformation pipeline across all targets ([#334](https://github.com/EveryInc/compound-engineering-plugin/issues/334)) ([4087e1d](https://github.com/EveryInc/compound-engineering-plugin/commit/4087e1df82138f462a64542831224e2718afafa7))
+* improve reproduce-bug skill, sync agent-browser, clean up redundant skills ([#333](https://github.com/EveryInc/compound-engineering-plugin/issues/333)) ([affba1a](https://github.com/EveryInc/compound-engineering-plugin/commit/affba1a6a0d9320b529d429ad06fd5a3b5200bd8))
 
-## [2.42.4] - 2026-03-05
+## [2.48.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.47.0...compound-engineering-v2.48.0) (2026-03-22)
 
-### 新功能
-- **Workflow Handoff 协议**: 建立统一的工作流命令衔接机制
-  - `plan_review` 增加 Post-Review Options，防止 AI 跳过 `/workflows:work`
-  - `work` 增加空参数回退逻辑（自动扫描 `docs/plans/`）
-  - `work` 增加 Phase 5 Handoff 引导到 `/workflows:review`
-  - `review` 增加 Workflow Handoff 引导到 `/workflows:compound` 和 `/workflows:save`
-  - `compound` 选项 1 改为显式的 `/workflows:save`
-  - `load` 增加未完成计划检测
-  - plugin CLAUDE.md 增加 Handoff 协议规范
-  - 新增 `scripts/check-handoff.sh` lint 脚本
-- `plan` 选项 4 显式传递 plan 文件路径给 `/workflows:work`
 
-### Summary
-- 29 agents, 32 commands, 23 skills, 1 MCP server
+### Features
 
----
+* **git-worktree:** auto-trust mise and direnv configs in new worktrees ([#312](https://github.com/EveryInc/compound-engineering-plugin/issues/312)) ([cfbfb67](https://github.com/EveryInc/compound-engineering-plugin/commit/cfbfb6710a846419cc07ad17d9dbb5b5a065801c))
+* make skills platform-agnostic across coding agents ([#330](https://github.com/EveryInc/compound-engineering-plugin/issues/330)) ([52df90a](https://github.com/EveryInc/compound-engineering-plugin/commit/52df90a16688ee023bbdb203969adcc45d7d2ba2))
 
-## [2.42.3] - 2026-02-15
+## [2.47.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.46.0...compound-engineering-v2.47.0) (2026-03-20)
 
-### Enhanced
-- **`/workflows:doctor` 升级为全自动配置工作流** — 从 7 步扩展到 10 步检测，支持 `--fix` 一键修复
-  - 新增 `--fix` 参数：自动安装缺失的 Codex CLI、Gemini CLI、GitHub MCP
-  - 新增 GitHub MCP 检测：解析 `~/.claude.json`，支持全局/项目级配置检测
-  - 新增 Context7 MCP 检测：验证 plugin.json 中的 MCP 配置
-  - 新增 agent-browser 检测（可选）
-  - 新增 FIXD 状态：区分自动修复与手动通过
-  - 失败时提示 `--fix` 可用
-  - MCP 修复后提醒重启 Claude Code
 
-### Summary
-- 29 agents, 32 commands, 23 skills, 1 MCP server
+### Features
 
----
+* improve `repo-research-analyst` by adding a structured technology scan ([#327](https://github.com/EveryInc/compound-engineering-plugin/issues/327)) ([1c28d03](https://github.com/EveryInc/compound-engineering-plugin/commit/1c28d0321401ad50a51989f5e6293d773ac1a477))
 
-## [2.42.2] - 2026-02-15
 
-### Added
-- **`/workflows:doctor` 健康检查命令** — 一键检测 Codex/Gemini CLI 安装状态、模型版本、认证配置
-  - 快速模式（默认）：检测安装、模型、认证
-  - `--smoke` 模式：额外执行冒烟测试验证 CLI 可用性
-  - 支持 `CODEX_MODEL`/`GEMINI_MODEL` 环境变量覆盖
-  - 退出码：0=全部通过，1=有失败，2=仅警告
-- **`scripts/doctor.sh` 检测脚本** — 7 步检测流程，失败不中断，结构化输出
+### Bug Fixes
 
-### Summary
-- 29 agents, 32 commands, 23 skills, 1 MCP server
+* **skills:** update ralph-wiggum references to ralph-loop in lfg/slfg ([#324](https://github.com/EveryInc/compound-engineering-plugin/issues/324)) ([ac756a2](https://github.com/EveryInc/compound-engineering-plugin/commit/ac756a267c5e3d5e4ceb2f99939dbb93491ac4d2))
 
----
+## [2.46.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.45.0...compound-engineering-v2.46.0) (2026-03-20)
 
-## [2.42.1] - 2026-02-15
 
-### Fixed
-- **Codex/Gemini 模型升级** — 所有 CLI 调用升级为最新模型（Codex: `gpt-5.3-codex`，Gemini: `gemini-3-pro-preview`）
-- **Gemini CLI 兼容性修复** — 移除不兼容的 `--approval-mode plan` 参数（新版 Gemini CLI 需实验性功能）
-- **安全文档修正** — 删除 gemini.md 中 `-p` 模式只读的错误声明，替换为准确的安全提示
-- **Shell 注入风险修复** — gemini-review-now.sh 中 `bash -c` 改用环境变量传递路径，消除引号注入风险
-- **模型版本可配置化** — 脚本提取 `CODEX_MODEL`/`GEMINI_MODEL` 环境变量，支持 `CODEX_MODEL=xxx ./scripts/codex-review-now.sh` 覆盖
-- **文档一致性** — 修复 review.md 和 gemini-review-now.sh 中的过时描述
+### Features
 
-### Summary
-- 29 agents, 31 commands, 23 skills, 1 MCP server
-- 基于三方代码审查（Claude + Codex + Gemini）发现并修复 P1/P2/P3 问题
+* add optional high-level technical design to plan-beta skills ([#322](https://github.com/EveryInc/compound-engineering-plugin/issues/322)) ([3ba4935](https://github.com/EveryInc/compound-engineering-plugin/commit/3ba4935926b05586da488119f215057164d97489))
 
----
+## [2.45.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.44.0...compound-engineering-v2.45.0) (2026-03-19)
 
-## [2.42.0] - 2026-02-11
 
-### Added
-- **Memory frontmatter** — 为 6 个研究型/架构型 agents 添加 `memory: project/user`，启用跨会话知识积累
-- **PDF pages 支持** — document-review skill 现在支持大型 PDF 分页读取
-- **Fast mode 引导** — workflows:review 和 workflows:work 命令添加性能优化提示
+### Features
 
-### Summary
-- 29 agents (6 with memory), 31 commands, 23 skills, 1 MCP server
+* edit resolve_todos_parallel skill for complete todo lifecycle ([#292](https://github.com/EveryInc/compound-engineering-plugin/issues/292)) ([88c89bc](https://github.com/EveryInc/compound-engineering-plugin/commit/88c89bc204c928d2f36e2d1f117d16c998ecd096))
+* integrate claude code auto memory as supplementary data source for ce:compound and ce:compound-refresh ([#311](https://github.com/EveryInc/compound-engineering-plugin/issues/311)) ([5c1452d](https://github.com/EveryInc/compound-engineering-plugin/commit/5c1452d4cc80b623754dd6fe09c2e5b6ae86e72e))
 
-## [2.41.0] - 2026-02-10
+## [2.44.0](https://github.com/EveryInc/compound-engineering-plugin/compare/compound-engineering-v2.43.0...compound-engineering-v2.44.0) (2026-03-18)
 
-### Critical Fix
 
-- **修复 context token 预算溢出 bug** — 插件使用了 316% 的 16K 字符预算，导致组件被静默排除
-  - 压缩 29 个 agent 描述（examples 从 frontmatter 移到 body），节省 ~35,600 字符
-  - 14 个命令添加 `disable-model-invocation: true` 标志
-  - 8 个 skill 添加 `disable-model-invocation: true` 标志
-  - 预算使用从 316% 降至 ~72%，实现 77% token 减少
+### Features
+
+* **plugin:** add execution posture signaling to ce:plan-beta and ce:work ([#309](https://github.com/EveryInc/compound-engineering-plugin/issues/309)) ([748f72a](https://github.com/EveryInc/compound-engineering-plugin/commit/748f72a57f713893af03a4d8ed69c2311f492dbd))
+
+## [2.39.0] - 2026-03-10
 
 ### Added
 
-- **`schema-drift-detector` agent** — 新增数据库 schema 漂移检测 agent（来自上游 v2.29.0）
-- **`orchestrating-swarms` skill** — 多 agent 编排指南，1718 行参考文档（来自上游 v2.30.0）
-- **`document-review` skill** — brainstorm/plan 文档审查 skill
-- **`resolve-pr-parallel` skill** — PR 评论并行解决（从 command 升级为 skill）
-- **`/slfg` command** — Swarm 模式自主工程工作流
-- **`/technical_review` command** — 技术审查命令
-- **`/triage-prs` command** — PR 分类和合并管理
+- **ce:compound context budget precheck** — Warns when context is constrained and offers compact-safe mode to avoid compaction mid-compound ([#235](https://github.com/EveryInc/compound-engineering-plugin/pull/235))
+- **ce:plan daily sequence numbers** — Plan filenames now include a 3-digit daily sequence number (e.g., `2026-03-10-001-feat-...`) to prevent collisions ([#238](https://github.com/EveryInc/compound-engineering-plugin/pull/238))
+- **ce:review serial mode** — Pass `--serial` flag (or auto-detects when 6+ agents configured) to run review agents sequentially, preventing context limit crashes ([#237](https://github.com/EveryInc/compound-engineering-plugin/pull/237))
+- **agent-browser inspection & debugging commands** — Added JS eval, console/errors, network, storage, device emulation, element debugging, recording/tracing, tabs, and advanced mouse commands to agent-browser skill ([#236](https://github.com/EveryInc/compound-engineering-plugin/pull/236))
+- **test-browser port detection** — Auto-detects dev server port from CLAUDE.md, package.json, or .env files; supports `--port` flag ([#233](https://github.com/EveryInc/compound-engineering-plugin/pull/233))
+- **lfg phase gating** — Added explicit GATE checks between /lfg steps to enforce plan-before-work ordering ([#231](https://github.com/EveryInc/compound-engineering-plugin/pull/231))
 
 ### Fixed
 
-- **Hook crash 修复** — 修复 hook 条目没有 matcher 时的崩溃（上游 #160）
-- **Subagent 中间文件防护** — `/workflows:compound` 防止 subagent 写入中间文件（上游 #150）
-- **配置备份** — 覆盖配置文件前先备份（上游 #119）
-
-### Summary
-
-- 29 agents, 31 commands, 23 skills, 1 MCP server
-- 基于上游 v2.29.0 - v2.30.0 选择性整合，保留全部中文文档和自定义功能
-
----
-
-## [2.40.1] - 2026-02-04
-
-### Changed
-
-- **`/workflows:work` Subagent 分支安全增强** — 整合 superpowers 最佳实践
-  - Subagent-Driven 模式禁止在默认分支（main/master）上执行
-  - 添加 Branch Safety Guard 前置检查
-  - 强化 worktree 推荐：≥2 任务时强烈推荐 worktree 隔离
-
-### Fixed
-
-- **上游 `#142` protect plan files** — 防止审查过程意外删除 plan 文件（合并自 upstream/main）
-
-### Summary
-
-- 28 agents, 29 commands, 20 skills, 1 MCP server
-
----
-
-## [2.40.0] - 2026-02-04
-
-### Added
-
-- **`/workflows:sync-upstream` 命令** — 上游仓库智能同步检测
-  - 角色化策略：parent(git-native) / reference(github-api) / runtime(releases)
-  - 可扩展配置：`upstream-repos.json` 支持动态添加/移除监控仓库
-  - 结构化报告：带 YAML frontmatter，支持 `/workflows:plan` 自动发现
-  - 噪音过滤：自动排除 chore/bump/dependabot/merge commits
-  - 交互式讨论：评估后可直接创建整合计划或执行合并
-  - 语音通知：发现重要更新时自动语音提醒
-
-### Summary
-
-- 28 agents, 29 commands, 20 skills, 1 MCP server
-
----
-
-## [2.39.0] - 2026-02-04
-
-### Added
-
-- **`/workflows:brainstorm [C][G]` 支持** - 在方案探索阶段调用 Codex/Gemini 外部方案咨询
-  - `[C]` 参数：Phase 2 后自动调用 Codex 方案咨询，寻找最优解
-  - `[G]` 参数：Phase 2 后自动调用 Gemini 方案咨询，寻找最优解
-  - `[P]` `[C]` `[G]` 三者正交兼容，可任意组合、无先后顺序
-  - 结果整合进 brainstorm 文档的「外部咨询」小节
-  - 使用 `<!-- CLAUDE-CODE-ONLY-START/END -->` 排除，不同步到 Codex/Gemini 格式
-
-### Summary
-
-- 28 agents, 28 commands, 20 skills, 1 MCP server
-
----
-
-## [2.38.1] - 2026-02-04
-
-### 修复
-
-- **SessionStart hook 跨平台修复** - 改为 prompt hook，避免 Windows 无 bash 时报错卡住
-
-### Summary
-
-- 28 agents, 28 commands, 20 skills, 1 MCP server
-
----
-## [2.38.0] - 2026-02-04
-
-### Added
-
-- **`/gemini` 命令** - 向 Gemini 寻求更优方案和最优解
-  - Claude 智能分析当前对话上下文（调试、设计、选型、重构等）
-  - 自动构建结构化 prompt，附上 Claude 当前方案供 Gemini 批判性评估
-  - 引导 Gemini 评估：是否最优解、有无替代方案、性价比、潜在风险
-  - 通过 `gemini --approval-mode plan -o json` 只读模式调用 Gemini CLI
-
-- **`/codex` 命令** - 向 Codex 寻求更优方案和最优解
-  - 与 `/gemini` 相同的智能上下文构建和批判性评估策略
-  - 通过 `codex exec --output-last-message` 调用 Codex CLI
-  - 综合对比分析，推荐性价比最优的方案
-
-### Changed
-
-- **挑战式咨询设计** - 核心理念是「寻求更优解」而非仅仅「第二意见」：
-  - 自动附上 Claude 当前方案，让外部工具做对比评判
-  - 引导外部工具从最优解、替代方案、性价比、维护风险四维度分析
-  - 结果展示以「方案对比与最优解分析」为核心，不回避分歧
-
-### Summary
-
-- 28 agents, 28 commands, 20 skills, 1 MCP server
-
----
-
-## [2.37.0] - 2026-02-03
-
-### Added
-
-- **Gemini CLI 集成** - `/workflows:review [G]` 支持调用 Gemini 进行额外代码审核
-  - 使用 `gemini --approval-mode plan -o json` 非交互模式（基于 Gemini 官方建议）
-  - 通过 stdin 管道传递 prompt，支持 1M+ tokens（不截断 diff）
-  - 使用系统 `timeout` 命令处理超时
-  - 新增 `scripts/gemini-review-now.sh` 脚本
-
-- **多工具协同审核** - `/workflows:review [C][G]` 同时调用 Codex 和 Gemini
-  - 综合三方审核结果（Claude + Codex + Gemini）
-  - 多方一致的发现优先级更高
-
-- **转换器智能过滤** - 转换到 Codex/Gemini 格式时自动过滤 `[C]` `[G]` 参数说明
-  - 新增 `src/utils/filter-claude-code-only.ts` 公共过滤函数
-  - 支持 `<!-- CLAUDE-CODE-ONLY-START/END -->` 标记块过滤
-
-### Changed
-
-- **`/workflows:review`** - 更新参数解析支持 `[G]` 标志
-- 更新 Prerequisites 包含 Gemini CLI 安装说明
-
-### Summary
-
-- 28 agents, 26 commands, 20 skills, 1 MCP server
-
----
-
-## [2.36.1] - 2026-02-03
-
-### Changed
-
-- **Codex 审核优化** - 解决长时间无响应问题
-  - 改用 `codex exec --json` 非交互模式（[官方推荐](https://developers.openai.com/codex/noninteractive)）
-  - 支持 JSONL 事件流，实时显示进度（thread.started、turn.started 等）
-  - 后台执行 + 5 分钟超时保护
-  - 超时后提供清晰的备选方案（增加超时时间、手动运行、查看部分输出）
-  - 更新 `scripts/codex-review-now.sh` v2 版本
-
-### Fixed
-
-- 修复 Codex CLI 调用可能卡住 10+ 分钟无反馈的问题（[Issue #4775](https://github.com/openai/codex/issues/4775)）
-
-### Summary
-
-- 28 agents, 26 commands, 20 skills, 1 MCP server
-
----
-
-## [2.36.0] - 2026-02-03
-
-### Added
-
-- **跨工具经验库系统** - 支持 Claude Code、Codex、Gemini 共享经验库
-  - 统一全局目录：`~/.compound/solutions/`（跨项目、跨工具）
-  - 三级优先级：`COMPOUND_SOLUTIONS_HOME` > `~/.compound/solutions/` > `docs/solutions/`
-  - 跨平台支持：Windows、macOS、Linux 路径自动解析
-  - 首次运行自动检测、创建目录、注入配置
-  - 项目标记文件：`.compound/config.json`
-
-### Changed
-
-- **`/workflows:compound`** - 添加 Environment Setup 自动化流程
-  - Step 0: 自动检测并创建经验库系统
-  - Step 0.1: Codex/Gemini CLI 同步说明
-- **`learnings-researcher` agent** - 支持搜索全局 + 项目两个经验库
-- **项目 `CLAUDE.md`** - 更新搜索说明为双目录搜索
-
-### Summary
-
-- 28 agents, 26 commands, 20 skills, 1 MCP server
-
----
-
-## [2.35.0] - 2026-02-02
-
-### Added
-
-- **Codex 可选审核集成到 `/workflows:review`** - 通过 `[C]` 参数自动触发 Codex 额外审核
-  - 命令参数添加 `[C]` 即可自动执行（如 `/workflows:review [C]` 或 `/workflows:review 123 [C]`）
-  - Codex 结果**同步显示在当前会话**，而非写入临时文件
-  - 自动整合 Claude 多代理审核 + Codex 审核结果
-  - 提供综合建议：双方一致的发现优先级更高
-
-### Changed
-
-- **`/workflows:review` 命令** - 添加 `[C]` 参数和 Step 7: Codex 额外审核
-  - 参数格式：`/workflows:review [目标] [C]`
-  - 有 `[C]` → 自动调用 Codex
-  - 无 `[C]` → 跳过 Codex 审核
-
-### Summary
-
-- 28 agents, 26 commands, 20 skills, 1 MCP server
-
----
-
-## [2.34.0] - 2026-02-02
+- **Context7 API key auth** — MCP server config now passes `CONTEXT7_API_KEY` via `x-api-key` header to avoid anonymous rate limits ([#232](https://github.com/EveryInc/compound-engineering-plugin/pull/232))
+- **CLI: MCP server merge order** — `sync` now correctly overwrites same-named MCP servers with plugin values instead of preserving stale entries
 
 ### Removed
 
-- **Codex Auto-Review Integration** - Removed Stop hook that automatically triggered Codex review
-  - Deleted `codex-review.sh`, `codex-review.ps1`, `codex-review-wrapper.sh`
-  - Removed Stop hook from `hooks.json`
-  - **Reason**: Auto-review was incomplete (results written to temp file with no consumption mechanism), triggered too frequently (any file change), and required users to have Codex CLI installed
+- **every-style-editor agent** — Removed duplicate agent; functionality already exists as `every-style-editor` skill ([#234](https://github.com/EveryInc/compound-engineering-plugin/pull/234))
 
-### Recommendation
+### Contributors
 
-For code review, use `/workflows:review` or manually run `codex review --uncommitted` when needed.
-
-### Summary
-
-- 28 agents, 26 commands, 20 skills, 1 MCP server
+- Matt Van Horn ([@mvanhorn](https://x.com/mvanhorn)) — PRs #231–#238
 
 ---
 
-## [2.33.0] - 2026-02-02
-
-### Added
-
-- **Codex Auto-Review Integration** - Stop hook triggers automatic code review via Codex CLI
-  - `codex-review.sh` - Bash script for Unix/Git Bash
-  - `codex-review.ps1` - PowerShell script for Windows (called by wrapper)
-  - `codex-review-wrapper.sh` - Cross-platform wrapper (auto-detects OS)
-  - Automatically runs `codex review --uncommitted` when Claude Code session ends
-  - Includes untracked new files in review scope
-  - Prevents infinite loop via `stop_hook_active` flag detection
+## [2.38.1] - 2026-03-01
 
 ### Fixed
 
-- **Untracked files missing from review** - Scripts now include `git ls-files --others --exclude-standard` to capture new files
-- **Codex review mode** - Changed from interactive prompt to `codex review --uncommitted` for non-blocking execution
-- **jq dependency** - Added fallback to grep when jq is not installed
-
-### Requirements
-
-- **Codex CLI**: `npm install -g @openai/codex`
-- **Windows users**: Git Bash required (included with Git for Windows)
-
-### Summary
-
-- 28 agents, 26 commands, 20 skills, 1 MCP server
+- **Cross-platform `AskUserQuestion` fallback** — `setup` skill and `create-new-skill`/`add-workflow` workflows now include an "Interaction Method" preamble that instructs non-Claude LLMs (Codex, Gemini, Copilot, Kiro) to use numbered lists instead of `AskUserQuestion`, preventing silent auto-configuration. ([#204](https://github.com/EveryInc/compound-engineering-plugin/issues/204))
+- **Codex AGENTS.md `AskUserQuestion` mapping** — Strengthened from "ask the user in chat" to structured numbered-list guidance with multi-select support and a "never skip or auto-configure" rule.
+- **Skill compliance checklist** — Added `AskUserQuestion` lint rule to `CLAUDE.md` to prevent recurrence.
 
 ---
 
-## [2.32.0] - 2026-02-02
+## [2.38.0] - 2026-03-01
+
+### Changed
+- `workflows:plan`, `workflows:work`, `workflows:review`, `workflows:brainstorm`, `workflows:compound` renamed to `ce:plan`, `ce:work`, `ce:review`, `ce:brainstorm`, `ce:compound` for clarity — the `ce:` prefix unambiguously identifies these as compound-engineering commands
+
+### Deprecated
+- `workflows:*` commands — all five remain functional as aliases that forward to their `ce:*` equivalents with a deprecation notice. Will be removed in a future version.
+
+---
+
+## [2.37.2] - 2026-03-01
 
 ### Added
 
-- **Subagent-Driven Development** - Automatic execution mode selection in `/workflows:work`
-  - 1 task → Standard mode (single agent)
-  - ≥2 tasks → Subagent-Driven mode (fresh context per task)
-  - Two-stage review: spec-compliance → code quality
-  - Human checkpoints every 3 tasks
-
-- **Bite-Sized Task format** - Mandatory format in `/workflows:plan`
-  - 2-5 minute atomic tasks
-  - Exact file paths with line numbers
-  - Complete code (not pseudocode)
-  - Specific verification steps
-
-- **Solution documentation** - New docs in `docs/solutions/`
-  - `subagent-driven-workflow-integration.md` - Integration guide
-  - `skill-vs-agent-invocation.md` - Skill vs Agent usage patterns
-
-### Changed
-
-- **`/workflows:work` command** - Added automatic execution mode detection (lines 19-47) and Subagent batch execution (lines 155-206)
-- **`/workflows:plan` command** - Added Bite-Sized Task format requirement (lines 123-184)
-- **`skill-checking-protocol.md`** - Added auto execution mode explanation
-
-### Summary
-
-- 28 agents, 26 commands, 20 skills, 1 MCP server
+- **CLI: auto-detect install targets** — `bunx @every-env/compound-plugin install compound-engineering --to all` auto-detects installed AI coding tools and installs to all of them in one command. ([#191](https://github.com/EveryInc/compound-engineering-plugin/pull/191))
+- **CLI: Gemini sync** — `sync --target gemini` symlinks personal skills to `.gemini/skills/` and merges MCP servers into `.gemini/settings.json`. ([#191](https://github.com/EveryInc/compound-engineering-plugin/pull/191))
+- **CLI: sync defaults to `--target all`** — Running `sync` with no target now syncs to all detected tools automatically. ([#191](https://github.com/EveryInc/compound-engineering-plugin/pull/191))
 
 ---
 
-## [2.31.0] - 2026-02-01
-
-### Changed
-
-- Internal improvements and bug fixes
-
-### Summary
-
-- 28 agents, 26 commands, 20 skills, 1 MCP server
-
----
-
-## [2.30.0] - 2026-02-01
-
-### Added
-
-- **`party-mode` skill** - Multi-agent collaborative discussion framework integrated with brainstorming
-  - Enables 2-3 AI agents to discuss from different expert perspectives
-  - Includes 14 pre-defined agent personas (architects, developers, PMs, designers, etc.)
-  - Intelligent agent selection based on discussion topic
-  - Natural cross-talk between agents (referencing, challenging, building on points)
-  - Seamless integration with `/workflows:brainstorm` via `[P]` trigger
-
-### Changed
-
-- **`/workflows:brainstorm` command** - Added Party Mode entry point for multi-perspective discussions
-
-### Summary
-
-- 28 agents, 26 commands, 17 skills, 1 MCP server
-
----
-
-## [2.29.0] - 2026-02-01
+## [2.37.1] - 2026-03-01
 
 ### Fixed
 
-- **Workflow command descriptions** - Changed circle numbers (①②③④⑤) to ASCII format (Step 1: Step 2: etc.) for better terminal compatibility
-- **Version sync issue** - Fixed marketplace.json version mismatch that prevented plugin updates via Marketplace
-- **README.md** - Updated Commands count from 24 to 26
+- **`/workflows:review` rendering** — Fixed broken markdown output: "Next Steps" items 3 & 4 and Severity Breakdown no longer leak outside the Summary Report template, section numbering fixed (was jumping 5→7, now correct), removed orphaned fenced code block delimiters that caused the entire End-to-End Testing section to render as a code block, and fixed unclosed quoted string in section 1. ([#214](https://github.com/EveryInc/compound-engineering-plugin/pull/214)) — thanks [@XSAM](https://github.com/XSAM)!
+- **`.worktrees` gitignore** — Added `.worktrees/` to `.gitignore` to prevent worktree directories created by the `git-worktree` skill from being tracked. ([#213](https://github.com/EveryInc/compound-engineering-plugin/pull/213)) — thanks [@XSAM](https://github.com/XSAM)!
+
+---
+
+## [2.37.0] - 2026-03-01
+
+### Added
+
+- **`proof` skill** — Create, edit, comment on, and share markdown documents via Proof's web API and local bridge. Supports document creation, track-changes suggestions, comments, and bulk rewrites. No authentication required for creating shared documents.
+- **Optional Proof sharing in `/workflows:brainstorm`** — "Share to Proof" is now a menu option in Phase 4 handoff, letting you upload the brainstorm document when you want to, rather than automatically on every run.
+- **Optional Proof sharing in `/workflows:plan`** — "Share to Proof" is now a menu option in Post-Generation Options, letting you upload the plan file on demand rather than automatically.
+
+---
+
+## [2.36.0] - 2026-03-01
+
+### Added
+
+- **OpenClaw install target** — `bunx @every-env/compound-plugin install compound-engineering --to openclaw` now installs the plugin to OpenClaw's extensions directory. ([#217](https://github.com/EveryInc/compound-engineering-plugin/pull/217)) — thanks [@TrendpilotAI](https://github.com/TrendpilotAI)!
+- **Qwen Code install target** — `bunx @every-env/compound-plugin install compound-engineering --to qwen` now installs the plugin to Qwen Code's extensions directory. ([#220](https://github.com/EveryInc/compound-engineering-plugin/pull/220)) — thanks [@rlam3](https://github.com/rlam3)!
+- **Windsurf install target** — `bunx @every-env/compound-plugin install compound-engineering --to windsurf` converts plugins to Windsurf format. Agents become Windsurf skills, commands become flat workflows, and MCP servers write to `mcp_config.json`. Defaults to global scope (`~/.codeium/windsurf/`); use `--scope workspace` for project-level output. ([#202](https://github.com/EveryInc/compound-engineering-plugin/pull/202)) — thanks [@rburnham52](https://github.com/rburnham52)!
+
+### Fixed
+
+- **`create-agent-skill` / `heal-skill` YAML crash** — `argument-hint` values containing special characters now properly quoted to prevent YAML parse errors in the Claude Code TUI. ([#219](https://github.com/EveryInc/compound-engineering-plugin/pull/219)) — thanks [@solon](https://github.com/solon)!
+- **`resolve-pr-parallel` skill name** — Renamed from `resolve_pr_parallel` (underscore) to `resolve-pr-parallel` (hyphen) to match the standard naming convention. ([#202](https://github.com/EveryInc/compound-engineering-plugin/pull/202)) — thanks [@rburnham52](https://github.com/rburnham52)!
+
+---
+
+## [2.35.2] - 2026-02-20
 
 ### Changed
 
-- **CLAUDE.md (root)** - Added version sync warning and quick check command
-- **CLAUDE.md (plugin)** - Added marketplace.json to version sync requirements
+- **`/workflows:plan` brainstorm integration** — When plan finds a brainstorm document, it now heavily references it throughout. Added `origin:` frontmatter field to plan templates, brainstorm cross-check in final review, and "Sources" section at the bottom of all three plan templates (MINIMAL, MORE, A LOT). Brainstorm decisions are carried forward with explicit references (`see brainstorm: <path>`) and a mandatory scan before finalizing ensures nothing is dropped.
 
-### Summary
+---
 
-- 28 agents, 26 commands, 16 skills, 1 MCP server
+## [2.35.1] - 2026-02-18
+
+### Changed
+
+- **`/workflows:work` system-wide test check** — Added "System-Wide Test Check" to the task execution loop. Before marking a task done, forces five questions: what callbacks/middleware fire when this runs? Do tests exercise the real chain or just mocked isolation? Can failure leave orphaned state? What other interfaces need the same change? Do error strategies align across layers? Includes skip criteria for leaf-node changes. Also added integration test guidance to the "Test Continuously" section.
+- **`/workflows:plan` system-wide impact templates** — Added "System-Wide Impact" section to MORE and A LOT plan templates (interaction graph, error propagation, state lifecycle, API surface parity, integration test scenarios) as lightweight prompts to flag risks during planning.
+
+---
+
+## [2.35.0] - 2026-02-17
+
+### Fixed
+
+- **`/lfg` and `/slfg` first-run failures** — Made ralph-loop step optional with graceful fallback when `ralph-wiggum` skill is not installed (#154). Added explicit "do not stop" instruction across all steps (#134).
+- **`/workflows:plan` not writing file in pipeline** — Added mandatory "Write Plan File" step with explicit Write tool instructions before Post-Generation Options. The file is now always written to disk before any interactive prompts (#155). Also adds pipeline-mode note to skip AskUserQuestion calls when invoked from LFG/SLFG (#134).
+- **Agent namespace typo in `/workflows:plan`** — `Task spec-flow-analyzer(...)` now uses the full qualified name `Task compound-engineering:workflow:spec-flow-analyzer(...)` to prevent Claude from prepending the wrong `workflows:` prefix (#193).
+
+---
+
+## [2.34.0] - 2026-02-14
+
+### Added
+
+- **Gemini CLI target** — New converter target for [Gemini CLI](https://github.com/google-gemini/gemini-cli). Install with `--to gemini` to convert agents to `.gemini/skills/*/SKILL.md`, commands to `.gemini/commands/*.toml` (TOML format with `description` + `prompt`), and MCP servers to `.gemini/settings.json`. Skills pass through unchanged (identical SKILL.md standard). Namespaced commands create directory structure (`workflows:plan` → `commands/workflows/plan.toml`). 29 new tests. ([#190](https://github.com/EveryInc/compound-engineering-plugin/pull/190))
+
+---
+
+## [2.33.1] - 2026-02-13
+
+### Changed
+
+- **`/workflows:plan` command** - All plan templates now include `status: active` in YAML frontmatter. Plans are created with `status: active` and marked `status: completed` when work finishes.
+- **`/workflows:work` command** - Phase 4 now updates plan frontmatter from `status: active` to `status: completed` after shipping. Agents can grep for status to distinguish current vs historical plans.
+
+---
+
+## [2.33.0] - 2026-02-12
+
+### Added
+
+- **`setup` skill** — Interactive configurator for review agents
+  - Auto-detects project type (Rails, Python, TypeScript, etc.)
+  - Two paths: "Auto-configure" (one click) or "Customize" (pick stack, focus areas, depth)
+  - Writes `compound-engineering.local.md` in project root (tool-agnostic — works for Claude, Codex, OpenCode)
+  - Invoked automatically by `/workflows:review` when no settings file exists
+- **`learnings-researcher` in `/workflows:review`** — Always-run agent that searches `docs/solutions/` for past issues related to the PR
+- **`schema-drift-detector` wired into `/workflows:review`** — Conditional agent for PRs with migrations
+
+### Changed
+
+- **`/workflows:review`** — Now reads review agents from `compound-engineering.local.md` settings file. Falls back to invoking setup skill if no file exists.
+- **`/workflows:work`** — Review agents now configurable via settings file
+- **`/release-docs` command** — Moved from plugin to local `.claude/commands/` (repo maintenance, not distributed)
+
+### Removed
+
+- **`/technical_review` command** — Superseded by configurable review agents
+
+---
+
+## [2.32.0] - 2026-02-11
+
+### Added
+
+- **Factory Droid target** — New converter target for [Factory Droid](https://docs.factory.ai). Install with `--to droid` to output agents, commands, and skills to `~/.factory/`. Includes tool name mapping (Claude → Factory), namespace prefix stripping, Task syntax conversion, and agent reference rewriting. 13 new tests (9 converter + 4 writer). ([#174](https://github.com/EveryInc/compound-engineering-plugin/pull/174))
+
+---
+
+## [2.31.1] - 2026-02-09
+
+### Changed
+
+- **`dspy-ruby` skill** — Complete rewrite to DSPy.rb v0.34.3 API: `.call()` / `result.field` patterns, `T::Enum` classes, `DSPy::Tools::Base` / `Toolset`. Added events system, lifecycle callbacks, fiber-local LM context, GEPA optimization, evaluation framework, typed context pattern, BAML/TOON schema formats, storage system, score reporting, RubyLLM adapter. 5 reference files (2 new: toolsets, observability), 3 asset templates rewritten.
+
+## [2.31.0] - 2026-02-08
+
+### Added
+
+- **`document-review` skill** — Brainstorm and plan refinement through structured review ([@Trevin Chow](https://github.com/trevin))
+- **`/sync` command** — Sync Claude Code personal config across machines ([@Terry Li](https://github.com/terryli))
+
+### Changed
+
+- **Context token optimization (79% reduction)** — Plugin was consuming 316% of the context description budget, causing Claude Code to silently exclude components. Now at 65% with room to grow:
+  - All 29 agent descriptions trimmed from ~1,400 to ~180 chars avg (examples moved to agent body)
+  - 18 manual commands marked `disable-model-invocation: true` (side-effect commands like `/lfg`, `/deploy-docs`, `/triage`, etc.)
+  - 6 manual skills marked `disable-model-invocation: true` (`orchestrating-swarms`, `git-worktree`, `skill-creator`, `compound-docs`, `file-todos`, `resolve-pr-parallel`)
+- **git-worktree**: Remove confirmation prompt for worktree creation ([@Sam Xie](https://github.com/XSAM))
+- **Prevent subagents from writing intermediary files** in compound workflow ([@Trevin Chow](https://github.com/trevin))
+
+### Fixed
+
+- Fix crash when hook entries have no matcher ([@Roberto Mello](https://github.com/robertomello))
+- Fix git-worktree detection where `.git` is a file, not a directory ([@David Alley](https://github.com/davidalley))
+- Backup existing config files before overwriting in sync ([@Zac Williams](https://github.com/zacwilliams))
+- Note new repository URL ([@Aarni Koskela](https://github.com/aarnikoskela))
+- Plugin component counts corrected: 29 agents, 24 commands, 18 skills
+
+---
+
+## [2.30.0] - 2026-02-05
+
+### Added
+
+- **`orchestrating-swarms` skill** - Comprehensive guide to multi-agent orchestration
+  - Covers primitives: Agent, Team, Teammate, Leader, Task, Inbox, Message, Backend
+  - Documents two spawning methods: subagents vs teammates
+  - Explains all 13 TeammateTool operations
+  - Includes orchestration patterns: Parallel Specialists, Pipeline, Self-Organizing Swarm
+  - Details spawn backends: in-process, tmux, iterm2
+  - Provides complete workflow examples
+- **`/slfg` command** - Swarm-enabled variant of `/lfg` that uses swarm mode for parallel execution
+
+### Changed
+
+- **`/workflows:work` command** - Added optional Swarm Mode section for parallel execution with coordinated agents
+
+---
+
+## [2.29.0] - 2026-02-04
+
+### Added
+
+- **`schema-drift-detector` agent** - Detects unrelated schema.rb changes in PRs
+  - Compares schema.rb diff against migrations in the PR
+  - Catches columns, indexes, and tables from other branches
+  - Prevents accidental inclusion of local database state
+  - Provides clear fix instructions (checkout + migrate)
+  - Essential pre-merge check for any PR with database changes
 
 ---
 
@@ -1178,4 +912,3 @@ These updates operationalize a key insight from building agent-native mobile app
 - **`/xcode-test` command** - Build and test iOS apps on simulator using XcodeBuildMCP. Automatically detects Xcode project, builds app, launches simulator, and runs test suite. Includes retries for flaky tests.
 
 - **`/playwright-test` command** - Run Playwright browser tests on pages affected by current PR or branch. Detects changed files, maps to affected routes, generates/runs targeted tests, and reports results with screenshots.
-
