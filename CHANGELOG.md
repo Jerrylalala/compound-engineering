@@ -16,6 +16,42 @@
 * **refactor**: 删除零引用私有 skill `review-prompt`（无任何引用）
 * **chore**: 将 `technical_review.md` 重命名为 `technical-review.md`（符合 kebab-case 命名规范）
 
+## [2.45.6] - 2026-04-08
+
+### Bug Fixes
+
+* **doctor.md**: 移除对不存在 scripts/doctor.sh 的依赖，改为直接调用现有脚本
+* **review-contract**: anti-leniency 澄清为参考框架，非自动注入
+* **deploy-docs.yml**: 修复监测和部署路径 docs
+* **triage-prs.md**: allowed-tools 补充 Task/AskUserQuestion/Read
+* **deprecated agents**: 为 security-sentinel/performance-oracle/data-integrity-guardian/data-migration-expert 添加废弃通知
+* **intent-gate**: 移除小数相编号 Phase 0.5
+* **ui-review-contract**: $PLAN_FILE 未定义变量修复
+* **executor-capability-gate**: last_call 写入说明 + Check 5 简化
+
+## [2.45.5] - 2026-04-08
+
+### Security Fixes
+
+* **codex-review-now.sh**: XML 标签隔离 diff 内容防止提示词注入
+* **notify-sound.sh**: 改用环境变量传 PowerShell 路径防止注入
+* **codex-review-now.sh**: 切换到 git 根目录 + TIMEOUT_SECONDS 整数验证
+* **check-handoff.sh**: `grep -qF` 字面匹配防止文件名被当作正则
+* **executor-capability-gate**: stat 跨平台兼容修复
+* **patch-approval**: 移除不存在的 `--dry-run`，使用隔离目录方案
+
+## [2.45.4] - 2026-04-08
+
+### Bug Fixes
+
+* **overlay**: 新增 overlay 技能触发时机注册表（plugins CLAUDE.md）
+* **sync-targets**: 修复错误的 codex 安装命令，改用 sync-codex-workflows.ps1
+* **docs**: 移除错误的 marketplace.json 版本号同步要求
+* **ce-work-integration**: 修复 state.md.tpl 路径错误
+* **compound-promotion-ladder**: 澄清为手动调用，非自动触发
+* **task-bundle**: 补充 ce-work-integration overlay 加载说明
+* **删除**: 移除零引用的 findings-triage/SKILL.md（与上游重复）
+
 ## [2.63.1](https://github.com/EveryInc/compound-engineering-plugin/compare/cli-v2.63.0...cli-v2.63.1) (2026-04-07)
 
 

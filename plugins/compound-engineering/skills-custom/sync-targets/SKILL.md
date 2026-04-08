@@ -22,13 +22,15 @@
 ls plugins/compound-engineering/.claude-plugin/plugin.json
 ```
 
-### 2. 安装到 Codex
+### 2. 同步到 Codex
 
-```bash
-bun run src/index.ts install plugins/compound-engineering --to codex
+**注意**：此操作只同步 3 个主入口 workflow skill（brainstorm/plan/review），不安装整个插件。
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
 ```
 
-输出位置: `~/.codex/`
+输出位置: `~/.codex/skills/workflows-{brainstorm,plan,review}/`
 
 ### 3. 安装到 Gemini
 

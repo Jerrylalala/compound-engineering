@@ -46,9 +46,10 @@ description: "私有 Overlay：Review Contract 三档 Tier 分类 + Anti-Lenienc
 
 ---
 
-## Anti-Leniency Prompt 注入（按 Tier）
+## Anti-Leniency 参考原则（仅供分类框架参考）
 
-以下 Prompt 作为 `system_prompt_suffix` 注入到对应 Tier 的 agent 调用中，不修改 agent 原始 prompt。
+> **注意**：以下原则是读取本 skill 时的行为指南，**不是**通过 `system_prompt_suffix` 自动注入到 agent 中。
+> ce:review 不支持动态 prompt 注入机制。加载本 skill 后，Claude 在调用各 Tier agent 时应主动遵循对应原则。
 
 ### Blocking Tier — 零容忍
 

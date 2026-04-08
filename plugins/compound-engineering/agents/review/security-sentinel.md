@@ -1,8 +1,10 @@
 ---
 name: security-sentinel
-description: "Performs security audits for vulnerabilities, input validation, auth/authz, hardcoded secrets, and OWASP compliance. Use when reviewing code for security issues or before deployment."
+description: "⚠️ 已废弃：请使用 security-reviewer。Performs security audits for vulnerabilities, input validation, auth/authz, hardcoded secrets, and OWASP compliance."
 model: inherit
 ---
+
+> **⚠️ 废弃通知**：此代理已被上游重命名为 `security-reviewer`。请在新代码中使用 `security-reviewer`。此文件保留仅供向后兼容。
 
 <examples>
 <example>

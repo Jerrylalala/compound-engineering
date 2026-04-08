@@ -112,16 +112,20 @@ description: "私有 Overlay：ce:work 意图分类门控。在执行前识别�
 
 ## 与 ce:work 的集成
 
-Intent Gate 作为 ce:work 的 Phase 0.5（Phase 0 之后，Phase 1 之前）：
+Intent Gate 在 ce:work Phase 0（环境扫描）完成后、Phase 1（Quick Start）开始前执行：
 
 ```
 Phase 0: 环境扫描（原有）
-Phase 0.5: Intent Gate（本 overlay 新增）
+  ↓
+[Intent Gate 插入点 — 本 overlay 在此插入]
   ├── 自动分类意图
   ├── 设定执行策略
   └── 加载对应 skill（TDD / systematic-debugging 等）
+  ↓
 Phase 1: Quick Start（原有，但按策略执行）
 ```
+
+> **注意**：不使用分数相命名（如 Phase 0.5），以避免与 ce:work 原有整数相编号冲突。
 
 **不修改 ce:work SKILL.md**。在调用 ce:work 前先加载 intent-gate skill，按其指导调整执行方式。
 

@@ -107,16 +107,21 @@ design_check:
 
 ```bash
 # Plan Signal: 检查计划文件中的 UI 关键词
-grep -i "component\|page\|screen\|layout\|style\|design\|UI\|UX" "$PLAN_FILE"
+# $PLAN_FILE = 当前任务的计划文件路径，如 docs/plans/2026-04-08-*.md
+# 调用前需确定计划文件路径，或用 $(ls docs/plans/*.md | tail -1) 取最新文件
+PLAN_FILE="${PLAN_FILE:-$(ls docs/plans/*.md 2>/dev/null | tail -1)}"
+grep -i "component\|page\|screen\|layout\|style\|design\|UI\|UX" "$PLAN_FILE" 2>/dev/null || true
 
 # File Signal: 检查改动文件
 git diff --name-only HEAD | grep -E "\.(css|scss|tsx|jsx|vue|html)$|components/|pages/"
 
 # Artifact Signal: 检查工件引用
-grep -ri "figma\.com\|screenshot\|visual.diff\|design.spec" "$PLAN_FILE" "$DIFF_OUTPUT"
+DIFF_OUTPUT="${DIFF_OUTPUT:-$(git diff HEAD 2>/dev/null)}"
+grep -ri "figma\.com\|screenshot\|visual.diff\|design.spec" "$PLAN_FILE" 2>/dev/null || true
+echo "$DIFF_OUTPUT" | grep -i "figma\.com\|screenshot" || true
 
 # Exclusion Signal
-grep -i "API.design\|database.design\|schema" "$PLAN_FILE"
+grep -i "API.design\|database.design\|schema" "$PLAN_FILE" 2>/dev/null || true
 ```
 
 ---

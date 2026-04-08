@@ -1,8 +1,10 @@
 ---
 name: data-migration-expert
-description: "Validates data migrations, backfills, and production data transformations against reality. Use when PRs involve ID mappings, column renames, enum conversions, or schema changes."
+description: "⚠️ 已废弃：请使用 data-migrations-reviewer。Validates data migrations, backfills, and production data transformations against reality."
 model: inherit
 ---
+
+> **⚠️ 废弃通知**：此代理已被上游合并为 `data-migrations-reviewer`（同时覆盖 data-integrity-guardian 功能）。请在新代码中使用 `data-migrations-reviewer`。此文件保留仅供向后兼容。
 
 <examples>
 <example>

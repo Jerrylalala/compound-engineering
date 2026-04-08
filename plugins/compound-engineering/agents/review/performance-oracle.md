@@ -1,8 +1,10 @@
 ---
 name: performance-oracle
-description: "Analyzes code for performance bottlenecks, algorithmic complexity, database queries, memory usage, and scalability. Use after implementing features or when performance concerns arise."
+description: "⚠️ 已废弃：请使用 performance-reviewer。Analyzes code for performance bottlenecks, algorithmic complexity, database queries, memory usage, and scalability."
 model: inherit
 ---
+
+> **⚠️ 废弃通知**：此代理已被上游重命名为 `performance-reviewer`。请在新代码中使用 `performance-reviewer`。此文件保留仅供向后兼容。
 
 <examples>
 <example>
