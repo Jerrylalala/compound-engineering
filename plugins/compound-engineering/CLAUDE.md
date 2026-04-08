@@ -51,18 +51,18 @@
 |------|----------|
 | 遇到 bug / 测试失败 | `systematic-debugging` |
 | 实现新功能 | `test-driven-development` |
-| 代码审查前 | `spec-compliance-review` → `/workflows:review` |
-| 代码审查 + Codex | `/workflows:review [C]`（自动调用 Codex 额外审核） |
-| 代码审查 + Gemini | `/workflows:review [G]`（自动调用 Gemini 额外审核） |
-| 代码审查 + 双重验证 | `/workflows:review [C][G]`（同时调用 Codex 和 Gemini） |
-| 需求不明确 | `/workflows:brainstorm` |
+| 代码审查前 | `spec-compliance-review` → `/ce:review` |
+| 代码审查 + Codex | `/ce:review [C]`（自动调用 Codex 额外审核） |
+| 代码审查 + Gemini | `/ce:review [G]`（自动调用 Gemini 额外审核） |
+| 代码审查 + 双重验证 | `/ce:review [C][G]`（同时调用 Codex 和 Gemini） |
+| 需求不明确 | `/ce:brainstorm` |
 | 需要多视角讨论 | `party-mode`（在 brainstorm 中用 [P]） |
-| 规划实现 | `/workflows:plan`（生成 Bite-Sized 任务格式） |
-| 执行计划 | `/workflows:work`（自动选择执行模式） |
+| 规划实现 | `/ce:plan`（生成 Bite-Sized 任务格式） |
+| 执行计划 | `/ce:work`（自动选择执行模式） |
 | 声称完成之前 | 完成前验证（见 CLAUDE.md） |
 | 任务完成后收尾 | `finishing-a-feature`（测试验证 → 合并/PR 决策 → worktree 清理） |
 | 收到审查反馈 | `receiving-code-review`（6 步响应 + 禁止表演性同意 + YAGNI 检查） |
-| 记录解决方案（可选） | `/workflows:compound`（手动调用） |
+| 记录解决方案（可选） | `/ce:compound`（手动调用） |
 
 ### 技能分类（刚性 vs 柔性）
 
@@ -77,7 +77,7 @@
 
 > **注意**：两种分类都必须通过技能检查协议（1% 规则不变）。区别仅在于执行弹性。
 
-### `/workflows:work` 自动执行模式
+### `/ce:work` 自动执行模式
 
 ```
 任务数量 = 1  → 标准模式（单代理执行）
@@ -145,8 +145,8 @@ agents/
 └── docs/       # Documentation agents
 
 commands/
-├── workflows/  # Core workflow commands (workflows:plan, workflows:review, etc.)
-└── *.md        # Utility commands
+├── workflows/  # 独立工具命令（doctor, pr, sync-upstream）
+└── *.md        # 工具命令（gemini, codex 等）
 
 skills/
 └── *.md        # All skills at root level
@@ -154,30 +154,27 @@ skills/
 
 ## Command Naming Convention
 
-**Workflow commands** use `workflows:` prefix to avoid collisions with built-in commands.
+**主工作流通过 Skills 提供**，使用 `ce:` 前缀（如 `/ce:brainstorm`）。
 
-**Why `workflows:`?** Claude Code has built-in `/plan` and `/review` commands. Using `name: workflows:plan` in frontmatter creates a unique `/workflows:plan` command with no collision.
+**Why `ce:`?** Claude Code 有内置 `/plan` 和 `/review` 命令。Skills 使用 `name: ce:plan` 创建不冲突的 `/ce:plan` 调用路径。
 
-### Workflow 命令
-
-主命令使用 `workflows:` 前缀，避免与内置命令冲突。
+### 主工作流 Skills（用 `ce:` 调用）
 
 | 命令 | 说明 |
 |------|------|
-| `/workflows:brainstorm` | 探索需求和方案 |
-| `/workflows:plan` | 创建实施计划 |
-| `/workflows:work` | 执行工作计划 |
-| `/workflows:review` | 代码审查 |
+| `/ce:brainstorm` | 探索需求和方案 `[P][C][G]` |
+| `/ce:plan` | 创建实施计划 |
+| `/ce:work` | 执行工作计划 |
+| `/ce:review` | 代码审查 `[mode:autofix] [C][G]` |
 
-**独立工具（手动调用）：**
+**独立工具命令（手动调用）：**
 
 | 命令 | 说明 |
 |------|------|
-| `/workflows:compound` | 记录解决方案（可选） |
+| `/ce:compound` | 记录解决方案（可选） |
 | `/workflows:sync-upstream` | 检测上游更新 |
 | `/workflows:pr` | 创建 PR |
-
-**别名兼容**: 所有命令均有 `/ce:*` 别名（如 `/ce:plan` → `/workflows:plan`）
+| `/workflows:doctor` | 健康检查 |
 
 ### 序号格式规范
 
