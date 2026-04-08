@@ -1,14 +1,14 @@
 ---
 name: team-mode
 description: "Multi-agent collaboration overlay for ce:brainstorm/plan/work/review. Enables contract-gated execution with single writer principle, verifier hooks, and deterministic patch gate for autofix stability."
-argument-hint: "[team] | [team:light] | [team:full]"
+argument-hint: "[team] | [team:full]"
 ---
 
 # Team Mode Overlay
 
 > **核心理念**：稳定性来自规则，不来自更多 agent。合约白名单 + 单写者原则 + 验证前移 = 问题被拦截在发生前。
 
-本 skill 是叠加在 `ce:brainstorm`/`ce:plan`/`ce:work`/`ce:review` 之上的 overlay。各命令通过检测 `[team]`、`[team:light]`、`[team:full]` token 激活对应的角色集和机制。
+本 skill 是叠加在 `ce:brainstorm`/`ce:plan`/`ce:work`/`ce:review` 之上的 overlay。各命令通过检测 `[team]`、`[team:full]` token 激活对应的角色集和机制。
 
 ---
 
@@ -17,7 +17,6 @@ argument-hint: "[team] | [team:light] | [team:full]"
 | Token | 角色集 | 适用场景 |
 |-------|--------|---------|
 | `[team]` | 合约主 + 执行者 + 验证者（3角色） | 默认，大多数任务 |
-| `[team:light]` | 执行者 + 验证者（2角色） | 快速小任务，无需合约 |
 | `[team:full]` | 合约主 + 执行者 + 验证者 + 风险卫（4角色） | auth/payment/migration 高风险路径 |
 
 ---
@@ -76,6 +75,7 @@ team_mode: true
 generated_by: "ce:plan [team]"
 generated_at: YYYY-MM-DD
 plan_source: docs/plans/PLAN_FILENAME.md
+plan_source_commit: <git-commit-hash>   # 生成时 plan_source 的最新 commit hash，用于检测计划是否已更新
 allowed_files:
   - path/to/file1.md
   - path/to/file2.md
@@ -104,6 +104,7 @@ last_verification_failure: null
 | `required_invariants` | string[] | 每次变更后必须满足的不变式（由 ce:plan 从 Acceptance Criteria 转换） |
 | `max_files_per_patch` | int | 单次 autofix patch 允许修改的最大文件数（默认 1，即 one-finding-one-patch） |
 | `last_verification_failure` | string\|null | 执行者记录最近一次验证失败信息（null 表示无失败） |
+| `plan_source_commit` | string\|null | 生成合约时 plan_source 的 git commit hash；ce:work 加载时与当前 hash 对比，检测计划是否已更新 |
 
 ---
 
@@ -120,6 +121,9 @@ last_verification_failure: null
 退出条件（满足任一）：
   - 双方达成「方向共识」（可行性 + 主要风险均已识别）
   - 用户输入 [E]
+  - 未达共识降级（经过 3 轮）：用 AskUserQuestion 展示双方核心分歧点，让用户选择采纳方向，然后继续
+
+「1轮」= 探索者 + 挑战者各回应一次（不含用户初始触发）
   
 与 [P] 的区别：
   [P] = 发散（14个专家自由讨论）
@@ -145,13 +149,20 @@ last_verification_failure: null
   3. 将发现追加到计划的 Open Questions 节
 ```
 
-### ce:work [team] / [team:light] / [team:full]
+### ce:work [team] / [team:full]
 
 在 Phase 0（Input Triage）之前执行 Phase -1（Team Mode 初始化）：
 
 ```
-1. 检测 team token 变体（default/light/full）
+1. 检测 team token 变体（default/full）
 2. 加载 .team-contract.md（如不存在，提示并询问是否继续无合约模式）
+   版本检测：合约加载后，运行：
+     git log -1 --format='%H' -- <plan_source>
+   将结果与合约中的 plan_source_commit 对比：
+   - plan_source_commit 为 null：提示"计划版本未记录"，跳过版本检测，继续
+   - 一致：正常继续
+   - 不一致：警告"⚠️ 计划已更新（合约版本不匹配），建议重新运行 /ce:plan [team] 刷新合约"
+             询问用户是否继续使用旧合约
 3. 宣告激活的角色集
 4. 在每个 Implementation Unit 前：
    - 执行者检查文件边界（allowed_files / forbidden_surfaces）

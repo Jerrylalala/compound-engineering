@@ -609,7 +609,7 @@ When the plan contains 4+ implementation units with non-linear dependencies, 3+ 
 
 ### Phase 4.5: Contract Generation（仅当 `[team]` 标志存在时）
 
-**触发条件**: `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`（`[team:light]` 不生成合约，跳过此 Phase）
+**触发条件**: `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`
 
 **执行时机**: Phase 4（Write the Plan）完成后，Phase 5（Final Review）之前
 
@@ -634,6 +634,7 @@ team_mode: true
 generated_by: "ce:plan [team]"
 generated_at: YYYY-MM-DD
 plan_source: <刚生成的计划文件路径>
+plan_source_commit: <运行 `git log -1 --format='%H' -- <plan_source>` 获取的 hash；如计划文件尚未提交则填 null>
 allowed_files:
   - <从 Implementation Units 提取的文件路径>
 forbidden_surfaces:

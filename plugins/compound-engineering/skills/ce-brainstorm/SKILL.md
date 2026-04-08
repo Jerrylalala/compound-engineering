@@ -67,6 +67,8 @@ When `[team]` is detected, activate a 2-role structured exploration before Phase
 退出条件（满足任一即退出角色对，继续正常流程）：
   - 双方达成「方向共识」：可行性已确认 + 主要风险已识别
   - 用户输入 [E]
+  - 未达共识降级（经过 3 轮后仍无共识）→ 用 AskUserQuestion 展示双方核心分歧点，让用户选择采纳方向，继续正常流程
+    （「1轮」= 探索者 + 挑战者各回应一次，不含用户初始触发）
 
 与 [P] 的区别：
   [P]      = 发散（14位专家自由讨论，无明确收敛条件）

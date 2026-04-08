@@ -177,7 +177,7 @@ skills/
 |------|------|
 | `/ce:brainstorm` | 探索需求和方案 `[P][C][G][team]` |
 | `/ce:plan` | 创建实施计划 `[team]` |
-| `/ce:work` | 执行工作计划 `[team][team:light][team:full]` |
+| `/ce:work` | 执行工作计划 `[team][team:full]` |
 | `/ce:review` | 代码审查 `[mode:autofix] [C][G][team]` |
 
 **独立工具命令（手动调用）：**
@@ -198,7 +198,6 @@ skills/
 | `[team]` | ce:brainstorm | 探索者 + 挑战者结构化验证角色对 |
 | `[team]` | ce:plan | 合约主 + 追溯审查，自动生成 `.team-contract.md` |
 | `[team]` | ce:work | 3角色默认（合约主+执行者+验证者），每任务后运行验证者 Hook |
-| `[team:light]` | ce:work | 2角色（执行者+验证者），快速小任务 |
 | `[team:full]` | ce:work | 4角色（加风险卫），适合 auth/payment/migration 高风险路径 |
 | `[team]` | ce:review | autofix 路径增加 Deterministic Patch Gate（规则引擎，不耗额外 token） |
 
