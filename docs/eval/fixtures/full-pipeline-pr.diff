@@ -1,0 +1,98 @@
+diff --git a/app/controllers/users_controller.rb b/app/controllers/users_controller.rb
+index a1b2c3d..e4f5a6b 100644
+--- a/app/controllers/users_controller.rb
++++ b/app/controllers/users_controller.rb
+@@ -1,12 +1,28 @@
+ class UsersController < ApplicationController
+   before_action :authenticate_user!
++  before_action :set_user, only: [:show, :update]
+
+   def show
+-    @user = User.find(params[:id])
++    # 问题 2 [analytical]: 控制器直接操作 Order 模型的 scope
++    @recent_orders = Order.where(user_id: @user.id).active.order(created_at: :desc).limit(5)
+   end
+
+   def update
+-    @user = current_user
+-    if @user.update(user_params)
++    if @user.update(user_params)
+       redirect_to @user, notice: 'Profile updated.'
+     else
+       render :edit
+@@ -14,7 +30,13 @@
+
+   private
+
++  def set_user
++    @user = User.find(params[:id])
++  end
++
+   def user_params
+-    params.require(:user).permit(:name, :email, :avatar)
++    # 问题 1 [blocking]: permit 中没有 :role，但下面的表单有 role 字段
++    # 攻击者可以通过其他方式（如 API 请求）传入 role 参数实现权限提升
++    params.require(:user).permit(:name, :email, :avatar, :bio, :website)
++    # 视图 app/views/users/_form.html.erb 中有: f.select :role, User.roles.keys
+   end
+ end
+
+diff --git a/app/frontend/components/UserDashboard.tsx b/app/frontend/components/UserDashboard.tsx
+index 7c8d9e0..1f2a3b4 100644
+--- a/app/frontend/components/UserDashboard.tsx
++++ b/app/frontend/components/UserDashboard.tsx
+@@ -1,15 +1,35 @@
+-import React from 'react';
++import React, { useState, useEffect } from 'react';
+
+-function UserDashboard() {
+-  return <div>Dashboard</div>;
++interface DashboardData {
++  stats: { orders: number; total: number };
++  notifications: Array<{ id: number; message: string }>;
++}
++
++function UserDashboard({ userId }: { userId: number }) {
++  const [data, setData] = useState<DashboardData | null>(null);
++
++  useEffect(() => {
++    fetch(`/api/dashboard/${userId}`)
++      .then(r => r.json())
++      .then(d => setData(d));
++  }, [userId]);
++
++  if (!data) return <div>Loading...</div>;
++
++  return (
++    <div>
++      <h1>Dashboard</h1>
++      <p>Orders: {data.stats.orders}</p>
++      <p>Total: ${data.stats.total}</p>
++    </div>
++  );
+ }
+
+ // 问题 3 [advisory]: 项目惯例是 snake_case 方法名（Rails 风格），但这里用了 camelCase
+-export function getUserDisplayName(user: any) {
++export function getUserDisplayName(user: any): string {
+   return user.name || user.email.split('@')[0];
+ }
+
++export function formatOrderDate(date: string): string {
++  return new Date(date).toLocaleDateString('en-US');
++}
++
+ export default UserDashboard;
+
+diff --git a/db/migrate/20260406_add_bio_to_users.rb b/db/migrate/20260406_add_bio_to_users.rb
+new file mode 100644
+index 0000000..5a6b7c8
+--- /dev/null
++++ b/db/migrate/20260406_add_bio_to_users.rb
+@@ -0,0 +1,6 @@
++class AddBioToUsers < ActiveRecord::Migration[7.0]
++  def change
++    add_column :users, :bio, :text
++    add_column :users, :website, :string
++  end
++end

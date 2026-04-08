@@ -1,0 +1,37 @@
+diff --git a/config/database.js b/config/database.js
+index 1a2b3c4..5d6e7f8 100644
+--- a/config/database.js
++++ b/config/database.js
+@@ -1,5 +1,8 @@
+ const dbConfig = {
+   host: process.env.DB_HOST || 'localhost',
+   port: process.env.DB_PORT || 5432,
++  password: process.env.DB_PASSWORD,
+   database: process.env.DB_NAME || 'app_development',
+ };
++
++const apiKey = process.env.API_KEY;
+
+diff --git a/config/application.rb b/config/application.rb
+index 9a8b7c6..3d2e1f0 100644
+--- a/config/application.rb
++++ b/config/application.rb
+@@ -10,6 +10,8 @@ module MyApp
+     config.load_defaults 7.0
+     config.api_only = true
+
++    config.secret_key_base = ENV['SECRET_KEY_BASE']
++    config.api_token = Rails.application.credentials.api_token
++
+   end
+ end
+
+diff --git a/config/initializers/stripe.rb b/config/initializers/stripe.rb
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/config/initializers/stripe.rb
+@@ -0,0 +1,3 @@
++Stripe.api_key = Rails.application.credentials.dig(:stripe, :secret_key)
++Stripe.api_version = '2023-10-16'
++Stripe.webhook_secret = ENV['STRIPE_WEBHOOK_SECRET']
