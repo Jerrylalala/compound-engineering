@@ -1,0 +1,21 @@
+{
+  "source_agent": "code-simplicity-reviewer",
+  "source_tier": "advisory",
+  "findings": [
+    {
+      "id": "STYLE-045",
+      "conclusion_type": "finding",
+      "severity": "high",
+      "confidence": "high",
+      "title": "函数超过 50 行",
+      "description": "process_data 函数有 62 行，超过了 50 行的推荐上限。应拆分为多个小函数。",
+      "evidence": {
+        "file": "app/services/data_processor.rb",
+        "line": 10,
+        "snippet": "def process_data(input)\n  # 62 lines of sequential processing\nend"
+      },
+      "action": "拆分为 validate_input、transform_data、persist_result 三个方法",
+      "blocking": true
+    }
+  ]
+}

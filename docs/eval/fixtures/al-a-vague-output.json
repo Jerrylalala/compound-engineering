@@ -1,0 +1,17 @@
+{
+  "source_agent": "security-sentinel",
+  "source_tier": "blocking",
+  "findings": [
+    {
+      "id": "SEC-099",
+      "conclusion_type": "clear",
+      "severity": "low",
+      "confidence": "low",
+      "title": "可能的路径遍历",
+      "description": "用户输入拼接到文件路径中，但应该没问题因为有其他校验",
+      "evidence": {},
+      "action": "暂不处理",
+      "blocking": false
+    }
+  ]
+}
