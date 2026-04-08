@@ -1,14 +1,14 @@
 {
-  "name": "@every-env/compound-plugin",
+  "name": "@jerry-jian/compound-plugin",
   "version": "2.63.1",
-  "description": "Official Compound Engineering plugin for Claude Code, Codex, and more",
+  "description": "Compound Engineering plugin for Claude Code, Codex — AI skills and agents with Chinese localization and private overlays",
   "type": "module",
   "private": false,
   "bin": {
     "compound-plugin": "src/index.ts"
   },
-  "homepage": "https://github.com/EveryInc/compound-engineering-plugin",
-  "repository": "https://github.com/EveryInc/compound-engineering-plugin",
+  "homepage": "https://github.com/Jerrylalala/compound-engineering-plugin-private",
+  "repository": "https://github.com/Jerrylalala/compound-engineering-plugin-private",
   "publishConfig": {
     "access": "public"
   },
