@@ -47,8 +47,12 @@ description: "私有 Overlay：Codex-first 外部执行器策略。按任务特�
 ```bash
 # Codex 调用超时（180s）
 timeout 180 codex "$TASK_PROMPT"
-if [ $? -eq 124 ]; then
+EXIT_CODE=$?
+if [ $EXIT_CODE -eq 124 ]; then
   echo "Codex 超时，降级到 Claude 执行"
+elif [ $EXIT_CODE -eq 0 ]; then
+  # 成功调用后记录时间（供 executor-capability-gate Check 4 Rate Limit 使用）
+  date +%s > ~/.codex/.last_call
 fi
 ```
 
