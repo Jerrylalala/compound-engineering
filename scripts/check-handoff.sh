@@ -13,28 +13,28 @@ echo ""
 for f in "$COMMANDS_DIR"/*.md; do
   filename=$(basename "$f")
 
-  # 跳过终端命令
-  if echo "$SKIP_FILES" | grep -q "$filename"; then
+  # 跳过终端命令（-qF 使用字面匹配，防止文件名被当作正则）
+  if echo "$SKIP_FILES" | grep -qF "$filename"; then
     echo "SKIP: $filename (终端命令)"
     continue
   fi
 
   # 判断档位
-  if echo "$MAIN_CHAIN" | grep -q "$filename"; then
+  if echo "$MAIN_CHAIN" | grep -qF "$filename"; then
     tier="主链档"
   else
     tier="工具档"
   fi
 
   # 检查 AskUserQuestion
-  if ! grep -q "AskUserQuestion" "$f"; then
+  if ! grep -qF "AskUserQuestion" "$f"; then
     echo "FAIL: $filename [$tier] - 缺少 AskUserQuestion (无 Handoff)"
     ERRORS=$((ERRORS + 1))
     continue
   fi
 
   # 检查 Based on selection
-  if ! grep -q "Based on selection" "$f"; then
+  if ! grep -qF "Based on selection" "$f"; then
     echo "FAIL: $filename [$tier] - 缺少 Based on selection (无行为约束)"
     ERRORS=$((ERRORS + 1))
     continue

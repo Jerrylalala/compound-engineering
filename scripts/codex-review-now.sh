@@ -6,11 +6,20 @@
 
 set -e
 
+# 切换到 git 仓库根目录，避免 Windows 工作目录错误（P2-C）
+cd "$(git rev-parse --show-toplevel)" 2>/dev/null || true
+
 # 模型配置（支持环境变量覆盖）
 CODEX_MODEL="${CODEX_MODEL:-gpt-5.3-codex}"
 
 SCOPE=${1:-uncommitted}
 TIMEOUT_SECONDS=${2:-300}
+
+# 验证 TIMEOUT_SECONDS 必须是正整数（P2-G）
+if ! [[ "$TIMEOUT_SECONDS" =~ ^[0-9]+$ ]] || [ "$TIMEOUT_SECONDS" -eq 0 ]; then
+  echo "❌ timeout_seconds 必须是正整数，当前值: $TIMEOUT_SECONDS"
+  exit 1
+fi
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 OUTPUT_DIR="${TEMP:-/tmp}/codex-review"
 OUTPUT_FILE="$OUTPUT_DIR/result-$TIMESTAMP.md"
@@ -90,15 +99,18 @@ echo "$CHANGES" | head -10
 echo ""
 
 # 构建 review prompt
+# 用 XML 标签隔离用户可控内容，防止 diff 中的文本被误解为指令（Sec-P1-B）
 REVIEW_PROMPT="You are a senior code reviewer. Review these changes and provide actionable feedback.
 
-## Files Changed ($FILE_COUNT files)
+<files_changed count=\"$FILE_COUNT\">
 $CHANGES
+</files_changed>
 
-## Diff (truncated to 500 lines)
+<diff note=\"truncated to 500 lines\">
 \`\`\`diff
 $DIFF
 \`\`\`
+</diff>
 
 ## Review Focus
 1. **CRITICAL**: Security vulnerabilities, data loss risks, breaking changes
