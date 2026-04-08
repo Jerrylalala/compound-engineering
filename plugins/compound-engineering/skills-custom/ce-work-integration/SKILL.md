@@ -58,11 +58,27 @@ active → blocked: 遇到任何阻塞（依赖缺失、CI 失败、需求不清
 blocked → debugging: 开始排查阻塞原因
 debugging → replanned: 需要修改原计划
 debugging → active: 阻塞自行解除（如 CI 通过）
-replanned → active: 按新计划重新开始（标记为 resumed）
+replanned → resumed: 新计划就绪，等待用户确认重启（⚠️ 必须等用户确认）
+resumed → active: 用户确认后，按新计划重新开始（AI 执行）
 active → reviewed: 实现完成，进入 ce:review
 reviewed → compounded: 经验沉淀完成
 任何状态 → cancelled: 任务被主动取消
 ```
+
+**`replanned → resumed` 用户确认门（强制）**：
+
+当状态进入 `resumed` 时，必须展示新计划摘要并等待用户确认，禁止自动进入 `active`：
+
+```
+📋 计划已更新，重启前需要你确认：
+
+  原阻塞原因：[blocked_by 值]
+  新计划摘要：[更新后的关键步骤]
+
+  确认后将从步骤 [N] 重新开始。继续吗？(y/n)
+```
+
+用户确认后才将 state.md 的 status 更新为 `active`。
 
 **每次状态转换写入 state.md**：
 
