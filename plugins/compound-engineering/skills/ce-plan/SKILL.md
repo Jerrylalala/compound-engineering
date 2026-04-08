@@ -626,7 +626,31 @@ When the plan contains 4+ implementation units with non-linear dependencies, 3+ 
 3. **`required_invariants`**：从计划的 Acceptance Criteria 提取可检查的不变式（转换为命令式短句）
 4. **`max_files_per_patch`**：默认 1（one-finding-one-patch 原则）
 
-**生成合约文件**：将 `plugins/compound-engineering/skills-custom/team-mode/templates/team-contract.md.tpl` 作为模板，填充提取的值，写入 `.team-contract.md`（repo 根目录）。
+**生成合约文件**：使用以下格式写入 `.team-contract.md`（repo 根目录），填充提取的值：
+
+```yaml
+---
+team_mode: true
+generated_by: "ce:plan [team]"
+generated_at: YYYY-MM-DD
+plan_source: <刚生成的计划文件路径>
+allowed_files:
+  - <从 Implementation Units 提取的文件路径>
+forbidden_surfaces:
+  - <识别的高风险文件>
+required_invariants:
+  - "<从 Acceptance Criteria 转换的不变式命令>"
+patch_gate_enabled: true
+max_files_per_patch: 1
+last_verification_failure: null
+---
+
+# Team Contract
+
+## 背景
+
+<!-- 本次计划的任务背景和边界约束 -->
+```
 
 #### 追溯审查角色激活
 

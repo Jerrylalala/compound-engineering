@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.45.8] - 2026-04-08
+## [2.45.9] - 2026-04-08
 
 ### Added
 
@@ -18,6 +18,10 @@
 
 * **fix(review-contract)**: 虚拟字段（`conclusion_type`/Tier 分类）现在由 `[team]` Patch Gate 自动消费 — "入口未接通、虚拟字段无消费者"问题已解决
 * **fix(review-contract)**: 新增 Integration with [team] Mode 节，明确 Tier → Patch Gate 行为映射
+* **fix(team-mode/ce-plan)**: 移除跨 skill 模板路径依赖——Phase 4.5 现在内联 .team-contract.md 格式，不再引用 `skills-custom/team-mode/templates/` 路径（修复 marketplace 安装时路径不可解析问题）
+* **fix(team-mode/ce-review)**: Patch Gate 使用 `finding.file`（review schema 实际字段），替换伪字段 `patch_file`/`affected_files`；Tier 覆盖规则改为 TEAM_GATE_ENABLED 下无条件激活（不再依赖 review-contract skill 是否单独加载）
+* **fix(team-mode/ce-work)**: 验证者 Hook 改为只报告失败，写入 `last_verification_failure` 由执行者负责——修复验证者违反单写者原则的矛盾
+* **fix(plugin.json)**: 修正 description 中 custom overlays 数量（14→12，与实际一致）
 
 ## [2.45.7] — 2026-04-08
 

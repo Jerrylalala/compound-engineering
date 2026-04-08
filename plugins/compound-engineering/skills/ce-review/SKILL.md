@@ -441,21 +441,24 @@ if TEAM_GATE_ENABLED AND mode == autofix:
   Read: allowed_files, forbidden_surfaces, max_files_per_patch, required_invariants
 
   For each finding where autofix_class == safe_auto:
+    # Use finding.file (the file the finding references, from the review schema)
+    # For Rules 1-3: "files touched by this finding" = the set of unique `file` values
+    # across this finding and any related findings proposing the same fix
 
     Rule 1 — File scope:
-      if ANY(patch_file NOT IN allowed_files):
+      if finding.file NOT IN allowed_files:
         downgrade: safe_auto → gated_auto
-        note: "合约白名单：{file} 不在 allowed_files 中"
+        note: "合约白名单：{finding.file} 不在 allowed_files 中"
 
     Rule 2 — Forbidden surface:
-      if ANY(patch_file IN forbidden_surfaces):
+      if finding.file IN forbidden_surfaces:
         downgrade: safe_auto → advisory (remove from fixer queue entirely)
-        note: "合约禁止区域：{file} 在 forbidden_surfaces 中，拒绝自动修复"
+        note: "合约禁止区域：{finding.file} 在 forbidden_surfaces 中，拒绝自动修复"
 
     Rule 3 — One-finding-one-patch:
-      if count(affected_files) > max_files_per_patch (default: 1):
+      if count(distinct files across co-located findings for same fix) > max_files_per_patch (default: 1):
         downgrade: safe_auto → gated_auto
-        note: "单补丁约束：此 finding 涉及 {N} 个文件，超过 max_files_per_patch={max}"
+        note: "单补丁约束：此修复涉及 {N} 个文件，超过 max_files_per_patch={max}"
 
     Rule 4 — Invariant verification:
       if required_invariants is non-empty:
@@ -463,11 +466,13 @@ if TEAM_GATE_ENABLED AND mode == autofix:
         fixer subagent must verify all required_invariants after applying the patch
         if invariant check fails: revert patch, re-route finding as gated_auto
 
-  Additionally, apply review-contract Tier overrides (if review-contract skill has been loaded):
-    Blocking Tier agents (security-reviewer, data-migrations-reviewer, deployment-verification):
+  Additionally, apply review-contract Tier overrides (always active when TEAM_GATE_ENABLED, regardless of whether review-contract skill was separately loaded):
+    Blocking Tier agents (security-reviewer, data-migrations-reviewer, deployment-verification-agent):
       findings from these agents: force to gated_auto regardless of original autofix_class
-    Analytical Tier: maintain original routing, add requires_verification: true
-    Advisory Tier: maintain original routing, no changes
+    Analytical Tier agents (architecture-strategist, performance-reviewer, kieran-*-reviewer, julik-*-reviewer, dhh-rails-reviewer, pattern-recognition-specialist):
+      maintain original routing, add requires_verification: true
+    Advisory Tier agents (code-simplicity-reviewer, agent-native-reviewer, schema-drift-detector):
+      maintain original routing, no changes
 ```
 
 7. **Partition the work.** Build three sets:

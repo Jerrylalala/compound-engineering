@@ -48,10 +48,10 @@ argument-hint: "[team] | [team:light] | [team:full]"
 
 ```
 其他角色职责分配：
-  合约主   → 只读 .team-contract.md；写入仅限合约文件本身
-  验证者   → 只读代码和测试输出；不修改任何文件
+  合约主   → 只读 .team-contract.md；写入仅限合约文件本身（初始化阶段）
+  验证者   → 只读代码和测试输出；不修改任何文件（包括 .team-contract.md）
   风险卫   → 只读代码；不修改任何文件
-  执行者   → 唯一可修改业务代码的角色
+  执行者   → 唯一可修改业务代码的角色；验证失败时负责写入 last_verification_failure
 ```
 
 **违反后果**：

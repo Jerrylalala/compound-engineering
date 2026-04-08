@@ -72,11 +72,10 @@ ONLY 执行者 writes to shared checkout.
   2. 逐一检查 required_invariants（如合约已加载）
   3. 如测试失败或不变式违反：
      - 立即停止（不执行下一单元）
-     - 将失败信息写入 .team-contract.md 的 last_verification_failure 字段
-     - 报告：验证者 Hook 失败 — [原因]
-     - 执行者（唯一可修改代码的角色）负责修复
+     - 向执行者报告：验证者 Hook 失败 — [原因]
+     - 执行者（单写者）负责：修复代码 + 将失败信息写入 .team-contract.md 的 last_verification_failure 字段
   4. 如全部通过：继续下一单元
-注意：验证者不修改任何代码文件。
+注意：验证者只读，不修改任何文件（包括 .team-contract.md）。写入 last_verification_failure 由执行者负责。
 ```
 
 **[team:full] 风险卫 Hook（在执行者开始每个单元之前）**:
