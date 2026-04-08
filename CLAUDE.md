@@ -84,10 +84,16 @@ Grep pattern="关键词" path=docs/solutions/ output_mode=files_with_matches
 
 **Git 提交使用中文**：commit message 使用中文书写。
 
-**临时文档清理（铁律）**：工作流完成后，立即清理临时文档：
-- brainstorm 完成 → 删除 `docs/brainstorms/[当前文件].md`
-- plan 最终版确定 → 删除 `docs/plans/*-original.md` 和 `*-summary.md`
-- 草稿文档不提交到 Git
+**文档保留策略（铁律）**：区分「决策记录」和「过渡草稿」：
+
+| 文档类型 | 判断标准 | 处置方式 |
+|----------|----------|----------|
+| 架构决策 brainstorm | 记录了技术选型、方案对比、设计理由 | **提交到 Git**（与现有 `docs/brainstorms/` 中 19+ 文件一致） |
+| 实施计划 plan | 记录了任务分解、实现策略、完成状态 | **提交到 Git**（与现有 `docs/plans/` 中 51+ 文件一致） |
+| 过渡草稿 | `*-original.md`、`*-summary.md`、中间版本 | 先问：内容是否已整合到主文档？已整合 → 删除；未整合 → 先整合再删 |
+| 纯临时便签 | 用完即弃的调试记录、单次操作指令 | 删除，不提交 |
+
+**判断原则**：如果这个文档记录了「为什么做出这个决定」，就是决策记录，提交。如果只是过渡产物，先确认内容已整合，再删除。
 
 **版本号更新（铁律）**：新增/修改 Agent/Command/Skill 后：
 ```bash
