@@ -5,3 +5,6 @@ node_modules/
 todos/
 .worktrees
 .context/
+.compound/
+.claude/agent-memory/
+.claude/settings.local.json
