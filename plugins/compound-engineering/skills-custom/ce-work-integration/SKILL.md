@@ -36,7 +36,7 @@ description: "私有 Overlay：Task Bundle 持久化 + Failure FSM 集成。在 
 4. 更新 state.md: status → active, updated_at → 当前时间
 ```
 
-**如果 state.md 不存在**（新任务），从 docs/tasks/task-bundle/templates/state.md.tpl 创建：
+**如果 state.md 不存在**（新任务），从 plugins/compound-engineering/skills-custom/task-bundle/templates/state.md.tpl 创建：
 
 ```bash
 cp plugins/compound-engineering/skills-custom/task-bundle/templates/state.md.tpl \

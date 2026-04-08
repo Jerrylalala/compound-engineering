@@ -8,8 +8,7 @@
 
 | 文件 | 更新内容 |
 |------|---------|
-| `.claude-plugin/marketplace.json` | version 字段 |
-| `plugins/compound-engineering/.claude-plugin/plugin.json` | version 字段 |
+| `plugins/compound-engineering/.claude-plugin/plugin.json` | version 字段（唯一权威来源） |
 | `plugins/compound-engineering/CHANGELOG.md` | 版本记录 |
 | `plugins/compound-engineering/README.md` | 组件数量（如有变化） |
 
@@ -25,8 +24,7 @@
 
 ```markdown
 ### 版本文件
-- [ ] marketplace.json 版本号已更新
-- [ ] plugin.json 版本号已更新（必须与上面一致）
+- [ ] plugin.json 版本号已更新
 - [ ] CHANGELOG.md 添加了版本记录
 
 ### 组件数量（如有变化）

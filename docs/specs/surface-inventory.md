@@ -190,7 +190,7 @@ status: active
 - `skills/ce-ideate/` — 新增 ideate 工作流
 - `skills/ce-plan/` — 新架构 plan
 - `skills/ce-review/` — 新架构 review（含 findings-schema.json，P0-2 Review Contract 的基础）
-- `skills/ce-work/` + `ce-work-beta/` — 新架构 work
+- `skills/ce-work/` — 新架构 work
 - `skills/agent-native-audit/`
 - `skills/changelog/`
 - `skills/claude-permissions-optimizer/`
