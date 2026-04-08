@@ -43,24 +43,22 @@ try {
     $marketplace = Get-Content $marketplaceFile -Raw | ConvertFrom-Json
     $plugin = Get-Content $pluginFile -Raw | ConvertFrom-Json
 
-    $marketplaceVersion = $marketplace.plugins[0].version
+    # marketplace.json does not store per-plugin version; only plugin.json is the source of truth
     $pluginVersion = $plugin.version
 
-    Write-Host "  marketplace.json: $marketplaceVersion"
-    Write-Host "  plugin.json:      $pluginVersion"
+    Write-Host "  plugin.json: $pluginVersion"
+    Write-OK "Version (plugin.json): $pluginVersion"
 } catch {
     Write-Err "JSON parse failed: $_"
     exit 1
 }
 
-# 3. Compare versions
-Write-Info "Comparing versions..."
-if ($marketplaceVersion -eq $pluginVersion) {
-    Write-OK "Versions match: $pluginVersion"
+# 3. Validate version format
+Write-Info "Validating version format..."
+if ($pluginVersion -match '^\d+\.\d+\.\d+$') {
+    Write-OK "Version format valid: $pluginVersion"
 } else {
-    Write-Err "Version mismatch!"
-    Write-Host "  marketplace.json: $marketplaceVersion" -ForegroundColor Red
-    Write-Host "  plugin.json:      $pluginVersion" -ForegroundColor Red
+    Write-Err "Version format invalid: $pluginVersion (expected x.y.z)"
     $hasError = $true
 }
 

@@ -71,21 +71,15 @@ $pluginJson = $plugin | ConvertTo-Json -Depth 10
 [System.IO.File]::WriteAllText((Resolve-Path $pluginFile), $pluginJson)
 Write-OK "plugin.json updated"
 
-# Update marketplace.json
-Write-Info "Updating $marketplaceFile..."
-$marketplace = Get-Content $marketplaceFile -Raw | ConvertFrom-Json
-$marketplace.plugins[0].version = $newVersion
-$marketplaceJson = $marketplace | ConvertTo-Json -Depth 10
-[System.IO.File]::WriteAllText((Resolve-Path $marketplaceFile), $marketplaceJson)
-Write-OK "marketplace.json updated"
+# Note: marketplace.json does not store per-plugin version (only metadata.version which is the schema version)
+# Version source of truth is plugin.json only
 
 # Verify
 Write-Host ""
 Write-Info "Verifying..."
 $verifyPlugin = (Get-Content $pluginFile -Raw | ConvertFrom-Json).version
-$verifyMarketplace = (Get-Content $marketplaceFile -Raw | ConvertFrom-Json).plugins[0].version
 
-if ($verifyPlugin -eq $newVersion -and $verifyMarketplace -eq $newVersion) {
+if ($verifyPlugin -eq $newVersion) {
     Write-OK "Version synced to: $newVersion"
 
     Write-Host ""
