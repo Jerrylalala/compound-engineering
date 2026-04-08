@@ -11,13 +11,21 @@ description: "私有 Overlay：Review Contract 三档 Tier 分类 + Anti-Lenienc
 
 ---
 
-## Tier 分类（15 个 Reviewer）
+## Tier 分类
+
+> **命名规范**：`[上游]` = 在 `skills/ce-review/references/persona-catalog.md` 中有记录，由 ce:review 编排器实际派发。
+> `[本地]` = 仅在 `agents/review/` 中存在但不在 persona-catalog，需手动调用，不被编排器自动派发。
 
 | Tier | Agents | Anti-Leniency 强度 |
 |------|--------|-------------------|
-| **Blocking** | security-sentinel, data-integrity-guardian, data-migration-expert, deployment-verification-agent | 零容忍：confidence ≥ 0.50 且 severity P0 必须报告，不确定时用 `needs-human-check` |
-| **Analytical** | architecture-strategist, performance-oracle, kieran-rails-reviewer, kieran-typescript-reviewer, kieran-python-reviewer, julik-frontend-races-reviewer, dhh-rails-reviewer, pattern-recognition-specialist | 严格务实：必须提供触发条件/复现场景；没有场景的担忧降级为 `question` |
-| **Advisory** | code-simplicity-reviewer, agent-native-reviewer, schema-drift-detector | 建议为主：默认 `autofix_class: advisory`，除非与明确 spec/CLAUDE.md 冲突 |
+| **Blocking** | `security-reviewer` [上游], `data-migrations-reviewer` [上游], `deployment-verification-agent` [上游] | 零容忍：confidence ≥ 0.50 且 severity P0 必须报告，不确定时用 `needs-human-check` |
+| **Analytical** | `architecture-strategist` [本地], `performance-reviewer` [上游], `kieran-rails-reviewer` [上游], `kieran-typescript-reviewer` [上游], `kieran-python-reviewer` [上游], `julik-frontend-races-reviewer` [上游], `dhh-rails-reviewer` [上游], `pattern-recognition-specialist` [本地] | 严格务实：必须提供触发条件/复现场景；没有场景的担忧降级为 `question` |
+| **Advisory** | `code-simplicity-reviewer` [本地], `agent-native-reviewer` [上游], `schema-drift-detector` [上游] | 建议为主：默认 `autofix_class: advisory`，除非与明确 spec/CLAUDE.md 冲突 |
+
+**已更正的名称对照**（原名 → persona-catalog 名）：
+- `security-sentinel` → `security-reviewer`
+- `data-integrity-guardian` + `data-migration-expert` → `data-migrations-reviewer`（合并，上游统一入口）
+- `performance-oracle` → `performance-reviewer`
 
 ---
 
