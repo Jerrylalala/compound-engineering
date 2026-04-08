@@ -175,9 +175,9 @@ skills/
 
 | 命令 | 说明 |
 |------|------|
-| `/ce:brainstorm` | 探索需求和方案 `[P][C][G][team]` |
+| `/ce:brainstorm` | 探索需求和方案 `[P][C][G][R][team]` |
 | `/ce:plan` | 创建实施计划 `[team]` |
-| `/ce:work` | 执行工作计划 `[team][team:full]` |
+| `/ce:work` | 执行工作计划 `[team][team:full][R]` |
 | `/ce:review` | 代码审查 `[mode:autofix] [C][G][team]` |
 
 **独立工具命令（手动调用）：**

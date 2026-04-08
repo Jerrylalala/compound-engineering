@@ -43,8 +43,8 @@ brainstorm: docs/brainstorms/2026-04-08-feature-extensions-5-improvements-brains
 **背景**: `learnings-researcher` agent 的 Step 3b 已经引用此文件（见 `plugins/compound-engineering/agents/research/learnings-researcher.md:68`），但文件不存在。这是一个悬空引用，创建此文件可立即修复。
 
 **操作**:
-- [ ] 创建目录 `docs/solutions/patterns/`
-- [ ] 创建 `docs/solutions/patterns/critical-patterns.md`
+- [x] 创建目录 `docs/solutions/patterns/`
+- [x] 创建 `docs/solutions/patterns/critical-patterns.md`
 
 **代码**（完整文件内容）:
 ```markdown
@@ -82,8 +82,8 @@ _暂无模式。当 solution 引用次数 ≥3 次时，compound-promotion-ladde
 ```
 
 **验证**:
-- [ ] `ls docs/solutions/patterns/critical-patterns.md` 确认文件存在
-- [ ] 文件可被 `learnings-researcher` agent 的 Step 3b 读取（Read 工具验证路径有效）
+- [x] `ls docs/solutions/patterns/critical-patterns.md` 确认文件存在
+- [x] 文件可被 `learnings-researcher` agent 的 Step 3b 读取（Read 工具验证路径有效）
 
 ---
 
@@ -94,9 +94,9 @@ _暂无模式。当 solution 引用次数 ≥3 次时，compound-promotion-ladde
 **背景**: 当前 37 个 solution 文档无导航入口，按目录散落。INDEX.md 按 problem_type 分类，每条记录一句话摘要，使 [R] 参数的检索结果更加结构化。
 
 **操作**:
-- [ ] 读取所有 37 个现有 solution 文件的 frontmatter（用 Grep 提取 title 字段）
-- [ ] 按目录/problem_type 分类整理
-- [ ] 写入 INDEX.md
+- [x] 读取所有 37 个现有 solution 文件的 frontmatter（用 Grep 提取 title 字段）
+- [x] 按目录/problem_type 分类整理
+- [x] 写入 INDEX.md
 
 **代码**（完整文件内容 — 需在 Task 执行时根据实际 frontmatter 内容填充摘要）:
 ```markdown
@@ -206,8 +206,8 @@ updated: 2026-04-08
 ```
 
 **验证**:
-- [ ] `ls docs/solutions/INDEX.md` 确认文件存在
-- [ ] 文件中每个目录都有条目（不遗漏）
+- [x] `ls docs/solutions/INDEX.md` 确认文件存在
+- [x] 文件中每个目录都有条目（不遗漏）
 
 ---
 
@@ -218,7 +218,7 @@ updated: 2026-04-08
 **背景**: 现有 `agents/docs/` 只有 `ankane-readme-writer.md`（英文 Ruby Gem README 写作）。中文技术文档写作完全空白。see brainstorm: Q5。
 
 **操作**:
-- [ ] 创建 `plugins/compound-engineering/agents/docs/cn-tech-writer.md`
+- [x] 创建 `plugins/compound-engineering/agents/docs/cn-tech-writer.md`
 
 **代码**（完整文件内容）:
 ```markdown
@@ -281,8 +281,8 @@ color: red
 ```
 
 **验证**:
-- [ ] `ls plugins/compound-engineering/agents/docs/cn-tech-writer.md` 确认存在
-- [ ] frontmatter 包含 name、description（含安全提示）、model、color 字段
+- [x] `ls plugins/compound-engineering/agents/docs/cn-tech-writer.md` 确认存在
+- [x] frontmatter 包含 name、description（含安全提示）、model、color 字段
 
 ---
 
@@ -328,9 +328,9 @@ Run: learnings-researcher(feature_description)
 ```
 
 **验证**:
-- [ ] Grep `argument-hint.*\[R=` `plugins/compound-engineering/skills/ce-brainstorm/SKILL.md` 确认新 hint 存在
-- [ ] Grep `Phase 1.0` 确认新 Phase 节存在
-- [ ] 检查格式：`[R]` 在参数表格中有独立行
+- [x] Grep `argument-hint.*\[R=` `plugins/compound-engineering/skills/ce-brainstorm/SKILL.md` 确认新 hint 存在
+- [x] Grep `Phase 0.4` 确认新 Phase 节存在（Codex 调整：Phase 0.4 而非 Phase 1.0）
+- [x] 检查格式：`[R]` 在参数表格中有独立行
 
 ---
 
@@ -394,9 +394,9 @@ argument-hint: "[Plan doc path or description of work. Blank to auto use latest 
 ```
 
 **验证**:
-- [ ] Grep `Intent Gate` 确认 5 问节存在
-- [ ] Grep `\[R\].*bare prompt` 确认 [R] 描述存在
-- [ ] 检查：5个问题是否依次列出，AskUserQuestion 是否提到
+- [x] Grep `Intent Gate` 确认两段式 Gate 节存在
+- [x] Grep `argument-hint.*\[R=研究` 确认 [R] 在 argument-hint 中
+- [x] 检查：两段式结构（段 1 路由 + 段 2 三维追问），AskUserQuestion 已提到
 
 ---
 
@@ -437,10 +437,10 @@ For each finding where finding.reviewers intersects {"codex", "gemini"}:
 **同时更新原 6.5 编号** → 改为 `6.5b. **Deterministic Patch Gate（仅当 TEAM_GATE_ENABLED = true AND mode == autofix）**`
 
 **验证**:
-- [ ] Grep `6.5a` 确认新规则存在
-- [ ] Grep `外部模型` 确认中文注释存在
-- [ ] Grep `6.5b` 确认原 Patch Gate 编号已更新
-- [ ] 检查：新规则是否在原 Patch Gate 之前
+- [x] Grep `6.5a` 确认新规则存在
+- [x] Grep `外部模型` 确认中文注释存在
+- [x] Grep `6.5b` 确认原 Patch Gate 编号已更新
+- [x] 检查：新规则是否在原 Patch Gate 之前
 
 ---
 
@@ -471,8 +471,8 @@ For each finding where finding.reviewers intersects {"codex", "gemini"}:
 ```
 
 **验证**:
-- [ ] `powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1` 版本一致性检查通过
-- [ ] Grep `2.45.12` plugin.json 确认版本更新
+- [x] `powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1` 版本一致性检查通过
+- [x] Grep `2.45.12` plugin.json 确认版本更新
 
 ---
 
@@ -480,20 +480,20 @@ For each finding where finding.reviewers intersects {"codex", "gemini"}:
 
 ### 功能验收
 
-- [ ] **Q2 知识索引**: `learnings-researcher` agent Step 3b 读取 `docs/solutions/patterns/critical-patterns.md` 不再报文件不存在
-- [ ] **Q2 INDEX.md**: `docs/solutions/INDEX.md` 包含所有 37 个文档的条目（无遗漏）
-- [ ] **Q5 中文Writer**: `agents/docs/cn-tech-writer.md` frontmatter 含安全提示、model: inherit、覆盖4种场景
-- [ ] **Q1 [R] brainstorm**: ce:brainstorm argument-hint 包含 `[R]`，Phase 1.0 节存在，Phase 2 出现「历史参考」节逻辑
-- [ ] **Q1 [R] work**: ce:work argument-hint 包含 `[R]`，Phase 0 bare prompt 路径有 [R] 触发逻辑
-- [ ] **Q4 Intent Gate**: ce:work Phase 0 Large 分支有 5 问流程，触发条件明确（bare prompt only，有 plan 则跳过）
-- [ ] **Q3 Patch Approval**: ce:review Stage 5 有 rule 6.5a，外部模型 finding 强制 gated_auto，不依赖 [team] 模式
-- [ ] **版本**: `plugin.json` 版本号为 2.45.12，check-versions 通过
+- [x] **Q2 知识索引**: `learnings-researcher` agent Step 3b 读取 `docs/solutions/patterns/critical-patterns.md` 不再报文件不存在
+- [x] **Q2 INDEX.md**: `docs/solutions/INDEX.md` 包含所有 37 个文档的条目（无遗漏）
+- [x] **Q5 中文Writer**: `agents/docs/cn-tech-writer.md` frontmatter 含安全提示、model: inherit、覆盖4种场景
+- [x] **Q1 [R] brainstorm**: ce:brainstorm argument-hint 包含 `[R]`，Phase 0.4 节存在，Phase 2 出现「历史参考」节逻辑
+- [x] **Q1 [R] work**: ce:work argument-hint 包含 `[R]`，Phase 0 bare prompt 路径有 [R] 触发逻辑
+- [x] **Q4 Intent Gate**: ce:work Phase 0 Large 分支有两段式 Gate（Codex 调整：段1路由+段2三维追问），触发条件明确
+- [x] **Q3 Patch Approval**: ce:review Stage 5 有 rule 6.5a，外部模型 finding 强制 gated_auto，不依赖 [team] 模式
+- [x] **版本**: `plugin.json` 版本号为 2.45.12，check-versions 通过
 
 ### 不变式
 
-- [ ] 所有修改均为 additive（不删除任何现有参数或行为）
-- [ ] 无 [R] 参数时，ce:brainstorm/ce:work 行为与修改前完全相同
-- [ ] ce:review 无 Codex/Gemini 来源 finding 时，6.5a 规则不影响任何路由结果
+- [x] 所有修改均为 additive（不删除任何现有参数或行为）
+- [x] 无 [R] 参数时，ce:brainstorm/ce:work 行为与修改前完全相同
+- [x] ce:review 无 Codex/Gemini 来源 finding 时，6.5a 规则不影响任何路由结果
 
 ---
 

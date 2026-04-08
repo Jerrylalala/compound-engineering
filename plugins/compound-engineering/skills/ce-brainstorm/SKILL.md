@@ -1,7 +1,7 @@
 ---
 name: ce:brainstorm
 description: 'Explore requirements and approaches through collaborative dialogue before writing a right-sized requirements document and planning implementation. Use for feature ideas, problem framing, when the user says ''let''s brainstorm'', or when they want to think through options before deciding what to build. Also use when a user describes a vague or ambitious feature request, asks ''what should we build'', ''help me think through X'', presents a problem with multiple valid solutions, or seems unsure about scope or direction — even if they don''t explicitly ask to brainstorm.'
-argument-hint: "[功能描述] [P=派对模式/多代理讨论] [C=Codex咨询] [G=Gemini咨询] [team=结构化探索:探索者+挑战者]"
+argument-hint: "[功能描述] [P=派对模式/多代理讨论] [C=Codex咨询] [G=Gemini咨询] [R=研究:触发learnings-researcher检索历史方案] [team=结构化探索:探索者+挑战者]"
 ---
 
 # Brainstorm a Feature or Improvement
@@ -54,6 +54,7 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 | `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. |
 | `[C]` | Auto-consult Codex after Phase 2. |
 | `[G]` | Auto-consult Gemini after Phase 2. |
+| `[R]` | 在 Phase 0 结束前触发 `learnings-researcher`。检索结果标注到 Phase 2 方案对比的「历史参考」节。去重：同 session 内相同关键词已搜索过则跳过。 |
 | `[team]` | TEAM_MODE = true. Activate structured exploration: **探索者 + 挑战者** role pair (see below). |
 
 ### `[team]` Structured Exploration Mode
@@ -124,6 +125,29 @@ Use the feature description plus a light repo scan to classify the work:
 - **Deep** - cross-cutting, strategic, or highly ambiguous
 
 If the scope is unclear, ask one targeted question to disambiguate and then proceed.
+
+#### 0.4 [R] 历史检索（仅当 `[R]` 标志存在时）
+
+**触发条件**: `$ARGUMENTS` 包含 `[R]`。
+
+从 feature description 提取关键词，运行 `learnings-researcher` 检索 `docs/solutions/` 历史方案：
+
+```
+Run: learnings-researcher(feature_description)
+```
+
+**去重规则**（同一 session 内）：
+- 记录已搜索的关键词集合 `[session_searched_topics]`
+- 若当前 feature_description 的核心关键词（模块名、技术术语）已在集合中 → 跳过，附注：「已在本 session 检索过相似主题，跳过重复搜索」
+- 去重键规范：lowercase + trim + collapse spaces + token sort（确保 "auth login" == "login auth"）
+- 若未搜索过 → 执行搜索，将关键词加入集合
+
+**内容预算**（防止撑爆上下文）：最多摘取 1 个 critical pattern + 3 条 relevant learnings + 1 段 recommendations。
+
+**结果处置**：
+- 检索结果作为 Phase 2 方案对比的「历史参考」上下文
+- 在 Phase 2 展示方案时，增加「📚 历史参考」子节，列出相关 solution 文档及其核心洞察
+- 若无相关历史记录 → 在「历史参考」节注明：`No relevant learnings found — 本次为全新探索`
 
 ### Phase 1: Understand the Idea
 

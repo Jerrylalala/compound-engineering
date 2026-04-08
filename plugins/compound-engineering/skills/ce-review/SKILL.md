@@ -430,7 +430,33 @@ Convert multiple reviewer JSON payloads into one deduplicated, confidence-gated 
 5. **Resolve disagreements.** When reviewers flag the same code region but disagree on severity, autofix_class, or owner, record the disagreement in the finding's evidence (e.g., "security rated P0, correctness rated P1 -- keeping P0"). This transparency helps the user understand why a finding was routed the way it was.
 6. **Normalize routing.** For each merged finding, set the final `autofix_class`, `owner`, and `requires_verification`. If reviewers disagree, keep the most conservative route. Synthesis may narrow a finding from `safe_auto` to `gated_auto` or `manual`, but must not widen it without new evidence.
 
-6.5. **Deterministic Patch Gate（仅当 TEAM_GATE_ENABLED = true AND mode == autofix）**
+6.5a. **外部模型建议强制 gated_auto（无条件生效，不依赖 [team] 模式）**
+
+This rule is a lightweight normalization step — no tokens consumed. Runs immediately after step 6, before the Patch Gate.
+
+```
+Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED) AND mode == autofix:
+  For each finding that was introduced or modified after external AI consultation:
+    if autofix_class == "safe_auto":
+      downgrade: safe_auto → gated_auto
+      note: "外部 AI 建议需人工确认（来源: Codex/Gemini）"
+
+  # safe rationale:
+  # Codex/Gemini lack full codebase context. Their suggestions may be
+  # locally correct but globally unsafe. Human confirmation is required.
+  # This rule is intentionally unconditional — [team] mode is NOT required.
+  # The existing Patch Gate (6.5b) provides deeper contract-based checks
+  # for [team] mode; this rule provides a lightweight baseline for all modes.
+  #
+  # Note: This rule only affects automation_mode (safe_auto → gated_auto),
+  # NOT severity_tier (P1/P2/P3 remains unchanged). P1 blocking behavior is preserved.
+```
+
+**注意**: 此规则仅影响 Codex/Gemini 来源的 `safe_auto` finding，
+不影响 Claude 内置审查 agent（security-sentinel、kieran-*-reviewer 等）的路由。
+无 Codex/Gemini 参与时（CODEX_ENABLED 和 GEMINI_ENABLED 均为 false），此规则不执行。
+
+6.5b. **Deterministic Patch Gate（仅当 TEAM_GATE_ENABLED = true AND mode == autofix）**
 
 This is a rule engine, not an agent — it consumes no extra tokens. Execute immediately after step 6 routing normalization, before partitioning the fixer queue.
 

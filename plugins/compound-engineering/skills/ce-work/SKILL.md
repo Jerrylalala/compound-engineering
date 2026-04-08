@@ -1,7 +1,7 @@
 ---
 name: ce:work
 description: Execute work efficiently while maintaining quality and finishing features
-argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration]"
+argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt场景触发learnings-researcher检索历史经验]"
 ---
 
 # Work Execution Command
@@ -49,6 +49,56 @@ Determine how to proceed based on what was provided in `<input_document>`.
    | **Trivial** | 1-2 files, no behavioral change (typo, config, rename) | Proceed to Phase 1 step 2 (environment setup), then implement directly — no task list, no execution loop. Apply Test Discovery if the change touches behavior-bearing code |
    | **Small / Medium** | Clear scope, under ~10 files | Build a task list from discovery. Proceed to Phase 1 step 2 |
    | **Large** | Cross-cutting, architectural decisions, 10+ files, touches auth/payments/migrations | Inform the user this would benefit from `/ce:brainstorm` or `/ce:plan` to surface edge cases and scope boundaries. Honor their choice. If proceeding, build a task list and continue to Phase 1 step 2 |
+
+3. **[R] 历史检索（bare prompt 场景，仅当 `[R]` 标志存在时）**
+
+   触发条件：输入为 bare prompt（非文件路径）且 `$ARGUMENTS` 包含 `[R]`。
+
+   在复杂度评估完成后，执行历史检索：
+
+   ```
+   Run: learnings-researcher(prompt_content)
+   ```
+
+   去重规则（同 ce:brainstorm [R]）：同一 session 内相同关键词（lowercase + trim + token sort）不重复搜索。
+
+   检索结果注入执行上下文，不修改 plan 文档格式。在每个 Implementation Unit 执行前，
+   如有相关历史经验，以注释形式提示：「📚 历史参考：[文档名] — [核心洞察]」。
+
+   **降级行为**：无匹配时写 `No relevant learnings found`，不阻断主流程。
+
+4. **Intent Gate（仅限 Large 复杂度 + bare prompt）**
+
+   触发条件：复杂度评估为 **Large** 且输入为 bare prompt（非文件路径）。
+
+   跳过条件：
+   - 输入为文件路径（plan document）→ 跳过，plan 已定义边界
+   - 复杂度为 Trivial/Small/Medium → 跳过，开销与价值不匹配
+
+   **段 1 — 路由问题**（使用 `AskUserQuestion` tool）:
+   > 这个任务规模较大，建议先规划。你想：
+   > 1. 先转 `/ce:plan` 创建结构化计划（推荐）
+   > 2. 继续直接执行，我来补充关键信息
+   > 3. 取消
+
+   - 用户选 1（转计划）→ 调用 `/ce:plan`，结束当前执行
+   - 用户选 3（取消）→ 停止执行
+   - 用户选 2（继续执行）→ 进入段 2
+
+   **段 2 — 关键信息补充**（仅当用户选择「继续执行」时，按实际缺口补问，不全量必问）:
+
+   从以下 3 个维度中，针对 prompt 中**尚未明确**的部分提问：
+
+   **目标**（如 prompt 已清楚则跳过）:
+   > 这次改动最终要达成什么可验证的结果？
+
+   **边界**（如 prompt 已指定范围则跳过）:
+   > 哪些模块/文件在改动范围内？有什么明确不改的？
+
+   **验收**（如 prompt 已包含验收标准则跳过）:
+   > 怎么判断做完了？用什么标准验收？
+
+   将用户补充的答案整合到任务列表构建中（forbidden_surfaces、acceptance criteria 等），然后继续 Phase 1 step 2。
 
 ---
 
