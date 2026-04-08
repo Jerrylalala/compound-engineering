@@ -33,8 +33,8 @@ command -v gemini &>/dev/null
 ### Check 2: 登录状态检查
 
 ```bash
-# Codex - 检查是否有有效 token
-codex --version 2>&1 | grep -q "version" && echo "OK" || echo "NOT_LOGGED_IN"
+# Codex - 检查凭据文件是否存在（codex --version 无需登录，不能用于验证）
+[ -f ~/.codex/auth.json ] && echo "OK" || echo "NOT_LOGGED_IN"
 
 # Gemini
 gemini --version 2>&1 | grep -q "version" && echo "OK" || echo "NOT_LOGGED_IN"
@@ -42,23 +42,22 @@ gemini --version 2>&1 | grep -q "version" && echo "OK" || echo "NOT_LOGGED_IN"
 
 **失败处理**：
 ```
-❌ Codex 未登录
+❌ Codex 未登录（~/.codex/auth.json 不存在）
    登录命令：codex  (首次运行引导登录)
 ```
 
-### Check 3: 网络/权限检查
+### Check 3: 网络连通性检查
 
 ```bash
-# 检查 API 可达性（轻量请求）
-curl -s --max-time 5 "https://api.openai.com/v1/models" \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -o /dev/null -w "%{http_code}"
-# 200=正常, 401=未授权, 429=限速, 000=网络不可达
+# 检查网络可达性（仅连通性，不含认证——凭据走 auth.json，非 OPENAI_API_KEY）
+curl -s --max-time 5 "https://api.openai.com" -o /dev/null -w "%{http_code}"
+# 非 000 = 网络可达（包括 401 均表示网络通）
+# 000 = 网络不可达
 ```
 
 **失败处理**：
 ```
-❌ 网络不可达 / API 权限不足
+❌ 网络不可达（curl 返回 000）
    跳过 Codex 调用，退回 Claude 执行
 ```
 
