@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.45.5] - 2026-04-08
+
+### Security Fixes
+
+* **codex-review-now.sh**: XML 标签隔离 diff 内容防止提示词注入
+* **notify-sound.sh**: 改用环境变量传 PowerShell 路径防止注入
+* **codex-review-now.sh**: 切换到 git 根目录 + TIMEOUT_SECONDS 整数验证
+* **check-handoff.sh**: `grep -qF` 字面匹配防止文件名被当作正则
+* **executor-capability-gate**: stat 跨平台兼容修复
+* **patch-approval**: 移除不存在的 `--dry-run`，使用隔离目录方案
+
 ## [2.45.4] - 2026-04-08
 
 ### Bug Fixes
