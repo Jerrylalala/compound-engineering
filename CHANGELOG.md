@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.45.9] - 2026-04-08
+## [2.45.10] - 2026-04-08
 
 ### Added
 
@@ -22,6 +22,10 @@
 * **fix(team-mode/ce-review)**: Patch Gate 使用 `finding.file`（review schema 实际字段），替换伪字段 `patch_file`/`affected_files`；Tier 覆盖规则改为 TEAM_GATE_ENABLED 下无条件激活（不再依赖 review-contract skill 是否单独加载）
 * **fix(team-mode/ce-work)**: 验证者 Hook 改为只报告失败，写入 `last_verification_failure` 由执行者负责——修复验证者违反单写者原则的矛盾
 * **fix(plugin.json)**: 修正 description 中 custom overlays 数量（14→12，与实际一致）
+* **fix(team-mode/ce-plan)**: Phase 4.5 触发条件移除 `[team:light]`（该模式设计为无合约，触发生成为语义矛盾）
+* **fix(team-mode/ce-review)**: Patch Gate Rule 2 forbidden_surfaces 命中时降级目标从 `advisory` 改为 `gated_auto`，确保禁止区域的 finding 仍可被追踪（而非变为 report-only）
+* **fix(team-mode/ce-work)**: 子代理 dispatch 时补充传递 team-mode 上下文（合约内容 + 角色约束），修复 subagent 模式下边界检查静默失效的问题
+* **fix(team-mode/SKILL.md)**: 补充 `追溯审查`/`探索者`/`挑战者` 角色到角色定义表；移除未在 ce:brainstorm 中实现的 `[team:full]` 可行性审查；修正审查 agent 数量描述（"31个"→"多个"）；移除死字段 `patch_gate_enabled`
 
 ## [2.45.7] — 2026-04-08
 

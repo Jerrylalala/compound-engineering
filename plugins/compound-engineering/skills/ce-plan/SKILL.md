@@ -609,7 +609,7 @@ When the plan contains 4+ implementation units with non-linear dependencies, 3+ 
 
 ### Phase 4.5: Contract Generation（仅当 `[team]` 标志存在时）
 
-**触发条件**: `$ARGUMENTS` 包含 `[team]`、`[team:light]` 或 `[team:full]`
+**触发条件**: `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`（`[team:light]` 不生成合约，跳过此 Phase）
 
 **执行时机**: Phase 4（Write the Plan）完成后，Phase 5（Final Review）之前
 
@@ -640,7 +640,6 @@ forbidden_surfaces:
   - <识别的高风险文件>
 required_invariants:
   - "<从 Acceptance Criteria 转换的不变式命令>"
-patch_gate_enabled: true
 max_files_per_patch: 1
 last_verification_failure: null
 ---

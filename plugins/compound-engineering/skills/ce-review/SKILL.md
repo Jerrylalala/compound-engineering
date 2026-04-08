@@ -452,8 +452,9 @@ if TEAM_GATE_ENABLED AND mode == autofix:
 
     Rule 2 — Forbidden surface:
       if finding.file IN forbidden_surfaces:
-        downgrade: safe_auto → advisory (remove from fixer queue entirely)
-        note: "合约禁止区域：{finding.file} 在 forbidden_surfaces 中，拒绝自动修复"
+        downgrade: safe_auto → gated_auto
+        owner: downstream-resolver
+        note: "合约禁止区域：{finding.file} 在 forbidden_surfaces 中，拒绝自动修复，需人工确认"
 
     Rule 3 — One-finding-one-patch:
       if count(distinct files across co-located findings for same fix) > max_files_per_patch (default: 1):

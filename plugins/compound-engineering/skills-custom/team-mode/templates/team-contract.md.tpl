@@ -6,7 +6,6 @@ plan_source: PLAN_PATH
 allowed_files: []
 forbidden_surfaces: []
 required_invariants: []
-patch_gate_enabled: true
 max_files_per_patch: 1
 last_verification_failure: null
 ---

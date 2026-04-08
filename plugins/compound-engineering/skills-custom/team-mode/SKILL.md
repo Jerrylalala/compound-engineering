@@ -22,23 +22,26 @@ argument-hint: "[team] | [team:light] | [team:full]"
 
 ---
 
-## 角色定义（work 阶段）
+## 角色定义
 
-| 中文名 | tmux短名 | 职责 | 生命周期 |
+| 中文名 | 适用阶段 | 职责 | 生命周期 |
 |--------|---------|------|---------|
-| **合约主** | `合约` | 执行前写边界合约（allowed_files/forbidden_surfaces/invariants），全程持有合约权威。通过 `.team-contract.md` 文件持久化，不是独立 subagent | 全程存活（文件持久化） |
-| **执行者** | `执行` | **唯一可写共享代码的角色**（单写者原则）。遇越界暂停上报，不自行决策 | 按任务运行 |
-| **验证者** | `验证` | 每 Implementation Unit 完成后运行集成测试和不变式检查，只读不写。发现回归立即报警，不继续 | 事件驱动（每任务后） |
-| **风险卫** | `风险` | 专门拦截高风险路径（auth/session/permission/payment/billing/migration/schema），执行前生成风险摘要并要求用户确认 | 仅 [team:full] 模式 |
+| **合约主** | plan, work | 执行前写边界合约（allowed_files/forbidden_surfaces/invariants），全程持有合约权威。通过 `.team-contract.md` 文件持久化，不是独立 subagent | 全程存活（文件持久化） |
+| **执行者** | work | **唯一可写共享代码的角色**（单写者原则）。遇越界暂停上报，不自行决策 | 按任务运行 |
+| **验证者** | work | 每 Implementation Unit 完成后运行集成测试和不变式检查，只读不写。发现回归立即报警，不继续 | 事件驱动（每任务后） |
+| **风险卫** | work（[team:full]） | 专门拦截高风险路径（auth/session/permission/payment/billing/migration/schema），执行前生成风险摘要并要求用户确认 | 仅 [team:full] 模式 |
+| **追溯审查** | plan | 搜索 `docs/solutions/` 查找历史相关案例，检查计划决策是否与已记录 gotcha 矛盾，将发现追加到计划 Open Questions 节 | ce:plan Phase 4.5（只读） |
+| **探索者** | brainstorm | 聚焦「这个想法在技术上可行吗？」，提出具体验证路径和可达条件 | ce:brainstorm [team] 激活期间 |
+| **挑战者** | brainstorm | 质疑假设，寻找边界条件和反例，防止过早收敛 | ce:brainstorm [team] 激活期间 |
 
 ### 各阶段角色集
 
 | 阶段 | 默认角色 | [team:full] 追加 |
 |------|---------|-----------------|
-| `/ce:brainstorm [team]` | 探索者 + 挑战者 | 可行性审查 |
+| `/ce:brainstorm [team]` | 探索者 + 挑战者 | — |
 | `/ce:plan [team]` | 合约主 + 追溯审查 | — |
 | `/ce:work [team]` | 合约主 + 执行者 + 验证者 | 风险卫 |
-| `/ce:review [team]` | 现有31个审查 agent + Patch Gate | — |
+| `/ce:review [team]` | 现有多个专业审查 agent + Patch Gate | — |
 
 ---
 
@@ -82,7 +85,6 @@ forbidden_surfaces:
 required_invariants:
   - "bash scripts/check-handoff.sh 必须通过"
   - "不得移除 argument-hint 中已有的 [C][G][P] 标志"
-patch_gate_enabled: true
 max_files_per_patch: 1
 last_verification_failure: null
 ---
@@ -100,9 +102,8 @@ last_verification_failure: null
 | `allowed_files` | string[] | 执行者在本次任务中允许修改的文件列表（由 ce:plan 从 Implementation Units 提取） |
 | `forbidden_surfaces` | string[] | 绝对禁止自动修改的文件（版本文件、schema、认证配置等） |
 | `required_invariants` | string[] | 每次变更后必须满足的不变式（由 ce:plan 从 Acceptance Criteria 转换） |
-| `patch_gate_enabled` | boolean | 是否启用 ce:review autofix 的 Patch Gate（默认 true） |
 | `max_files_per_patch` | int | 单次 autofix patch 允许修改的最大文件数（默认 1，即 one-finding-one-patch） |
-| `last_verification_failure` | string\|null | 验证者记录最近一次失败信息（null 表示无失败） |
+| `last_verification_failure` | string\|null | 执行者记录最近一次验证失败信息（null 表示无失败） |
 
 ---
 
@@ -161,15 +162,17 @@ last_verification_failure: null
    - 如失败：停止，写入 last_verification_failure，等待执行者修复
 ```
 
-### ce:review mode:autofix [team]
+### ce:review [team]（autofix 和 interactive 模式有效，report-only/headless 无效）
 
-在 Stage 5 路由规范化后执行 Deterministic Patch Gate（规则引擎，不消耗额外 token）：
+在 Stage 5 路由规范化后执行 Deterministic Patch Gate（规则引擎，不消耗额外 token）。
+
+完整 Patch Gate 逻辑见 `ce:review Stage 5 步骤 6.5`。规则摘要：
 
 ```
 加载 .team-contract.md → 对每条 safe_auto finding：
-  规则1（文件范围）：patch_file ∉ allowed_files → gated_auto
-  规则2（禁止区域）：patch_file ∈ forbidden_surfaces → advisory（拒绝）
-  规则3（单补丁约束）：affected_files > max_files_per_patch → gated_auto
+  规则1（文件范围）：finding.file ∉ allowed_files → gated_auto
+  规则2（禁止区域）：finding.file ∈ forbidden_surfaces → gated_auto（需人工确认）
+  规则3（单补丁约束）：涉及文件数 > max_files_per_patch → gated_auto
   规则4（不变式验证）：required_invariants 非空 → fixer 需验证后落盘
 ```
 

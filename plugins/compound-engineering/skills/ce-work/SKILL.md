@@ -220,6 +220,12 @@ Determine how to proceed based on what was provided in `<input_document>`.
    - Any resolved deferred questions relevant to that unit
    - Instruction to check whether the unit's test scenarios cover all applicable categories (happy paths, edge cases, error paths, integration) and supplement gaps before writing tests
 
+   **Team mode dispatch (when TEAM_MODE is active):** Additionally pass to each subagent:
+   - TEAM_VARIANT (default/light/full)
+   - The content of `.team-contract.md` (allowed_files, forbidden_surfaces, required_invariants, max_files_per_patch)
+   - Instruction to enforce single-writer principle: only write files in this unit's Files list, and verify they are in allowed_files
+   - Instruction to run the verifier hook after completing this unit (run Verification commands + check required_invariants)
+
    **Permission mode:** Omit the `mode` parameter when dispatching subagents so the user's configured permission settings apply. Do not pass `mode: "auto"` — it overrides user-level settings like `bypassPermissions`.
 
    After each subagent completes, update the plan checkboxes and task list before dispatching the next dependent unit.
