@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.45.6] - 2026-04-08
+
+### Bug Fixes
+
+* **doctor.md**: 移除对不存在 scripts/doctor.sh 的依赖，改为直接调用现有脚本
+* **review-contract**: anti-leniency 澄清为参考框架，非自动注入
+* **deploy-docs.yml**: 修复监测和部署路径 docs
+* **triage-prs.md**: allowed-tools 补充 Task/AskUserQuestion/Read
+* **deprecated agents**: 为 security-sentinel/performance-oracle/data-integrity-guardian/data-migration-expert 添加废弃通知
+* **intent-gate**: 移除小数相编号 Phase 0.5
+* **ui-review-contract**: $PLAN_FILE 未定义变量修复
+* **executor-capability-gate**: last_call 写入说明 + Check 5 简化
+
 ## [2.63.1](https://github.com/EveryInc/compound-engineering-plugin/compare/cli-v2.63.0...cli-v2.63.1) (2026-04-07)
 
 
