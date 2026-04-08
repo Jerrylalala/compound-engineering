@@ -1,0 +1,21 @@
+{
+  "source_agent": "code-simplicity-reviewer",
+  "source_tier": "advisory",
+  "findings": [
+    {
+      "id": "STYLE-012",
+      "conclusion_type": "question",
+      "severity": "low",
+      "confidence": "medium",
+      "title": "Service Object 是否必要",
+      "description": "当前只有一个调用点，Service Object 可能是过早抽象。但如果计划扩展，则合理。",
+      "evidence": {
+        "file": "app/services/notification_sender.rb",
+        "line": 1,
+        "snippet": "class NotificationSender\n  def call(user, message)..."
+      },
+      "action": "考虑是否可以简化为 model 方法",
+      "blocking": false
+    }
+  ]
+}
