@@ -1,0 +1,32 @@
+PR #42: feat(auth): 重构认证服务
+
+文件列表：
+  M  src/services/auth.ts                       (+85, -32)
+  A  src/services/token-refresh.ts              (+45)
+  M  src/middleware/auth-middleware.ts           (+12, -3)
+  A  docs/plans/auth-refactor-plan.md           (+120)
+  A  docs/solutions/auth-token-refresh.md       (+35)
+  M  tests/auth.test.ts                         (+28, -5)
+
+--- src/services/auth.ts ---
+import { TokenService } from './token-refresh';
+
+export class AuthService {
+  private tokenService: TokenService;
+
+  constructor() {
+    this.tokenService = new TokenService();
+  }
+
+  async authenticate(credentials: Credentials): Promise<AuthResult> {
+    const user = await this.findUser(credentials.email);
+    if (!user) throw new AuthError('User not found');
+
+    const valid = await this.verifyPassword(credentials.password, user.passwordHash);
+    if (!valid) throw new AuthError('Invalid credentials');
+
+    return this.tokenService.generateTokenPair(user);
+  }
+
+  // ... 其余方法省略
+}

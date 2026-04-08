@@ -1,0 +1,38 @@
+diff --git a/app/services/user_settings_service.rb b/app/services/user_settings_service.rb
+index 0000000..a1b2c3d 100644
+--- /dev/null
++++ b/app/services/user_settings_service.rb
+@@ -0,0 +1,32 @@
++class UserSettingsService
++  def initialize(user)
++    @user = user
++  end
++
++  # 核心问题：delete_all + create! 没有事务包裹
++  # 如果 create! 中途失败，用户的旧设置已被删除，新设置只写入了一部分
++  # 结果：用户丢失所有设置
++  def replace_all(new_settings)
++    # 危险：先删除所有旧设置
++    UserSetting.where(user_id: @user.id).delete_all
++
++    # 如果这里的第 3 条 create! 抛异常...
++    # 第 1、2 条已写入，旧数据已删除 → 数据不一致
++    new_settings.each do |setting|
++      UserSetting.create!(
++        user_id: @user.id,
++        key: setting[:key],
++        value: setting[:value]
++      )
++    end
++  end
++
++  def get_all
++    UserSetting.where(user_id: @user.id).pluck(:key, :value).to_h
++  end
++
++  # 单个设置的更新是安全的（upsert）
++  def update_one(key, value)
++    UserSetting.find_or_initialize_by(user_id: @user.id, key: key)
++               .update!(value: value)
++  end
++end

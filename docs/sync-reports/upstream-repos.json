@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "repos": [
     {
       "repo": "EveryInc/compound-engineering-plugin",
@@ -25,6 +25,24 @@
       "role": "runtime",
       "strategy": "releases",
       "description": "运行时环境，关注新功能/API 变化"
+    },
+    {
+      "repo": "Yeachan-Heo/oh-my-claudecode",
+      "role": "reference",
+      "strategy": "github-api",
+      "description": "同宿主 Claude Code 插件，参考 Team 编排、ralph 循环、/learner 自动学习"
+    },
+    {
+      "repo": "code-yeongyu/oh-my-openagent",
+      "role": "reference",
+      "strategy": "github-api",
+      "description": "OpenCode 插件，参考 Hash 锚定编辑、Intent Gate、多模型路由"
+    },
+    {
+      "repo": "fengshao1227/ccg-workflow",
+      "role": "reference",
+      "strategy": "github-api",
+      "description": "多模型安全协作（Claude 编排 + Codex 后端 + Gemini 前端），参考 patch 审批架构"
     }
   ]
 }
