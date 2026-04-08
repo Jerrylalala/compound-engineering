@@ -1,79 +1,70 @@
 import path from "path"
-import { ensureDir, writeText } from "../utils/files"
-import type { GeminiBundle, GeminiCommand } from "../types/gemini"
+import { backupFile, copySkillDir, ensureDir, pathExists, readJson, resolveCommandPath, sanitizePathName, writeJson, writeText } from "../utils/files"
+import { transformContentForGemini } from "../converters/claude-to-gemini"
+import type { GeminiBundle } from "../types/gemini"
 
 export async function writeGeminiBundle(outputRoot: string, bundle: GeminiBundle): Promise<void> {
-  const geminiRoot = resolveGeminiRoot(outputRoot)
-  await ensureDir(geminiRoot)
+  const paths = resolveGeminiPaths(outputRoot)
+  await ensureDir(paths.geminiDir)
 
-  // 写入 GEMINI.md（系统上下文）
-  await writeText(path.join(geminiRoot, "GEMINI.md"), bundle.geminiMd.trimEnd() + "\n")
+  if (bundle.generatedSkills.length > 0) {
+    for (const skill of bundle.generatedSkills) {
+      await writeText(path.join(paths.skillsDir, sanitizePathName(skill.name), "SKILL.md"), skill.content + "\n")
+    }
+  }
 
-  // 写入命令 TOML 文件
-  const commandsRoot = path.join(geminiRoot, "commands")
-  await ensureDir(commandsRoot)
+  if (bundle.skillDirs.length > 0) {
+    for (const skill of bundle.skillDirs) {
+      await copySkillDir(skill.sourceDir, path.join(paths.skillsDir, sanitizePathName(skill.name)), transformContentForGemini)
+    }
+  }
 
-  for (const cmd of bundle.commands) {
-    const tomlPath = path.join(commandsRoot, cmd.relativePath)
+  if (bundle.commands.length > 0) {
+    for (const command of bundle.commands) {
+      const dest = await resolveCommandPath(paths.commandsDir, command.name, ".toml")
+      await writeText(dest, command.content + "\n")
+    }
+  }
 
-    // P1 修复：验证路径在 commands 目录内，防止路径遍历攻击
-    const resolvedPath = path.resolve(tomlPath)
-    const resolvedRoot = path.resolve(commandsRoot)
-    if (!resolvedPath.startsWith(resolvedRoot + path.sep) && resolvedPath !== resolvedRoot) {
-      throw new Error(`路径遍历检测，拒绝写入: ${cmd.relativePath}`)
+  if (bundle.mcpServers && Object.keys(bundle.mcpServers).length > 0) {
+    const settingsPath = path.join(paths.geminiDir, "settings.json")
+    const backupPath = await backupFile(settingsPath)
+    if (backupPath) {
+      console.log(`Backed up existing settings.json to ${backupPath}`)
     }
 
-    const tomlDir = path.dirname(tomlPath)
-    await ensureDir(tomlDir)
-    await writeText(tomlPath, renderCommandToml(cmd))
+    // Merge mcpServers into existing settings if present
+    let existingSettings: Record<string, unknown> = {}
+    if (await pathExists(settingsPath)) {
+      try {
+        existingSettings = await readJson<Record<string, unknown>>(settingsPath)
+      } catch {
+        console.warn("Warning: existing settings.json could not be parsed and will be replaced.")
+      }
+    }
+
+    const existingMcp = (existingSettings.mcpServers && typeof existingSettings.mcpServers === "object")
+      ? existingSettings.mcpServers as Record<string, unknown>
+      : {}
+    const merged = { ...existingSettings, mcpServers: { ...existingMcp, ...bundle.mcpServers } }
+    await writeJson(settingsPath, merged)
   }
 }
 
-/**
- * 将命令转换为 TOML 格式
- */
-function renderCommandToml(cmd: GeminiCommand): string {
-  const escapedDescription = escapeTomlString(cmd.description)
-  const escapedPrompt = escapeTomlMultilineString(cmd.prompt)
-
-  return `# Gemini CLI command: /${cmd.name}
-# Auto-generated from Claude Code plugin
-
-description = "${escapedDescription}"
-
-prompt = """
-${escapedPrompt}
-"""
-`
-}
-
-/**
- * 转义 TOML 基本字符串中的特殊字符（用于 description 等单行字段）
- */
-function escapeTomlString(str: string): string {
-  return str
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, "\\n")
-    .replace(/\r/g, "\\r")
-    .replace(/\t/g, "\\t")
-    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // 移除不可打印控制字符
-}
-
-/**
- * 转义 TOML 多行字符串中的特殊字符（用于 prompt 字段）
- * TOML 多行字符串使用 """ 包裹，需要转义内容中的 """ 序列
- */
-function escapeTomlMultilineString(str: string): string {
-  // 转义反斜杠（必须先做）
-  let result = str.replace(/\\/g, "\\\\")
-  // 转义连续的三个引号，防止提前关闭多行字符串
-  result = result.replace(/"""/g, '""\\\"')
-  // 移除不可打印控制字符（保留换行、回车、制表符）
-  result = result.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "")
-  return result
-}
-
-function resolveGeminiRoot(outputRoot: string): string {
-  return path.basename(outputRoot) === ".gemini" ? outputRoot : path.join(outputRoot, ".gemini")
+function resolveGeminiPaths(outputRoot: string) {
+  const base = path.basename(outputRoot)
+  // If already pointing at .gemini, write directly into it
+  if (base === ".gemini") {
+    return {
+      geminiDir: outputRoot,
+      skillsDir: path.join(outputRoot, "skills"),
+      commandsDir: path.join(outputRoot, "commands"),
+    }
+  }
+  // Otherwise nest under .gemini
+  return {
+    geminiDir: path.join(outputRoot, ".gemini"),
+    skillsDir: path.join(outputRoot, ".gemini", "skills"),
+    commandsDir: path.join(outputRoot, ".gemini", "commands"),
+  }
 }

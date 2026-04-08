@@ -1,72 +1,139 @@
 import { describe, expect, test } from "bun:test"
-import { convertClaudeToGemini } from "../src/converters/claude-to-gemini"
+import { convertClaudeToGemini, toToml, transformContentForGemini } from "../src/converters/claude-to-gemini"
+import { parseFrontmatter } from "../src/utils/frontmatter"
 import type { ClaudePlugin } from "../src/types/claude"
 
 const fixturePlugin: ClaudePlugin = {
   root: "/tmp/plugin",
-  manifest: {
-    name: "fixture-plugin",
-    version: "1.0.0",
-    description: "Fixture plugin for Gemini conversion.",
-  },
-  agents: [],
+  manifest: { name: "fixture", version: "1.0.0" },
+  agents: [
+    {
+      name: "Security Reviewer",
+      description: "Security-focused agent",
+      capabilities: ["Threat modeling", "OWASP"],
+      model: "claude-sonnet-4-20250514",
+      body: "Focus on vulnerabilities.",
+      sourcePath: "/tmp/plugin/agents/security-reviewer.md",
+    },
+  ],
   commands: [
     {
       name: "workflows:plan",
-      description: "Plan the work.",
+      description: "Planning command",
       argumentHint: "[FOCUS]",
-      allowedTools: ["Read", "Write"],
-      body: "Plan content.",
+      model: "inherit",
+      allowedTools: ["Read"],
+      body: "Plan the work.",
       sourcePath: "/tmp/plugin/commands/workflows/plan.md",
     },
   ],
-  skills: [],
+  skills: [
+    {
+      name: "existing-skill",
+      description: "Existing skill",
+      sourceDir: "/tmp/plugin/skills/existing-skill",
+      skillPath: "/tmp/plugin/skills/existing-skill/SKILL.md",
+    },
+  ],
   hooks: undefined,
-  mcpServers: undefined,
-  claudeMd: "# Sample Plugin Guide\n\n## Conventions\n\n- Use snake_case.\n",
+  mcpServers: {
+    local: { command: "echo", args: ["hello"] },
+  },
 }
 
 describe("convertClaudeToGemini", () => {
-  test("renders system context, conventions, and commands", () => {
+  test("converts agents to skills with SKILL.md frontmatter", () => {
     const bundle = convertClaudeToGemini(fixturePlugin, {
       agentMode: "subagent",
       inferTemperature: false,
       permissions: "none",
     })
 
-    const content = bundle.geminiMd
-    expect(content).toContain("# System Context")
-    expect(content).toContain("- Project: fixture-plugin")
-    expect(content).toContain("- Description: Fixture plugin for Gemini conversion.")
-
-    expect(content).toContain("# Conventions")
-    expect(content).toContain("## Sample Plugin Guide")
-    expect(content).toContain("### Conventions")
-
-    expect(content).toContain("# Commands/Tools")
-    expect(content).toContain("To run `/workflows:plan`")
-    expect(content).toContain("Plan the work.")
-    expect(content).toContain("Arguments: [FOCUS]")
-    expect(content).toContain("Allowed tools: Read, Write")
+    const skill = bundle.generatedSkills.find((s) => s.name === "security-reviewer")
+    expect(skill).toBeDefined()
+    const parsed = parseFrontmatter(skill!.content)
+    expect(parsed.data.name).toBe("security-reviewer")
+    expect(parsed.data.description).toBe("Security-focused agent")
+    expect(parsed.body).toContain("Focus on vulnerabilities.")
   })
 
-  test("handles missing CLAUDE.md content", () => {
-    const bundle = convertClaudeToGemini(
-      {
-        ...fixturePlugin,
-        claudeMd: undefined,
-      },
-      {
-        agentMode: "subagent",
-        inferTemperature: false,
-        permissions: "none",
-      },
-    )
+  test("agent with capabilities prepended to body", () => {
+    const bundle = convertClaudeToGemini(fixturePlugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
 
-    expect(bundle.geminiMd).toContain("No CLAUDE.md found in the plugin root")
+    const skill = bundle.generatedSkills.find((s) => s.name === "security-reviewer")
+    expect(skill).toBeDefined()
+    const parsed = parseFrontmatter(skill!.content)
+    expect(parsed.body).toContain("## Capabilities")
+    expect(parsed.body).toContain("- Threat modeling")
+    expect(parsed.body).toContain("- OWASP")
   })
 
-  test("converts commands to GeminiCommand array", () => {
+  test("agent with empty description gets default description", () => {
+    const plugin: ClaudePlugin = {
+      ...fixturePlugin,
+      agents: [
+        {
+          name: "my-agent",
+          body: "Do things.",
+          sourcePath: "/tmp/plugin/agents/my-agent.md",
+        },
+      ],
+      commands: [],
+      skills: [],
+    }
+
+    const bundle = convertClaudeToGemini(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    const parsed = parseFrontmatter(bundle.generatedSkills[0].content)
+    expect(parsed.data.description).toBe("Use this skill for my-agent tasks")
+  })
+
+  test("agent model field silently dropped", () => {
+    const bundle = convertClaudeToGemini(fixturePlugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    const skill = bundle.generatedSkills.find((s) => s.name === "security-reviewer")
+    const parsed = parseFrontmatter(skill!.content)
+    expect(parsed.data.model).toBeUndefined()
+  })
+
+  test("agent with empty body gets default body text", () => {
+    const plugin: ClaudePlugin = {
+      ...fixturePlugin,
+      agents: [
+        {
+          name: "Empty Agent",
+          description: "An empty agent",
+          body: "",
+          sourcePath: "/tmp/plugin/agents/empty.md",
+        },
+      ],
+      commands: [],
+      skills: [],
+    }
+
+    const bundle = convertClaudeToGemini(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    const parsed = parseFrontmatter(bundle.generatedSkills[0].content)
+    expect(parsed.body).toContain("Instructions converted from the Empty Agent agent.")
+  })
+
+  test("converts commands to TOML with prompt and description", () => {
     const bundle = convertClaudeToGemini(fixturePlugin, {
       agentMode: "subagent",
       inferTemperature: false,
@@ -74,32 +141,49 @@ describe("convertClaudeToGemini", () => {
     })
 
     expect(bundle.commands).toHaveLength(1)
-
-    const cmd = bundle.commands[0]
-    expect(cmd.name).toBe("workflows:plan")
-    expect(cmd.description).toBe("Plan the work.")
-    expect(cmd.relativePath).toBe("workflows/plan.toml")
-    expect(cmd.prompt).toContain("Plan content.")
-    expect(cmd.prompt).toContain("{{args}}")
+    const command = bundle.commands[0]
+    expect(command.name).toBe("workflows/plan")
+    expect(command.content).toContain('description = "Planning command"')
+    expect(command.content).toContain('prompt = """')
+    expect(command.content).toContain("Plan the work.")
   })
 
-  test("generates correct paths for namespaced commands", () => {
-    const plugin = {
+  test("namespaced command creates correct path", () => {
+    const bundle = convertClaudeToGemini(fixturePlugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    const command = bundle.commands.find((c) => c.name === "workflows/plan")
+    expect(command).toBeDefined()
+  })
+
+  test("command with argument-hint gets {{args}} placeholder", () => {
+    const bundle = convertClaudeToGemini(fixturePlugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    const command = bundle.commands[0]
+    expect(command.content).toContain("{{args}}")
+  })
+
+  test("command with disable-model-invocation is still included", () => {
+    const plugin: ClaudePlugin = {
       ...fixturePlugin,
       commands: [
         {
-          name: "workflows:review",
-          description: "Review code.",
-          body: "Review body.",
-          sourcePath: "/tmp/plugin/commands/workflows/review.md",
-        },
-        {
-          name: "simple-command",
-          description: "Simple command.",
-          body: "Simple body.",
-          sourcePath: "/tmp/plugin/commands/simple-command.md",
+          name: "disabled-command",
+          description: "Disabled command",
+          disableModelInvocation: true,
+          body: "Disabled body.",
+          sourcePath: "/tmp/plugin/commands/disabled.md",
         },
       ],
+      agents: [],
+      skills: [],
     }
 
     const bundle = convertClaudeToGemini(plugin, {
@@ -108,59 +192,52 @@ describe("convertClaudeToGemini", () => {
       permissions: "none",
     })
 
-    expect(bundle.commands).toHaveLength(2)
-    expect(bundle.commands[0].relativePath).toBe("workflows/review.toml")
-    expect(bundle.commands[1].relativePath).toBe("simple-command.toml")
-  })
-
-  test("handles empty command name after sanitization", () => {
-    const plugin = {
-      ...fixturePlugin,
-      commands: [
-        {
-          name: "../..",
-          description: "Command that becomes empty after sanitization.",
-          body: "Body content.",
-          sourcePath: "/tmp/plugin/commands/empty.md",
-        },
-      ],
-    }
-
-    const bundle = convertClaudeToGemini(plugin, {
-      agentMode: "subagent",
-      inferTemperature: false,
-      permissions: "none",
-    })
-
+    // Gemini TOML commands are prompts, not code — always include
     expect(bundle.commands).toHaveLength(1)
-    // 空命令名应回退到默认名称
-    expect(bundle.commands[0].relativePath).toBe("unnamed-command.toml")
-    expect(bundle.commands[0].name).not.toBe("")
+    expect(bundle.commands[0].name).toBe("disabled-command")
   })
 
-  test("sanitizes path traversal attempts in command names", () => {
-    const plugin = {
+  test("command allowedTools silently dropped", () => {
+    const bundle = convertClaudeToGemini(fixturePlugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    const command = bundle.commands[0]
+    expect(command.content).not.toContain("allowedTools")
+    expect(command.content).not.toContain("Read")
+  })
+
+  test("skills pass through as directory references", () => {
+    const bundle = convertClaudeToGemini(fixturePlugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    expect(bundle.skillDirs).toHaveLength(1)
+    expect(bundle.skillDirs[0].name).toBe("existing-skill")
+    expect(bundle.skillDirs[0].sourceDir).toBe("/tmp/plugin/skills/existing-skill")
+  })
+
+  test("MCP servers convert to settings.json-compatible config", () => {
+    const bundle = convertClaudeToGemini(fixturePlugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    expect(bundle.mcpServers?.local?.command).toBe("echo")
+    expect(bundle.mcpServers?.local?.args).toEqual(["hello"])
+  })
+
+  test("plugin with zero agents produces empty generatedSkills", () => {
+    const plugin: ClaudePlugin = {
       ...fixturePlugin,
-      commands: [
-        {
-          name: "../etc:passwd",
-          description: "Malicious command.",
-          body: "Bad body.",
-          sourcePath: "/tmp/plugin/commands/bad.md",
-        },
-        {
-          name: "..\\windows:system32",
-          description: "Another malicious command.",
-          body: "Bad body.",
-          sourcePath: "/tmp/plugin/commands/bad2.md",
-        },
-        {
-          name: "normal/slash:test",
-          description: "Command with slash in name.",
-          body: "Normal body.",
-          sourcePath: "/tmp/plugin/commands/normal.md",
-        },
-      ],
+      agents: [],
+      commands: [],
+      skills: [],
     }
 
     const bundle = convertClaudeToGemini(plugin, {
@@ -169,40 +246,14 @@ describe("convertClaudeToGemini", () => {
       permissions: "none",
     })
 
-    // 路径遍历字符 (..) 应被清理
-    expect(bundle.commands[0].relativePath).not.toContain("..")
-    expect(bundle.commands[1].relativePath).not.toContain("..")
-    // 输入中的斜杠应被替换为横杠（命名空间分隔符 : 转换为 / 是正常的）
-    expect(bundle.commands[2].relativePath).toBe("normal-slash/test.toml")
-    // 验证没有 Windows 反斜杠
-    expect(bundle.commands[1].relativePath).not.toContain("\\")
+    expect(bundle.generatedSkills).toHaveLength(0)
   })
 
-  test("excludes claude-code-only commands from conversion and GEMINI.md", () => {
-    const plugin = {
+  test("plugin with only skills works correctly", () => {
+    const plugin: ClaudePlugin = {
       ...fixturePlugin,
-      commands: [
-        {
-          name: "normal-command",
-          description: "Normal command.",
-          body: "Normal body.",
-          sourcePath: "/tmp/plugin/commands/normal.md",
-        },
-        {
-          name: "gemini",
-          description: "Claude-only command.",
-          claudeCodeOnly: true,
-          body: "Should be excluded.",
-          sourcePath: "/tmp/plugin/commands/gemini.md",
-        },
-        {
-          name: "codex",
-          description: "Another Claude-only command.",
-          claudeCodeOnly: true,
-          body: "Should also be excluded.",
-          sourcePath: "/tmp/plugin/commands/codex.md",
-        },
-      ],
+      agents: [],
+      commands: [],
     }
 
     const bundle = convertClaudeToGemini(plugin, {
@@ -211,13 +262,133 @@ describe("convertClaudeToGemini", () => {
       permissions: "none",
     })
 
-    // 只有 normal-command 应该被转换
-    expect(bundle.commands).toHaveLength(1)
-    expect(bundle.commands[0].name).toBe("normal-command")
+    expect(bundle.generatedSkills).toHaveLength(0)
+    expect(bundle.skillDirs).toHaveLength(1)
+    expect(bundle.commands).toHaveLength(0)
+  })
 
-    // GEMINI.md 中也不应列出 claude-code-only 命令
-    expect(bundle.geminiMd).toContain("/normal-command")
-    expect(bundle.geminiMd).not.toContain("/gemini")
-    expect(bundle.geminiMd).not.toContain("/codex")
+  test("agent name colliding with skill name gets deduplicated", () => {
+    const plugin: ClaudePlugin = {
+      ...fixturePlugin,
+      skills: [{ name: "security-reviewer", description: "Existing skill", sourceDir: "/tmp/skill", skillPath: "/tmp/skill/SKILL.md" }],
+      agents: [{ name: "Security Reviewer", description: "Agent version", body: "Body.", sourcePath: "/tmp/agents/sr.md" }],
+      commands: [],
+    }
+
+    const bundle = convertClaudeToGemini(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    // Agent should be deduplicated since skill already has "security-reviewer"
+    expect(bundle.generatedSkills[0].name).toBe("security-reviewer-2")
+    expect(bundle.skillDirs[0].name).toBe("security-reviewer")
+  })
+
+  test("hooks present emits console.warn", () => {
+    const warnings: string[] = []
+    const originalWarn = console.warn
+    console.warn = (msg: string) => warnings.push(msg)
+
+    const plugin: ClaudePlugin = {
+      ...fixturePlugin,
+      hooks: { hooks: { PreToolUse: [{ matcher: "*", body: "hook body" }] } },
+      agents: [],
+      commands: [],
+      skills: [],
+    }
+
+    convertClaudeToGemini(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    console.warn = originalWarn
+    expect(warnings.some((w) => w.includes("Gemini"))).toBe(true)
+  })
+})
+
+describe("transformContentForGemini", () => {
+  test("transforms .claude/ paths to .gemini/", () => {
+    const result = transformContentForGemini("Read .claude/settings.json for config.")
+    expect(result).toContain(".gemini/settings.json")
+    expect(result).not.toContain(".claude/")
+  })
+
+  test("transforms ~/.claude/ paths to ~/.gemini/", () => {
+    const result = transformContentForGemini("Check ~/.claude/config for settings.")
+    expect(result).toContain("~/.gemini/config")
+    expect(result).not.toContain("~/.claude/")
+  })
+
+  test("transforms Task agent(args) to natural language skill reference", () => {
+    const input = `Run these:
+
+- Task repo-research-analyst(feature_description)
+- Task learnings-researcher(feature_description)
+
+Task best-practices-researcher(topic)`
+
+    const result = transformContentForGemini(input)
+    expect(result).toContain("Use the repo-research-analyst skill to: feature_description")
+    expect(result).toContain("Use the learnings-researcher skill to: feature_description")
+    expect(result).toContain("Use the best-practices-researcher skill to: topic")
+    expect(result).not.toContain("Task repo-research-analyst")
+  })
+
+  test("transforms namespaced Task agent calls using final segment", () => {
+    const input = `Run agents:
+
+- Task compound-engineering:research:repo-research-analyst(feature_description)
+- Task compound-engineering:review:security-reviewer(code_diff)`
+
+    const result = transformContentForGemini(input)
+    expect(result).toContain("Use the repo-research-analyst skill to: feature_description")
+    expect(result).toContain("Use the security-reviewer skill to: code_diff")
+    expect(result).not.toContain("compound-engineering:")
+  })
+
+  test("transforms zero-argument Task calls", () => {
+    const input = `- Task compound-engineering:review:code-simplicity-reviewer()`
+
+    const result = transformContentForGemini(input)
+    expect(result).toContain("Use the code-simplicity-reviewer skill")
+    expect(result).not.toContain("compound-engineering:")
+    expect(result).not.toContain("skill to:")
+  })
+
+  test("transforms @agent references to skill references", () => {
+    const result = transformContentForGemini("Ask @security-sentinel for a review.")
+    expect(result).toContain("the security-sentinel skill")
+    expect(result).not.toContain("@security-sentinel")
+  })
+})
+
+describe("toToml", () => {
+  test("produces valid TOML with description and prompt", () => {
+    const result = toToml("A description", "The prompt content")
+    expect(result).toContain('description = "A description"')
+    expect(result).toContain('prompt = """')
+    expect(result).toContain("The prompt content")
+    expect(result).toContain('"""')
+  })
+
+  test("escapes quotes in description", () => {
+    const result = toToml('Say "hello"', "Prompt")
+    expect(result).toContain('description = "Say \\"hello\\""')
+  })
+
+  test("escapes triple quotes in prompt", () => {
+    const result = toToml("A command", 'Content with """ inside it')
+    // Should not contain an unescaped """ that would close the TOML multi-line string prematurely
+    // The prompt section should have the escaped version
+    expect(result).toContain('description = "A command"')
+    expect(result).toContain('prompt = """')
+    // The inner """ should be escaped
+    expect(result).not.toMatch(/""".*""".*"""/s) // Should not have 3 separate triple-quote sequences (open, content, close would make 3)
+    // Verify it contains the escaped form
+    expect(result).toContain('\\"\\"\\"')
   })
 })

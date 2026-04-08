@@ -2,26 +2,6 @@
 *.log
 node_modules/
 .codex/
-!.codex/
-!.codex/skills/
-!.codex/skills/workflows-brainstorm/
-!.codex/skills/workflows-brainstorm/SKILL.md
-!.codex/skills/workflows-plan/
-!.codex/skills/workflows-plan/SKILL.md
-!.codex/skills/workflows-review/
-!.codex/skills/workflows-review/SKILL.md
-.gemini/
-.compound/
-.claude/settings.local.json
-.claude/agent-memory/
-
-# 工作流临时产物（brainstorms 和 plans 保留提交）
-docs/context/
-docs/analysis/
-docs/reviews/
-
-# 临时输出文件
-nul
-stderr.txt
-stdout.txt
-text_*.txt
+todos/
+.worktrees
+.context/

@@ -1,147 +1,219 @@
 import { describe, expect, test } from "bun:test"
 import { promises as fs } from "fs"
-import os from "os"
 import path from "path"
+import os from "os"
 import { writeGeminiBundle } from "../src/targets/gemini"
 import type { GeminiBundle } from "../src/types/gemini"
-import { exists } from "./utils/fs"
+
+async function exists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath)
+    return true
+  } catch {
+    return false
+  }
+}
 
 describe("writeGeminiBundle", () => {
-  test("writes GEMINI.md under .gemini", async () => {
+  test("writes skills, commands, and settings.json", async () => {
     const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-test-"))
     const bundle: GeminiBundle = {
-      geminiMd: "# System Context\n",
+      generatedSkills: [
+        {
+          name: "security-reviewer",
+          content: "---\nname: security-reviewer\ndescription: Security\n---\n\nReview code.",
+        },
+      ],
+      skillDirs: [
+        {
+          name: "skill-one",
+          sourceDir: path.join(import.meta.dir, "fixtures", "sample-plugin", "skills", "skill-one"),
+        },
+      ],
+      commands: [
+        {
+          name: "plan",
+          content: 'description = "Plan"\nprompt = """\nPlan the work.\n"""',
+        },
+      ],
+      mcpServers: {
+        playwright: { command: "npx", args: ["-y", "@anthropic/mcp-playwright"] },
+      },
+    }
+
+    await writeGeminiBundle(tempRoot, bundle)
+
+    expect(await exists(path.join(tempRoot, ".gemini", "skills", "security-reviewer", "SKILL.md"))).toBe(true)
+    expect(await exists(path.join(tempRoot, ".gemini", "skills", "skill-one", "SKILL.md"))).toBe(true)
+    expect(await exists(path.join(tempRoot, ".gemini", "commands", "plan.toml"))).toBe(true)
+    expect(await exists(path.join(tempRoot, ".gemini", "settings.json"))).toBe(true)
+
+    const skillContent = await fs.readFile(
+      path.join(tempRoot, ".gemini", "skills", "security-reviewer", "SKILL.md"),
+      "utf8",
+    )
+    expect(skillContent).toContain("Review code.")
+
+    const commandContent = await fs.readFile(
+      path.join(tempRoot, ".gemini", "commands", "plan.toml"),
+      "utf8",
+    )
+    expect(commandContent).toContain("Plan the work.")
+
+    const settingsContent = JSON.parse(
+      await fs.readFile(path.join(tempRoot, ".gemini", "settings.json"), "utf8"),
+    )
+    expect(settingsContent.mcpServers.playwright.command).toBe("npx")
+  })
+
+  test("transforms Task calls in copied SKILL.md files", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-skill-transform-"))
+    const sourceSkillDir = path.join(tempRoot, "source-skill")
+    await fs.mkdir(sourceSkillDir, { recursive: true })
+    await fs.writeFile(
+      path.join(sourceSkillDir, "SKILL.md"),
+      `---
+name: ce:plan
+description: Planning workflow
+---
+
+Run these research agents:
+
+- Task compound-engineering:research:repo-research-analyst(feature_description)
+- Task compound-engineering:research:learnings-researcher(feature_description)
+- Task compound-engineering:review:code-simplicity-reviewer()
+`,
+    )
+
+    const bundle: GeminiBundle = {
+      generatedSkills: [],
+      skillDirs: [{ name: "ce:plan", sourceDir: sourceSkillDir }],
       commands: [],
     }
 
     await writeGeminiBundle(tempRoot, bundle)
 
-    const geminiPath = path.join(tempRoot, ".gemini", "GEMINI.md")
-    expect(await exists(geminiPath)).toBe(true)
+    const installedSkill = await fs.readFile(
+      path.join(tempRoot, ".gemini", "skills", "ce-plan", "SKILL.md"),
+      "utf8",
+    )
+
+    expect(installedSkill).toContain("Use the repo-research-analyst skill to: feature_description")
+    expect(installedSkill).toContain("Use the learnings-researcher skill to: feature_description")
+    expect(installedSkill).toContain("Use the code-simplicity-reviewer skill")
+    expect(installedSkill).not.toContain("Task compound-engineering:")
   })
 
-  test("writes directly into a .gemini output root", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-root-"))
-    const geminiRoot = path.join(tempRoot, ".gemini")
-    await fs.mkdir(geminiRoot, { recursive: true })
+  test("namespaced commands create subdirectories", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-ns-"))
     const bundle: GeminiBundle = {
-      geminiMd: "# System Context\n",
-      commands: [],
+      generatedSkills: [],
+      skillDirs: [],
+      commands: [
+        {
+          name: "workflows/plan",
+          content: 'description = "Plan"\nprompt = """\nPlan.\n"""',
+        },
+      ],
+    }
+
+    await writeGeminiBundle(tempRoot, bundle)
+
+    expect(await exists(path.join(tempRoot, ".gemini", "commands", "workflows", "plan.toml"))).toBe(true)
+  })
+
+  test("does not double-nest when output root is .gemini", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-home-"))
+    const geminiRoot = path.join(tempRoot, ".gemini")
+    const bundle: GeminiBundle = {
+      generatedSkills: [
+        { name: "reviewer", content: "Reviewer skill content" },
+      ],
+      skillDirs: [],
+      commands: [
+        { name: "plan", content: "Plan content" },
+      ],
     }
 
     await writeGeminiBundle(geminiRoot, bundle)
 
-    const geminiPath = path.join(geminiRoot, "GEMINI.md")
-    expect(await exists(geminiPath)).toBe(true)
+    expect(await exists(path.join(geminiRoot, "skills", "reviewer", "SKILL.md"))).toBe(true)
+    expect(await exists(path.join(geminiRoot, "commands", "plan.toml"))).toBe(true)
+    // Should NOT double-nest under .gemini/.gemini
+    expect(await exists(path.join(geminiRoot, ".gemini"))).toBe(false)
   })
 
-  test("writes command TOML files under commands directory", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-cmd-"))
+  test("handles empty bundles gracefully", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-empty-"))
     const bundle: GeminiBundle = {
-      geminiMd: "# System Context\n",
-      commands: [
-        {
-          name: "workflows:plan",
-          description: "Plan the work.",
-          prompt: "Create a plan.\n\n## Arguments\n[FOCUS]: {{args}}",
-          relativePath: "workflows/plan.toml",
-        },
-        {
-          name: "test-command",
-          description: "A test command.",
-          prompt: "Test prompt.\n\n## User Input\n{{args}}",
-          relativePath: "test-command.toml",
-        },
-      ],
+      generatedSkills: [],
+      skillDirs: [],
+      commands: [],
     }
 
     await writeGeminiBundle(tempRoot, bundle)
-
-    // 验证命令目录和文件
-    const commandsDir = path.join(tempRoot, ".gemini", "commands")
-    expect(await exists(commandsDir)).toBe(true)
-
-    const planPath = path.join(commandsDir, "workflows", "plan.toml")
-    expect(await exists(planPath)).toBe(true)
-
-    const testPath = path.join(commandsDir, "test-command.toml")
-    expect(await exists(testPath)).toBe(true)
-
-    // 验证 TOML 内容
-    const planContent = await fs.readFile(planPath, "utf-8")
-    expect(planContent).toContain('description = "Plan the work."')
-    expect(planContent).toContain("prompt = ")
-    expect(planContent).toContain("{{args}}")
+    expect(await exists(tempRoot)).toBe(true)
   })
 
-  test("escapes triple quotes in prompt content to prevent TOML injection", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-escape-"))
+  test("backs up existing settings.json before overwrite", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-backup-"))
+    const geminiRoot = path.join(tempRoot, ".gemini")
+    await fs.mkdir(geminiRoot, { recursive: true })
+
+    // Write existing settings.json
+    const settingsPath = path.join(geminiRoot, "settings.json")
+    await fs.writeFile(settingsPath, JSON.stringify({ mcpServers: { old: { command: "old-cmd" } } }))
+
     const bundle: GeminiBundle = {
-      geminiMd: "# System Context\n",
-      commands: [
-        {
-          name: "inject-test",
-          description: 'Test with "quotes"',
-          prompt: 'Content with """ triple quotes """ and more text',
-          relativePath: "inject-test.toml",
-        },
-      ],
+      generatedSkills: [],
+      skillDirs: [],
+      commands: [],
+      mcpServers: {
+        newServer: { command: "new-cmd" },
+      },
     }
 
-    await writeGeminiBundle(tempRoot, bundle)
+    await writeGeminiBundle(geminiRoot, bundle)
 
-    const tomlPath = path.join(tempRoot, ".gemini", "commands", "inject-test.toml")
-    const content = await fs.readFile(tomlPath, "utf-8")
+    // New settings.json should have the new content
+    const newContent = JSON.parse(await fs.readFile(settingsPath, "utf8"))
+    expect(newContent.mcpServers.newServer.command).toBe("new-cmd")
 
-    // 描述中的引号应被转义
-    expect(content).toContain('description = "Test with \\"quotes\\""')
-    // 多行字符串中的 """ 应被转义，不应导致提前关闭
-    expect(content).not.toMatch(/"""\s*"""\s*"""/)
+    // A backup file should exist
+    const files = await fs.readdir(geminiRoot)
+    const backupFiles = files.filter((f) => f.startsWith("settings.json.bak."))
+    expect(backupFiles.length).toBeGreaterThanOrEqual(1)
   })
 
-  test("handles edge cases: content ending with quotes", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-edge-"))
+  test("merges mcpServers into existing settings.json without clobbering other keys", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "gemini-merge-"))
+    const geminiRoot = path.join(tempRoot, ".gemini")
+    await fs.mkdir(geminiRoot, { recursive: true })
+
+    // Write existing settings.json with other keys
+    const settingsPath = path.join(geminiRoot, "settings.json")
+    await fs.writeFile(settingsPath, JSON.stringify({
+      model: "gemini-2.5-pro",
+      mcpServers: { old: { command: "old-cmd" } },
+    }))
+
     const bundle: GeminiBundle = {
-      geminiMd: "# System Context\n",
-      commands: [
-        {
-          name: "edge-single",
-          description: "Edge case test",
-          prompt: 'Content ending with single quote"',
-          relativePath: "edge-single.toml",
-        },
-        {
-          name: "edge-double",
-          description: "Edge case test",
-          prompt: 'Content ending with double quotes""',
-          relativePath: "edge-double.toml",
-        },
-        {
-          name: "edge-backslash",
-          description: "Edge case test",
-          prompt: 'Content with backslash before triple quotes \\"""',
-          relativePath: "edge-backslash.toml",
-        },
-      ],
+      generatedSkills: [],
+      skillDirs: [],
+      commands: [],
+      mcpServers: {
+        newServer: { command: "new-cmd" },
+      },
     }
 
-    await writeGeminiBundle(tempRoot, bundle)
+    await writeGeminiBundle(geminiRoot, bundle)
 
-    // 验证所有文件都能正确生成
-    const singlePath = path.join(tempRoot, ".gemini", "commands", "edge-single.toml")
-    const doublePath = path.join(tempRoot, ".gemini", "commands", "edge-double.toml")
-    const backslashPath = path.join(tempRoot, ".gemini", "commands", "edge-backslash.toml")
-
-    expect(await exists(singlePath)).toBe(true)
-    expect(await exists(doublePath)).toBe(true)
-    expect(await exists(backslashPath)).toBe(true)
-
-    // 验证内容格式正确（以 """ 结尾）
-    const singleContent = await fs.readFile(singlePath, "utf-8")
-    const doubleContent = await fs.readFile(doublePath, "utf-8")
-
-    // 每个文件应该以正确的 """ 结尾
-    expect(singleContent.trim().endsWith('"""')).toBe(true)
-    expect(doubleContent.trim().endsWith('"""')).toBe(true)
+    const content = JSON.parse(await fs.readFile(settingsPath, "utf8"))
+    // Should preserve existing model key
+    expect(content.model).toBe("gemini-2.5-pro")
+    // Should preserve existing MCP server
+    expect(content.mcpServers.old.command).toBe("old-cmd")
+    // Should add new MCP server
+    expect(content.mcpServers.newServer.command).toBe("new-cmd")
   })
 })

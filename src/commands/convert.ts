@@ -2,9 +2,12 @@ import { defineCommand } from "citty"
 import os from "os"
 import path from "path"
 import { loadClaudePlugin } from "../parsers/claude"
-import { targets } from "../targets"
-import type { PermissionMode } from "../converters/claude-to-opencode"
+import { targets, validateScope } from "../targets"
+import type { ClaudeToOpenCodeOptions, PermissionMode } from "../converters/claude-to-opencode"
 import { ensureCodexAgentsFile } from "../utils/codex-agents"
+import { expandHome, resolveTargetHome } from "../utils/resolve-home"
+import { resolveTargetOutputRoot } from "../utils/resolve-output"
+import { detectInstalledTools } from "../utils/detect-tools"
 
 const permissionModes: PermissionMode[] = ["none", "broad", "from-commands"]
 
@@ -22,7 +25,7 @@ export default defineCommand({
     to: {
       type: "string",
       default: "opencode",
-      description: "Target format (opencode | codex | gemini)",
+      description: "Target format (opencode | codex | droid | cursor | pi | copilot | gemini | kiro | windsurf | openclaw | qwen | all)",
     },
     output: {
       type: "string",
@@ -34,10 +37,24 @@ export default defineCommand({
       alias: "codex-home",
       description: "Write Codex output to this .codex root (ex: ~/.codex)",
     },
-    geminiHome: {
+    piHome: {
       type: "string",
-      alias: "gemini-home",
-      description: "Write Gemini output to this project root (creates .gemini)",
+      alias: "pi-home",
+      description: "Write Pi output to this Pi root (ex: ~/.pi/agent or ./.pi)",
+    },
+    openclawHome: {
+      type: "string",
+      alias: "openclaw-home",
+      description: "Write OpenClaw output to this extensions root (ex: ~/.openclaw/extensions)",
+    },
+    qwenHome: {
+      type: "string",
+      alias: "qwen-home",
+      description: "Write Qwen output to this Qwen extensions root (ex: ~/.qwen/extensions)",
+    },
+    scope: {
+      type: "string",
+      description: "Scope level: global | workspace (default varies by target)",
     },
     also: {
       type: "string",
@@ -61,6 +78,71 @@ export default defineCommand({
   },
   async run({ args }) {
     const targetName = String(args.to)
+
+    const permissions = String(args.permissions)
+    if (!permissionModes.includes(permissions as PermissionMode)) {
+      throw new Error(`Unknown permissions mode: ${permissions}`)
+    }
+
+    const plugin = await loadClaudePlugin(String(args.source))
+    const outputRoot = resolveOutputRoot(args.output)
+    const hasExplicitOutput = Boolean(args.output && String(args.output).trim())
+    const codexHome = resolveTargetHome(args.codexHome, path.join(os.homedir(), ".codex"))
+    const piHome = resolveTargetHome(args.piHome, path.join(os.homedir(), ".pi", "agent"))
+    const openclawHome = resolveTargetHome(args.openclawHome, path.join(os.homedir(), ".openclaw", "extensions"))
+    const qwenHome = resolveTargetHome(args.qwenHome, path.join(os.homedir(), ".qwen", "extensions"))
+
+    const options: ClaudeToOpenCodeOptions = {
+      agentMode: String(args.agentMode) === "primary" ? "primary" : "subagent",
+      inferTemperature: Boolean(args.inferTemperature),
+      permissions: permissions as PermissionMode,
+    }
+
+    if (targetName === "all") {
+      const detected = await detectInstalledTools()
+      const activeTargets = detected.filter((t) => t.detected)
+
+      if (activeTargets.length === 0) {
+        console.log("No AI coding tools detected. Install at least one tool first.")
+        return
+      }
+
+      console.log(`Detected ${activeTargets.length} tool(s):`)
+      for (const tool of detected) {
+        console.log(`  ${tool.detected ? "✓" : "✗"} ${tool.name} — ${tool.reason}`)
+      }
+
+      for (const tool of activeTargets) {
+        const handler = targets[tool.name]
+        if (!handler || !handler.implemented) {
+          console.warn(`Skipping ${tool.name}: not implemented.`)
+          continue
+        }
+        const bundle = handler.convert(plugin, options)
+        if (!bundle) {
+          console.warn(`Skipping ${tool.name}: no output returned.`)
+          continue
+        }
+        const root = resolveTargetOutputRoot({
+          targetName: tool.name,
+          outputRoot,
+          codexHome,
+          piHome,
+          openclawHome,
+          qwenHome,
+          pluginName: plugin.manifest.name,
+          hasExplicitOutput,
+        })
+        await handler.write(root, bundle)
+        console.log(`Converted ${plugin.manifest.name} to ${tool.name} at ${root}`)
+      }
+
+      if (activeTargets.some((t) => t.name === "codex")) {
+        await ensureCodexAgentsFile(codexHome)
+      }
+      return
+    }
+
     const target = targets[targetName]
     if (!target) {
       throw new Error(`Unknown target: ${targetName}`)
@@ -70,37 +152,25 @@ export default defineCommand({
       throw new Error(`Target ${targetName} is registered but not implemented yet.`)
     }
 
-    const permissions = String(args.permissions)
-    if (!permissionModes.includes(permissions as PermissionMode)) {
-      throw new Error(`Unknown permissions mode: ${permissions}`)
-    }
+    const resolvedScope = validateScope(targetName, target, args.scope ? String(args.scope) : undefined)
 
-    const plugin = await loadClaudePlugin(String(args.source))
-    const outputRootProvided = Boolean(args.output && String(args.output).trim())
-    const outputRoot = resolveOutputRoot(args.output)
-    const codexHome = resolveCodexRoot(args.codexHome)
-    const geminiHome = resolveGeminiRoot(
-      args.geminiHome,
-      outputRootProvided ? outputRoot : process.cwd(),
-    )
-
-    const options = {
-      agentMode: String(args.agentMode) === "primary" ? "primary" : "subagent",
-      inferTemperature: Boolean(args.inferTemperature),
-      permissions: permissions as PermissionMode,
-    }
-
-    const primaryOutputRoot = targetName === "codex"
-      ? codexHome
-      : targetName === "gemini"
-        ? geminiHome
-        : outputRoot
+    const primaryOutputRoot = resolveTargetOutputRoot({
+      targetName,
+      outputRoot,
+      codexHome,
+      piHome,
+      openclawHome,
+      qwenHome,
+      pluginName: plugin.manifest.name,
+      hasExplicitOutput,
+      scope: resolvedScope,
+    })
     const bundle = target.convert(plugin, options)
     if (!bundle) {
       throw new Error(`Target ${targetName} did not return a bundle.`)
     }
 
-    await target.write(primaryOutputRoot, bundle)
+    await target.write(primaryOutputRoot, bundle, resolvedScope)
     console.log(`Converted ${plugin.manifest.name} to ${targetName} at ${primaryOutputRoot}`)
 
     const extraTargets = parseExtraTargets(args.also)
@@ -120,12 +190,18 @@ export default defineCommand({
         console.warn(`Skipping ${extra}: no output returned.`)
         continue
       }
-      const extraRoot = extra === "codex"
-        ? codexHome
-        : extra === "gemini"
-          ? geminiHome
-          : path.join(outputRoot, extra)
-      await handler.write(extraRoot, extraBundle)
+      const extraRoot = resolveTargetOutputRoot({
+        targetName: extra,
+        outputRoot: path.join(outputRoot, extra),
+        codexHome,
+        piHome,
+        openclawHome,
+        qwenHome,
+        pluginName: plugin.manifest.name,
+        hasExplicitOutput,
+        scope: handler.defaultScope,
+      })
+      await handler.write(extraRoot, extraBundle, handler.defaultScope)
       console.log(`Converted ${plugin.manifest.name} to ${extra} at ${extraRoot}`)
     }
 
@@ -141,34 +217,6 @@ function parseExtraTargets(value: unknown): string[] {
     .split(",")
     .map((entry) => entry.trim())
     .filter(Boolean)
-}
-
-function resolveCodexHome(value: unknown): string | null {
-  if (!value) return null
-  const raw = String(value).trim()
-  if (!raw) return null
-  const expanded = expandHome(raw)
-  return path.resolve(expanded)
-}
-
-function resolveCodexRoot(value: unknown): string {
-  return resolveCodexHome(value) ?? path.join(os.homedir(), ".codex")
-}
-
-function resolveGeminiRoot(value: unknown, fallback: string): string {
-  if (!value || !String(value).trim()) {
-    return path.resolve(fallback)
-  }
-  const expanded = expandHome(String(value).trim())
-  return path.resolve(expanded)
-}
-
-function expandHome(value: string): string {
-  if (value === "~") return os.homedir()
-  if (value.startsWith(`~${path.sep}`)) {
-    return path.join(os.homedir(), value.slice(2))
-  }
-  return value
 }
 
 function resolveOutputRoot(value: unknown): string {
