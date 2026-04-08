@@ -570,12 +570,44 @@ brainstorm 已有 `[P][C][G]` 统一解析骨架（PARTY_MODE_ENABLED / CODEX_EN
 
 ---
 
+## SpecFlow 关键差距（实施阻塞点）
+
+以下是 SpecFlow 分析发现的关键问题，必须在实施前解决：
+
+### 阻塞点 A（硬阻塞）：Feature 3 (6.5a) — Codex/Gemini 当前无结构化 finding 字段
+
+**问题**：ce:review [C]/[G] 产生的是非结构化文本输出，不是带 `reviewer` 字段的 JSON finding。rule 6.5a 无法按"检测 reviewer == Codex/Gemini"来过滤。
+
+**解决方案**（实施时选择）：
+- Option A（最小改动）：6.5a 改为 **Stage 级别检测**——当 CODEX_ENABLED 或 GEMINI_ENABLED = true 时，对所有在外部咨询后新增的 `safe_auto` finding 打标记，统一降级为 `gated_auto`
+- Option B：在 Stage 5 Step 5.5 增加"外部 AI 输出→结构化 finding"转换步骤，然后 6.5a 按 reviewer 字段过滤
+
+**推荐**：Option A（最小代价）。
+
+### 阻塞点 B（硬阻塞）：Feature 4 (Intent Gate) 与现有 intent-gate skill 冲突
+
+**问题**：`skills-custom/intent-gate/SKILL.md` 已在 ce:work Phase 0 插入意图分类门控，Feature 4 也要在同位置插入 5 问 Gate。两者冲突。
+
+**解决方案**：
+- Feature 4 的 Intent Gate 在 intent-gate 意图分类 **完成后**执行
+- 仅在 intent-gate 分类为 "implement" 或 "mixed" 时才触发 5 问（"explore" / "fix" 场景跳过）
+- 不重复 intent-gate 的意图判断逻辑
+
+### 阻塞点 C（设计确认）：[R] 去重缓存范围
+
+**问题**：同 session 内 ce:brainstorm [R] 和 ce:work [R] 是不同 skill 调用，无法共享内存缓存。
+
+**决策**（简单方案）：**仅 in-memory 去重**（同一 skill 调用内有效）。跨 skill 调用不保证去重，两个独立调用各自执行。不引入文件缓存（YAGNI）。
+
+---
+
 ## Open Questions（来自 brainstorm，待实施时解决）
 
-1. **[R] 去重的 session 边界**: Claude Code 单次对话 = 一个 session。关键词匹配用精确字符串匹配（不用语义相似度），实现简单可靠。
+1. **[R] 去重的 session 边界**: Claude Code 单次对话 = 一个 session。关键词匹配用 lowercase + trim + collapse spaces + token sort（Codex 建议），不用语义相似度。跨 skill 调用不去重（见阻塞点 C）。
 2. **INDEX.md 摘要内容**: 实施 Task 2 时需读取每个文件的 frontmatter title 字段，摘要基于 title + 文件名推断（不逐一全文读取）。
 3. **compound-promotion-ladder 升级阈值**: 3 次引用触发提示（已在 compound-promotion-ladder SKILL.md 中定义为"同类 tag ≥2次"，本次不修改该 skill，只在 critical-patterns.md 中说明接入关系）。
 4. **Intent Gate 5问保存**: 不保存为 .work-intent.md（YAGNI，see brainstorm Open Questions 4）。
+5. **Task 6 采用两段式**（Codex 建议，SpecFlow 确认）：先问"转 plan / 直接执行 / 取消"，只有坚持直接执行时才追问 3 维（目标/边界/验收），不全量 5 问。
 
 ---
 
