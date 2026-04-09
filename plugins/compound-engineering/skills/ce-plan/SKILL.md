@@ -670,7 +670,7 @@ allowed_files:
 forbidden_surfaces:
   - <识别的高风险文件>
 required_invariants:
-  - "<从 Acceptance Criteria 转换的不变式命令>"
+  - "<从 ## 验收场景章节或 Unit Verification 字段转换的不变式命令>"
 max_files_per_patch: 1
 last_verification_failure: null
 ---

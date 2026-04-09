@@ -111,7 +111,7 @@ last_verification_failure: null
 |------|------|------|
 | `allowed_files` | string[] | 执行者在本次任务中允许修改的文件列表（由 ce:plan 从 Implementation Units 提取）。**匹配规则：精确路径匹配（完整 repo-relative 路径），不支持通配符（`src/*` 无效），不支持目录前缀（`src/` 不匹配 `src/foo.ts`），如需覆盖目录须逐个列出文件** |
 | `forbidden_surfaces` | string[] | 绝对禁止自动修改的文件（版本文件、schema、认证配置等） |
-| `required_invariants` | string[] | 每次变更后必须满足的不变式（由 ce:plan 从 Acceptance Criteria 转换） |
+| `required_invariants` | string[] | 每次变更后必须满足的不变式（由 ce:plan 从 `## 验收场景` 章节和 Unit Verification 字段转换） |
 | `max_files_per_patch` | int | 单次 autofix patch 允许修改的最大文件数（默认 1，即 one-finding-one-patch） |
 | `last_verification_failure` | string\|null | 执行者记录最近一次验证失败信息（null 表示无失败） |
 | `plan_source_commit` | string\|null | 生成合约时 plan_source 的 git commit hash；ce:work 加载时与当前 hash 对比，检测计划是否已更新 |
@@ -150,7 +150,7 @@ last_verification_failure: null
   1. 读取刚生成的计划文件
   2. 从所有 Implementation Units 的 Files 字段收集 allowed_files
   3. 从计划描述识别高风险文件 → forbidden_surfaces
-  4. 从 Acceptance Criteria 转换 → required_invariants
+  4. 从 `## 验收场景` 章节和 Unit Verification 字段转换 → required_invariants
   5. 写入 .team-contract.md（repo 根目录）
 
 追溯审查激活：
@@ -221,9 +221,9 @@ last_verification_failure: null
 > 3. 停止，稍后处理"
 
 选择说明：
-- 选 1 → 执行者读取 `.ce-work-verification.json` 的 layer 失败信息，修复后重置 verification_rounds，重跑 Phase 3.5
+- 选 1 → 执行者读取 `.context/compound-engineering/ce-work-verification.json` 的 layer 失败信息，修复后重置 verification_rounds，重跑 Phase 3.5
 - 选 2 → 继续 Phase 4，在 PR/commit 描述中标注「⚠️ [T] 验证未通过，人工跳过」
-- 选 3 → 结束，保留 `.ce-work-verification.json` 供后续参考
+- 选 3 → 结束，保留 `.context/compound-engineering/ce-work-verification.json` 供后续参考
 
 ### ce:review [team]（autofix 和 interactive 模式有效，report-only/headless 无效）
 

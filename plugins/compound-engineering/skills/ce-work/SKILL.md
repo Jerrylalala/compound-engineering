@@ -52,7 +52,7 @@ This command takes a work document (plan, specification, or todo file) or a bare
 - 如果 `$ARGUMENTS` 包含 `[G]` 或 `[g]`：
   - 设置 GEMINI_ENABLED = true
   - 从参数中移除 `[G]`
-  - 宣告：「✅ [G] 标志已检测——Phase 3 内嵌 ce:review 时将透传 [G]，Gemini 将参与审查」
+  - 宣告：「✅ [G] 标志已检测——标记外部 AI（Gemini）已参与整体工作流。注：[G] 不透传给内嵌 ce:review（透传无收益，详见 Phase 3）」
 - 否则：GEMINI_ENABLED = false
 
 **[team] / [team:full] 检测**（仅当包含时）：
@@ -354,7 +354,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
    If a `/simplify` skill or equivalent is available, use it. Otherwise, review the changed files yourself for reuse and consolidation opportunities.
 
-6. **Figma Design Sync** (if applicable)
+7. **Figma Design Sync** (if applicable)
 
    For UI work with Figma designs:
 
@@ -543,8 +543,8 @@ Determine how to proceed based on what was provided in `<input_document>`.
    - **Step c**（Step b 成功时）：调用识别到的登录端点获取 token，注入后续请求的 `Authorization` header
 3. 若均无法获取，记录「⚠️ Layer 1 需要认证，无法自动注入，跳过 + 标记 skip」
 4. 执行对应的 curl 请求或 DB CLI 查询
-4. 验证响应码 + 返回体结构 + 数据库状态
-5. 成功 → `layers.layer1 = "pass"`；失败 → 修复 → 重试
+5. 验证响应码 + 返回体结构 + 数据库状态
+6. 成功 → `layers.layer1 = "pass"`；失败 → 修复 → 重试
 
 ---
 

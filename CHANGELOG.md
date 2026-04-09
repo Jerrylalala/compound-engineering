@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.45.21] - 2026-04-09
+
+### 修复（全量检查第五轮：6 个遗留问题）
+- [ce:work] Phase -1 [G] 宣告矛盾修复：改为「不透传给内嵌 ce:review」与 Phase 3 注释一致（原文错误声明「将透传 [G]，Gemini 将参与审查」）
+- [ce:work] Layer 1 步骤编号修复：两个「4.」改为正确的 4/5/6（执行 curl → 验证响应 → 成功/失败）
+- [ce:work] Phase 2 Execute 步骤编号修复：第二个「6.」（Track Progress）改为「7.」
+- [team-mode] BLOCKED 检查点路径修复：两处旧路径 `.ce-work-verification.json` 更新为 `.context/compound-engineering/ce-work-verification.json`
+- [team-mode] 字段描述 + ce:plan 激活步骤：「Acceptance Criteria」改为「## 验收场景章节和 Unit Verification 字段」（与 ce:plan Phase 4.5 一致）
+- [ce:plan] Phase 4.5 YAML 模板注释：required_invariants 示例更新为正确来源描述
+
 ## [2.45.20] - 2026-04-09
 
 ### 修复（第四轮：剩余 P2/P3 + Handoff 协议 + 文件路径）
