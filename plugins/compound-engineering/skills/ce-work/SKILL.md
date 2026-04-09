@@ -34,13 +34,18 @@ This command takes a work document (plan, specification, or todo file) or a bare
       - 若不可用：PW_MODE_ENABLED = false，输出：「⚠️ Playwright MCP Server 未配置，[PW] 模式不可用，Layer 2 自动降级为 agent-browser。如需 Playwright MCP，请先安装并配置 Playwright MCP Server。」
     - 否则：PW_MODE_ENABLED = false（Layer 2 使用 agent-browser，token 低 30-50 倍）
 - 否则：T_MODE_ENABLED = false；PW_MODE_ENABLED = false
-  - 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：移除 `[PW]`，输出：「⚠️ [PW] 需要配合 [T] 使用，当前未传 [T]，[PW] 将被忽略。如需浏览器验证，请使用 `ce:work [T][PW]`。」
+  - 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：移除 `[PW]`，使用 **AskUserQuestion** 询问：
+      > "⚠️ [PW] 需要配合 [T] 使用，当前未传 [T]，[PW] 单独使用无效。
+      > 1. 以 [T][PW] 模式重新运行（启用四层自验证 + Playwright 浏览器验证）
+      > 2. 继续当前模式（忽略 [PW]，无浏览器验证）
+      > 3. 停止"
+      Based on selection: 选 1 → 以 [T][PW] 标志重新执行；选 2 → 继续（PW_MODE_ENABLED=false）；选 3 → 结束
 
 **[C] Codex 标志检测**：
 - 如果 `$ARGUMENTS` 包含 `[C]` 或 `[c]`：
   - 设置 CODEX_ENABLED = true
   - 从参数中移除 `[C]`
-  - 宣告：「✅ [C] 标志已检测——Phase 3 内嵌 ce:review 时将透传 [C]，Codex 将参与审查」
+  - 宣告：「✅ [C] 标志已检测——标记外部 AI（Codex）已参与整体工作流。注：[C] 不透传给内嵌 ce:review（透传无收益，详见 Phase 3）」
 - 否则：CODEX_ENABLED = false
 
 **[G] Gemini 标志检测**：
@@ -122,6 +127,11 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
    检索结果注入执行上下文，不修改 plan 文档格式。在每个 Implementation Unit 执行前，
    如有相关历史经验，以注释形式提示：「📚 历史参考：[文档名] — [核心洞察]」。无匹配时写 `No relevant learnings found`，不阻断主流程。
+
+   **[R]+[T] 组合行为**：
+   - [R] 历史检索在 Phase 0 执行，结果注入 Phase 2 实现上下文
+   - Layer 3 验收审查**可引用**历史经验作为补充佐证（如"历史上类似场景通过了 X 检查"）
+   - 但 Layer 3 的验收标准以当前计划的验收场景为准，历史经验不改变 pass/fail 判断
 
 ---
 
@@ -424,7 +434,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 #### 3.5.0 初始化验证状态
 
-**检查项目根目录是否已存在 `.ce-work-verification.json`**：
+**检查 `.context/compound-engineering/ce-work-verification.json` 是否存在**（与 ce:review artifact 目录一致，避免多 worktree 根目录冲突）：
 
 **情况 A：文件已存在且 `passes: false`**
 1. 读取文件内容
@@ -444,7 +454,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 6. 不重置 verification_rounds（继续累计）
 
 **情况 B：文件不存在，或 `passes: true`（上次已成功）**
-新建文件（如下）：
+确保目录存在后新建文件：`mkdir -p .context/compound-engineering/`
 
 ```json
 {
@@ -469,7 +479,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 - `layer0_inner_retries`：Layer 0 层内重试次数，上限 3 次，不计入 verification_rounds
 - `passes: false` 初始值：防止验证未完成就进入 Phase 4
 
-**只读文件系统降级**：若项目根目录不可写（如 CI 只读容器），以内存状态继续执行：
+**只读文件系统降级**：若 `.context/compound-engineering/` 不可写（如 CI 只读容器），以内存状态继续执行：
 - 所有状态变量在 session 内存中维护
 - Phase 3.5 结束时输出状态摘要（代替写文件）
 - 宣告：「⚠️ 根目录不可写，以内存状态模式执行验证（无 session 恢复能力）」
@@ -490,7 +500,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 不确定时：激活 Layer 0 + Layer 3，Layer 1/2 使用 **AskUserQuestion** 询问用户确认。
 
 **全层跳过的情况**：若扫描结果所有层均判断为 `"skip"`（如纯 Markdown 项目无构建命令、无 UI、无验收场景），则：
-- 设置 passes = true，写入 .ce-work-verification.json
+- 设置 passes = true，写入 .context/compound-engineering/ce-work-verification.json
 - 宣告：「⚠️ 未检测到验证内容，所有层跳过，标记验证通过（纯文档/无可执行验证场景）」
 - 直接进入 Phase 4（跳过 Phase 3.5.2 和 3.5.3）
 
@@ -508,7 +518,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 2. 执行命令，捕获 exit code + stderr
 3. exit code = 0 → 更新 `layers.layer0 = "pass"`
 4. exit code ≠ 0 → 分析错误输出 → 修复代码/配置 → 重试 Layer 0（**不计入 verification_rounds**，属于层内重试）
-   - **层内最大重试次数：3 次**。每次重试 `layer0_inner_retries +1`（记录在 .ce-work-verification.json 或内存中）。
+   - **层内最大重试次数：3 次**。每次重试 `layer0_inner_retries +1`（记录在 .context/compound-engineering/ce-work-verification.json 或内存中）。
    - 超过 3 次后：
      - 更新 `layers.layer0 = "fail"` 并记录错误摘要
      - 继续本轮的后续激活层（Layer 1/2/3），不提前中断
@@ -584,10 +594,20 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
    - 与验收场景逐条比对
 4. 发现未达标项 → 列出 → 修复 → 重试 Layer 3
 
+**[T]+[team] 职责矩阵**：
+
+| 职责 | Phase 3.5 Layer 3 | team 验证者 Hook |
+|------|-------------------|-----------------|
+| 触发时机 | 所有任务完成后（Phase 3.5） | 每个 Implementation Unit 完成后 |
+| 检查范围 | 跨任务全局一致性 | 单任务局部正确性 |
+| 读取方式 | 独立读所有变更文件（不信任执行者报告） | 运行测试命令 + 不变式检查 |
+| 失败行为 | 进入 BLOCKED（AskUserQuestion 三选一） | 停止当前 Unit，等待执行者修复 |
+| 重复检查 | 只核查跨任务维度条目，不重复局部已覆盖条目 | 不关注跨任务组合 |
+
 **[T] + [team] 特殊处理**：
 - **Layer 3 delegation**：[team] 模式的验证者 Hook 在每任务后运行（时机早于 Phase 3.5，逐任务局部验证）。Phase 3.5 的 Layer 3 执行轻量全局确认：
   - **精确职责**：只核查验收场景表中跨任务维度的条目（如"整体流程通过"类场景），不重复核查已被 team 验证者 Hook 覆盖的单任务条目
-  - **跨任务组合问题处理**：若发现跨任务组合破坏了不变式，记录到 `.ce-work-verification.json` 的 Layer 3 失败信息，进入标准 BLOCKED 流程（AskUserQuestion 三选一），不触发新一轮 team 验证者 Hook
+  - **跨任务组合问题处理**：若发现跨任务组合破坏了不变式，记录到 `.context/compound-engineering/ce-work-verification.json` 的 Layer 3 失败信息，进入标准 BLOCKED 流程（AskUserQuestion 三选一），不触发新一轮 team 验证者 Hook
   - 状态标记：`layers.layer3 = "delegated-to-team+light-check"`（team Hook 已完成局部验证，Phase 3.5 补充全局一致性确认）
   - 若计划无验收场景章节：标记 `"delegated-to-team"`，跳过 Phase 3.5 的 Layer 3
 
@@ -604,7 +624,7 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 
 #### 3.5.3 更新状态并处理结果
 
-每层执行后更新 `.ce-work-verification.json`；`verification_rounds` 每轮 +1。
+每层执行后更新 `.context/compound-engineering/ce-work-verification.json`；`verification_rounds` 每轮 +1。
 
 **所有激活层通过（passes: true）**：
 
@@ -645,7 +665,7 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 Based on selection:
 - 选 1 → 展示完整错误，等用户修复后重新执行 Phase 3.5（verification_rounds 重置为 0）
 - 选 2 → 继续 Phase 4，在 PR 描述中标注「⚠️ 验证未通过，人工跳过」
-- 选 3 → 结束流程，保留 `.ce-work-verification.json` 供后续参考
+- 选 3 → 结束流程，保留 `.context/compound-engineering/ce-work-verification.json` 供后续参考
 
 ---
 
@@ -705,7 +725,21 @@ Based on selection:
    - Summarize what was completed
    - Link to PR (if one was created)
    - Note any follow-up work needed
-   - Suggest next steps if applicable
+
+### Handoff
+
+使用 **AskUserQuestion** 工具询问：
+
+> "功能已完成。下一步？
+>
+> 1. **代码审查（推荐）** — `/ce:review mode:autofix plan:<计划路径>` 进行结构化审查
+> 2. **直接创建 PR** — `/workflows:pr`
+> 3. **完成** — 无需额外操作"
+
+Based on selection:
+- 选 1 → 调用 `ce:review` skill，传入 `mode:autofix`，plan 路径已知则传入（加 `[team]` 如果 TEAM_GATE_ENABLED）
+- 选 2 → 调用 `workflows:pr` skill
+- 选 3 → 结束流程
 
 ---
 

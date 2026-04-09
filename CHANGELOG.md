@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.45.20] - 2026-04-09
+
+### 修复（第四轮：剩余 P2/P3 + Handoff 协议 + 文件路径）
+- [ce:work] 修复 Phase -1 [C] 宣告文字（移除"透传给内嵌 ce:review"的错误声明）
+- [ce:work] Phase 4 新增 Workflow Handoff（AskUserQuestion 三选一：代码审查/创建PR/完成）
+- [ce:work] [PW] 孤立检测升级为 AskUserQuestion（从文字警告升级为 agent-native 交互）
+- [ce:work] .context/compound-engineering/ce-work-verification.json 替代根目录放置（避免多 worktree 冲突，与 ce:review artifact 目录一致）
+- [ce:work] 添加 Layer 3 + team 验证者 Hook 职责矩阵表（时机/范围/读取方式/失败行为）
+- [ce:work] Phase 0 添加 [R]+[T] 组合交互行为说明
+- [team-mode] 添加风险卫执行规范（时机/输入/匹配规则/用户拒绝处理）
+- [team-mode] allowed_files 字段说明添加精确匹配规则（不支持通配符/目录前缀）
+- [ce:review] Rule 4 添加 fixer subagent 执行步骤（命令式vs描述式验证/回滚逻辑）
+- [ce:brainstorm] argument-hint 添加 [team:full] 说明
+
 ## [2.45.19] - 2026-04-09
 
 ### 修复（第三轮 + team 全量审核）

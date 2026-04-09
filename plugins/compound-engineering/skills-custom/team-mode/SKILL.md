@@ -75,6 +75,8 @@ argument-hint: "[team] | [team:full]"
 
 ## .team-contract.md 格式规范
 
+> **Source of Truth**：本节是 `.team-contract.md` 格式的唯一权威定义。`ce:plan/SKILL.md` 的 Phase 4.5 包含格式副本用于生成指引，若两处有出入，以本节为准。
+
 合约文件使用 YAML frontmatter（而非 Markdown 表格），便于规则引擎程序化解析：
 
 ```yaml
@@ -107,7 +109,7 @@ last_verification_failure: null
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `allowed_files` | string[] | 执行者在本次任务中允许修改的文件列表（由 ce:plan 从 Implementation Units 提取） |
+| `allowed_files` | string[] | 执行者在本次任务中允许修改的文件列表（由 ce:plan 从 Implementation Units 提取）。**匹配规则：精确路径匹配（完整 repo-relative 路径），不支持通配符（`src/*` 无效），不支持目录前缀（`src/` 不匹配 `src/foo.ts`），如需覆盖目录须逐个列出文件** |
 | `forbidden_surfaces` | string[] | 绝对禁止自动修改的文件（版本文件、schema、认证配置等） |
 | `required_invariants` | string[] | 每次变更后必须满足的不变式（由 ce:plan 从 Acceptance Criteria 转换） |
 | `max_files_per_patch` | int | 单次 autofix patch 允许修改的最大文件数（默认 1，即 one-finding-one-patch） |
@@ -181,6 +183,12 @@ last_verification_failure: null
 4. 在每个 Implementation Unit 前：
    - 执行者检查文件边界（allowed_files / forbidden_surfaces）
    - [team:full] 风险卫检查高风险模式 → 要求用户确认
+     **风险卫执行规范**：
+     - 时机：每个 Implementation Unit 开始前（执行者读计划、准备修改文件前）
+     - 输入：当前 Unit 的描述文字 + Files 列表（不读代码，不消耗额外 token）
+     - 匹配：检测高风险关键词（`auth`/`session`/`permission`/`payment`/`billing`/`migration`/`schema`/`seed`）
+     - 用户确认后：继续执行该 Unit
+     - 用户拒绝后：跳过该 Unit，记录到 `.team-contract.md` 的 work_log，不自动 fail
 
 **并行 subagent 的文件边界约束**（当 ce:work 派发多个并行 subagent 时）：
 - 合约主在派发前检查各 Implementation Unit 的 Files 列表：

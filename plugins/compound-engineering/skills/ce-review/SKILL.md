@@ -502,8 +502,15 @@ if TEAM_GATE_ENABLED AND mode != "report-only" AND mode != "headless":
     Rule 4 — Invariant verification:
       if required_invariants is non-empty:
         mark finding with requires_verification: true
-        fixer subagent must verify all required_invariants after applying the patch
-        if invariant check fails: revert patch, re-route finding as gated_auto
+        fixer subagent must verify all required_invariants after applying the patch:
+          1. 应用 patch
+          2. 对 required_invariants 中每个条目：
+             - 命令式（"bash script.sh 必须通过"）→ 运行命令，检查退出码
+             - 描述式（"UI 显示成功提示"）→ 标注 requires_human_check: true，跳过自动验证
+          3. 若任何命令验证失败：
+             - 自动回滚 patch（git checkout -- <file>）
+             - re-route finding as gated_auto，标注"invariant 验证失败: <命令> exit <N>"
+          4. 若所有验证通过：保留 patch，finding 标注 verified: true
 
   Additionally, apply review-contract Tier overrides (always active when TEAM_GATE_ENABLED, regardless of whether review-contract skill was separately loaded):
     Blocking Tier agents (security-reviewer, data-migrations-reviewer, deployment-verification-agent):
