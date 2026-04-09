@@ -1,7 +1,7 @@
 ---
 name: ce:plan
 description: "Create structured plans for any multi-step task -- software features, research workflows, events, study plans, or any goal that benefits from structured breakdown. Also deepen existing plans with interactive review of sub-agent findings. Use for plan creation when the user says 'plan this', 'create a plan', 'write a tech plan', 'plan the implementation', 'how should we build', 'what's the approach for', 'break this down', 'plan a trip', 'create a study plan', or when a brainstorm/requirements document is ready for planning. Use for plan deepening when the user says 'deepen the plan', 'deepen my plan', 'deepening pass', or uses 'deepen' in reference to a plan. For exploratory or ambiguous requests where the user is unsure what to do, prefer ce:brainstorm first."
-argument-hint: "[optional: feature description, requirements doc path, plan path to deepen, or any task to plan] [team=合约主+追溯审查+自动生成.team-contract.md]"
+argument-hint: "[optional: feature description, requirements doc path, plan path to deepen, or any task to plan] [team=合约主+追溯审查+自动生成.team-contract.md] [team:full=同[team]（ce:plan阶段无额外角色，与ce:work [team:full]路径兼容）]"
 ---
 
 # Create Technical Plan
@@ -625,6 +625,8 @@ When the plan contains 4+ implementation units with non-linear dependencies, 3+ 
 
 **执行时机**: Phase 4（Write the Plan）完成后，Phase 5（Final Review）之前
 
+Load the `team-mode` skill for role definitions (合约主, 追溯审查).
+
 #### 合约主角色激活
 
 合约主读取刚生成的计划文件，提取边界合约：
@@ -646,7 +648,10 @@ team_mode: true
 generated_by: "ce:plan [team]"
 generated_at: YYYY-MM-DD
 plan_source: <刚生成的计划文件路径>
-plan_source_commit: <运行 `git log -1 --format='%H' -- <plan_source>` 获取的 hash；如计划文件尚未提交则填 null>
+plan_source_commit: null   # 计划文件在 Phase 5 写入后尚未 commit，此处始终为 null
+                           # 启用版本检测方法：在 Phase 5 写入计划文件后，运行：
+                           #   git log -1 --format='%H' -- <plan_file>
+                           # 将结果填入此字段，或让 ce:work [team] 在执行前手动更新
 allowed_files:
   - <从 Implementation Units 提取的文件路径>
 forbidden_surfaces:
@@ -673,6 +678,22 @@ last_verification_failure: null
 3. 将有价值的发现追加到计划文件的 **Open Questions** 节（如无此节则新建）
 
 **输出**：`.team-contract.md` 写入根目录；追溯审查结果（如有）写入计划文件末尾
+
+#### Post-Phase-5 合约 hash 更新（可选，启用版本检测）
+
+Phase 5.2（Write Plan File）完成后，如需启用版本检测：
+
+```bash
+PLAN_HASH=$(git log -1 --format='%H' -- <plan_source_path> 2>/dev/null)
+```
+
+如 `PLAN_HASH` 非空（计划文件已提交），在 `.team-contract.md` 的 YAML frontmatter 中更新：
+```yaml
+plan_source_commit: <PLAN_HASH>
+```
+
+如 `PLAN_HASH` 为空（计划文件尚未提交，是常见状态），保留 null 即可。
+建议：在首次运行 `ce:work [team]` 前手动 commit 计划文件，以启用完整版本保护。
 
 ---
 

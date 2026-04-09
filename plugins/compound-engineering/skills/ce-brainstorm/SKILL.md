@@ -55,7 +55,7 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 | `[C]` | Auto-consult Codex after Phase 2. |
 | `[G]` | Auto-consult Gemini after Phase 2. |
 | `[R]` | Run learnings-researcher before Phase 1. Inject results as historical reference in Phase 2. |
-| `[team]` | TEAM_MODE = true. Activate structured exploration: **探索者 + 挑战者** role pair (see below). |
+| `[team]` | TEAM_MODE = true. Activate structured exploration: **探索者 + 挑战者** role pair (see below). **[team:full]** 传入时等同于 `[team]`（brainstorm 阶段探索者+挑战者角色集，无额外风险卫角色）。 |
 
 ### `[team]` Structured Exploration Mode
 
@@ -134,16 +134,18 @@ If the scope is unclear, ask one targeted question to disambiguate and then proc
 - Phase 0.1b 判断为 non-software brainstorming → 跳过（历史方案为软件解决方案，检索无意义）
 - Phase 0.2 判断为 clear requirements → 直接路由至 Phase 1.3 或 Phase 3 → 跳过
 
+跳过时宣告：「⚠️ [R] 跳过：当前属于非软件探索/已有清晰需求场景，learnings-researcher 检索跳过」
+
 从 feature description 提取关键词，运行 `compound-engineering:research:learnings-researcher` 检索 `docs/solutions/` 历史方案：
 
 ```
 Task compound-engineering:research:learnings-researcher(feature_description)
 ```
 
-**去重规则**（同一 session 内）：
-- 将已搜索的关键词集合维护为 `[session_searched_topics]`（key: lowercase + trim + token sort）
-- 若核心关键词已在集合中 → 跳过并注明「已在本 session 检索过相似主题」；否则 → 执行搜索并加入集合
-- 注：子代理派发场景下各子代理 in-memory 状态独立，跨子代理去重不生效
+**去重规则**（当前 skill 内有效，跨 skill 不生效）：
+同一 session 内相同关键词（lowercase + trim + token sort）不重复搜索，维护 `[session_searched_topics]` 集合。
+子代理派发时各子代理 in-memory 状态独立，跨子代理去重不生效（同一搜索词可能被多个子代理重复触发）。
+跨 skill 去重不生效（如本 session 已在 ce:work [R] 中检索过相同关键词，ce:brainstorm [R] 仍会重新检索）。
 
 **结果处置**：
 - 检索结果作为 Phase 2 方案对比的「历史参考」上下文

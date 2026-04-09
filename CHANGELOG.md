@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.45.18] - 2026-04-09
+
+### 修复
+- [ce:work] Phase -1 重构 [PW] 检测为嵌套结构（消除多步依赖链），添加 Playwright MCP 可用性检查
+- [ce:work] Phase -1 新增 [C]/[G] 检测并透传给内嵌 ce:review 调用
+- [ce:work] Phase 3.5.0 添加先读后写逻辑，修复 session 恢复承诺无法实现的问题
+- [ce:work] Phase 3.5.0 添加只读文件系统降级策略（内存状态模式）
+- [ce:work] Layer 0 添加层内最大重试次数限制（3 次），防止无限循环
+- [ce:work] Layer 1 添加认证端点识别优先级规则，不再依赖 AI 推断登录端点
+- [ce:work] Layer 2 添加 agent-browser 两步调用说明（加载文档 + Bash 执行）
+- [ce:work] [PW] argument-hint 改为主动式警告，明确前置条件（需 Playwright MCP Server）
+- [ce:work] [R] 去重规则独立展开，不再引用 ce:brainstorm，明确跨 skill 不生效
+- [ce:work] [T]+[team] BLOCKED 改为标准 AskUserQuestion，不再引用未定义的 team 检查点
+- [ce:work] [T]+[team] Layer 3 边界定义明确（只核查跨任务维度），定义跨任务组合问题处理路径
+- [ce:plan] Phase 4.5 添加 Load team-mode skill 指令
+- [ce:plan] Phase 4.5 修复 plan_source_commit 时序问题，添加 Post-Phase-5 更新指南
+- [ce:plan] argument-hint 添加 [team:full] 说明
+- [team-mode] 添加 BLOCKED 检查点定义（[T]+[team] 同时激活时）
+- [team-mode] 文档化 plan_source_commit 版本检测限制和启用步骤
+- [team-mode] 降级行为表添加设计原因说明
+- [team-mode] 明确 [team:full] 在 ce:brainstorm/review 中等同 [team]
+- [team-mode] 添加并行 subagent 文件边界约束规则
+- [team-mode] [T]+[team] 全局 Layer 3 补充定义
+- [ce:review] [C]/[G] 参数描述修正：诚实说明不直接调用 Codex/Gemini，而是激活安全降级规则
+- [ce:review] Patch Gate 扩展到 interactive 模式（原仅限 autofix），确保合约保护在默认模式生效
+- [ce:review] argument-hint 添加 [team:full] 说明（等同 [team]）
+- [ce:brainstorm] [R] 去重规则独立展开，添加跳过通知，明确跨 skill 不生效
+- [ce:brainstorm] [team:full] 说明等同 [team]
+
+---
+
 ## [2.45.14] - 2026-04-09
 
 ### Added

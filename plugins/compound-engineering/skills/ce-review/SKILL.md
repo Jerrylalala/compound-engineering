@@ -27,9 +27,10 @@ Parse `$ARGUMENTS` for the following optional tokens. Strip each recognized toke
 | `mode:headless` | `mode:headless` | Select headless mode for programmatic callers (see Mode Detection below) |
 | `base:<sha-or-ref>` | `base:abc1234` or `base:origin/main` | Skip scope detection — use this as the diff base directly |
 | `plan:<path>` | `plan:docs/plans/2026-03-25-001-feat-foo-plan.md` | Load this plan for requirements verification |
-| `[C]` | `[C]` | CODEX_ENABLED = true. Invoke Codex as an additional external reviewer. Triggers 6.5a downgrade rule in Stage 5. |
-| `[G]` | `[G]` | GEMINI_ENABLED = true. Invoke Gemini as an additional external reviewer. Triggers 6.5a downgrade rule in Stage 5. |
-| `[team]` | `[team]` | TEAM_GATE_ENABLED = true. Load `.team-contract.md` and execute Deterministic Patch Gate in Stage 5 (see below). Has no effect in `mode:report-only` or `mode:headless`. |
+| `[C]` | `[C]` | CODEX_ENABLED = true. 标记 Codex 将作为外部审查方参与（由 workflows:review [C] 调用）。激活 6.5a 安全规则：将所有 safe_auto 降级为 gated_auto，防止可能缺乏 codebase 上下文的建议被自动应用。 |
+| `[G]` | `[G]` | GEMINI_ENABLED = true. 标记 Gemini 将作为外部审查方参与（由 workflows:review [G] 调用）。激活 6.5a 安全规则（同 [C]）。 |
+| `[team]` | `[team]` | TEAM_GATE_ENABLED = true. Load `.team-contract.md` and execute Deterministic Patch Gate in Stage 5 (see below). Has no effect in `mode:report-only` or `mode:headless`. Patch Gate runs in both `mode:autofix` and interactive mode. |
+| `[team:full]` | `[team:full]` | 等同于 `[team]`（ce:review 阶段无风险卫角色，Patch Gate 行为与 [team] 相同，TEAM_GATE_ENABLED = true）。 |
 
 All tokens are optional. Each one present means one less thing to infer. When absent, fall back to existing behavior for that stage.
 
@@ -434,6 +435,8 @@ Convert multiple reviewer JSON payloads into one deduplicated, confidence-gated 
 
 6.5a. **外部模型建议强制 gated_auto（无条件生效，不依赖 [team] 模式）**
 
+**注意**：ce:review 本身不主动调用 Codex/Gemini CLI。`[C]`/`[G]` 标志由外层编排（如 `workflows:review [C]`）传入，表示外部 AI 已参与或将参与审查。6.5a 规则是一个轻量级安全层，对所有 safe_auto 发现保守降级，防止外部 AI 建议（可能缺乏全局 context）被自动应用。
+
 This rule is a lightweight normalization step — no tokens consumed. Runs immediately after step 6, before the Patch Gate.
 
 标志赋值：`CODEX_ENABLED` 在 Argument Parsing 阶段检测到 `[C]` 时设为 true；`GEMINI_ENABLED` 在检测到 `[G]` 时设为 true。
@@ -470,7 +473,7 @@ Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED):
 This is a rule engine, not an agent — it consumes no extra tokens. Execute immediately after step 6 routing normalization, before partitioning the fixer queue.
 
 ```
-if TEAM_GATE_ENABLED AND mode == autofix:
+if TEAM_GATE_ENABLED AND mode != "report-only" AND mode != "headless":
   Load .team-contract.md from repo root
   If not found: skip this gate, log warning "未找到 .team-contract.md，Patch Gate 已禁用"
   Read: allowed_files, forbidden_surfaces, max_files_per_patch, required_invariants

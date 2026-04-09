@@ -1,7 +1,7 @@
 ---
 name: ce:work
 description: Execute work efficiently while maintaining quality and finishing features
-argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt场景触发learnings-researcher检索历史经验] [T=四层自验证:执行后运行CLI+API/DB+浏览器+验收验证,通过验证才算完成] [PW=Playwright MCP浏览器验证,仅在[T]时生效,默认[T]使用agent-browser低token模式]"
+argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt且非Trivial场景触发learnings-researcher检索历史经验，传文件路径无效] [T=四层自验证:执行后运行CLI+API/DB+浏览器+验收验证,通过验证才算完成] [PW=Playwright MCP浏览器验证（必须同时传[T]，单独传[PW]无效并显示警告；需另行安装Playwright MCP Server，插件不含此依赖）]"
 ---
 
 # Work Execution Command
@@ -27,18 +27,28 @@ This command takes a work document (plan, specification, or todo file) or a bare
   - 设置 T_MODE_ENABLED = true
   - 从参数中移除 `[T]`
   - 宣告：「✅ [T] 自验证模式已启用——执行完成后将运行四层验证（Phase 3.5）」
-- 否则：T_MODE_ENABLED = false（Phase 3.5 不触发）
+  - **[PW] 检测**（仅在 T_MODE_ENABLED=true 时执行）：
+    - 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：
+      - 检查 Playwright MCP 工具可用性（`mcp__playwright__browser_navigate` 是否在工具列表中）
+      - 若可用：设置 PW_MODE_ENABLED = true，从参数中移除 `[PW]`，宣告：「✅ [PW] Playwright MCP 模式已启用——Layer 2 将使用 Playwright MCP（高精度浏览器验证）」
+      - 若不可用：PW_MODE_ENABLED = false，输出：「⚠️ Playwright MCP Server 未配置，[PW] 模式不可用，Layer 2 自动降级为 agent-browser。如需 Playwright MCP，请先安装并配置 Playwright MCP Server。」
+    - 否则：PW_MODE_ENABLED = false（Layer 2 使用 agent-browser，token 低 30-50 倍）
+- 否则：T_MODE_ENABLED = false；PW_MODE_ENABLED = false
+  - 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：移除 `[PW]`，输出：「⚠️ [PW] 需要配合 [T] 使用，当前未传 [T]，[PW] 将被忽略。如需浏览器验证，请使用 `ce:work [T][PW]`。」
 
-**[PW] Playwright 标志检测**（仅在 T_MODE_ENABLED=true 时有意义）：
-- 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：
-  - 从参数中移除 `[PW]`
-  - 如果 T_MODE_ENABLED = false：
-    - 强制 PW_MODE_ENABLED = false（不留歧义状态）
-    - 输出：「⚠️ [PW] 需要配合 [T] 使用，当前未传 [T]，[PW] 将被忽略。如需浏览器验证，请使用 `ce:work [T][PW]`。」
-  - 如果 T_MODE_ENABLED = true：
-    - 设置 PW_MODE_ENABLED = true
-    - 宣告：「✅ [PW] Playwright MCP 模式已启用——Layer 2 将使用 Playwright MCP（高精度浏览器验证）」
-- 否则：PW_MODE_ENABLED = false（Layer 2 使用 agent-browser，token 低 30-50 倍）
+**[C] Codex 标志检测**：
+- 如果 `$ARGUMENTS` 包含 `[C]` 或 `[c]`：
+  - 设置 CODEX_ENABLED = true
+  - 从参数中移除 `[C]`
+  - 宣告：「✅ [C] 标志已检测——Phase 3 内嵌 ce:review 时将透传 [C]，Codex 将参与审查」
+- 否则：CODEX_ENABLED = false
+
+**[G] Gemini 标志检测**：
+- 如果 `$ARGUMENTS` 包含 `[G]` 或 `[g]`：
+  - 设置 GEMINI_ENABLED = true
+  - 从参数中移除 `[G]`
+  - 宣告：「✅ [G] 标志已检测——Phase 3 内嵌 ce:review 时将透传 [G]，Gemini 将参与审查」
+- 否则：GEMINI_ENABLED = false
 
 **[team] / [team:full] 检测**（仅当包含时）：
 Strip the team token from arguments before passing to Phase 0.
@@ -105,7 +115,10 @@ Determine how to proceed based on what was provided in `<input_document>`.
    Task compound-engineering:research:learnings-researcher(prompt_content)
    ```
 
-   去重规则（同 ce:brainstorm [R]）：同一 session 内相同关键词（lowercase + trim + token sort）不重复搜索。子代理派发时各子代理 in-memory 状态独立。
+   **去重规则**（当前 skill 内有效，跨 skill 不生效）：
+   同一 session 内相同关键词（lowercase + trim + token sort）不重复搜索。
+   子代理派发时各子代理 in-memory 状态独立，跨子代理去重不生效（同一搜索词可能被多个子代理重复触发）。
+   跨 skill 去重不生效（如先运行 ce:brainstorm [R]，再运行 ce:work [R]，相同关键词仍会重新检索）。
 
    检索结果注入执行上下文，不修改 plan 文档格式。在每个 Implementation Unit 执行前，
    如有相关历史经验，以注释形式提示：「📚 历史参考：[文档名] — [核心洞察]」。无匹配时写 `No relevant learnings found`，不阻断主流程。
@@ -365,6 +378,8 @@ Determine how to proceed based on what was provided in `<input_document>`.
    Every change gets reviewed before shipping. The depth scales with the change's risk profile, but review itself is never skipped.
 
    **Tier 2: Full review (default)** — REQUIRED unless Tier 1 criteria are explicitly met. Invoke the `ce:review` skill with `mode:autofix` to run specialized reviewer agents, auto-apply safe fixes, and surface residual work as todos. When the plan file path is known, pass it as `plan:<path>`. This is the mandatory default — proceed to Tier 1 only after confirming every criterion below.
+   - If CODEX_ENABLED: also pass `[C]` to ce:review
+   - If GEMINI_ENABLED: also pass `[G]` to ce:review
 
    **Tier 1: Inline self-review** — A lighter alternative permitted only when **all four** criteria are true. Before choosing Tier 1, explicitly state which criteria apply and why. If any criterion is uncertain, use Tier 2.
    - Purely additive (new files only, no existing behavior modified)
@@ -402,7 +417,17 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 #### 3.5.0 初始化验证状态
 
-在项目根目录创建 `.ce-work-verification.json`（已在 .gitignore，不提交）：
+**检查项目根目录是否已存在 `.ce-work-verification.json`**：
+
+**情况 A：文件已存在且 `passes: false`**
+1. 读取文件内容
+2. 读取 `current_layer` 字段（如 `"layer1"`）和 `verification_rounds` 字段
+3. 宣告：「🔄 检测到未完成的验证状态（session 恢复），从 [current_layer] 继续，跳过已完成的层」
+4. 直接跳到 Phase 3.5.2 对应层执行（跳过 layers 状态为 pass/skip 的层）
+5. 不重置 verification_rounds（继续累计）
+
+**情况 B：文件不存在，或 `passes: true`（上次已成功）**
+新建文件（如下）：
 
 ```json
 {
@@ -410,6 +435,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
   "description": "<完整任务描述>",
   "verification_rounds": 0,
   "current_layer": "layer0",
+  "layer0_inner_retries": 0,
   "layers": {
     "layer0": "pending",
     "layer1": "pending",
@@ -422,8 +448,14 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 **字段说明**：
 - `task_id`：`前20字 + ISO日期` 确保同日内同前缀任务不冲突
-- `current_layer`：当前正在执行的层（`layer0/1/2/3`）；session 中断重启后从此层继续，而非全部重跑
+- `current_layer`：当前正在执行的层（`layer0/1/2/3`）；session 中断重启后，Phase 3.5.0 会检测此文件并从此层继续，而非全部重跑
+- `layer0_inner_retries`：Layer 0 层内重试次数，上限 3 次，不计入 verification_rounds
 - `passes: false` 初始值：防止验证未完成就进入 Phase 4
+
+**只读文件系统降级**：若项目根目录不可写（如 CI 只读容器），以内存状态继续执行：
+- 所有状态变量在 session 内存中维护
+- Phase 3.5 结束时输出状态摘要（代替写文件）
+- 宣告：「⚠️ 根目录不可写，以内存状态模式执行验证（无 session 恢复能力）」
 
 #### 3.5.1 Layer 触发判断
 
@@ -454,6 +486,11 @@ Determine how to proceed based on what was provided in `<input_document>`.
 2. 执行命令，捕获 exit code + stderr
 3. exit code = 0 → 更新 `layers.layer0 = "pass"`
 4. exit code ≠ 0 → 分析错误输出 → 修复代码/配置 → 重试 Layer 0（**不计入 verification_rounds**，属于层内重试）
+   - **层内最大重试次数：3 次**。每次重试 `layer0_inner_retries +1`（记录在 .ce-work-verification.json 或内存中）。
+   - 超过 3 次后：
+     - 更新 `layers.layer0 = "fail"` 并记录错误摘要
+     - verification_rounds +1（计入全局轮次上限）
+     - 继续后续激活层（不因 Layer 0 失败而停止，让 BLOCKED 逻辑在轮次用尽时正常触发）
 
 ---
 
@@ -463,10 +500,16 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 *如触发*：
 1. 读取计划验收场景中标注「Layer 1」的行
-2. **认证处理**：如 API 需要认证 token，按以下优先级获取：
-   - 读取项目 `.env` / CLAUDE.md 中记录的测试 token
-   - 先调用登录端点获取 token，再注入后续请求的 `Authorization` header
-   - 若均无法获取，记录「⚠️ Layer 1 需要认证，无法自动注入，跳过 + 标记 skip」
+2. **认证 token 获取**（如 API 需要认证 token）：
+   - **Step a**：读取项目 `.env` 或 CLAUDE.md 中记录的测试 token → 直接注入 Authorization header
+   - **Step b**（Step a 失败时）：识别登录端点（按优先级）：
+     1. 读取 CLAUDE.md 中标注的 `test_login_endpoint` 或 `auth_endpoint` 配置
+     2. 读取项目 OpenAPI/Swagger spec（如 `openapi.yaml` / `swagger.json`）中的认证端点
+     3. 读取 `README.md` 中的认证流程说明
+     4. 如项目关键词含 `oauth/sso/openid/saml` → 标记 skip，注明「OAuth/SSO 项目无法自动认证，Layer 1 跳过」
+     5. 以上均无法确定 → 标记 skip，注明「无法识别登录端点，Layer 1 跳过（不猜测 /api/login 等路径）」
+   - **Step c**（Step b 成功时）：调用识别到的登录端点获取 token，注入后续请求的 `Authorization` header
+3. 若均无法获取，记录「⚠️ Layer 1 需要认证，无法自动注入，跳过 + 标记 skip」
 3. 执行对应的 curl 请求或 DB CLI 查询
 4. 验证响应码 + 返回体结构 + 数据库状态
 5. 成功 → `layers.layer1 = "pass"`；失败 → 修复 → 重试
@@ -487,7 +530,8 @@ Determine how to proceed based on what was provided in `<input_document>`.
 *PW_MODE_ENABLED = false（默认，使用 agent-browser，token 低 30-50 倍）*：
 
 ```bash
-Skill("agent-browser")                               # 加载 agent-browser skill
+Skill("agent-browser")   # 加载 skill 文档（了解 CLI 语法和可用命令）
+# ⚠️ 上方 Skill 调用仅加载文档。以下命令需通过 Bash 工具执行（`npx agent-browser ...`）：
 agent-browser open <dev-server-url>                  # 从 CLAUDE.md 或计划获取 URL
 agent-browser snapshot -i --json                     # 获取可交互元素（带 ref）
 agent-browser click @e<N>                            # 根据验收场景执行操作
@@ -519,8 +563,20 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 4. 发现未达标项 → 列出 → 修复 → 重试 Layer 3
 
 **[T] + [team] 特殊处理**：
-- **Layer 3 delegation**：[team] 模式的验证者 Hook 在每任务后运行（时机早于 Phase 3.5，逐任务局部验证）。Phase 3.5 的 Layer 3 仍执行轻量全局确认：逐行读取「验收场景」表格 → 检查对应变更文件是否存在且包含预期逻辑 → **不重新运行验证命令**（区别于全量 Layer 3）。`layers.layer3 = "delegated-to-team+light-check"`，表示 team Hook 已完成局部验证，Phase 3.5 补充了全局一致性确认。若计划无验收场景章节，则直接标记 `"delegated-to-team"` 并跳过 Phase 3.5 的 Layer 3。
-- **BLOCKED 合并**：[T]+[team] 同时激活时，BLOCKED 状态合并到 team-mode 人工检查点，不重复弹出两个对话框。team 人工检查点中包含等同于「修复重试 / 跳过验证 / 停止」的决策路径。若无 team 模式，使用标准 AskUserQuestion 三选一（见 3.5.3）。
+- **Layer 3 delegation**：[team] 模式的验证者 Hook 在每任务后运行（时机早于 Phase 3.5，逐任务局部验证）。Phase 3.5 的 Layer 3 执行轻量全局确认：
+  - **精确职责**：只核查验收场景表中跨任务维度的条目（如"整体流程通过"类场景），不重复核查已被 team 验证者 Hook 覆盖的单任务条目
+  - **跨任务组合问题处理**：若发现跨任务组合破坏了不变式，记录到 `.ce-work-verification.json` 的 Layer 3 失败信息，进入标准 BLOCKED 流程（AskUserQuestion 三选一），不触发新一轮 team 验证者 Hook
+  - 状态标记：`layers.layer3 = "delegated-to-team+light-check"`（team Hook 已完成局部验证，Phase 3.5 补充全局一致性确认）
+  - 若计划无验收场景章节：标记 `"delegated-to-team"`，跳过 Phase 3.5 的 Layer 3
+
+- **BLOCKED 合并**：[T]+[team] 同时激活且验证失败时，使用标准 AskUserQuestion 工具（与非 team 模式相同），在提示文字中标注「团队模式」：
+  > "⚠️ [T]+[team] 验证未通过（已重试 N 轮）
+  > 失败层：[层名] — [失败原因摘要]
+  > Layer 0 层内重试：[layer0_inner_retries] 次
+  >
+  > 1. 查看详细错误，执行者手动修复后重新运行验证（重置 verification_rounds）
+  > 2. 跳过验证，降级为标准模式继续 Phase 4
+  > 3. 停止，稍后处理"
 
 ---
 
@@ -554,6 +610,7 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 使用 **AskUserQuestion** 工具询问：
 > "⚠️ [T] 验证未通过（已重试 2 轮）
 > 失败层：[层名] — [失败原因摘要]
+> （Layer 0 层内重试次数：[layer0_inner_retries] 次）
 >
 > 1. 查看详细错误，手动修复后重新运行验证（重置轮次）
 > 2. 跳过验证，降级为标准模式继续 Phase 4
