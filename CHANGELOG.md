@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.45.22] - 2026-04-09
+
+### 修复（全量链路审查：2 个 P2 问题）
+- [ce:work] argument-hint 补充 [C] 和 [G] 参数说明（之前遗漏，用户无法从 hint 得知这两个标志的含义）
+- [ce:review] 6.5a 执行顺序描述澄清：「Runs immediately after step 6」改为「Runs after step 6 routing normalization is complete (as a secondary normalization pass), before Patch Gate (6.5b)」
+
 ## [2.45.21] - 2026-04-09
 
 ### 修复（全量检查第五轮：6 个遗留问题）

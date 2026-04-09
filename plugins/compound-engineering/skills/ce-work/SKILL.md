@@ -1,7 +1,7 @@
 ---
 name: ce:work
 description: Execute work efficiently while maintaining quality and finishing features
-argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt且非Trivial场景触发learnings-researcher检索历史经验，传文件路径无效] [T=四层自验证:执行后运行CLI+API/DB+浏览器+验收验证,通过验证才算完成] [PW=Playwright MCP浏览器验证（必须同时传[T]，单独传[PW]无效并显示警告；需另行安装Playwright MCP Server，插件不含此依赖）]"
+argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt且非Trivial场景触发learnings-researcher检索历史经验，传文件路径无效] [T=四层自验证:执行后运行CLI+API/DB+浏览器+验收验证,通过验证才算完成] [PW=Playwright MCP浏览器验证（必须同时传[T]，单独传[PW]无效并显示警告；需另行安装Playwright MCP Server，插件不含此依赖）] [C=外部AI参与标记:Codex已参与整体工作流，标记用于审计溯源，不透传给内嵌ce:review] [G=外部AI参与标记:Gemini已参与整体工作流，标记用于审计溯源，不透传给内嵌ce:review]"
 ---
 
 # Work Execution Command

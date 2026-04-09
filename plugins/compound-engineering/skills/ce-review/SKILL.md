@@ -437,7 +437,7 @@ Convert multiple reviewer JSON payloads into one deduplicated, confidence-gated 
 
 **注意**：ce:review 本身不主动调用 Codex/Gemini CLI。`[C]`/`[G]` 标志由外层编排（如 `workflows:review [C]`）传入，表示外部 AI 已参与或将参与审查。6.5a 规则是一个轻量级安全层，对所有 safe_auto 发现保守降级，防止外部 AI 建议（可能缺乏全局 context）被自动应用。
 
-This rule is a lightweight normalization step — no tokens consumed. Runs immediately after step 6, before the Patch Gate.
+This rule is a lightweight normalization step — no tokens consumed. Runs after step 6 routing normalization is complete (as a secondary normalization pass), before Patch Gate (6.5b).
 
 标志赋值：`CODEX_ENABLED` 在 Argument Parsing 阶段检测到 `[C]` 时设为 true；`GEMINI_ENABLED` 在检测到 `[G]` 时设为 true。
 
