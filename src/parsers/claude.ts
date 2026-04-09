@@ -84,6 +84,7 @@ async function loadCommands(commandsDirs: string[]): Promise<ClaudeCommand[]> {
     const name = (data.name as string) ?? path.basename(file, ".md")
     const allowedTools = parseAllowedTools(data["allowed-tools"])
     const disableModelInvocation = data["disable-model-invocation"] === true ? true : undefined
+    const claudeCodeOnly = data["claude-code-only"] === true ? true : undefined
     commands.push({
       name,
       description: data.description as string | undefined,
@@ -91,6 +92,7 @@ async function loadCommands(commandsDirs: string[]): Promise<ClaudeCommand[]> {
       model: data.model as string | undefined,
       allowedTools,
       disableModelInvocation,
+      claudeCodeOnly,
       body: body.trim(),
       sourcePath: file,
     })

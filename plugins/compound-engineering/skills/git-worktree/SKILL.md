@@ -99,7 +99,6 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/worktree-manager.sh creat
 2. Updates the base branch from remote
 3. Creates new worktree and branch
 4. **Copies all .env files from main repo** (.env, .env.local, .env.test, etc.)
-<<<<<<< HEAD
 5. Shows path for cd-ing to the worktree
 6. **（推荐）运行基线测试验证环境**：
    ```bash
@@ -122,13 +121,6 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/git-worktree/scripts/worktree-manager.sh creat
 | `go.sum` | go | `go mod download` |
 
 > **重要**：优先使用 lockfile 对应的包管理器（如有 `yarn.lock` 则用 yarn 而非 npm），确保依赖版本一致。
-=======
-5. **Trusts dev tool configs** with branch-aware safety rules:
-   - trusted bases (`main`, `develop`, `dev`, `trunk`, `staging`, `release/*`) compare against themselves
-   - other branches compare against the default branch
-   - direnv auto-allow is skipped on non-trusted bases because `.envrc` can source unchecked files
-6. Shows path for cd-ing to the worktree
->>>>>>> upstream/main
 
 ### `list` or `ls`
 

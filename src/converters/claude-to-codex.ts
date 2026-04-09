@@ -16,7 +16,9 @@ export function convertClaudeToCodex(
   plugin: ClaudePlugin,
   _options: ClaudeToCodexOptions,
 ): CodexBundle {
-  const invocableCommands = plugin.commands.filter((command) => !command.disableModelInvocation)
+  const invocableCommands = plugin.commands.filter(
+    (command) => !command.disableModelInvocation && !command.claudeCodeOnly,
+  )
   const applyCompoundWorkflowModel = shouldApplyCompoundWorkflowModel(plugin)
   const canonicalWorkflowSkills = applyCompoundWorkflowModel
     ? plugin.skills.filter((skill) => isCanonicalCodexWorkflowSkill(skill.name))
