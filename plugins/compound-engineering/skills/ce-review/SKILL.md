@@ -437,7 +437,7 @@ Convert multiple reviewer JSON payloads into one deduplicated, confidence-gated 
 
 **注意**：ce:review 本身不主动调用 Codex/Gemini CLI。`[C]`/`[G]` 标志由外层编排（如 `workflows:review [C]`）传入，表示外部 AI 已参与或将参与审查。6.5a 规则是一个轻量级安全层，对所有 safe_auto 发现保守降级，防止外部 AI 建议（可能缺乏全局 context）被自动应用。
 
-This rule is a lightweight normalization step — no tokens consumed. Runs immediately after step 6, before the Patch Gate.
+This rule is a lightweight normalization step — no tokens consumed. Runs after step 6 routing normalization is complete (as a secondary normalization pass), before Patch Gate (6.5b).
 
 标志赋值：`CODEX_ENABLED` 在 Argument Parsing 阶段检测到 `[C]` 时设为 true；`GEMINI_ENABLED` 在检测到 `[G]` 时设为 true。
 
@@ -468,7 +468,7 @@ Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED):
 无 Codex/Gemini 参与时，此规则不执行，不影响 Claude 内置审查 agent 的路由。
 此规则对所有模式生效（interactive/autofix/headless），确保最常见的 interactive 模式也受到保护。
 
-6.5b. **Deterministic Patch Gate（仅当 TEAM_GATE_ENABLED = true AND mode == autofix）**
+6.5b. **Deterministic Patch Gate（当 TEAM_GATE_ENABLED = true，在 autofix 和 interactive 模式均生效；report-only 和 headless 模式跳过）**
 
 This is a rule engine, not an agent — it consumes no extra tokens. Execute immediately after step 6 routing normalization, before partitioning the fixer queue.
 

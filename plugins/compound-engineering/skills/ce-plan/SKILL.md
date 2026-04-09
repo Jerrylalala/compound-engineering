@@ -621,11 +621,13 @@ When the plan contains 4+ implementation units with non-linear dependencies, 3+ 
 
 ### Phase 4.5: Contract Generation（仅当 `[team]` 标志存在时）
 
+> ⚠️ **延迟执行指令**：读到此处时**不要执行**——跳过，继续 Phase 5。待 Phase 5.3.7（Deepening Execution）完成后，在进入 Phase 5.3.8（Document Review）之前返回此处执行。
+
 **触发条件**: `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`
 
-**执行时机**: Phase 5.2（Write Plan File）完成后，Phase 5.3（Handoff）之前
+**执行时机**: Phase 5.3.7 完成后，Phase 5.3.8（Document Review）之前
 
-> 原因：Phase 5.1 Final Review 可能修改 Implementation Units（添加/删除文件、变更范围）。在 Phase 5.2 写入磁盘后生成合约，确保 allowed_files 与最终计划同步，避免合约文件与实际计划不一致。
+> 原因：Phase 5.1 Final Review 和 Phase 5.3 Deepening 均可能修改 Implementation Units（添加/删除文件、变更范围）。必须在这两个阶段都完成后生成合约，确保 allowed_files 基于最终计划，避免与实际执行范围不一致。
 
 Load the `team-mode` skill for role definitions (合约主, 追溯审查).
 
@@ -799,6 +801,8 @@ If the plan already appears sufficiently grounded and the thin-grounding overrid
 When deepening is warranted, read `references/deepening-workflow.md` for confidence scoring checklists, section-to-agent dispatch mapping, execution mode selection, research execution, interactive finding review, and plan synthesis instructions. Execute steps 5.3.3 through 5.3.7 from that file, then return here for 5.3.8.
 
 ##### 5.3.8–5.4 Document Review, Final Checks, and Post-Generation Options
+
+> **[team] 触发点**：如果 `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`，在进入 Document Review 之前，**立即执行 Phase 4.5（Contract Generation）**。
 
 When reaching this phase, read `references/plan-handoff.md` for document review instructions (5.3.8), final checks and cleanup (5.3.9), post-generation options menu (5.4), and issue creation. Do not load this file earlier. Document review is mandatory — do not skip it even if the confidence check already ran.
 

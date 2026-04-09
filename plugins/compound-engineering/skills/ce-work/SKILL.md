@@ -1,7 +1,7 @@
 ---
 name: ce:work
 description: Execute work efficiently while maintaining quality and finishing features
-argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt且非Trivial场景触发learnings-researcher检索历史经验，传文件路径无效] [T=四层自验证:执行后运行CLI+API/DB+浏览器+验收验证,通过验证才算完成] [PW=Playwright MCP浏览器验证（必须同时传[T]，单独传[PW]无效并显示警告；需另行安装Playwright MCP Server，插件不含此依赖）]"
+argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt且非Trivial场景触发learnings-researcher检索历史经验，传文件路径无效] [T=四层自验证:执行后运行CLI+API/DB+浏览器+验收验证,通过验证才算完成] [PW=Playwright MCP浏览器验证（必须同时传[T]，单独传[PW]无效并显示警告；需另行安装Playwright MCP Server，插件不含此依赖）] [C=外部AI参与标记:Codex已参与整体工作流，标记用于审计溯源，不透传给内嵌ce:review] [G=外部AI参与标记:Gemini已参与整体工作流，标记用于审计溯源，不透传给内嵌ce:review]"
 ---
 
 # Work Execution Command
@@ -21,6 +21,12 @@ This command takes a work document (plan, specification, or todo file) or a bare
 ### Phase -1: 参数检测与模式初始化
 
 检测所有可选标志并 strip from arguments before passing to Phase 0。
+
+**[R] 历史检索标志检测**（最先执行，防止污染路径解析）：
+- 如果 `$ARGUMENTS` 包含 `[R]` 或 `[r]`：
+  - 设置 R_MODE_ENABLED = true
+  - 从参数中移除 `[R]`
+- 否则：R_MODE_ENABLED = false
 
 **[T] 自验证标志检测**（独立执行）：
 - 如果 `$ARGUMENTS` 包含 `[T]` 或 `[t]`：
@@ -112,9 +118,9 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
    将用户补充的答案整合到任务列表构建中（forbidden_surfaces、acceptance criteria 等），然后继续步骤 4。
 
-4. **[R] 历史检索（bare prompt 场景，仅当 `[R]` 标志存在时）**
+4. **[R] 历史检索（bare prompt 场景，仅当 R_MODE_ENABLED = true 时）**
 
-   触发条件：输入为 bare prompt（非文件路径）且 `$ARGUMENTS` 包含 `[R]`。Trivial 任务跳过（见步骤 2）。
+   触发条件：输入为 bare prompt（非文件路径）且 R_MODE_ENABLED = true（由 Phase -1 设置）。Trivial 任务跳过（见步骤 2）。
 
    ```
    Task compound-engineering:research:learnings-researcher(prompt_content)
@@ -379,8 +385,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
    # Run full test suite (use project's test command)
    # Examples: bin/rails test, npm test, pytest, go test, etc.
 
-   # Run linting (per AGENTS.md)
-   # Use linting-agent before pushing to origin
+   # Run linting (per AGENTS.md or CLAUDE.md lint command)
    ```
 
 2. **Code Review** (REQUIRED)
@@ -688,13 +693,8 @@ Based on selection:
    ```
    See the `agent-browser` skill for detailed usage.
 
-   **Step 3: Upload using imgup skill**
-   ```bash
-   skill: imgup
-   # Then upload each screenshot:
-   imgup -h pixhost screenshot.png  # pixhost works without API key
-   # Alternative hosts: catbox, imagebin, beeimg
-   ```
+   **Step 3: Upload screenshots**
+   Upload screenshots using any available image hosting service or share them directly in the conversation.
 
    **What to capture:**
    - **New screens**: Screenshot of the new UI
@@ -738,7 +738,7 @@ Based on selection:
 
 Based on selection:
 - 选 1 → 调用 `ce:review` skill，传入 `mode:autofix`，plan 路径已知则传入（加 `[team]` 如果 TEAM_GATE_ENABLED）
-- 选 2 → 调用 `workflows:pr` skill
+- 选 2 → 执行 `/workflows:pr` command
 - 选 3 → 结束流程
 
 ---
@@ -810,7 +810,7 @@ Before creating PR, verify:
 - [ ] All clarifying questions asked and answered
 - [ ] All tasks marked completed
 - [ ] Testing addressed -- tests pass AND new/changed behavior has corresponding test coverage (or an explicit justification for why tests are not needed)
-- [ ] Linting passes (use linting-agent)
+- [ ] Linting passes (run project lint command per CLAUDE.md/AGENTS.md)
 - [ ] Code follows existing patterns
 - [ ] Figma designs match implementation (if applicable)
 - [ ] Before/after screenshots captured and uploaded (for UI changes)

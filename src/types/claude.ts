@@ -40,6 +40,7 @@ export type ClaudeCommand = {
   model?: string
   allowedTools?: string[]
   disableModelInvocation?: boolean
+  claudeCodeOnly?: boolean
   body: string
   sourcePath: string
 }
