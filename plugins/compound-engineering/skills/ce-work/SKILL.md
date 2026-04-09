@@ -1,7 +1,7 @@
 ---
 name: ce:work
 description: Execute work efficiently while maintaining quality and finishing features
-argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt场景触发learnings-researcher检索历史经验]"
+argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt场景触发learnings-researcher检索历史经验] [T=四层自验证:CLI+API/DB+浏览器+验收;完成=通过验证而非写完代码] [PW=Playwright MCP浏览器验证,仅在[T]时生效;默认[T]使用agent-browser低token模式]"
 ---
 
 # Work Execution Command
@@ -18,12 +18,26 @@ This command takes a work document (plan, specification, or todo file) or a bare
 
 ## Execution Workflow
 
-### Phase -1: Team Mode 初始化（仅当 `[team]` 或 `[team:full]` 时）
+### Phase -1: 参数检测与模式初始化
 
-**触发条件**: `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`。
+检测所有可选标志并 strip from arguments before passing to Phase 0。
 
+**[T] 自验证标志检测**（独立执行）：
+- 如果 `$ARGUMENTS` 包含 `[T]` 或 `[t]`：
+  - 设置 T_MODE_ENABLED = true
+  - 从参数中移除 `[T]`
+  - 宣告：「✅ [T] 自验证模式已启用——执行完成后将运行四层验证（Phase 3.5）」
+- 否则：T_MODE_ENABLED = false（Phase 3.5 不触发）
+
+**[PW] Playwright 标志检测**（仅在 T_MODE_ENABLED=true 时有意义）：
+- 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：
+  - 设置 PW_MODE_ENABLED = true
+  - 从参数中移除 `[PW]`
+  - 宣告：「✅ [PW] Playwright MCP 模式已启用——Layer 2 将使用 Playwright MCP（高精度浏览器验证）」
+- 否则：PW_MODE_ENABLED = false（Layer 2 使用 agent-browser，token 低 30-50 倍）
+
+**[team] / [team:full] 检测**（仅当包含时）：
 Strip the team token from arguments before passing to Phase 0.
-
 Load the `team-mode` skill for the complete initialization sequence: token detection, contract loading, role announcement, single-writer law, verifier hooks, and 风险卫 logic.
 
 ---
@@ -373,6 +387,163 @@ Determine how to proceed based on what was provided in `<input_document>`.
      - Failure signals and rollback/mitigation trigger
      - Validation window and owner
    - If there is truly no production/runtime impact, still include the section with: `No additional operational monitoring required` and a one-line reason.
+
+---
+
+### Phase 3.5: 四层自验证（仅当 `[T]` 时）
+
+**触发条件**：T_MODE_ENABLED = true（在 Phase -1 中设置）。T_MODE_ENABLED = false 时跳过本节，直接进入 Phase 4。
+
+---
+
+#### 3.5.0 初始化验证状态
+
+在项目根目录创建 `.ce-work-verification.json`（已在 .gitignore，不提交）：
+
+```json
+{
+  "task_id": "<任务描述前20字>",
+  "description": "<完整任务描述>",
+  "verification_rounds": 0,
+  "layers": {
+    "layer0": "pending",
+    "layer1": "pending",
+    "layer2": "pending",
+    "layer3": "pending"
+  },
+  "passes": false
+}
+```
+
+#### 3.5.1 Layer 触发判断
+
+扫描当前任务描述 + 已变更文件列表，判断激活哪些层：
+
+| 触发信号 | 激活层 | 判断依据 |
+|----------|--------|----------|
+| 描述含「前端/UI/组件/页面/样式/交互」或变更含 `.tsx/.vue/.html/.css` | Layer 2 | 关键词 + 扩展名 |
+| 描述含「API/接口/数据库/路由/endpoint/migration」或变更含 `routes/controllers/models/migrations` | Layer 1 | 关键词 + 路径 |
+| 描述含「Markdown/文档/提示词/SKILL」 | 跳过 Layer 1/2，仅 Layer 0 + Layer 3 | 关键词 |
+| 项目 CLAUDE.md 含构建/测试命令 | Layer 0（始终激活） | — |
+
+不确定时：激活 Layer 0 + Layer 3，Layer 1/2 使用 **AskUserQuestion** 询问用户确认。
+
+#### 3.5.2 验证循环（最多 2 轮）
+
+当 `passes: false` 且 `verification_rounds < 2`，执行以下四层：
+
+---
+
+**Layer 0：CLI 静态检查**（始终执行）
+
+1. 读取项目 CLAUDE.md，提取构建/测试命令（如 `npm run build`、`pytest`、`cargo test`）
+2. 执行命令，捕获 exit code + stderr
+3. exit code = 0 → 更新 `layers.layer0 = "pass"`
+4. exit code ≠ 0 → 分析错误输出 → 修复代码/配置 → 重试 Layer 0（计入 verification_rounds）
+
+---
+
+**Layer 1：API/DB 验证**（条件执行）
+
+*如未触发*：`layers.layer1 = "skip"`
+
+*如触发*：
+1. 读取计划验收场景中标注「Layer 1」的行
+2. 执行对应的 curl 请求或 DB CLI 查询
+3. 验证响应码 + 返回体结构 + 数据库状态
+4. 成功 → `layers.layer1 = "pass"`；失败 → 修复 → 重试
+
+---
+
+**Layer 2：浏览器 UI 验证**（条件执行）
+
+*如未触发*：`layers.layer2 = "skip"`
+
+*如 dev server 未运行*：尝试启动；若失败则跳过 Layer 2，记录警告 "⚠️ dev server 未运行，Layer 2 跳过"
+
+**工具选择由 Phase -1 的 PW_MODE_ENABLED 决定（不自动切换）**：
+
+*PW_MODE_ENABLED = false（默认，使用 agent-browser，token 低 30-50 倍）*：
+
+```bash
+Skill("agent-browser")                               # 加载 agent-browser skill
+agent-browser open <dev-server-url>                  # 从 CLAUDE.md 或计划获取 URL
+agent-browser snapshot -i --json                     # 获取可交互元素（带 ref）
+agent-browser click @e<N>                            # 根据验收场景执行操作
+agent-browser screenshot verification-$(date +%s).png  # 捕获视觉证据
+```
+
+*PW_MODE_ENABLED = true（用户显式传入 `[PW]`，使用 Playwright MCP）*——适用于网络请求拦截、JS 执行、拖拽、文件上传：
+- `mcp__playwright__browser_navigate` + `mcp__playwright__browser_snapshot`
+- `mcp__playwright__browser_console_messages`（捕获 console 错误）
+- `mcp__playwright__browser_network_requests`（拦截 API 调用）
+- `mcp__playwright__browser_evaluate`（执行 JS 断言）
+
+**铁律：不基于任务关键词自动升级到 Playwright MCP。用户传 [PW] 才用。**
+
+成功 → `layers.layer2 = "pass"`；失败 → 修复 → 重试
+
+---
+
+**Layer 3：验收确认**（始终执行——独立 reviewer 视角）
+
+> 「不信任实现者报告」原则（Superpowers spec-reviewer 原则）：独立读取变更文件，不依赖执行阶段的自我声明。
+
+1. 读取计划文件中的「验收场景」章节
+2. **若无验收场景章节**：输出警告 "⚠️ 计划中无验收场景，切换宽松核查模式"，转为对照任务需求逐条检查已修改文件
+3. 逐条使用 Read 工具读取所有变更文件，对照验收场景核查：
+   - 功能是否实现？（检查代码/Markdown 逻辑）
+   - 是否遗漏边界条件？
+   - 与验收场景逐条比对
+4. 发现未达标项 → 列出 → 修复 → 重试 Layer 3
+
+**[T] + [team] 特殊处理**：
+- Layer 3 reviewer = team-mode 验证者 Hook（角色复用，不重复执行）
+- BLOCKED 状态触发 team-mode 人工检查点
+
+---
+
+#### 3.5.3 更新状态并处理结果
+
+每层执行后更新 `.ce-work-verification.json`；`verification_rounds` 每轮 +1。
+
+**所有激活层通过（passes: true）**：
+
+```json
+{
+  "verification_rounds": 1,
+  "layers": { "layer0": "pass", "layer1": "skip", "layer2": "pass", "layer3": "pass" },
+  "passes": true
+}
+```
+
+展示验证摘要：
+```
+✅ [T] 验证通过（第 N 轮）
+  Layer 0: pass  ✅
+  Layer 1: skip  —
+  Layer 2: pass  ✅ (截图: verification-<ts>.png)
+  Layer 3: pass  ✅
+```
+
+继续 **Phase 4（Ship It）**。
+
+**第 2 轮结束仍有层失败（BLOCKED）**：
+
+使用 **AskUserQuestion** 工具询问：
+> "⚠️ [T] 验证未通过（已重试 2 轮）
+> 失败层：[层名] — [失败原因摘要]
+>
+> 1. 查看详细错误，手动修复后重新运行验证（重置轮次）
+> 2. 跳过验证，降级为标准模式继续 Phase 4
+> 3. 停止，稍后处理"
+
+Based on selection:
+- 选 1 → 展示完整错误，等用户修复后重新执行 Phase 3.5（verification_rounds 重置为 0）
+- 选 2 → 继续 Phase 4，在 PR 描述中标注「⚠️ 验证未通过，人工跳过」
+- 选 3 → 结束流程，保留 `.ce-work-verification.json` 供后续参考
+
+---
 
 ### Phase 4: Ship It
 

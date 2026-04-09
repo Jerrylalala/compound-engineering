@@ -177,7 +177,7 @@ skills/
 |------|------|
 | `/ce:brainstorm` | 探索需求和方案 `[P][C][G][R][team]` |
 | `/ce:plan` | 创建实施计划 `[team]` |
-| `/ce:work` | 执行工作计划 `[team][team:full][R]` |
+| `/ce:work` | 执行工作计划 `[team][team:full][R][T=四层自验证][PW=Playwright浏览器]` |
 | `/ce:review` | 代码审查 `[mode:autofix] [C][G][team]` |
 
 **独立工具命令（手动调用）：**

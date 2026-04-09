@@ -535,6 +535,16 @@ deepened: YYYY-MM-DD  # optional, set when the confidence check substantively st
 - **Integration coverage:** [Cross-layer scenarios unit tests alone will not prove]
 - **Unchanged invariants:** [Existing APIs, interfaces, or behaviors that this plan explicitly does not change — and how the new work relates to them. Include when the change touches shared surfaces and reviewers need blast-radius assurance]
 
+<!-- 当计划预期使用 ce:work [T] 模式时包含此章节；否则可省略。 -->
+## 验收场景（[T] 模式使用）
+
+> 每条场景对应 ce:work [T] 的验证层。Layer 3 独立 reviewer 将逐条核查变更文件是否满足以下标准。
+> 有 [T] 参数时建议包含此章节；若无，ce:work [T] 的 Layer 3 将切换到宽松核查模式并发出警告。
+
+| # | 场景 | 操作步骤 | 期望结果 | 层级 |
+|---|------|----------|----------|------|
+| 1 | [功能场景描述] | [用户操作步骤] | [可观测的期望结果] | Layer 0/1/2/3 |
+
 ## Risks & Dependencies
 
 | Risk | Mitigation |
@@ -602,6 +612,7 @@ For larger `Deep` plans, extend the core template only when useful with sections
 - Do not include git commands, commit messages, or exact test command recipes
 - Do not expand implementation units into micro-step `RED/GREEN/REFACTOR` instructions
 - Do not pretend an execution-time question is settled just to make the plan look complete
+- 若计划预期使用 `ce:work [T]`，包含 `## 验收场景` 章节；Layer 3 验证器将逐条核查此处定义的成功标准（见 Phase 3.5 of ce:work）
 
 #### 4.4 Visual Communication in Plan Documents
 
