@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.45.19] - 2026-04-09
+
+### 修复（第三轮 + team 全量审核）
+- [ce:work] Codex-P1: Phase 3 内嵌 ce:review 添加 [team] 透传，防止 Patch Gate 被绕过（安全漏洞修复）
+- [ce:work] Codex-P2a: 移除内嵌 ce:review 的 [C]/[G] 透传（transparent pass 是净损失，降级 safe_auto 无实际收益）
+- [ce:work] Codex-P2b/team-P1-001: Phase 3.5.0 情况A新增 task_id 比对，防止不同任务误继承旧验证状态
+- [ce:work] P1-001: Phase 3.5.0 情况A添加 current_layer→Phase 跳转映射表
+- [ce:work] task_id 生成添加输入清理规则（仅保留字母数字中文连字符下划线）
+- [ce:work] P2-001: 澄清 verification_rounds 递增时机（每轮所有层完成后 +1），移除 Layer 0 超限时的错误提前 +1
+- [ce:work] P2-002: 添加全层跳过→passes=true 路径（纯文档/无可执行验证场景）
+- [ce:work] P2-003: Phase 3.5.3 添加两种 Layer 3 委派状态的 passes 判断规则
+- [ce:work] P2-006: Phase 3 添加 [C]/[G]/[team] 参数拼接示例
+- [ce:work] team-P2-001: Layer 1 修复重复步骤编号（第二个 "3." 改为 "4."）
+- [ce:work] team-P1-002: Layer 1 认证 token 获取优先使用 TEST_ 前缀变量，避免误用生产凭证
+- [ce:plan] Codex-P2c: Phase 4.5 执行时机改为 Phase 5.2 之后（确保合约与最终计划同步）
+- [ce:plan] Codex-P2d/P2-005: required_invariants 提取来源改为 `## 验收场景` + Unit Verification 字段，不再引用不存在的 "Acceptance Criteria" 章节
+- [ce:plan] P2-004: allowed_files 提取规则明确排除 Test/Move/Delete 类型文件
+- [ce:review] P1-002: argument-hint 添加 [team:full] 说明
+
 ## [2.45.18] - 2026-04-09
 
 ### 修复

@@ -623,7 +623,9 @@ When the plan contains 4+ implementation units with non-linear dependencies, 3+ 
 
 **触发条件**: `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`
 
-**执行时机**: Phase 4（Write the Plan）完成后，Phase 5（Final Review）之前
+**执行时机**: Phase 5.2（Write Plan File）完成后，Phase 5.3（Handoff）之前
+
+> 原因：Phase 5.1 Final Review 可能修改 Implementation Units（添加/删除文件、变更范围）。在 Phase 5.2 写入磁盘后生成合约，确保 allowed_files 与最终计划同步，避免合约文件与实际计划不一致。
 
 Load the `team-mode` skill for role definitions (合约主, 追溯审查).
 
@@ -631,13 +633,24 @@ Load the `team-mode` skill for role definitions (合约主, 追溯审查).
 
 合约主读取刚生成的计划文件，提取边界合约：
 
-1. **`allowed_files`**：遍历所有 Implementation Units 的 Files 字段，收集完整文件路径列表
+1. **`allowed_files`**：遍历所有 Implementation Units 的 Files 字段，提取文件路径：
+   - **包含**：Files 列中标注 Create/Modify 类型的文件
+   - **排除**：Test 类型文件（Test 文件通过验证者 Hook 单独验证，不在 Patch Gate 白名单中）
+   - **排除**：Move/Delete 类型操作（不涉及内容修改，Patch Gate 特殊处理）
 2. **`forbidden_surfaces`**：从计划描述和技术方案中识别高风险文件：
    - 版本文件：`**/plugin.json`、`package.json`（当版本管理是明确任务时例外）
    - 数据库 schema：`db/schema.rb`、`**/*_schema.*`
    - 认证/授权配置：含 `auth`、`credential`、`secret`、`permission` 的配置文件
    - 如无明显高风险文件，保留为空列表
-3. **`required_invariants`**：从计划的 Acceptance Criteria 提取可检查的不变式（转换为命令式短句）
+3. **`required_invariants`**：从以下优先顺序提取可检查的不变式（转换为命令式短句）：
+   a. 计划末尾的 `## 验收场景` 章节（如存在）→ 提取每个场景的"期望结果"列
+   b. 各 Implementation Unit 的 `Verification` 字段 → 提取层级为 Layer 0/1 的可执行验证
+   c. 若两者均不存在 → required_invariants 留空，合约生成时宣告：「⚠️ 未找到验收场景或 Verification 字段，required_invariants 为空，Patch Gate Rule 4 无法执行后置验证」
+   
+   转换规则：
+   - 可命令化的结果（"bash scripts/check.sh 必须通过"）→ 命令式短句
+   - 纯 UI/视觉结果（"用户看到成功提示"）→ 转为描述式短句，标注 `requires_human_check: true`
+   - Layer 0 结果 → 可执行命令型不变式；Layer 3 结果 → 验收确认型不变式
 4. **`max_files_per_patch`**：默认 1（one-finding-one-patch 原则）
 
 **生成合约文件**：使用以下格式写入 `.team-contract.md`（repo 根目录），填充提取的值：

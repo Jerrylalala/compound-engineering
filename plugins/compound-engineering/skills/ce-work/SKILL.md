@@ -378,8 +378,15 @@ Determine how to proceed based on what was provided in `<input_document>`.
    Every change gets reviewed before shipping. The depth scales with the change's risk profile, but review itself is never skipped.
 
    **Tier 2: Full review (default)** — REQUIRED unless Tier 1 criteria are explicitly met. Invoke the `ce:review` skill with `mode:autofix` to run specialized reviewer agents, auto-apply safe fixes, and surface residual work as todos. When the plan file path is known, pass it as `plan:<path>`. This is the mandatory default — proceed to Tier 1 only after confirming every criterion below.
-   - If CODEX_ENABLED: also pass `[C]` to ce:review
-   - If GEMINI_ENABLED: also pass `[G]` to ce:review
+   - If TEAM_GATE_ENABLED: also pass `[team]`（或 `[team:full]`）to ce:review（确保 Patch Gate 白名单门控激活，不传则 Patch Gate 静默跳过）
+
+   参数拼接示例：
+   - 基础调用：`Skill("ce:review", "mode:autofix")`
+   - 含计划路径：`Skill("ce:review", "mode:autofix plan:docs/plans/xxx.md")`
+   - 含 [team]：`Skill("ce:review", "mode:autofix plan:docs/plans/xxx.md [team]")`
+   - 含 [team:full]：`Skill("ce:review", "mode:autofix plan:docs/plans/xxx.md [team:full]")`
+
+   注：[C]/[G] **不透传**给内嵌 ce:review。[C]/[G] 在 ce:work 层的作用是标记外部 AI 已参与整体工作流；内嵌 ce:review 仅负责代码质量把关，不涉及外部模型调用，透传只会将 safe_auto 降级为 gated_auto 而无实际收益。
 
    **Tier 1: Inline self-review** — A lighter alternative permitted only when **all four** criteria are true. Before choosing Tier 1, explicitly state which criteria apply and why. If any criterion is uncertain, use Tier 2.
    - Purely additive (new files only, no existing behavior modified)
@@ -421,17 +428,27 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 **情况 A：文件已存在且 `passes: false`**
 1. 读取文件内容
-2. 读取 `current_layer` 字段（如 `"layer1"`）和 `verification_rounds` 字段
-3. 宣告：「🔄 检测到未完成的验证状态（session 恢复），从 [current_layer] 继续，跳过已完成的层」
-4. 直接跳到 Phase 3.5.2 对应层执行（跳过 layers 状态为 pass/skip 的层）
-5. 不重置 verification_rounds（继续累计）
+2. 比对文件中的 `task_id` 和 `description` 与当前任务：
+   - **匹配**（同一任务 session 中断后恢复）→ 继续步骤 3-6
+   - **不匹配**（不同任务遗留的旧文件）→ 转入情况 B（覆盖旧文件，全新开始），宣告：「⚠️ 检测到旧任务的验证文件（[旧task_id]），当前任务不同，重新初始化」
+3. 读取 `current_layer` 字段（如 `"layer1"`）和 `verification_rounds` 字段
+4. 宣告：「🔄 检测到未完成的验证状态（session 恢复），从 [current_layer] 继续，跳过已完成的层」
+5. 跳转到 Phase 3.5.2 对应层（根据 `current_layer` 值）：
+   | `current_layer` 值 | 跳转到 | 含义 |
+   |---|---|---|
+   | `"layer0"` | Phase 3.5.2 Layer 0 节 | 从 Layer 0 重新开始 |
+   | `"layer1"` | Phase 3.5.2 Layer 1 节 | 跳过 Layer 0，从 Layer 1 开始 |
+   | `"layer2"` | Phase 3.5.2 Layer 2 节 | 跳过 Layer 0-1，从 Layer 2 开始 |
+   | `"layer3"` | Phase 3.5.2 Layer 3 节 | 跳过 Layer 0-2，从 Layer 3 开始 |
+   注：跳过的层必须在文件中状态为 `"pass"` 才可跳过，否则从最早 `"fail"` 层重新开始
+6. 不重置 verification_rounds（继续累计）
 
 **情况 B：文件不存在，或 `passes: true`（上次已成功）**
 新建文件（如下）：
 
 ```json
 {
-  "task_id": "<任务描述前20字>-<ISO时间戳前10位,如2026-04-09>",
+  "task_id": "<任务描述前20字（仅保留字母数字中文连字符下划线，过滤 ../等特殊字符）>-<ISO时间戳前10位,如2026-04-09>",
   "description": "<完整任务描述>",
   "verification_rounds": 0,
   "current_layer": "layer0",
@@ -472,6 +489,11 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 不确定时：激活 Layer 0 + Layer 3，Layer 1/2 使用 **AskUserQuestion** 询问用户确认。
 
+**全层跳过的情况**：若扫描结果所有层均判断为 `"skip"`（如纯 Markdown 项目无构建命令、无 UI、无验收场景），则：
+- 设置 passes = true，写入 .ce-work-verification.json
+- 宣告：「⚠️ 未检测到验证内容，所有层跳过，标记验证通过（纯文档/无可执行验证场景）」
+- 直接进入 Phase 4（跳过 Phase 3.5.2 和 3.5.3）
+
 #### 3.5.2 验证循环（最多 2 轮）
 
 **轮次定义**：一轮 = 所有激活层各执行一次（Layer 0 → Layer 1/2（如触发）→ Layer 3）；每轮结束后无论成功与否，`verification_rounds +1`。Layer 内部的修复重试不计入 verification_rounds。
@@ -489,8 +511,8 @@ Determine how to proceed based on what was provided in `<input_document>`.
    - **层内最大重试次数：3 次**。每次重试 `layer0_inner_retries +1`（记录在 .ce-work-verification.json 或内存中）。
    - 超过 3 次后：
      - 更新 `layers.layer0 = "fail"` 并记录错误摘要
-     - verification_rounds +1（计入全局轮次上限）
-     - 继续后续激活层（不因 Layer 0 失败而停止，让 BLOCKED 逻辑在轮次用尽时正常触发）
+     - 继续本轮的后续激活层（Layer 1/2/3），不提前中断
+     - **本轮所有层执行完毕后**，`verification_rounds +1`（Layer 0 内部重试不独立计入轮次）
 
 ---
 
@@ -501,7 +523,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 *如触发*：
 1. 读取计划验收场景中标注「Layer 1」的行
 2. **认证 token 获取**（如 API 需要认证 token）：
-   - **Step a**：读取项目 `.env` 或 CLAUDE.md 中记录的测试 token → 直接注入 Authorization header
+   - **Step a**：读取项目 `.env` 或 CLAUDE.md 中记录的**测试 token**（优先使用 `TEST_API_TOKEN`、`TEST_TOKEN` 等 TEST_ 前缀变量，若只有生产 token 变量，使用 AskUserQuestion 询问用户确认再注入，不自动使用生产凭证）→ 注入 Authorization header
    - **Step b**（Step a 失败时）：识别登录端点（按优先级）：
      1. 读取 CLAUDE.md 中标注的 `test_login_endpoint` 或 `auth_endpoint` 配置
      2. 读取项目 OpenAPI/Swagger spec（如 `openapi.yaml` / `swagger.json`）中的认证端点
@@ -510,7 +532,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
      5. 以上均无法确定 → 标记 skip，注明「无法识别登录端点，Layer 1 跳过（不猜测 /api/login 等路径）」
    - **Step c**（Step b 成功时）：调用识别到的登录端点获取 token，注入后续请求的 `Authorization` header
 3. 若均无法获取，记录「⚠️ Layer 1 需要认证，无法自动注入，跳过 + 标记 skip」
-3. 执行对应的 curl 请求或 DB CLI 查询
+4. 执行对应的 curl 请求或 DB CLI 查询
 4. 验证响应码 + 返回体结构 + 数据库状态
 5. 成功 → `layers.layer1 = "pass"`；失败 → 修复 → 重试
 
@@ -604,6 +626,10 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 ```
 
 继续 **Phase 4（Ship It）**。
+
+**[T]+[team] 委派状态的 passes 判断规则**：
+- `layers.layer3 = "delegated-to-team"`：该层在 passes 判断中**不计入失败**（team 验证者 Hook 已全权处理，无验收场景章节时跳过 Phase 3.5 Layer 3 是设计如此）
+- `layers.layer3 = "delegated-to-team+light-check"` 且全局一致性检查失败：**计入失败**，进入标准 BLOCKED 流程（AskUserQuestion 三选一）
 
 **第 2 轮结束仍有层失败（BLOCKED）**：
 
