@@ -536,10 +536,11 @@ deepened: YYYY-MM-DD  # optional, set when the confidence check substantively st
 - **Unchanged invariants:** [Existing APIs, interfaces, or behaviors that this plan explicitly does not change — and how the new work relates to them. Include when the change touches shared surfaces and reviewers need blast-radius assurance]
 
 <!-- 当计划预期使用 ce:work [T] 模式时包含此章节；否则可省略。 -->
+<!-- 省略时：ce:work [T] 的 Layer 3 自动切换宽松核查模式——对照任务需求逐条核查已修改文件，不按场景表逐行比对（见 ce:work Phase 3.5 Layer 3）。 -->
 ## 验收场景（[T] 模式使用）
 
 > 每条场景对应 ce:work [T] 的验证层。Layer 3 独立 reviewer 将逐条核查变更文件是否满足以下标准。
-> 有 [T] 参数时建议包含此章节；若无，ce:work [T] 的 Layer 3 将切换到宽松核查模式并发出警告。
+> 有 [T] 参数时建议包含此章节；若无，Layer 3 切换宽松核查模式（读文件对照需求，不运行验证命令）并发出警告。
 
 | # | 场景 | 操作步骤 | 期望结果 | 层级 |
 |---|------|----------|----------|------|

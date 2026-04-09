@@ -1,7 +1,7 @@
 ---
 name: ce:work
 description: Execute work efficiently while maintaining quality and finishing features
-argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt场景触发learnings-researcher检索历史经验] [T=四层自验证:CLI+API/DB+浏览器+验收;完成=通过验证而非写完代码] [PW=Playwright MCP浏览器验证,仅在[T]时生效;默认[T]使用agent-browser低token模式]"
+argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt场景触发learnings-researcher检索历史经验] [T=四层自验证:执行后运行CLI+API/DB+浏览器+验收验证,通过验证才算完成] [PW=Playwright MCP浏览器验证,仅在[T]时生效,默认[T]使用agent-browser低token模式]"
 ---
 
 # Work Execution Command
@@ -406,9 +406,10 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 ```json
 {
-  "task_id": "<任务描述前20字>",
+  "task_id": "<任务描述前20字>-<ISO时间戳前10位,如2026-04-09>",
   "description": "<完整任务描述>",
   "verification_rounds": 0,
+  "current_layer": "layer0",
   "layers": {
     "layer0": "pending",
     "layer1": "pending",
@@ -418,6 +419,11 @@ Determine how to proceed based on what was provided in `<input_document>`.
   "passes": false
 }
 ```
+
+**字段说明**：
+- `task_id`：`前20字 + ISO日期` 确保同日内同前缀任务不冲突
+- `current_layer`：当前正在执行的层（`layer0/1/2/3`）；session 中断重启后从此层继续，而非全部重跑
+- `passes: false` 初始值：防止验证未完成就进入 Phase 4
 
 #### 3.5.1 Layer 触发判断
 
@@ -457,9 +463,13 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 *如触发*：
 1. 读取计划验收场景中标注「Layer 1」的行
-2. 执行对应的 curl 请求或 DB CLI 查询
-3. 验证响应码 + 返回体结构 + 数据库状态
-4. 成功 → `layers.layer1 = "pass"`；失败 → 修复 → 重试
+2. **认证处理**：如 API 需要认证 token，按以下优先级获取：
+   - 读取项目 `.env` / CLAUDE.md 中记录的测试 token
+   - 先调用登录端点获取 token，再注入后续请求的 `Authorization` header
+   - 若均无法获取，记录「⚠️ Layer 1 需要认证，无法自动注入，跳过 + 标记 skip」
+3. 执行对应的 curl 请求或 DB CLI 查询
+4. 验证响应码 + 返回体结构 + 数据库状态
+5. 成功 → `layers.layer1 = "pass"`；失败 → 修复 → 重试
 
 ---
 
@@ -502,7 +512,7 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 
 1. 读取计划文件中的「验收场景」章节
 2. **若无验收场景章节**：输出警告 "⚠️ 计划中无验收场景，切换宽松核查模式"，转为对照任务需求逐条检查已修改文件
-3. 逐条使用 Read 工具读取所有变更文件，对照验收场景核查：
+3. 逐条独立读取所有变更文件（使用文件读取工具，不依赖内存中的已有内容），对照验收场景核查：
    - 功能是否实现？（检查代码/Markdown 逻辑）
    - 是否遗漏边界条件？
    - 与验收场景逐条比对
