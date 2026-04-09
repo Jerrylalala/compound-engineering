@@ -31,12 +31,12 @@ This command takes a work document (plan, specification, or todo file) or a bare
 
 **[PW] Playwright 标志检测**（仅在 T_MODE_ENABLED=true 时有意义）：
 - 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：
-  - 设置 PW_MODE_ENABLED = true
   - 从参数中移除 `[PW]`
   - 如果 T_MODE_ENABLED = false：
+    - 强制 PW_MODE_ENABLED = false（不留歧义状态）
     - 输出：「⚠️ [PW] 需要配合 [T] 使用，当前未传 [T]，[PW] 将被忽略。如需浏览器验证，请使用 `ce:work [T][PW]`。」
-    - PW_MODE_ENABLED 设置不影响任何执行行为（Phase 3.5 不触发）
   - 如果 T_MODE_ENABLED = true：
+    - 设置 PW_MODE_ENABLED = true
     - 宣告：「✅ [PW] Playwright MCP 模式已启用——Layer 2 将使用 Playwright MCP（高精度浏览器验证）」
 - 否则：PW_MODE_ENABLED = false（Layer 2 使用 agent-browser，token 低 30-50 倍）
 
@@ -447,7 +447,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 1. 读取项目 CLAUDE.md，提取构建/测试命令（如 `npm run build`、`pytest`、`cargo test`）
 2. 执行命令，捕获 exit code + stderr
 3. exit code = 0 → 更新 `layers.layer0 = "pass"`
-4. exit code ≠ 0 → 分析错误输出 → 修复代码/配置 → 重试 Layer 0（计入 verification_rounds）
+4. exit code ≠ 0 → 分析错误输出 → 修复代码/配置 → 重试 Layer 0（**不计入 verification_rounds**，属于层内重试）
 
 ---
 
@@ -467,7 +467,10 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 *如未触发*：`layers.layer2 = "skip"`
 
-*如 dev server 未运行*：尝试启动；若失败则跳过 Layer 2，记录警告 "⚠️ dev server 未运行，Layer 2 跳过"
+*如 dev server 未运行*：
+- 尝试启动；若本项目无 dev server（纯 API/CLI 项目）→ `layers.layer2 = "skip"`，记录「⚠️ 项目无 dev server，Layer 2 跳过」
+- 若项目应有 dev server 但**启动失败**（可能是代码问题）→ 记录 `layers.layer2 = "fail"`，标注「⚠️ dev server 启动失败，可能是代码编译错误，Layer 2 计为失败而非跳过」（区别：不掩盖真实构建问题）
+- Layer 2 URL 推断：优先读 CLAUDE.md 中的 dev server URL；其次读计划文件；若均未指定，默认 `http://localhost:3000` 并宣告使用的 URL
 
 **工具选择由 Phase -1 的 PW_MODE_ENABLED 决定（不自动切换）**：
 
@@ -478,7 +481,7 @@ Skill("agent-browser")                               # 加载 agent-browser skil
 agent-browser open <dev-server-url>                  # 从 CLAUDE.md 或计划获取 URL
 agent-browser snapshot -i --json                     # 获取可交互元素（带 ref）
 agent-browser click @e<N>                            # 根据验收场景执行操作
-agent-browser screenshot verification-$(date +%s).png  # 捕获视觉证据
+agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（timestamp 使用 ISO 格式，跨平台兼容）
 ```
 
 *PW_MODE_ENABLED = true（用户显式传入 `[PW]`，使用 Playwright MCP）*——适用于网络请求拦截、JS 执行、拖拽、文件上传：
@@ -506,7 +509,7 @@ agent-browser screenshot verification-$(date +%s).png  # 捕获视觉证据
 4. 发现未达标项 → 列出 → 修复 → 重试 Layer 3
 
 **[T] + [team] 特殊处理**：
-- **Layer 3 delegation**：[team] 模式的验证者 Hook 在每任务后运行（时机早于 Phase 3.5）。Phase 3.5 的 Layer 3 标记为 `layers.layer3 = "delegated-to-team"`，不重复执行独立 reviewer；但若计划有「验收场景」章节，仍对照验收场景做最终一致性确认（轻量核查，不全量重跑）。
+- **Layer 3 delegation**：[team] 模式的验证者 Hook 在每任务后运行（时机早于 Phase 3.5，逐任务局部验证）。Phase 3.5 的 Layer 3 仍执行轻量全局确认：逐行读取「验收场景」表格 → 检查对应变更文件是否存在且包含预期逻辑 → **不重新运行验证命令**（区别于全量 Layer 3）。`layers.layer3 = "delegated-to-team+light-check"`，表示 team Hook 已完成局部验证，Phase 3.5 补充了全局一致性确认。若计划无验收场景章节，则直接标记 `"delegated-to-team"` 并跳过 Phase 3.5 的 Layer 3。
 - **BLOCKED 合并**：[T]+[team] 同时激活时，BLOCKED 状态合并到 team-mode 人工检查点，不重复弹出两个对话框。team 人工检查点中包含等同于「修复重试 / 跳过验证 / 停止」的决策路径。若无 team 模式，使用标准 AskUserQuestion 三选一（见 3.5.3）。
 
 ---
