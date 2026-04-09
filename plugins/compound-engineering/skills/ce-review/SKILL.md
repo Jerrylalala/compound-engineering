@@ -27,6 +27,8 @@ Parse `$ARGUMENTS` for the following optional tokens. Strip each recognized toke
 | `mode:headless` | `mode:headless` | Select headless mode for programmatic callers (see Mode Detection below) |
 | `base:<sha-or-ref>` | `base:abc1234` or `base:origin/main` | Skip scope detection — use this as the diff base directly |
 | `plan:<path>` | `plan:docs/plans/2026-03-25-001-feat-foo-plan.md` | Load this plan for requirements verification |
+| `[C]` | `[C]` | CODEX_ENABLED = true. Invoke Codex as an additional external reviewer. Triggers 6.5a downgrade rule in Stage 5. |
+| `[G]` | `[G]` | GEMINI_ENABLED = true. Invoke Gemini as an additional external reviewer. Triggers 6.5a downgrade rule in Stage 5. |
 | `[team]` | `[team]` | TEAM_GATE_ENABLED = true. Load `.team-contract.md` and execute Deterministic Patch Gate in Stage 5 (see below). Has no effect in `mode:report-only` or `mode:headless`. |
 
 All tokens are optional. Each one present means one less thing to infer. When absent, fall back to existing behavior for that stage.
@@ -437,7 +439,7 @@ This rule is a lightweight normalization step — no tokens consumed. Runs immed
 标志赋值：`CODEX_ENABLED` 在 Argument Parsing 阶段检测到 `[C]` 时设为 true；`GEMINI_ENABLED` 在检测到 `[G]` 时设为 true。
 
 ```
-Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED) AND (mode == autofix OR mode == headless):
+Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED):
   For each finding where autofix_class == "safe_auto":
     downgrade: safe_auto → gated_auto
     note: "外部 AI 参与时 safe_auto 降级（来源: Codex/Gemini，缺乏全局 codebase context）"
@@ -448,7 +450,10 @@ Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED) AND (mode == autofix
   # This rule applies when EITHER Codex OR Gemini participated in the review —
   # it is not possible to determine which specific finding originated from them,
   # so all safe_auto findings are conservatively downgraded.
-  # This rule is intentionally unconditional — [team] mode is NOT required.
+  # This rule is intentionally unconditional — [team] mode is NOT required,
+  # and applies to ALL modes (interactive, autofix, headless) equally.
+  # Interactive mode also auto-applies safe_auto fixes, so the downgrade
+  # must cover it — otherwise the most common mode is unprotected.
   # The existing Patch Gate (6.5b) provides deeper contract-based checks
   # for [team] mode; this rule provides a lightweight baseline for all modes.
   #
@@ -458,6 +463,7 @@ Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED) AND (mode == autofix
 
 **注意**: 此规则仅在 Codex/Gemini 参与本次审查时生效（`CODEX_ENABLED OR GEMINI_ENABLED = true`）。
 无 Codex/Gemini 参与时，此规则不执行，不影响 Claude 内置审查 agent 的路由。
+此规则对所有模式生效（interactive/autofix/headless），确保最常见的 interactive 模式也受到保护。
 
 6.5b. **Deterministic Patch Gate（仅当 TEAM_GATE_ENABLED = true AND mode == autofix）**
 

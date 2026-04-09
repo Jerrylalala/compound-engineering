@@ -134,10 +134,10 @@ If the scope is unclear, ask one targeted question to disambiguate and then proc
 - Phase 0.1b 判断为 non-software brainstorming → 跳过（历史方案为软件解决方案，检索无意义）
 - Phase 0.2 判断为 clear requirements → 直接路由至 Phase 1.3 或 Phase 3 → 跳过
 
-从 feature description 提取关键词，运行 `learnings-researcher` 检索 `docs/solutions/` 历史方案：
+从 feature description 提取关键词，运行 `compound-engineering:research:learnings-researcher` 检索 `docs/solutions/` 历史方案：
 
 ```
-Run: learnings-researcher(feature_description)
+Task compound-engineering:research:learnings-researcher(feature_description)
 ```
 
 **去重规则**（同一 session 内）：

@@ -48,7 +48,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
    |-----------|---------|--------|
    | **Trivial** | 1-2 files, no behavioral change (typo, config, rename) | Proceed to Phase 1 step 2 directly. Skip step 3 (Intent Gate) and step 4 ([R]). Apply Test Discovery if the change touches behavior-bearing code |
    | **Small / Medium** | Clear scope, under ~10 files | Build a task list from discovery. Proceed to Phase 1 step 2 |
-   | **Large** | Cross-cutting, architectural decisions, 10+ files, touches auth/payments/migrations | Inform the user this would benefit from `/ce:brainstorm` or `/ce:plan` to surface edge cases and scope boundaries. Honor their choice. If proceeding, build a task list and continue to Phase 1 step 2 |
+   | **Large** | Cross-cutting, architectural decisions, 10+ files, touches auth/payments/migrations | Inform the user this would benefit from `/ce:brainstorm` or `/ce:plan` to surface edge cases and scope boundaries. Honor their choice. If proceeding, continue to step 3 (Intent Gate) |
 
 3. **Intent Gate（仅限 Large 复杂度 + bare prompt）**
 
@@ -84,7 +84,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
    触发条件：输入为 bare prompt（非文件路径）且 `$ARGUMENTS` 包含 `[R]`。Trivial 任务跳过（见步骤 2）。
 
    ```
-   Run: learnings-researcher(prompt_content)
+   Task compound-engineering:research:learnings-researcher(prompt_content)
    ```
 
    去重规则（同 ce:brainstorm [R]）：同一 session 内相同关键词（lowercase + trim + token sort）不重复搜索。子代理派发时各子代理 in-memory 状态独立。
