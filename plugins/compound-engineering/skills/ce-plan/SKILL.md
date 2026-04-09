@@ -623,9 +623,9 @@ When the plan contains 4+ implementation units with non-linear dependencies, 3+ 
 
 **触发条件**: `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`
 
-**执行时机**: Phase 5.2（Write Plan File）完成后，Phase 5.3（Handoff）之前
+**执行时机**: Phase 5.3（Confidence Check and Deepening）完成后，Phase 5.3.8（Document Review）之前
 
-> 原因：Phase 5.1 Final Review 可能修改 Implementation Units（添加/删除文件、变更范围）。在 Phase 5.2 写入磁盘后生成合约，确保 allowed_files 与最终计划同步，避免合约文件与实际计划不一致。
+> 原因：Phase 5.1 Final Review 和 Phase 5.3 Deepening 均可能修改 Implementation Units（添加/删除文件、变更范围）。必须在这两个阶段都完成后生成合约，确保 allowed_files 基于最终计划，避免与实际执行范围不一致。注：Phase 4.5 的编号仅反映概念位置（在 Phase 4 Planning 之后），实际执行在 Phase 5.3 完成后。
 
 Load the `team-mode` skill for role definitions (合约主, 追溯审查).
 

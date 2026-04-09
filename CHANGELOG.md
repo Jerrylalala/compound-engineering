@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.45.23] - 2026-04-09
+
+### 修复（第三方审核 + 事实核查：5 个确认问题）
+- **[ce:review] P1 修复**: 6.5b 标题「仅当 mode == autofix」与参数表（interactive+autofix 均生效）和伪代码矛盾，已统一为「autofix 和 interactive 均生效，report-only/headless 跳过」
+- **[ce:work] P2 修复**: [R] 标志未在 Phase -1 剥离，若传 `plan.md [R]` 会导致路径解析污染；现在 Phase -1 最先检测并剥离 [R]，设置 R_MODE_ENABLED
+- **[ce:work] P2 修复**: Phase 0 [R] 检索触发条件从 `$ARGUMENTS 包含 [R]` 改为 `R_MODE_ENABLED = true`（与 Phase -1 设置的变量保持一致）
+- **[ce:work] P2 修复**: Handoff 选 2「调用 `workflows:pr` skill」改为「执行 `/workflows:pr` command」（workflows:pr 是 Command 不是 Skill）
+- **[ce:work] P2 修复**: 移除 `imgup` skill 引用（插件中不存在该组件）；移除 `linting-agent` 引用（不存在），改为通用 lint 命令说明
+- **[ce:plan] P2 修复**: Phase 4.5 合约生成时机描述更新：从「Phase 5.3（Handoff）之前」改为「Phase 5.3（Deepening）完成后，5.3.8 之前」，防止 Deepening 新增文件后合约过期
+
 ## [2.45.22] - 2026-04-09
 
 ### 修复（全量链路审查：2 个 P2 问题）

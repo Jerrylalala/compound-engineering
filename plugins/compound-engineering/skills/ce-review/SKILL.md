@@ -468,7 +468,7 @@ Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED):
 无 Codex/Gemini 参与时，此规则不执行，不影响 Claude 内置审查 agent 的路由。
 此规则对所有模式生效（interactive/autofix/headless），确保最常见的 interactive 模式也受到保护。
 
-6.5b. **Deterministic Patch Gate（仅当 TEAM_GATE_ENABLED = true AND mode == autofix）**
+6.5b. **Deterministic Patch Gate（当 TEAM_GATE_ENABLED = true，在 autofix 和 interactive 模式均生效；report-only 和 headless 模式跳过）**
 
 This is a rule engine, not an agent — it consumes no extra tokens. Execute immediately after step 6 routing normalization, before partitioning the fixer queue.
 
