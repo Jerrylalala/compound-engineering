@@ -8,3 +8,4 @@ todos/
 .compound/
 .claude/agent-memory/
 .claude/settings.local.json
+.ce-work-verification.json

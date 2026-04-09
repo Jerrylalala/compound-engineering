@@ -1,7 +1,7 @@
 ---
 name: ce:plan
 description: "Create structured plans for any multi-step task -- software features, research workflows, events, study plans, or any goal that benefits from structured breakdown. Also deepen existing plans with interactive review of sub-agent findings. Use for plan creation when the user says 'plan this', 'create a plan', 'write a tech plan', 'plan the implementation', 'how should we build', 'what's the approach for', 'break this down', 'plan a trip', 'create a study plan', or when a brainstorm/requirements document is ready for planning. Use for plan deepening when the user says 'deepen the plan', 'deepen my plan', 'deepening pass', or uses 'deepen' in reference to a plan. For exploratory or ambiguous requests where the user is unsure what to do, prefer ce:brainstorm first."
-argument-hint: "[optional: feature description, requirements doc path, plan path to deepen, or any task to plan]"
+argument-hint: "[optional: feature description, requirements doc path, plan path to deepen, or any task to plan] [team=合约主+追溯审查+自动生成.team-contract.md] [team:full=同[team]（ce:plan阶段无额外角色，与ce:work [team:full]路径兼容）]"
 ---
 
 # Create Technical Plan
@@ -535,6 +535,17 @@ deepened: YYYY-MM-DD  # optional, set when the confidence check substantively st
 - **Integration coverage:** [Cross-layer scenarios unit tests alone will not prove]
 - **Unchanged invariants:** [Existing APIs, interfaces, or behaviors that this plan explicitly does not change — and how the new work relates to them. Include when the change touches shared surfaces and reviewers need blast-radius assurance]
 
+<!-- 当计划预期使用 ce:work [T] 模式时包含此章节；否则可省略。 -->
+<!-- 省略时：ce:work [T] 的 Layer 3 自动切换宽松核查模式——对照任务需求逐条核查已修改文件，不按场景表逐行比对（见 ce:work Phase 3.5 Layer 3）。 -->
+## 验收场景（[T] 模式使用）
+
+> 每条场景对应 ce:work [T] 的验证层。Layer 3 独立 reviewer 将逐条核查变更文件是否满足以下标准。
+> 有 [T] 参数时建议包含此章节；若无，Layer 3 切换宽松核查模式（读文件对照需求，不运行验证命令）并发出警告。
+
+| # | 场景 | 操作步骤 | 期望结果 | 层级 |
+|---|------|----------|----------|------|
+| 1 | [功能场景描述] | [用户操作步骤] | [可观测的期望结果] | Layer 0/1/2/3 |
+
 ## Risks & Dependencies
 
 | Risk | Mitigation |
@@ -602,10 +613,102 @@ For larger `Deep` plans, extend the core template only when useful with sections
 - Do not include git commands, commit messages, or exact test command recipes
 - Do not expand implementation units into micro-step `RED/GREEN/REFACTOR` instructions
 - Do not pretend an execution-time question is settled just to make the plan look complete
+- If the plan is expected to use `ce:work [T]`, include a `## 验收场景` section; the Layer 3 reviewer will check each criterion against changed files. If omitted, Layer 3 falls back to loose-check mode against task requirements (see Phase 3.5 of ce:work).
 
 #### 4.4 Visual Communication in Plan Documents
 
 When the plan contains 4+ implementation units with non-linear dependencies, 3+ interacting surfaces in System-Wide Impact, 3+ behavioral modes/variants in Overview or Problem Frame, or 3+ interacting decisions in Key Technical Decisions or alternatives in Alternative Approaches, read `references/visual-communication.md` for diagram and table guidance. This covers plan-structure visuals (dependency graphs, interaction diagrams, comparison tables) — not solution-design diagrams, which are covered in Section 3.4.
+
+### Phase 4.5: Contract Generation（仅当 `[team]` 标志存在时）
+
+**触发条件**: `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`
+
+**执行时机**: Phase 5.2（Write Plan File）完成后，Phase 5.3（Handoff）之前
+
+> 原因：Phase 5.1 Final Review 可能修改 Implementation Units（添加/删除文件、变更范围）。在 Phase 5.2 写入磁盘后生成合约，确保 allowed_files 与最终计划同步，避免合约文件与实际计划不一致。
+
+Load the `team-mode` skill for role definitions (合约主, 追溯审查).
+
+#### 合约主角色激活
+
+合约主读取刚生成的计划文件，提取边界合约：
+
+1. **`allowed_files`**：遍历所有 Implementation Units 的 Files 字段，提取文件路径：
+   - **包含**：Files 列中标注 Create/Modify 类型的文件
+   - **排除**：Test 类型文件（Test 文件通过验证者 Hook 单独验证，不在 Patch Gate 白名单中）
+   - **排除**：Move/Delete 类型操作（不涉及内容修改，Patch Gate 特殊处理）
+2. **`forbidden_surfaces`**：从计划描述和技术方案中识别高风险文件：
+   - 版本文件：`**/plugin.json`、`package.json`（当版本管理是明确任务时例外）
+   - 数据库 schema：`db/schema.rb`、`**/*_schema.*`
+   - 认证/授权配置：含 `auth`、`credential`、`secret`、`permission` 的配置文件
+   - 如无明显高风险文件，保留为空列表
+3. **`required_invariants`**：从以下优先顺序提取可检查的不变式（转换为命令式短句）：
+   a. 计划末尾的 `## 验收场景` 章节（如存在）→ 提取每个场景的"期望结果"列
+   b. 各 Implementation Unit 的 `Verification` 字段 → 提取层级为 Layer 0/1 的可执行验证
+   c. 若两者均不存在 → required_invariants 留空，合约生成时宣告：「⚠️ 未找到验收场景或 Verification 字段，required_invariants 为空，Patch Gate Rule 4 无法执行后置验证」
+   
+   转换规则：
+   - 可命令化的结果（"bash scripts/check.sh 必须通过"）→ 命令式短句
+   - 纯 UI/视觉结果（"用户看到成功提示"）→ 转为描述式短句，标注 `requires_human_check: true`
+   - Layer 0 结果 → 可执行命令型不变式；Layer 3 结果 → 验收确认型不变式
+4. **`max_files_per_patch`**：默认 1（one-finding-one-patch 原则）
+
+**生成合约文件**：使用以下格式写入 `.team-contract.md`（repo 根目录），填充提取的值：
+
+```yaml
+---
+team_mode: true
+generated_by: "ce:plan [team]"
+generated_at: YYYY-MM-DD
+plan_source: <刚生成的计划文件路径>
+plan_source_commit: null   # 计划文件在 Phase 5 写入后尚未 commit，此处始终为 null
+                           # 启用版本检测方法：在 Phase 5 写入计划文件后，运行：
+                           #   git log -1 --format='%H' -- <plan_file>
+                           # 将结果填入此字段，或让 ce:work [team] 在执行前手动更新
+allowed_files:
+  - <从 Implementation Units 提取的文件路径>
+forbidden_surfaces:
+  - <识别的高风险文件>
+required_invariants:
+  - "<从 ## 验收场景章节或 Unit Verification 字段转换的不变式命令>"
+max_files_per_patch: 1
+last_verification_failure: null
+---
+
+# Team Contract
+
+## 背景
+
+<!-- 本次计划的任务背景和边界约束 -->
+```
+
+#### 追溯审查角色激活
+
+追溯审查者（只读角色）执行历史经验检查：
+
+1. 搜索 `docs/solutions/` 查找与当前计划相关的历史案例
+2. 检查计划的技术决策是否与已记录的 gotcha 或失败模式矛盾
+3. 将有价值的发现追加到计划文件的 **Open Questions** 节（如无此节则新建）
+
+**输出**：`.team-contract.md` 写入根目录；追溯审查结果（如有）写入计划文件末尾
+
+#### Post-Phase-5 合约 hash 更新（可选，启用版本检测）
+
+Phase 5.2（Write Plan File）完成后，如需启用版本检测：
+
+```bash
+PLAN_HASH=$(git log -1 --format='%H' -- <plan_source_path> 2>/dev/null)
+```
+
+如 `PLAN_HASH` 非空（计划文件已提交），在 `.team-contract.md` 的 YAML frontmatter 中更新：
+```yaml
+plan_source_commit: <PLAN_HASH>
+```
+
+如 `PLAN_HASH` 为空（计划文件尚未提交，是常见状态），保留 null 即可。
+建议：在首次运行 `ce:work [team]` 前手动 commit 计划文件，以启用完整版本保护。
+
+---
 
 ### Phase 5: Final Review, Write File, and Handoff
 

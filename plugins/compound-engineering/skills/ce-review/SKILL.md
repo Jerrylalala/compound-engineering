@@ -1,7 +1,7 @@
 ---
 name: ce:review
 description: "Structured code review using tiered persona agents, confidence-gated findings, and a merge/dedup pipeline. Use when reviewing code changes before creating a PR."
-argument-hint: "[PR# 或留空=当前分支] [mode:autofix|report-only|headless] [plan:路径] [base:ref] [C=Codex审核] [G=Gemini审核]"
+argument-hint: "[PR# 或留空=当前分支] [mode:autofix|report-only|headless] [plan:路径] [base:ref] [C=Codex审核] [G=Gemini审核] [team=合约白名单门控,需.team-contract.md] [team:full=等同[team],Patch Gate行为相同]"
 ---
 
 # Code Review
@@ -27,6 +27,10 @@ Parse `$ARGUMENTS` for the following optional tokens. Strip each recognized toke
 | `mode:headless` | `mode:headless` | Select headless mode for programmatic callers (see Mode Detection below) |
 | `base:<sha-or-ref>` | `base:abc1234` or `base:origin/main` | Skip scope detection — use this as the diff base directly |
 | `plan:<path>` | `plan:docs/plans/2026-03-25-001-feat-foo-plan.md` | Load this plan for requirements verification |
+| `[C]` | `[C]` | CODEX_ENABLED = true. 标记 Codex 将作为外部审查方参与（由 workflows:review [C] 调用）。激活 6.5a 安全规则：将所有 safe_auto 降级为 gated_auto，防止可能缺乏 codebase 上下文的建议被自动应用。 |
+| `[G]` | `[G]` | GEMINI_ENABLED = true. 标记 Gemini 将作为外部审查方参与（由 workflows:review [G] 调用）。激活 6.5a 安全规则（同 [C]）。 |
+| `[team]` | `[team]` | TEAM_GATE_ENABLED = true. Load `.team-contract.md` and execute Deterministic Patch Gate in Stage 5 (see below). Has no effect in `mode:report-only` or `mode:headless`. Patch Gate runs in both `mode:autofix` and interactive mode. |
+| `[team:full]` | `[team:full]` | 等同于 `[team]`（ce:review 阶段无风险卫角色，Patch Gate 行为与 [team] 相同，TEAM_GATE_ENABLED = true）。 |
 
 All tokens are optional. Each one present means one less thing to infer. When absent, fall back to existing behavior for that stage.
 
@@ -428,6 +432,95 @@ Convert multiple reviewer JSON payloads into one deduplicated, confidence-gated 
 5. **Separate pre-existing.** Pull out findings with `pre_existing: true` into a separate list.
 5. **Resolve disagreements.** When reviewers flag the same code region but disagree on severity, autofix_class, or owner, record the disagreement in the finding's evidence (e.g., "security rated P0, correctness rated P1 -- keeping P0"). This transparency helps the user understand why a finding was routed the way it was.
 6. **Normalize routing.** For each merged finding, set the final `autofix_class`, `owner`, and `requires_verification`. If reviewers disagree, keep the most conservative route. Synthesis may narrow a finding from `safe_auto` to `gated_auto` or `manual`, but must not widen it without new evidence.
+
+6.5a. **外部模型建议强制 gated_auto（无条件生效，不依赖 [team] 模式）**
+
+**注意**：ce:review 本身不主动调用 Codex/Gemini CLI。`[C]`/`[G]` 标志由外层编排（如 `workflows:review [C]`）传入，表示外部 AI 已参与或将参与审查。6.5a 规则是一个轻量级安全层，对所有 safe_auto 发现保守降级，防止外部 AI 建议（可能缺乏全局 context）被自动应用。
+
+This rule is a lightweight normalization step — no tokens consumed. Runs immediately after step 6, before the Patch Gate.
+
+标志赋值：`CODEX_ENABLED` 在 Argument Parsing 阶段检测到 `[C]` 时设为 true；`GEMINI_ENABLED` 在检测到 `[G]` 时设为 true。
+
+```
+Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED):
+  For each finding where autofix_class == "safe_auto":
+    downgrade: safe_auto → gated_auto
+    note: "外部 AI 参与时 safe_auto 降级（来源: Codex/Gemini，缺乏全局 codebase context）"
+
+  # safe rationale:
+  # Codex/Gemini lack full codebase context. Their suggestions may be
+  # locally correct but globally unsafe. Human confirmation is required.
+  # This rule applies when EITHER Codex OR Gemini participated in the review —
+  # it is not possible to determine which specific finding originated from them,
+  # so all safe_auto findings are conservatively downgraded.
+  # This rule is intentionally unconditional — [team] mode is NOT required,
+  # and applies to ALL modes (interactive, autofix, headless) equally.
+  # Interactive mode also auto-applies safe_auto fixes, so the downgrade
+  # must cover it — otherwise the most common mode is unprotected.
+  # The existing Patch Gate (6.5b) provides deeper contract-based checks
+  # for [team] mode; this rule provides a lightweight baseline for all modes.
+  #
+  # Note: This rule only affects automation_mode (safe_auto → gated_auto),
+  # NOT severity_tier (P1/P2/P3 remains unchanged). P1 blocking behavior is preserved.
+```
+
+**注意**: 此规则仅在 Codex/Gemini 参与本次审查时生效（`CODEX_ENABLED OR GEMINI_ENABLED = true`）。
+无 Codex/Gemini 参与时，此规则不执行，不影响 Claude 内置审查 agent 的路由。
+此规则对所有模式生效（interactive/autofix/headless），确保最常见的 interactive 模式也受到保护。
+
+6.5b. **Deterministic Patch Gate（仅当 TEAM_GATE_ENABLED = true AND mode == autofix）**
+
+This is a rule engine, not an agent — it consumes no extra tokens. Execute immediately after step 6 routing normalization, before partitioning the fixer queue.
+
+```
+if TEAM_GATE_ENABLED AND mode != "report-only" AND mode != "headless":
+  Load .team-contract.md from repo root
+  If not found: skip this gate, log warning "未找到 .team-contract.md，Patch Gate 已禁用"
+  Read: allowed_files, forbidden_surfaces, max_files_per_patch, required_invariants
+
+  For each finding where autofix_class == safe_auto:
+    # Use finding.file (the file the finding references, from the review schema)
+    # For Rules 1-3: "files touched by this finding" = the set of unique `file` values
+    # across this finding and any related findings proposing the same fix
+
+    Rule 1 — File scope:
+      if finding.file NOT IN allowed_files:
+        downgrade: safe_auto → gated_auto
+        note: "合约白名单：{finding.file} 不在 allowed_files 中"
+
+    Rule 2 — Forbidden surface:
+      if finding.file IN forbidden_surfaces:
+        downgrade: safe_auto → gated_auto
+        owner: downstream-resolver
+        note: "合约禁止区域：{finding.file} 在 forbidden_surfaces 中，拒绝自动修复，需人工确认"
+
+    Rule 3 — One-finding-one-patch:
+      if count(distinct files across co-located findings for same fix) > max_files_per_patch (default: 1):
+        downgrade: safe_auto → gated_auto
+        note: "单补丁约束：此修复涉及 {N} 个文件，超过 max_files_per_patch={max}"
+
+    Rule 4 — Invariant verification:
+      if required_invariants is non-empty:
+        mark finding with requires_verification: true
+        fixer subagent must verify all required_invariants after applying the patch:
+          1. 应用 patch
+          2. 对 required_invariants 中每个条目：
+             - 命令式（"bash script.sh 必须通过"）→ 运行命令，检查退出码
+             - 描述式（"UI 显示成功提示"）→ 标注 requires_human_check: true，跳过自动验证
+          3. 若任何命令验证失败：
+             - 自动回滚 patch（git checkout -- <file>）
+             - re-route finding as gated_auto，标注"invariant 验证失败: <命令> exit <N>"
+          4. 若所有验证通过：保留 patch，finding 标注 verified: true
+
+  Additionally, apply review-contract Tier overrides (always active when TEAM_GATE_ENABLED, regardless of whether review-contract skill was separately loaded):
+    Blocking Tier agents (security-reviewer, data-migrations-reviewer, deployment-verification-agent):
+      findings from these agents: force to gated_auto regardless of original autofix_class
+    Analytical Tier agents (architecture-strategist, performance-reviewer, kieran-*-reviewer, julik-*-reviewer, dhh-rails-reviewer, pattern-recognition-specialist):
+      maintain original routing, add requires_verification: true
+    Advisory Tier agents (code-simplicity-reviewer, agent-native-reviewer, schema-drift-detector):
+      maintain original routing, no changes
+```
+
 7. **Partition the work.** Build three sets:
    - in-skill fixer queue: only `safe_auto -> review-fixer`
    - residual actionable queue: unresolved `gated_auto` or `manual` findings whose owner is `downstream-resolver`

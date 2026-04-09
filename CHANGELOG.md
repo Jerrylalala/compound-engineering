@@ -1,5 +1,122 @@
 # Changelog
 
+## [2.45.21] - 2026-04-09
+
+### 修复（全量检查第五轮：6 个遗留问题）
+- [ce:work] Phase -1 [G] 宣告矛盾修复：改为「不透传给内嵌 ce:review」与 Phase 3 注释一致（原文错误声明「将透传 [G]，Gemini 将参与审查」）
+- [ce:work] Layer 1 步骤编号修复：两个「4.」改为正确的 4/5/6（执行 curl → 验证响应 → 成功/失败）
+- [ce:work] Phase 2 Execute 步骤编号修复：第二个「6.」（Track Progress）改为「7.」
+- [team-mode] BLOCKED 检查点路径修复：两处旧路径 `.ce-work-verification.json` 更新为 `.context/compound-engineering/ce-work-verification.json`
+- [team-mode] 字段描述 + ce:plan 激活步骤：「Acceptance Criteria」改为「## 验收场景章节和 Unit Verification 字段」（与 ce:plan Phase 4.5 一致）
+- [ce:plan] Phase 4.5 YAML 模板注释：required_invariants 示例更新为正确来源描述
+
+## [2.45.20] - 2026-04-09
+
+### 修复（第四轮：剩余 P2/P3 + Handoff 协议 + 文件路径）
+- [ce:work] 修复 Phase -1 [C] 宣告文字（移除"透传给内嵌 ce:review"的错误声明）
+- [ce:work] Phase 4 新增 Workflow Handoff（AskUserQuestion 三选一：代码审查/创建PR/完成）
+- [ce:work] [PW] 孤立检测升级为 AskUserQuestion（从文字警告升级为 agent-native 交互）
+- [ce:work] .context/compound-engineering/ce-work-verification.json 替代根目录放置（避免多 worktree 冲突，与 ce:review artifact 目录一致）
+- [ce:work] 添加 Layer 3 + team 验证者 Hook 职责矩阵表（时机/范围/读取方式/失败行为）
+- [ce:work] Phase 0 添加 [R]+[T] 组合交互行为说明
+- [team-mode] 添加风险卫执行规范（时机/输入/匹配规则/用户拒绝处理）
+- [team-mode] allowed_files 字段说明添加精确匹配规则（不支持通配符/目录前缀）
+- [ce:review] Rule 4 添加 fixer subagent 执行步骤（命令式vs描述式验证/回滚逻辑）
+- [ce:brainstorm] argument-hint 添加 [team:full] 说明
+
+## [2.45.19] - 2026-04-09
+
+### 修复（第三轮 + team 全量审核）
+- [ce:work] Codex-P1: Phase 3 内嵌 ce:review 添加 [team] 透传，防止 Patch Gate 被绕过（安全漏洞修复）
+- [ce:work] Codex-P2a: 移除内嵌 ce:review 的 [C]/[G] 透传（transparent pass 是净损失，降级 safe_auto 无实际收益）
+- [ce:work] Codex-P2b/team-P1-001: Phase 3.5.0 情况A新增 task_id 比对，防止不同任务误继承旧验证状态
+- [ce:work] P1-001: Phase 3.5.0 情况A添加 current_layer→Phase 跳转映射表
+- [ce:work] task_id 生成添加输入清理规则（仅保留字母数字中文连字符下划线）
+- [ce:work] P2-001: 澄清 verification_rounds 递增时机（每轮所有层完成后 +1），移除 Layer 0 超限时的错误提前 +1
+- [ce:work] P2-002: 添加全层跳过→passes=true 路径（纯文档/无可执行验证场景）
+- [ce:work] P2-003: Phase 3.5.3 添加两种 Layer 3 委派状态的 passes 判断规则
+- [ce:work] P2-006: Phase 3 添加 [C]/[G]/[team] 参数拼接示例
+- [ce:work] team-P2-001: Layer 1 修复重复步骤编号（第二个 "3." 改为 "4."）
+- [ce:work] team-P1-002: Layer 1 认证 token 获取优先使用 TEST_ 前缀变量，避免误用生产凭证
+- [ce:plan] Codex-P2c: Phase 4.5 执行时机改为 Phase 5.2 之后（确保合约与最终计划同步）
+- [ce:plan] Codex-P2d/P2-005: required_invariants 提取来源改为 `## 验收场景` + Unit Verification 字段，不再引用不存在的 "Acceptance Criteria" 章节
+- [ce:plan] P2-004: allowed_files 提取规则明确排除 Test/Move/Delete 类型文件
+- [ce:review] P1-002: argument-hint 添加 [team:full] 说明
+
+## [2.45.18] - 2026-04-09
+
+### 修复
+- [ce:work] Phase -1 重构 [PW] 检测为嵌套结构（消除多步依赖链），添加 Playwright MCP 可用性检查
+- [ce:work] Phase -1 新增 [C]/[G] 检测并透传给内嵌 ce:review 调用
+- [ce:work] Phase 3.5.0 添加先读后写逻辑，修复 session 恢复承诺无法实现的问题
+- [ce:work] Phase 3.5.0 添加只读文件系统降级策略（内存状态模式）
+- [ce:work] Layer 0 添加层内最大重试次数限制（3 次），防止无限循环
+- [ce:work] Layer 1 添加认证端点识别优先级规则，不再依赖 AI 推断登录端点
+- [ce:work] Layer 2 添加 agent-browser 两步调用说明（加载文档 + Bash 执行）
+- [ce:work] [PW] argument-hint 改为主动式警告，明确前置条件（需 Playwright MCP Server）
+- [ce:work] [R] 去重规则独立展开，不再引用 ce:brainstorm，明确跨 skill 不生效
+- [ce:work] [T]+[team] BLOCKED 改为标准 AskUserQuestion，不再引用未定义的 team 检查点
+- [ce:work] [T]+[team] Layer 3 边界定义明确（只核查跨任务维度），定义跨任务组合问题处理路径
+- [ce:plan] Phase 4.5 添加 Load team-mode skill 指令
+- [ce:plan] Phase 4.5 修复 plan_source_commit 时序问题，添加 Post-Phase-5 更新指南
+- [ce:plan] argument-hint 添加 [team:full] 说明
+- [team-mode] 添加 BLOCKED 检查点定义（[T]+[team] 同时激活时）
+- [team-mode] 文档化 plan_source_commit 版本检测限制和启用步骤
+- [team-mode] 降级行为表添加设计原因说明
+- [team-mode] 明确 [team:full] 在 ce:brainstorm/review 中等同 [team]
+- [team-mode] 添加并行 subagent 文件边界约束规则
+- [team-mode] [T]+[team] 全局 Layer 3 补充定义
+- [ce:review] [C]/[G] 参数描述修正：诚实说明不直接调用 Codex/Gemini，而是激活安全降级规则
+- [ce:review] Patch Gate 扩展到 interactive 模式（原仅限 autofix），确保合约保护在默认模式生效
+- [ce:review] argument-hint 添加 [team:full] 说明（等同 [team]）
+- [ce:brainstorm] [R] 去重规则独立展开，添加跳过通知，明确跨 skill 不生效
+- [ce:brainstorm] [team:full] 说明等同 [team]
+
+---
+
+## [2.45.14] - 2026-04-09
+
+### Added
+
+* **feat(ce-work)**: 新增 `[T]` 参数——四层自验证模式（Layer 0 CLI + Layer 1 API/DB + Layer 2 浏览器 + Layer 3 验收审查）
+  * 完成标准从"代码写完"升级为"通过验证"
+  * `[T]` 模式默认使用 agent-browser（低 token，30-50x 于 Playwright MCP）
+* **feat(ce-work)**: 新增 `[PW]` 参数——显式启用 Playwright MCP 浏览器验证（仅在 `[T]` 时生效）
+  * 适用于网络请求拦截、JS 执行、拖拽、文件上传等高精度场景
+  * 用户显式控制，避免 token 浪费
+* **feat(ce-work)**: 新增 `.ce-work-verification.json` 跨轮次验证状态持久化（已加入 .gitignore）
+* **feat(ce-work)**: Layer 3"不信任实现者报告"原则——独立读文件，不依赖执行阶段自声明
+* **feat(ce-plan)**: 新增 `## 验收场景` 章节模板——为 `ce:work [T]` 的 Layer 3 提供逐条核查标准
+
+---
+
+## [2.45.10] - 2026-04-08
+
+### Added
+
+* **feat(team-mode)**: 新增 `[team]` 参数 — 多代理协作稳定性框架，适用于 ce:brainstorm/plan/work/review
+  * 单写者原则（Iron Law）：执行者是唯一可写共享代码的角色，其他角色只读
+  * 合约白名单：`ce:plan [team]` 在 Phase 4.5 自动生成 `.team-contract.md`（allowed_files/forbidden_surfaces/required_invariants）
+  * 验证者集成：`ce:work [team]` 每任务完成后自动运行验证者 Hook（集成测试 + 不变式检查）
+  * Deterministic Patch Gate：`ce:review mode:autofix [team]` 在 Stage 5 执行规则引擎门控（不消耗额外 token）
+  * 三个变体：`[team]`（3角色默认）/ `[team:light]`（2角色快速）/ `[team:full]`（4角色含风险卫）
+  * `[P][team]` 组合支持：Party Mode 发散 → [team] 结构化验证（顺序执行）
+* **feat(team-mode)**: 新增 `skills-custom/team-mode/SKILL.md` — overlay skill，定义角色规范、单写者原则、合约文件格式
+* **feat(team-mode)**: 新增 `skills-custom/team-mode/templates/team-contract.md.tpl` — `.team-contract.md` 生成模板
+
+### Fixed
+
+* **fix(review-contract)**: 虚拟字段（`conclusion_type`/Tier 分类）现在由 `[team]` Patch Gate 自动消费 — "入口未接通、虚拟字段无消费者"问题已解决
+* **fix(review-contract)**: 新增 Integration with [team] Mode 节，明确 Tier → Patch Gate 行为映射
+* **fix(team-mode/ce-plan)**: 移除跨 skill 模板路径依赖——Phase 4.5 现在内联 .team-contract.md 格式，不再引用 `skills-custom/team-mode/templates/` 路径（修复 marketplace 安装时路径不可解析问题）
+* **fix(team-mode/ce-review)**: Patch Gate 使用 `finding.file`（review schema 实际字段），替换伪字段 `patch_file`/`affected_files`；Tier 覆盖规则改为 TEAM_GATE_ENABLED 下无条件激活（不再依赖 review-contract skill 是否单独加载）
+* **fix(team-mode/ce-work)**: 验证者 Hook 改为只报告失败，写入 `last_verification_failure` 由执行者负责——修复验证者违反单写者原则的矛盾
+* **fix(plugin.json)**: 修正 description 中 custom overlays 数量（14→12，与实际一致）
+* **fix(team-mode/ce-plan)**: Phase 4.5 触发条件移除 `[team:light]`（该模式设计为无合约，触发生成为语义矛盾）
+* **fix(team-mode/ce-review)**: Patch Gate Rule 2 forbidden_surfaces 命中时降级目标从 `advisory` 改为 `gated_auto`，确保禁止区域的 finding 仍可被追踪（而非变为 report-only）
+* **fix(team-mode/ce-work)**: 子代理 dispatch 时补充传递 team-mode 上下文（合约内容 + 角色约束），修复 subagent 模式下边界检查静默失效的问题
+* **fix(team-mode/SKILL.md)**: 补充 `追溯审查`/`探索者`/`挑战者` 角色到角色定义表；移除未在 ce:brainstorm 中实现的 `[team:full]` 可行性审查；修正审查 agent 数量描述（"31个"→"多个"）；移除死字段 `patch_gate_enabled`
+
 ## [2.45.7] — 2026-04-08
 
 ### 修复与优化（P3 可选优化批次）

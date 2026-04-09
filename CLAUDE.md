@@ -265,6 +265,19 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---
 
+## Codex 模型策略（强制）
+
+> **铁律**：本项目调用 Codex 时，统一使用 `gpt-5.4`（当前最新模型）。
+
+- **不使用** `gpt-4.1`、`gpt-5.3-codex` 等旧版本（ChatGPT 账户不支持 gpt-4.x）
+- **调用方式**：不指定 `-m` 或 `-c model=` 参数，使用 Codex 默认（当前即 gpt-5.4）
+- **显式指定**（仅在需要覆盖时）：`codex exec -c "model=gpt-5.4" ...`
+- **环境变量**：`export CODEX_MODEL=gpt-5.4`（全局覆盖，用于脚本场景）
+
+配置位置：`plugins/compound-engineering/commands/codex.md` Step 2
+
+---
+
 ## Codex 审核（可选）
 
 ### 方式一：通过 `/workflows:review [C]`（推荐，插件功能）

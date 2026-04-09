@@ -1,7 +1,7 @@
 ---
 name: ce:brainstorm
 description: 'Explore requirements and approaches through collaborative dialogue before writing a right-sized requirements document and planning implementation. Use for feature ideas, problem framing, when the user says ''let''s brainstorm'', or when they want to think through options before deciding what to build. Also use when a user describes a vague or ambitious feature request, asks ''what should we build'', ''help me think through X'', presents a problem with multiple valid solutions, or seems unsure about scope or direction — even if they don''t explicitly ask to brainstorm.'
-argument-hint: "[功能描述] [P=派对模式/多代理讨论] [C=Codex咨询] [G=Gemini咨询]"
+argument-hint: "[功能描述] [P=派对模式/多代理讨论] [C=Codex咨询] [G=Gemini咨询] [R=研究:触发learnings-researcher检索历史方案] [team=结构化探索:探索者+挑战者] [team:full=等同[team],brainstorm阶段无风险卫角色]"
 ---
 
 # Brainstorm a Feature or Improvement
@@ -44,6 +44,42 @@ This skill does not implement code. It explores, clarifies, and documents decisi
 **If the feature description above is empty, ask the user:** "What would you like to explore? Please describe the feature, problem, or improvement you're thinking about."
 
 Do not proceed until you have a feature description from the user.
+
+## Parameter Handling
+
+Parse `$ARGUMENTS` for the following optional tokens before entering the Execution Flow. Strip each recognized token from the arguments before using the remainder as the feature description.
+
+| Token | Effect |
+|-------|--------|
+| `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. |
+| `[C]` | Auto-consult Codex after Phase 2. |
+| `[G]` | Auto-consult Gemini after Phase 2. |
+| `[R]` | Run learnings-researcher before Phase 1. Inject results as historical reference in Phase 2. |
+| `[team]` | TEAM_MODE = true. Activate structured exploration: **探索者 + 挑战者** role pair (see below). **[team:full]** 传入时等同于 `[team]`（brainstorm 阶段探索者+挑战者角色集，无额外风险卫角色）。 |
+
+### `[team]` Structured Exploration Mode
+
+When `[team]` is detected, activate a 2-role structured exploration before Phase 1:
+
+```
+探索者：聚焦「这个想法在技术上可行吗？」，提出具体验证路径和可达条件
+挑战者：质疑假设，寻找边界条件和反例，防止过早收敛
+
+退出条件（满足任一即退出角色对，继续正常流程）：
+  - 双方达成「方向共识」：可行性已确认 + 主要风险已识别
+  - 用户输入 [E]
+  - 未达共识降级（经过 3 轮后仍无共识）→ 用 AskUserQuestion 展示双方核心分歧点，让用户选择采纳方向，继续正常流程
+    （「1轮」= 探索者 + 挑战者各回应一次，不含用户初始触发）
+
+与 [P] 的区别：
+  [P]      = 发散（14位专家自由讨论，无明确收敛条件）
+  [team]   = 收敛（2个角色结构化验证，有明确退出条件）
+  [P][team] = 先 [P] 发散 → 退出 → [team] 结构化挑战验证（顺序执行）
+```
+
+Load the `team-mode` skill for full role definitions and behavioral rules.
+
+---
 
 ## Execution Flow
 
@@ -89,6 +125,32 @@ Use the feature description plus a light repo scan to classify the work:
 - **Deep** - cross-cutting, strategic, or highly ambiguous
 
 If the scope is unclear, ask one targeted question to disambiguate and then proceed.
+
+#### 0.4 [R] 历史检索（仅当 `[R]` 标志存在时）
+
+**触发条件**: `$ARGUMENTS` 包含 `[R]`。
+
+**跳过条件**（不触发 learnings-researcher）：
+- Phase 0.1b 判断为 non-software brainstorming → 跳过（历史方案为软件解决方案，检索无意义）
+- Phase 0.2 判断为 clear requirements → 直接路由至 Phase 1.3 或 Phase 3 → 跳过
+
+跳过时宣告：「⚠️ [R] 跳过：当前属于非软件探索/已有清晰需求场景，learnings-researcher 检索跳过」
+
+从 feature description 提取关键词，运行 `compound-engineering:research:learnings-researcher` 检索 `docs/solutions/` 历史方案：
+
+```
+Task compound-engineering:research:learnings-researcher(feature_description)
+```
+
+**去重规则**（当前 skill 内有效，跨 skill 不生效）：
+同一 session 内相同关键词（lowercase + trim + token sort）不重复搜索，维护 `[session_searched_topics]` 集合。
+子代理派发时各子代理 in-memory 状态独立，跨子代理去重不生效（同一搜索词可能被多个子代理重复触发）。
+跨 skill 去重不生效（如本 session 已在 ce:work [R] 中检索过相同关键词，ce:brainstorm [R] 仍会重新检索）。
+
+**结果处置**：
+- 检索结果作为 Phase 2 方案对比的「历史参考」上下文
+- 在 Phase 2 展示方案时，增加「📚 历史参考」子节，列出相关 solution 文档及其核心洞察
+- 若无相关历史记录 → 在「历史参考」节注明：`No relevant learnings found — 本次为全新探索`
 
 ### Phase 1: Understand the Idea
 

@@ -48,9 +48,15 @@ $ARGUMENTS
 
 使用 heredoc 避免特殊字符问题，通过 `codex exec` 非交互模式调用：
 
+> **模型策略**：本项目统一使用 `gpt-5.4`（Codex 当前最新模型）。
+> 不使用 gpt-4.1 等旧版本（ChatGPT 账户不支持）。
+> 如需覆盖：`export CODEX_MODEL=gpt-5.4`（保持默认即可）。
+
 ```bash
 CODEX_OUTPUT="${TEMP:-/tmp}/codex-ask-$(date +%s).md"
-cat <<'PROMPT_EOF' | codex exec -m "${CODEX_MODEL:-gpt-5.4}" --output-last-message "$CODEX_OUTPUT" -
+# 不指定 model 参数，使用 Codex 默认（当前为 gpt-5.4）
+# 如需显式指定：codex exec -c "model=${CODEX_MODEL:-gpt-5.4}" ...
+cat <<'PROMPT_EOF' | codex exec --output-last-message "$CODEX_OUTPUT" -
 <构建好的prompt>
 PROMPT_EOF
 echo "---EXIT_CODE: $?---"
@@ -63,7 +69,7 @@ cat "$CODEX_OUTPUT" 2>/dev/null
 
 **如果失败**：
 - 模型不支持 → 检查 `codex --version`，运行 `npm update -g @openai/codex` 升级
-- 也可通过环境变量覆盖模型：`export CODEX_MODEL=gpt-5.4`
+- 显式指定模型（当需要覆盖时）：`codex exec -c "model=gpt-5.4" ...`
 - 未安装 → 提示：`npm install -g @openai/codex`
 - 网络/认证问题 → 运行 `codex login` 重新认证
 - 沙箱权限 → 确保 ~/.codex/config.toml 中 [windows] sandbox = "elevated"

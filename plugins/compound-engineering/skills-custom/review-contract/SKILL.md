@@ -123,3 +123,32 @@ description: "私有 Overlay：Review Contract 三档 Tier 分类 + Anti-Lenienc
 1. `conclusion_type` 是否需要写入 findings-schema.json？（当前策略：不修改上游 schema，在 overlay 层处理）
 2. Anti-leniency prompt suffix 的具体注入机制（system_prompt_suffix vs overlay skill 说明）
 3. 多模型仲裁权重：Claude 1.0 / Codex 0.85 / Gemini 0.80（待 P7 实现时启用）
+
+---
+
+## Integration with [team] Mode
+
+当 `ce:review` 使用 `[team]` flag 时，本 skill 的 Tier 分类由 Stage 5 Deterministic Patch Gate **自动消费**。用户不再需要手动加载此 skill — Patch Gate 内联引用 Tier 逻辑。
+
+### Tier → Patch Gate 行为映射
+
+| Tier | 代理 | Patch Gate 行为 |
+|------|------|----------------|
+| **Blocking** | security-reviewer, data-migrations-reviewer, deployment-verification-agent | 所有 findings **强制** downgrade 为 `gated_auto`（无论原始 autofix_class） |
+| **Analytical** | architecture-strategist, performance-reviewer, kieran-*/julik-*/dhh-rails-* | 维持原 autofix_class，但自动添加 `requires_verification: true` |
+| **Advisory** | code-simplicity-reviewer, agent-native-reviewer, schema-drift-detector | 维持原 autofix_class，不触发额外验证 |
+
+### 解决的遗留问题
+
+本集成解决了此前 skill 中记录的"虚拟字段无消费者"问题：
+
+- `conclusion_type` 字段 — Patch Gate 通过 Tier 分类间接消费（Blocking Tier = gated_auto，对应 `conclusion_type: finding` 的最高置信度处理）
+- `confidence ≥ 0.50 (P0)` Blocking Tier 规则 — Patch Gate 的 Rule 1 强制 gated_auto 确保 Blocking Tier 高风险发现不会被自动应用
+- Anti-leniency 原则 — 通过 Patch Gate 的 Blocking Tier 强制路由实现，不依赖 prompt suffix 注入
+
+### 激活条件
+
+Patch Gate 集成仅在以下条件同时满足时生效：
+- `ce:review` 收到 `[team]` flag
+- `mode:autofix` 被选中
+- `.team-contract.md` 存在于 repo 根目录
