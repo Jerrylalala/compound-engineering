@@ -33,7 +33,11 @@ This command takes a work document (plan, specification, or todo file) or a bare
 - 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：
   - 设置 PW_MODE_ENABLED = true
   - 从参数中移除 `[PW]`
-  - 宣告：「✅ [PW] Playwright MCP 模式已启用——Layer 2 将使用 Playwright MCP（高精度浏览器验证）」
+  - 如果 T_MODE_ENABLED = false：
+    - 输出：「⚠️ [PW] 需要配合 [T] 使用，当前未传 [T]，[PW] 将被忽略。如需浏览器验证，请使用 `ce:work [T][PW]`。」
+    - PW_MODE_ENABLED 设置不影响任何执行行为（Phase 3.5 不触发）
+  - 如果 T_MODE_ENABLED = true：
+    - 宣告：「✅ [PW] Playwright MCP 模式已启用——Layer 2 将使用 Playwright MCP（高精度浏览器验证）」
 - 否则：PW_MODE_ENABLED = false（Layer 2 使用 agent-browser，token 低 30-50 倍）
 
 **[team] / [team:full] 检测**（仅当包含时）：
@@ -424,11 +428,15 @@ Determine how to proceed based on what was provided in `<input_document>`.
 | 描述含「前端/UI/组件/页面/样式/交互」或变更含 `.tsx/.vue/.html/.css` | Layer 2 | 关键词 + 扩展名 |
 | 描述含「API/接口/数据库/路由/endpoint/migration」或变更含 `routes/controllers/models/migrations` | Layer 1 | 关键词 + 路径 |
 | 描述含「Markdown/文档/提示词/SKILL」 | 跳过 Layer 1/2，仅 Layer 0 + Layer 3 | 关键词 |
-| 项目 CLAUDE.md 含构建/测试命令 | Layer 0（始终激活） | — |
+| 始终 | Layer 0（无条件激活） | — |
+
+**Layer 0 无命令兜底**：若项目 CLAUDE.md 中未找到构建/测试命令（如纯 Markdown/SKILL 插件项目），Layer 0 执行文件格式检查（如 markdownlint）或版本一致性检查（如 `scripts/check-versions.ps1`）。若确无任何可执行命令，记录 `layers.layer0 = "skip"`，输出：「⚠️ 未检测到构建命令，Layer 0 跳过 CLI 执行，仅记录 skip」。
 
 不确定时：激活 Layer 0 + Layer 3，Layer 1/2 使用 **AskUserQuestion** 询问用户确认。
 
 #### 3.5.2 验证循环（最多 2 轮）
+
+**轮次定义**：一轮 = 所有激活层各执行一次（Layer 0 → Layer 1/2（如触发）→ Layer 3）；每轮结束后无论成功与否，`verification_rounds +1`。Layer 内部的修复重试不计入 verification_rounds。
 
 当 `passes: false` 且 `verification_rounds < 2`，执行以下四层：
 
@@ -498,8 +506,8 @@ agent-browser screenshot verification-$(date +%s).png  # 捕获视觉证据
 4. 发现未达标项 → 列出 → 修复 → 重试 Layer 3
 
 **[T] + [team] 特殊处理**：
-- Layer 3 reviewer = team-mode 验证者 Hook（角色复用，不重复执行）
-- BLOCKED 状态触发 team-mode 人工检查点
+- **Layer 3 delegation**：[team] 模式的验证者 Hook 在每任务后运行（时机早于 Phase 3.5）。Phase 3.5 的 Layer 3 标记为 `layers.layer3 = "delegated-to-team"`，不重复执行独立 reviewer；但若计划有「验收场景」章节，仍对照验收场景做最终一致性确认（轻量核查，不全量重跑）。
+- **BLOCKED 合并**：[T]+[team] 同时激活时，BLOCKED 状态合并到 team-mode 人工检查点，不重复弹出两个对话框。team 人工检查点中包含等同于「修复重试 / 跳过验证 / 停止」的决策路径。若无 team 模式，使用标准 AskUserQuestion 三选一（见 3.5.3）。
 
 ---
 

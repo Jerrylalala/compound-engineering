@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.45.14] - 2026-04-09
+
+### Added
+
+* **feat(ce-work)**: 新增 `[T]` 参数——四层自验证模式（Layer 0 CLI + Layer 1 API/DB + Layer 2 浏览器 + Layer 3 验收审查）
+  * 完成标准从"代码写完"升级为"通过验证"
+  * `[T]` 模式默认使用 agent-browser（低 token，30-50x 于 Playwright MCP）
+* **feat(ce-work)**: 新增 `[PW]` 参数——显式启用 Playwright MCP 浏览器验证（仅在 `[T]` 时生效）
+  * 适用于网络请求拦截、JS 执行、拖拽、文件上传等高精度场景
+  * 用户显式控制，避免 token 浪费
+* **feat(ce-work)**: 新增 `.ce-work-verification.json` 跨轮次验证状态持久化（已加入 .gitignore）
+* **feat(ce-work)**: Layer 3"不信任实现者报告"原则——独立读文件，不依赖执行阶段自声明
+* **feat(ce-plan)**: 新增 `## 验收场景` 章节模板——为 `ce:work [T]` 的 Layer 3 提供逐条核查标准
+
+---
+
 ## [2.45.10] - 2026-04-08
 
 ### Added

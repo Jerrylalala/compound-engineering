@@ -612,7 +612,7 @@ For larger `Deep` plans, extend the core template only when useful with sections
 - Do not include git commands, commit messages, or exact test command recipes
 - Do not expand implementation units into micro-step `RED/GREEN/REFACTOR` instructions
 - Do not pretend an execution-time question is settled just to make the plan look complete
-- 若计划预期使用 `ce:work [T]`，包含 `## 验收场景` 章节；Layer 3 验证器将逐条核查此处定义的成功标准（见 Phase 3.5 of ce:work）
+- If the plan is expected to use `ce:work [T]`, include a `## 验收场景` section; the Layer 3 reviewer will check each criterion against changed files. If omitted, Layer 3 falls back to loose-check mode against task requirements (see Phase 3.5 of ce:work).
 
 #### 4.4 Visual Communication in Plan Documents
 
