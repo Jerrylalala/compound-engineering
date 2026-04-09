@@ -54,7 +54,7 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 | `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. |
 | `[C]` | Auto-consult Codex after Phase 2. |
 | `[G]` | Auto-consult Gemini after Phase 2. |
-| `[R]` | 在 Phase 0 结束前触发 `learnings-researcher`。检索结果标注到 Phase 2 方案对比的「历史参考」节。去重：同 session 内相同关键词已搜索过则跳过。 |
+| `[R]` | Run learnings-researcher before Phase 1. Inject results as historical reference in Phase 2. |
 | `[team]` | TEAM_MODE = true. Activate structured exploration: **探索者 + 挑战者** role pair (see below). |
 
 ### `[team]` Structured Exploration Mode
@@ -130,6 +130,10 @@ If the scope is unclear, ask one targeted question to disambiguate and then proc
 
 **触发条件**: `$ARGUMENTS` 包含 `[R]`。
 
+**跳过条件**（不触发 learnings-researcher）：
+- Phase 0.1b 判断为 non-software brainstorming → 跳过（历史方案为软件解决方案，检索无意义）
+- Phase 0.2 判断为 clear requirements → 直接路由至 Phase 1.3 或 Phase 3 → 跳过
+
 从 feature description 提取关键词，运行 `learnings-researcher` 检索 `docs/solutions/` 历史方案：
 
 ```
@@ -137,12 +141,9 @@ Run: learnings-researcher(feature_description)
 ```
 
 **去重规则**（同一 session 内）：
-- 记录已搜索的关键词集合 `[session_searched_topics]`
-- 若当前 feature_description 的核心关键词（模块名、技术术语）已在集合中 → 跳过，附注：「已在本 session 检索过相似主题，跳过重复搜索」
-- 去重键规范：lowercase + trim + collapse spaces + token sort（确保 "auth login" == "login auth"）
-- 若未搜索过 → 执行搜索，将关键词加入集合
-
-**内容预算**（防止撑爆上下文）：最多摘取 1 个 critical pattern + 3 条 relevant learnings + 1 段 recommendations。
+- 将已搜索的关键词集合维护为 `[session_searched_topics]`（key: lowercase + trim + token sort）
+- 若核心关键词已在集合中 → 跳过并注明「已在本 session 检索过相似主题」；否则 → 执行搜索并加入集合
+- 注：子代理派发场景下各子代理 in-memory 状态独立，跨子代理去重不生效
 
 **结果处置**：
 - 检索结果作为 Phase 2 方案对比的「历史参考」上下文

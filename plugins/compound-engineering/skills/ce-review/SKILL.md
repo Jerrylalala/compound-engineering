@@ -434,16 +434,20 @@ Convert multiple reviewer JSON payloads into one deduplicated, confidence-gated 
 
 This rule is a lightweight normalization step — no tokens consumed. Runs immediately after step 6, before the Patch Gate.
 
+标志赋值：`CODEX_ENABLED` 在 Argument Parsing 阶段检测到 `[C]` 时设为 true；`GEMINI_ENABLED` 在检测到 `[G]` 时设为 true。
+
 ```
-Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED) AND mode == autofix:
-  For each finding that was introduced or modified after external AI consultation:
-    if autofix_class == "safe_auto":
-      downgrade: safe_auto → gated_auto
-      note: "外部 AI 建议需人工确认（来源: Codex/Gemini）"
+Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED) AND (mode == autofix OR mode == headless):
+  For each finding where autofix_class == "safe_auto":
+    downgrade: safe_auto → gated_auto
+    note: "外部 AI 参与时 safe_auto 降级（来源: Codex/Gemini，缺乏全局 codebase context）"
 
   # safe rationale:
   # Codex/Gemini lack full codebase context. Their suggestions may be
   # locally correct but globally unsafe. Human confirmation is required.
+  # This rule applies when EITHER Codex OR Gemini participated in the review —
+  # it is not possible to determine which specific finding originated from them,
+  # so all safe_auto findings are conservatively downgraded.
   # This rule is intentionally unconditional — [team] mode is NOT required.
   # The existing Patch Gate (6.5b) provides deeper contract-based checks
   # for [team] mode; this rule provides a lightweight baseline for all modes.
@@ -452,9 +456,8 @@ Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED) AND mode == autofix:
   # NOT severity_tier (P1/P2/P3 remains unchanged). P1 blocking behavior is preserved.
 ```
 
-**注意**: 此规则仅影响 Codex/Gemini 来源的 `safe_auto` finding，
-不影响 Claude 内置审查 agent（security-sentinel、kieran-*-reviewer 等）的路由。
-无 Codex/Gemini 参与时（CODEX_ENABLED 和 GEMINI_ENABLED 均为 false），此规则不执行。
+**注意**: 此规则仅在 Codex/Gemini 参与本次审查时生效（`CODEX_ENABLED OR GEMINI_ENABLED = true`）。
+无 Codex/Gemini 参与时，此规则不执行，不影响 Claude 内置审查 agent 的路由。
 
 6.5b. **Deterministic Patch Gate（仅当 TEAM_GATE_ENABLED = true AND mode == autofix）**
 
