@@ -90,12 +90,16 @@ if ($verifyPlugin -eq $newVersion) {
 
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "  Next Steps" -ForegroundColor Yellow
+    Write-Host "  发版流程" -ForegroundColor Yellow
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "1. Update CHANGELOG.md"
-    Write-Host "2. Update component counts in README.md (if changed)"
-    Write-Host "3. Update component counts in CLAUDE.md (if changed)"
-    Write-Host "4. Commit: git add . && git commit -m 'Release v$newVersion'"
+    Write-Host "1. 更新 CHANGELOG.md（添加 v$newVersion 的变更内容）"
+    Write-Host "2. 更新 README.md 组件数量（如有变更）"
+    Write-Host "3. 提交并推送 PR：git add . && git commit -m 'chore: 升级版本至 v$newVersion'"
+    Write-Host "4. PR 合并到 main 后，打 tag 触发自动 Release："
+    Write-Host ""
+    Write-Host "     git tag v$newVersion && git push origin v$newVersion" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   GitHub Actions 将自动从 CHANGELOG.md 提取内容并创建 Release。" -ForegroundColor Cyan
     Write-Host ""
 } else {
     Write-Err "Verification failed, please check files manually"
