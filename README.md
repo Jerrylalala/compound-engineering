@@ -1,292 +1,116 @@
 # Compound Engineering
 
-[![Build Status](https://github.com/EveryInc/compound-engineering-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/EveryInc/compound-engineering-plugin/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@every-env/compound-plugin)](https://www.npmjs.com/package/@every-env/compound-plugin)
+[![Plugin Version](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/Jerrylalala/compound-engineering/main/plugins/compound-engineering/.claude-plugin/plugin.json&query=$.version&label=version&color=blue)](plugins/compound-engineering/.claude-plugin/plugin.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://jerrylalala.github.io/compound-engineering/)
 
-A plugin marketplace featuring the [Compound Engineering plugin](plugins/compound-engineering/README.md) — AI skills and agents that make each unit of engineering work easier than the last.
+> **中文增强版** Claude Code 复合工程插件 — AI 技能、代理和工作流，让每一个工程单元都比上一个更容易。
 
-## Philosophy
-
-**Each unit of engineering work should make subsequent units easier—not harder.**
-
-Traditional development accumulates technical debt. Every feature adds complexity. The codebase becomes harder to work with over time.
-
-Compound engineering inverts this. 80% is in planning and review, 20% is in execution:
-- Plan thoroughly before writing code
-- Review to catch issues and capture learnings
-- Codify knowledge so it's reusable
-- Keep quality high so future changes are easy
-
-**Learn more**
-
-- [Full component reference](plugins/compound-engineering/README.md) - all agents, commands, skills
-- [Compound engineering: how Every codes with agents](https://every.to/chain-of-thought/compound-engineering-how-every-codes-with-agents)
-- [The story behind compounding engineering](https://every.to/source-code/my-ai-had-already-fixed-the-code-before-i-saw-it)
-
-## Workflow
-
-```
-Brainstorm -> Plan -> Work -> Review -> Compound -> Repeat
-    ^
-  Ideate (optional -- when you need ideas)
-```
-
-| Command | Purpose |
-|---------|---------|
-| `/ce:ideate` | Discover high-impact project improvements through divergent ideation and adversarial filtering |
-| `/ce:brainstorm` | Explore requirements and approaches before planning |
-| `/ce:plan` | Turn feature ideas into detailed implementation plans |
-| `/ce:work` | Execute plans with worktrees and task tracking |
-| `/ce:review` | Multi-agent code review before merging |
-| `/ce:compound` | Document learnings to make future work easier |
-
-`/ce:brainstorm` is the main entry point -- it refines ideas into a requirements plan through interactive Q&A, and short-circuits automatically when ceremony isn't needed. `/ce:plan` takes either a requirements doc from brainstorming or a detailed idea and distills it into a technical plan that agents (or humans) can work from.
-
-`/ce:ideate` is used less often but can be a force multiplier -- it proactively surfaces strong improvement ideas based on your codebase, with optional steering from you.
-
-Each cycle compounds: brainstorms sharpen plans, plans inform future plans, reviews catch more issues, patterns get documented.
+📖 **[在线文档](https://jerrylalala.github.io/compound-engineering/)** | 🔄 **[更新日志](CHANGELOG.md)**
 
 ---
 
-## Install
+## 设计哲学
 
-### Claude Code
+**每一个工程单元都应该让后续单元更容易——而不是更难。**
+
+复合工程反转了技术债务的积累方向。80% 在规划和审查，20% 在执行：
+- 写代码前充分规划
+- 审查以发现问题并沉淀经验
+- 将知识编码，使其可复用
+- 保持高质量，让未来的改动更容易
+
+---
+
+## 工作流
+
+```
+Brainstorm → Plan → Work → Review → Compound → Repeat
+```
+
+| 命令 | 用途 |
+|------|------|
+| `/ce:brainstorm` | 通过对话探索需求，生成需求文档 `[P][C][G][R]` |
+| `/ce:plan` | 将需求转化为可执行的实施计划 `[team]` |
+| `/ce:work` | 执行计划，支持 Agent Teams、自验证、Playwright `[team][T][PW][C][G]` |
+| `/ce:review` | 多代理代码审查，支持自动修复 `[mode:autofix][C][G][team]` |
+| `/ce:compound` | 记录解决方案，构建经验库 |
+
+---
+
+## 安装
+
+### Claude Code（推荐）
 
 ```bash
-/plugin marketplace add EveryInc/compound-engineering-plugin
+/plugin marketplace add Jerrylalala/compound-engineering
 /plugin install compound-engineering
 ```
 
-### Cursor
-
-```text
-/add-plugin compound-engineering
-```
-
-### OpenCode, Codex, Droid, Pi, Gemini, Copilot, Kiro, Windsurf, OpenClaw & Qwen (experimental)
-
-This repo includes a Bun/TypeScript CLI that converts Claude Code plugins to OpenCode, Codex, Factory Droid, Pi, Gemini CLI, GitHub Copilot, Kiro CLI, Windsurf, OpenClaw, and Qwen Code.
+### 本地开发
 
 ```bash
-# convert the compound-engineering plugin into OpenCode format
-bunx @every-env/compound-plugin install compound-engineering --to opencode
-
-# convert to Codex format
-bunx @every-env/compound-plugin install compound-engineering --to codex
-
-# convert to Factory Droid format
-bunx @every-env/compound-plugin install compound-engineering --to droid
-
-# convert to Pi format
-bunx @every-env/compound-plugin install compound-engineering --to pi
-
-# convert to Gemini CLI format
-bunx @every-env/compound-plugin install compound-engineering --to gemini
-
-# convert to GitHub Copilot format
-bunx @every-env/compound-plugin install compound-engineering --to copilot
-
-# convert to Kiro CLI format
-bunx @every-env/compound-plugin install compound-engineering --to kiro
-
-# convert to OpenClaw format
-bunx @every-env/compound-plugin install compound-engineering --to openclaw
-
-# convert to Windsurf format (global scope by default)
-bunx @every-env/compound-plugin install compound-engineering --to windsurf
-
-# convert to Windsurf workspace scope
-bunx @every-env/compound-plugin install compound-engineering --to windsurf --scope workspace
-
-# convert to Qwen Code format
-bunx @every-env/compound-plugin install compound-engineering --to qwen
-
-# auto-detect installed tools and install to all
-bunx @every-env/compound-plugin install compound-engineering --to all
-```
-
-<details>
-<summary>Output format details per target</summary>
-
-| Target | Output path | Notes |
-|--------|------------|-------|
-| `opencode` | `~/.config/opencode/` | Commands as `.md` files; `opencode.json` MCP config deep-merged; backups made before overwriting |
-| `codex` | `~/.codex/prompts` + `~/.codex/skills` | Claude commands become prompt + skill pairs; canonical `ce:*` workflow skills also get prompt wrappers; deprecated `workflows:*` aliases are omitted |
-| `droid` | `~/.factory/` | Tool names mapped (`Bash`->`Execute`, `Write`->`Create`); namespace prefixes stripped |
-| `pi` | `~/.pi/agent/` | Prompts, skills, extensions, and `mcporter.json` for MCPorter interoperability |
-| `gemini` | `.gemini/` | Skills from agents; commands as `.toml`; namespaced commands become directories (`workflows:plan` -> `commands/workflows/plan.toml`) |
-| `copilot` | `.github/` | Agents as `.agent.md` with Copilot frontmatter; MCP env vars prefixed with `COPILOT_MCP_` |
-| `kiro` | `.kiro/` | Agents as JSON configs + prompt `.md` files; only stdio MCP servers supported |
-| `openclaw` | `~/.openclaw/extensions/<plugin>/` | Entry-point TypeScript skill file; `openclaw-extension.json` for MCP servers |
-| `windsurf` | `~/.codeium/windsurf/` (global) or `.windsurf/` (workspace) | Agents become skills; commands become flat workflows; `mcp_config.json` merged |
-| `qwen` | `~/.qwen/extensions/<plugin>/` | Agents as `.yaml`; env vars with placeholders extracted as settings; colon separator for nested commands |
-
-All provider targets are experimental and may change as the formats evolve.
-
-</details>
-
----
-
-## Local Development
-
-### From your local checkout
-
-For active development -- edits to the plugin source are reflected immediately.
-
-**Claude Code** -- add a shell alias so your local copy loads alongside your normal plugins:
-
-```bash
-alias cce='claude --plugin-dir ~/code/compound-engineering-plugin/plugins/compound-engineering'
-```
-
-Run `cce` instead of `claude` to test your changes. Your production install stays untouched.
-
-**Codex and other targets** -- run the local CLI against your checkout:
-
-```bash
-# from the repo root
-bun run src/index.ts install ./plugins/compound-engineering --to codex
-
-# same pattern for other targets
-bun run src/index.ts install ./plugins/compound-engineering --to opencode
-```
-
-### From a pushed branch
-
-For testing someone else's branch or your own branch from a worktree, without switching checkouts. Uses `--branch` to clone the branch to a deterministic cache directory.
-
-> **Unpushed local branches**: If the branch exists only in a local worktree and hasn't been pushed, point `--plugin-dir` directly at the worktree path instead (e.g. `claude --plugin-dir /path/to/worktree/plugins/compound-engineering`).
-
-**Claude Code** -- use `plugin-path` to get the cached clone path:
-
-```bash
-# from the repo root
-bun run src/index.ts plugin-path compound-engineering --branch feat/new-agents
-# Output:
-#   claude --plugin-dir ~/.cache/compound-engineering/branches/compound-engineering-feat~new-agents/plugins/compound-engineering
-```
-
-The cache path is deterministic (same branch always maps to the same directory). Re-running updates the checkout to the latest commit on that branch.
-
-**Codex, OpenCode, and other targets** -- pass `--branch` to `install`:
-
-```bash
-# from the repo root
-bun run src/index.ts install compound-engineering --to codex --branch feat/new-agents
-
-# works with any target
-bun run src/index.ts install compound-engineering --to opencode --branch feat/new-agents
-
-# combine with --also for multiple targets
-bun run src/index.ts install compound-engineering --to codex --also opencode --branch feat/new-agents
-```
-
-Both features use the `COMPOUND_PLUGIN_GITHUB_SOURCE` env var to resolve the repository, defaulting to `https://github.com/EveryInc/compound-engineering-plugin`.
-
-### Shell aliases
-
-Add to `~/.zshrc` or `~/.bashrc`. All aliases use the local CLI so there's no dependency on npm publishing. `plugin-path` prints just the path to stdout (progress goes to stderr), so it composes with `$()`.
-
-```bash
-CE_REPO=~/code/compound-engineering-plugin
-
-ce-cli() { bun run "$CE_REPO/src/index.ts" "$@"; }
-
-# --- Local checkout (active development) ---
-alias cce='claude --plugin-dir $CE_REPO/plugins/compound-engineering'
-
-codex-ce() {
-  ce-cli install "$CE_REPO/plugins/compound-engineering" --to codex "$@"
-}
-
-# --- Pushed branch (testing PRs, worktree workflows) ---
-ccb() {
-  claude --plugin-dir "$(ce-cli plugin-path compound-engineering --branch "$1")" "${@:2}"
-}
-
-codex-ceb() {
-  ce-cli install compound-engineering --to codex --branch "$1" "${@:2}"
-}
-```
-
-Usage:
-
-```bash
-cce                              # local checkout with Claude Code
-codex-ce                         # install local checkout to Codex
-ccb feat/new-agents              # test a pushed branch with Claude Code
-ccb feat/new-agents --verbose    # extra flags forwarded to claude
-codex-ceb feat/new-agents        # install a pushed branch to Codex
+# 克隆后直接加载本地版本
+claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 ```
 
 ---
 
-## Sync Personal Config
+## 主要特性
 
-Sync your personal Claude Code config (`~/.claude/`) to other AI coding tools. Omit `--target` to sync to all detected supported tools automatically:
+### [team] 真实 Agent Teams（Claude Code 原生）
 
-```bash
-# Sync to all detected tools (default)
-bunx @every-env/compound-plugin sync
+`ce:work [team]` 使用 Claude Code 原生 Agent Teams，不是角色扮演：
 
-# Sync skills and MCP servers to OpenCode
-bunx @every-env/compound-plugin sync --target opencode
+- **TeamCreate** 创建命名团队（时间戳命名，防碰撞）
+- **独立 context window** 的 verifier teammate，不受执行上下文污染
+- **SendMessage** 实时通信，每 Unit 完成后触发验证
+- **TeamDelete** 收尾清理，无资源泄漏
 
-# Sync to Codex
-bunx @every-env/compound-plugin sync --target codex
+### [P] 派对模式 + 自动收敛
 
-# Sync to Pi
-bunx @every-env/compound-plugin sync --target pi
+`ce:brainstorm [P]` 14 个视角发散讨论，结束后**自动触发探索者+挑战者结构化收敛**，无需额外参数。
 
-# Sync to Droid
-bunx @every-env/compound-plugin sync --target droid
+### [T] 四层自验证
 
-# Sync to GitHub Copilot (skills + MCP servers)
-bunx @every-env/compound-plugin sync --target copilot
+`ce:work [T]` 按任务类型自动选择验证层：
+- Layer 0：构建/语法检查
+- Layer 1：单元测试
+- Layer 2：集成测试
+- Layer 3：Playwright 浏览器验收
 
-# Sync to Gemini (skills + MCP servers)
-bunx @every-env/compound-plugin sync --target gemini
+### Codex / Gemini 双重审查
 
-# Sync to Windsurf
-bunx @every-env/compound-plugin sync --target windsurf
+`/ce:review [C][G]` 同时调用 Codex 和 Gemini 进行交叉验证，对共同发现的问题提升优先级。
 
-# Sync to Kiro
-bunx @every-env/compound-plugin sync --target kiro
+---
 
-# Sync to Qwen
-bunx @every-env/compound-plugin sync --target qwen
+## 文档
 
-# Sync to OpenClaw (skills only; MCP is validation-gated)
-bunx @every-env/compound-plugin sync --target openclaw
+| 文档 | 说明 |
+|------|------|
+| [在线文档](https://jerrylalala.github.io/compound-engineering/) | 完整文档站点（自动更新） |
+| [工作流可视化](docs/zh-CN/WORKFLOW-VISUAL.md) | 流程图和参数说明 |
+| [安装指南](docs/zh-CN/INSTALL.md) | 详细安装步骤 |
+| [核心概念](docs/zh-CN/CONCEPTS.md) | Skills vs Agents vs Commands |
+| [更新日志](CHANGELOG.md) | 版本历史 |
 
-# Sync to all detected tools
-bunx @every-env/compound-plugin sync --target all
-```
+---
 
-This syncs:
-- Personal skills from `~/.claude/skills/` (as symlinks)
-- Personal slash commands from `~/.claude/commands/` (as provider-native prompts, workflows, or converted skills where supported)
-- MCP servers from `~/.claude/settings.json`
+## Credits
 
-Skills are symlinked (not copied) so changes in Claude Code are reflected immediately.
+本项目 fork 自 [compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin)（由 [EveryInc](https://github.com/EveryInc) 创建，MIT 协议）。
 
-Supported sync targets:
-- `opencode`
-- `codex`
-- `pi`
-- `droid`
-- `copilot`
-- `gemini`
-- `windsurf`
-- `kiro`
-- `qwen`
-- `openclaw`
+在原版基础上进行了以下扩展：
+- 全面中文化（命令提示、文档、注释）
+- Claude Code Agent Teams 真实多代理实现（TeamCreate/SendMessage/TeamDelete）
+- 四层自验证框架（[T] 参数）
+- [P] 派对模式后自动结构化收敛
+- Codex / Gemini 双重交叉验证
+- 私有覆盖层（`skills-custom/`）支持本地扩展
 
-Notes:
-- Codex sync preserves non-managed `config.toml` content and now includes remote MCP servers.
-- Command sync reuses each provider's existing Claude command conversion, so some targets receive prompts or workflows while others receive converted skills.
-- Copilot sync writes personal skills to `~/.copilot/skills/` and MCP config to `~/.copilot/mcp-config.json`.
-- Gemini sync writes MCP config to `~/.gemini/` and avoids mirroring skills that Gemini already discovers from `~/.agents/skills`, which prevents duplicate-skill warnings.
-- Droid, Windsurf, Kiro, and Qwen sync merge MCP servers into the provider's documented user config.
-- OpenClaw currently syncs skills only. Personal command sync is skipped because this repo does not yet have a documented user-level OpenClaw command surface, and MCP sync is skipped because the current official OpenClaw docs do not clearly document an MCP server config contract.
+---
 
+## License
+
+MIT — 详见 [LICENSE](LICENSE)

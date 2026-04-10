@@ -1,0 +1,63 @@
+site_name: Compound Engineering
+site_description: AI 驱动的 Claude Code 复合工程插件 — 中文增强版
+site_url: https://jerrylalala.github.io/compound-engineering/
+repo_url: https://github.com/Jerrylalala/compound-engineering
+repo_name: Jerrylalala/compound-engineering
+edit_uri: edit/main/
+
+theme:
+  name: material
+  language: zh
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色模式
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色模式
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.suggest
+  font:
+    text: Noto Sans SC
+    code: Roboto Mono
+
+docs_dir: docs/zh-CN
+
+nav:
+  - 首页: index.md
+  - 安装与使用: INSTALL.md
+  - 工作流指南: WORKFLOW-VISUAL.md
+  - 核心概念: CONCEPTS.md
+  - 脚本说明: SCRIPTS.md
+  - 版本策略: VERSION-STRATEGY.md
+  - 同步上游: SYNC.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Jerrylalala/compound-engineering
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - admonition
+  - tables
+  - toc:
+      permalink: true
