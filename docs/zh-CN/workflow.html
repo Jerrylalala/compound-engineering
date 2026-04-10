@@ -485,9 +485,9 @@
         <div class="node-label">Review</div>
         <div class="node-cmd">/ce:review</div>
         <div class="node-badges">
-          <span class="param-badge real">[T]</span>
           <span class="param-badge optional">[C]</span>
           <span class="param-badge optional">[G]</span>
+          <span class="param-badge real">[T]</span>
           <span class="param-badge">[autofix]</span>
         </div>
       </div>
@@ -624,7 +624,6 @@
         desc: '将需求文档或功能描述转化为结构化实施计划。回答"怎么做"：明确实现单元、文件列表、依赖关系、测试场景和验收标准。`[T]` 参数额外生成 `.team-contract.md`（文件白名单 + 不变式约束），为后续 ce:work 和 ce:review 的合约验证提供基础。',
         params: [
           { tag: '[T]', type: 'implemented', label: '真实实现', desc: '合约主 + 追溯审查模式：分析实施计划中的文件变更范围，生成 .team-contract.md（allowed_files / forbidden_surfaces / required_invariants / max_files_per_patch）。ce:work 执行时用于单写者原则验证，ce:review 用于 Patch Gate 门控。' },
-          { tag: '[T+]', type: 'implemented', label: '真实实现', desc: '等同 [T]，生成相同的 .team-contract.md。在 ce:plan 阶段无额外角色；与 ce:work [T+] 路径兼容（风险卫角色在 work 阶段激活）。' },
         ],
         examples: `# 基础规划（传需求文档路径）
 /ce:plan docs/brainstorms/auth-requirements.md
@@ -677,10 +676,9 @@
         desc: '多代理并行代码审查，基于 Tier 分级框架（安全/性能/正确性/可维护性等专属审查者），自动 merge 发现并去重。`mode:autofix` 安全发现自动修复，残余问题以 TODO 形式输出。`[T]` 激活 Deterministic Patch Gate——规则引擎验证所有变更是否在 .team-contract.md 白名单内，不消耗额外 token。',
         params: [
           { tag: '[mode:autofix]', type: 'implemented', label: '推荐默认', desc: '自动修复安全级别的发现（low-risk 自动应用，medium-risk 确认后应用，high-risk 仅报告）。建议大多数情况使用此模式。' },
-          { tag: '[T]', type: 'implemented', label: '真实实现', desc: 'TEAM_GATE_ENABLED = true。加载 .team-contract.md，在 Stage 5 运行 Deterministic Patch Gate：规则引擎验证所有变更文件是否在 allowed_files 白名单内，拦截越界修改。在 report-only / headless 模式下不生效。' },
-          { tag: '[T+]', type: 'implemented', label: '真实实现', desc: '等同 [T]（ce:review 阶段无风险卫角色，Patch Gate 行为与 [T] 相同）。' },
           { tag: '[C]', type: 'optional', label: '可选增强', desc: 'Codex 审核：调用 Codex CLI 对同一 diff 进行独立审查，双方共同发现的问题优先级提升，减少漏报。' },
           { tag: '[G]', type: 'optional', label: '可选增强', desc: 'Gemini 审核：调用 Gemini 对同一 diff 进行独立审查，与 [C] 组合使用时形成三方交叉验证。' },
+          { tag: '[T]', type: 'implemented', label: '真实实现', desc: 'TEAM_GATE_ENABLED = true。加载 .team-contract.md，在 Stage 5 运行 Deterministic Patch Gate：规则引擎验证所有变更文件是否在 allowed_files 白名单内，拦截越界修改。在 report-only / headless 模式下不生效。' },
           { tag: 'plan:<路径>', type: '', label: '可选', desc: '传入计划文件路径，审查者可对照需求检查实现是否符合原始规格，发现 scope creep 或遗漏。' },
         ],
         examples: `# 标准审查（当前分支 diff）
@@ -699,7 +697,7 @@
 /ce:review mode:autofix [C][G]
 
 # 完整组合
-/ce:review mode:autofix plan:docs/plans/auth-plan.md [T][C][G]`
+/ce:review mode:autofix plan:docs/plans/auth-plan.md [C][G][T]`
       },
       compound: {
         icon: '📚',
