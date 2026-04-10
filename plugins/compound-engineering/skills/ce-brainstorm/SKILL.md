@@ -56,28 +56,6 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 | `[G]` | Auto-consult Gemini after Phase 2. |
 | `[R]` | Run learnings-researcher before Phase 1. Inject results as historical reference in Phase 2. |
 
-### `[P]` Post-Party Structured Convergence（自动，无需额外参数）
-
-Party Mode 结束后自动执行结构化收敛，不需要用户传任何额外参数。
-
-```
-[P] 讨论结束后，自动进入 2 角色结构化验证：
-
-探索者视角：从 Party Mode 讨论中提炼出最有希望的方向，
-            聚焦「这个方向在技术上可行吗？」，给出具体验证路径
-
-挑战者视角：质疑探索者的假设，寻找边界条件、反例和未被发现的风险，
-            防止 Party Mode 产生的多视角共鸣带来过早收敛
-
-退出条件（满足任一即结束，继续正常流程）：
-  - 双方达成「方向共识」：可行性已确认 + 主要风险已识别
-  - 用户输入 [E]
-  - 未达共识（3 轮后）→ 用 AskUserQuestion 展示核心分歧，让用户裁决方向
-    （「1轮」= 探索者 + 挑战者各回应一次）
-
-不使用 [P] 时：跳过此步骤，直接进入正常 brainstorm 流程
-```
-
 ---
 
 ## Execution Flow
@@ -150,6 +128,27 @@ Task compound-engineering:research:learnings-researcher(feature_description)
 - 检索结果作为 Phase 2 方案对比的「历史参考」上下文
 - 在 Phase 2 展示方案时，增加「📚 历史参考」子节，列出相关 solution 文档及其核心洞察
 - 若无相关历史记录 → 在「历史参考」节注明：`No relevant learnings found — 本次为全新探索`
+
+#### 0.5 [P] Post-Party Structured Convergence（仅当 `[P]` 标志存在时）
+
+**触发时机**：Party Mode（`[P]`）讨论轮次结束后，进入此阶段。不使用 `[P]` 时跳过，直接进入 Phase 1。
+
+**执行方式**：以 2 个对立视角顺序输出（同一 agent 切换视角），不创建独立 teammate：
+
+- **探索者视角**：从 Party Mode 讨论中提炼出最有希望的方向，聚焦「这个方向在技术上可行吗？」，给出具体验证路径
+- **挑战者视角**：质疑探索者的假设，寻找边界条件、反例和未被发现的风险，防止 Party Mode 多视角共鸣带来过早收敛
+
+**退出条件**（满足任一即结束，继续 Phase 1）：
+- 双方达成「方向共识」：可行性已确认 + 主要风险已识别
+- 用户输入 `[E]`
+- 未达共识（3 轮后）→ 用 `AskUserQuestion` 展示核心分歧，让用户裁决方向（「1 轮」= 探索者 + 挑战者各回应一次）
+
+**输出格式**：
+```
+[探索者] <2-4 句：当前最有希望方向 + 验证路径>
+
+[挑战者] <2-4 句：假设质疑 + 关键风险>
+```
 
 ### Phase 1: Understand the Idea
 

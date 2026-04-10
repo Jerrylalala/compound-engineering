@@ -1,6 +1,6 @@
 ---
 name: team-mode
-description: "Multi-agent collaboration overlay for ce:brainstorm/plan/work/review. Enables contract-gated execution with single writer principle, verifier hooks, and deterministic patch gate for autofix stability."
+description: "Multi-agent collaboration overlay for ce:plan/work/review. ce:brainstorm structured convergence is built-in to [P] mode, not via [team]. Enables contract-gated execution with single writer principle, real Agent Teams verifier, and deterministic patch gate."
 argument-hint: "[team] | [team:full]"
 ---
 
@@ -14,7 +14,7 @@ argument-hint: "[team] | [team:full]"
 > - `ce:plan [team]`：同一 agent 多任务（有意设计，合约生成和追溯审查是顺序文档处理，不需要验证循环）
 > - `ce:review [team]`：规则引擎（有意设计，Patch Gate 是 deterministic whitelist check，零 token）
 
-本 skill 是叠加在 `ce:brainstorm`/`ce:plan`/`ce:work`/`ce:review` 之上的 overlay。各命令通过检测 `[team]`、`[team:full]` token 激活对应的角色集和机制。
+本 skill 是叠加在 `ce:plan`/`ce:work`/`ce:review` 之上的 overlay。各命令通过检测 `[team]`、`[team:full]` token 激活对应的角色集和机制。`ce:brainstorm` 不支持 `[team]` 参数，结构化收敛已内置为 `[P]` 的自动后续行为。
 
 ---
 
@@ -51,7 +51,6 @@ argument-hint: "[team] | [team:full]"
 | `/ce:review [team]` | 现有多个专业审查 agent + Patch Gate | — |
 
 **[team:full] 在各命令的行为**：
-- `ce:brainstorm [team:full]`：等同于 `[team]`（brainstorm 阶段无风险卫角色，[team:full] 与 [team] 行为相同）
 - `ce:plan [team:full]`：等同于 `[team]`（plan 阶段无风险卫角色，触发同样的 Phase 4.5 合约生成）
 - `ce:work [team:full]`：在 3 角色基础上追加风险卫（4 角色完整模式）
 - `ce:review [team:full]`：等同于 `[team]`（Patch Gate 行为无差别）
@@ -178,7 +177,7 @@ last_verification_failure: null
      prompt="""
        你是验证者 teammate（只读角色，不修改任何文件）。
        启动后读取 .team-contract.md，了解 required_invariants。
-       持续等待 lead 通过 SendMessage 发来消息。
+       等待 lead 通过 SendMessage 激活。每次收到消息时执行一次验证，完成后回复结果，然后等待下一次激活。
 
        消息格式（Lead → 你）：
          「Unit {unit_id} 已完成。变更文件：[file1, file2, ...]。请验证。」
@@ -205,7 +204,7 @@ last_verification_failure: null
      name="risk-guard",
      prompt="""
        你是风险卫 teammate（只读角色，不修改任何文件）。
-       持续等待 lead 发来 Unit 开始通知。
+       等待 lead 发来 Unit 开始通知。每次收到通知时执行一次风险检测，完成后回复结果，然后等待下一次通知。
 
        消息格式（Lead → 你）：
          「Unit {unit_id} 开始。描述：{desc}。文件：[file1, ...]」

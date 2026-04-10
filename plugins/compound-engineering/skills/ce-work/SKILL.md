@@ -736,6 +736,14 @@ Based on selection:
    - Link to PR (if one was created)
    - Note any follow-up work needed
 
+5. **[team] 模式：销毁团队**（仅当 TEAM_GATE_ENABLED = true）
+
+   PR 创建完成后，销毁 Agent Teams：
+   ```
+   TeamDelete(TEAM_NAME)
+   ```
+   宣告：「✅ Agent Team `{TEAM_NAME}` 已销毁，资源释放完毕。」
+
 ### Handoff
 
 使用 **AskUserQuestion** 工具询问：

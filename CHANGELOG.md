@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.46.1] - 2026-04-10
+
+### Bug 修复：P0/P1 一致性修复
+
+- **[team-mode] SKILL.md**：删除 `ce:brainstorm [team:full]` 行（该行暗示 brainstorm 支持 [team:full]，与设计矛盾）
+- **[team-mode] SKILL.md**：修正 overlay 声明，明确 `ce:brainstorm` 不在 [team] 覆盖范围内
+- **[team-mode] SKILL.md**：修正 verifier/risk-guard 的"持续等待"措辞 → "等待激活，每次收到消息执行一次，完成后等待下一次"（one-shot 语义，非 daemon）
+- **[ce:brainstorm] SKILL.md**：将 [P] 收敛执行逻辑从 Parameter Handling 移至 Execution Flow Phase 0.5（有明确挂载点，执行时机清晰）
+- **[ce:work] SKILL.md**：在 Phase 4 Step 5 添加 `TeamDelete(TEAM_NAME)` 销毁步骤（此前仅 team-mode 提及，ce:work 本体遗漏）
+
+---
+
 ## [2.46.0] - 2026-04-10
 
 ### 新功能：[team] 升级为 Claude Code 原生 Agent Teams
