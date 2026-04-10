@@ -97,12 +97,15 @@ Load the `team-mode` skill for the complete initialization sequence:
 
 ```
 <!-- ce-work-start-command: <command> -->
+<!-- ce-work-start-command-source: auto-detected|user-provided -->
 ```
 
 - 若找到：
-  - 设置 `START_COMMAND = <command>`
-  - 宣告：`✅ 已读取 CLAUDE.md 启动命令覆盖：\`<command>\``
-  - **跳转至「Level 4：验证命令可用性」**
+  - 读取 source 字段：
+    - **`source: user-provided`**：用户明确指定的覆盖，无条件使用。设置 `START_COMMAND = <command>`，宣告 `✅ 已读取 CLAUDE.md 用户覆盖命令`，**跳转 Level 4**
+    - **`source: auto-detected`**（或字段不存在）：需跨会话漂移校验。重新执行 Level 2 推导（新鲜读取 package.json）：
+      - 若 Level 2 推导结果 = 已存储命令 → 无漂移，设置 `START_COMMAND = <command>`，**跳转 Level 4**
+      - 若 Level 2 推导结果 ≠ 已存储命令（或 Level 2 无法推导）→ 宣告 `⚠️ 检测到启动命令可能已过期`，清除旧记录，**继续 Level 2**（会触发重写 CLAUDE.md）
 - 若未找到：继续 Level 2
 
 **Level 2：从 package.json 动态推导（每次新鲜读取，禁止依赖缓存）**
@@ -120,7 +123,7 @@ Load the `team-mode` skill for the complete initialization sequence:
 
 | 优先级 | 匹配条件 | 推导结果 |
 |--------|---------|---------|
-| 1 | scripts 中有 key 包含 `electron` 的条目（如 `electron`, `start:electron`） | `<PKG_RUN> <该key>` |
+| 1 | scripts 中有 key 精确匹配 start-like 名称（`electron`/`start:electron`/`dev:electron`/`serve:electron`），或脚本值包含 `electron .`/`electron-forge start` | `<PKG_RUN> <该key>` |
 | 2 | scripts.dev 或 scripts.serve 存在，且 devDependencies 或 dependencies 中含 `electron` | `<PKG_RUN> dev` / `<PKG_RUN> serve` |
 | 3 | scripts.start 存在，且 devDependencies 或 dependencies 中含 `electron` | `<PKG_RUN> start` |
 | 4 | `main` 字段存在，且 devDependencies 或 dependencies 含 `electron`，且无上述 scripts | `npx electron .` |
@@ -140,11 +143,17 @@ Load the `team-mode` skill for the complete initialization sequence:
 
 > 我需要知道怎么启动这个应用，才能帮你自动验证效果。
 >
-> 请告诉我启动命令，比如 `npm run dev`、`npm start`、`electron .` 等。
-> （我会记住这个，以后不会再问了）
+> 请选择或输入：
+> 1. 告诉我启动命令（如 `npm run dev`、`yarn start`、`electron .`）
+> 2. 不知道，帮我从项目文件中判断
 
-- 用户回答后：
-  - 设置 `START_COMMAND = <用户答案>`
+- 用户选 2（不知道）：重新执行 Level 2 推导；若仍无法推导，以业务语言询问项目类型（Web/Electron/其他），再尝试推导；若依然失败，请用户检查后重试
+- 用户输入命令后：
+  - **语义校验**：
+    - 若命令形如 `<PKG_RUN> <script>`（npm/yarn/pnpm/bun run xxx）：检查 package.json 中 scripts.xxx 是否存在，若不存在则提示用户确认（`⚠️ 未在 package.json 中找到 script "<xxx>"，是否仍使用此命令？`）
+    - 若命令包含 `-->` 或换行符：以业务语言提示"命令格式有误，请检查后重输"，重新提问（此为格式安全防护，防止破坏 CLAUDE.md 注释结构）
+    - 其他裸命令：接受，不做额外校验
+  - 校验通过后：设置 `START_COMMAND = <用户答案>`，设置 SOURCE = `user-provided`
   - **继续「Level 3b：写入 CLAUDE.md」**
 
 **Level 3b：写入 CLAUDE.md 持久化（Level 2 推导成功 或 Level 3 用户回答后执行）**
@@ -159,11 +168,13 @@ Load the `team-mode` skill for the complete initialization sequence:
 
 宣告：`✅ 启动命令已记录到 CLAUDE.md，后续会话自动复用，无需再次配置`
 
-**Level 4：验证命令可用性（仅做格式检查，不实际启动）**
+**Level 4：验证命令可用性（格式 + 安全校验，不实际启动）**
 
-检查 START_COMMAND 基本格式是否合法（非空，不含明显拼写错误如多余引号）。
-- 若格式异常：以业务语言告知用户并重新进入 Level 3
-- 若正常：环境指纹阶段完成，宣告：
+检查 START_COMMAND：
+- 若命令为空 → 以业务语言提示，重进 Level 3
+- 若命令包含 `-->` 或换行符 → 以业务语言提示"命令格式有误，请检查"，重进 Level 3（**安全防护：避免破坏 CLAUDE.md HTML 注释结构**）
+- 若命令形如 `<PKG_RUN> <script>`：验证 package.json 中该 script 是否存在（警告但不阻断）
+- 若通过：环境指纹阶段完成，宣告：
   ```
   ✅ 环境指纹就绪：启动命令 = `<START_COMMAND>`
      Layer 2/4 验证将使用此命令启动应用
@@ -173,7 +184,7 @@ Load the `team-mode` skill for the complete initialization sequence:
 
 #### 主动漂移检测（防止 AI 修改 package.json 后启动命令失效）
 
-**触发时机**：本次会话执行过程中，若任何步骤修改了 `package.json` 的 `scripts` 字段：
+**触发时机**：本次会话执行过程中，若任何步骤写入或修改了 `package.json`（任意字段，包括 `scripts`、`dependencies`、`devDependencies`、`main`、`config`、`packageManager`）：
 
 1. **重新执行 Level 2 推导**（从磁盘新鲜读取修改后的 package.json）
 2. **对比结果**：

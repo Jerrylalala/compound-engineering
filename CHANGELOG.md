@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.48.1] - 2026-04-10
+
+### 环境指纹 Codex 审核修复（PATCH）
+
+修复 Codex 审核发现的 5 个问题：
+
+- **P0 修复**：Level 3/4 新增 `-->` 和换行符安全校验，防止破坏 CLAUDE.md HTML 注释结构（格式注入防护）
+- **P1 修复**：Level 1 新增 auto-detected vs user-provided 分类处理——user-provided 无条件优先，auto-detected 每次会话重比对 Level 2 推导结果（防止跨会话旧命令压住新推导）
+- **P1 修复**：electron key 匹配从"包含 electron"收窄为精确 start-like 名称（`electron`/`start:electron`/`dev:electron`/`serve:electron`）或脚本值匹配（`electron .`/`electron-forge start`），消除 `build:electron`/`test:electron` 误判
+- **P1 修复**：漂移检测覆盖范围扩展为"任何 package.json 写入"（含 dependencies/devDependencies/main/config/packageManager），不再只监听 scripts 字段
+- **P1 修复**：Level 3 增加"帮我判断"选项（选 2），并对 `PKG_RUN <script>` 形式做 script 存在性校验，减少非开发者无效输入被持久化
+
+---
+
 ## [2.48.0] - 2026-04-10
 
 ### ce:work [V+] 环境指纹自动检测（MINOR — 新功能）
