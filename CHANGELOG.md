@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.46.4] - 2026-04-10
+
+### UX 精化 + 文档增强
+
+- **命令描述精简**：从 `Step N/5 ...` 改为 `N: ...`，更简洁；argument-hint 同步精简（去掉冗余解释词，保留关键参数）
+- **README**：
+  - 工作流表格加序号列（#1~5）
+  - 交互式工作流链接改为独立 blockquote 区块，更醒目
+  - 新增「UI 设计联动」特性章节（Pencil MCP + Figma + frontend-design）
+  - 竞品对比表加入 UI 联动行，Credits 加 Pencil/Figma 条目
+- **workflow.html**：
+  - 修复中文文本行距过密（panel-desc 1.7→1.9，param-desc 1.5→1.75，加 letter-spacing）
+  - 加大 param-card 内边距（14px→18px）和 params-grid 间距（12px→14px）
+  - 新增「UI 设计联动」专题区（Pencil MCP / Figma 对比 / frontend-design）
+  - panel-body 内边距加宽（28px→32px 36px）
+
+---
+
 ## [2.46.3] - 2026-04-10
 
 ### 文档 + UX 改进
