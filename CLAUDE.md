@@ -13,7 +13,7 @@
 | 角色         | 仓库                                            | 说明                 |
 | ------------ | ----------------------------------------------- | -------------------- |
 | **参考上游** | EveryInc/compound-engineering-plugin            | 参考方向，不强制同步 |
-| **本仓库**   | Jerrylalala/compound-engineering-plugin-private | 独立维护的主仓库     |
+| **本仓库**   | Jerrylalala/compound-engineering | 独立维护的主仓库     |
 
 ### 核心原则
 
@@ -179,7 +179,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 **推荐：通过 Marketplace 从 GitHub 安装**
 
 ```
-/plugins → Add marketplace → Jerrylalala/compound-engineering-plugin-private
+/plugins → Add marketplace → Jerrylalala/compound-engineering
 ```
 
 **本地开发：**
@@ -193,7 +193,7 @@ claude --plugin-dir "完整路径\plugins\compound-engineering"
 ## 目录结构
 
 ```
-compound-engineering-plugin-private/
+compound-engineering/
 ├── .claude-plugin/marketplace.json
 ├── docs/zh-CN/                        # 中文文档
 ├── scripts/                           # 自动化工具
