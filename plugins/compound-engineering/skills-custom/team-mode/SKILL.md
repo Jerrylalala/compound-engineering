@@ -10,7 +10,7 @@ argument-hint: "[team] | [team:full]"
 >
 > **各命令的实现层次不同**：
 > - `ce:work [team]`：真实 Claude Code Agent Teams（TeamCreate + 独立 context window + SendMessage）
-> - `ce:brainstorm [team]`：同一 agent 顺序切换（有意设计，探索者和挑战者需要读取对方输出才能有意义响应，独立 context window 会破坏对话流）
+> - `ce:brainstorm [P]`：[P] 结束后自动触发探索者+挑战者收敛（无独立 [team] 参数，避免与 Claude Code Agent Teams 混淆）
 > - `ce:plan [team]`：同一 agent 多任务（有意设计，合约生成和追溯审查是顺序文档处理，不需要验证循环）
 > - `ce:review [team]`：规则引擎（有意设计，Patch Gate 是 deterministic whitelist check，零 token）
 
@@ -20,10 +20,12 @@ argument-hint: "[team] | [team:full]"
 
 ## 参数变体
 
-| Token | ce:work 实现 | ce:brainstorm/plan/review 实现 | 适用场景 |
-|-------|-------------|-------------------------------|---------|
-| `[team]` | TeamCreate + verifier teammate（独立 context window）+ lead 扮演合约主+执行者 | 角色模拟（同一 agent，有意设计） | 默认，大多数任务 |
-| `[team:full]` | 在 `[team]` 基础上额外 spawn risk-guard teammate | 同 `[team]`（brainstorm/plan/review 无额外角色） | auth/payment/migration 高风险路径 |
+| Token | ce:work 实现 | ce:plan/review 实现 | 适用场景 |
+|-------|-------------|---------------------|---------|
+| `[team]` | TeamCreate + verifier teammate（独立 context window）+ lead 扮演合约主+执行者 | 同一 agent（plan=合约生成，review=规则引擎） | 默认，大多数任务 |
+| `[team:full]` | 在 `[team]` 基础上额外 spawn risk-guard teammate | 同 `[team]`（plan/review 无额外角色） | auth/payment/migration 高风险路径 |
+
+> **ce:brainstorm 不使用 [team] 参数**：结构化收敛（探索者+挑战者）已内置为 [P] 结束后的自动行为，避免与 Claude Code 原生 Agent Teams 混淆。
 
 ---
 
@@ -36,14 +38,14 @@ argument-hint: "[team] | [team:full]"
 | **验证者** | work | 独立 context window 的真实 teammate。等待 lead 发 SendMessage 通知，运行不变式检查，只读不写，回复 PASS/FAIL | 事件驱动（每 Unit 完成后收到 SendMessage） |
 | **风险卫** | work（[team:full]） | 独立 context window 的真实 teammate。等待 lead 发 Unit 开始通知，检测高风险关键词，回复拦截或通过，要求用户确认才继续 | 仅 [team:full] 模式，Unit 开始前 |
 | **追溯审查** | plan | 搜索 `docs/solutions/` 查找历史相关案例，检查计划决策是否与已记录 gotcha 矛盾，将发现追加到计划 Open Questions 节 | ce:plan Phase 4.5（只读） |
-| **探索者** | brainstorm | 聚焦「这个想法在技术上可行吗？」，提出具体验证路径和可达条件 | ce:brainstorm [team] 激活期间 |
-| **挑战者** | brainstorm | 质疑假设，寻找边界条件和反例，防止过早收敛 | ce:brainstorm [team] 激活期间 |
+| **探索者** | brainstorm | 聚焦「这个想法在技术上可行吗？」，提出具体验证路径和可达条件 | ce:brainstorm [P] 结束后自动触发（非独立参数） |
+| **挑战者** | brainstorm | 质疑假设，寻找边界条件和反例，防止过早收敛 | ce:brainstorm [P] 结束后自动触发（非独立参数） |
 
 ### 各阶段角色集
 
 | 阶段 | 默认角色 | [team:full] 追加 |
 |------|---------|-----------------|
-| `/ce:brainstorm [team]` | 探索者 + 挑战者 | — |
+| `/ce:brainstorm [P]` | [P] 结束后自动收敛（探索者+挑战者，内置，无需 [team]） | — |
 | `/ce:plan [team]` | 合约主 + 追溯审查 | — |
 | `/ce:work [team]` | 合约主 + 执行者 + 验证者 | 风险卫 |
 | `/ce:review [team]` | 现有多个专业审查 agent + Patch Gate | — |
@@ -125,30 +127,6 @@ last_verification_failure: null
 ---
 
 ## 各命令激活方式
-
-### ce:brainstorm [team]
-
-> **实现层次**：同一 agent 顺序扮演探索者和挑战者（有意设计，非遗漏）。
-> 原因：探索者和挑战者需要读取对方的完整输出才能有意义响应；若使用独立 context window，双方只能通过 SendMessage 传递消息，会破坏来回对话的连贯性，验证质量反而下降。
-
-激活探索者 + 挑战者角色对（结构化探索，有明确收敛条件）：
-
-```
-探索者：聚焦「这个想法在技术上可行吗？」，提出具体验证路径
-挑战者：质疑假设，寻找边界条件和反例，防止过早收敛
-
-退出条件（满足任一）：
-  - 双方达成「方向共识」（可行性 + 主要风险均已识别）
-  - 用户输入 [E]
-  - 未达共识降级（经过 3 轮）：用 AskUserQuestion 展示双方核心分歧点，让用户选择采纳方向，然后继续
-
-「1轮」= 探索者 + 挑战者各回应一次（不含用户初始触发）
-  
-与 [P] 的区别：
-  [P] = 发散（14个专家自由讨论）
-  [team] = 收敛（2个角色结构化验证）
-  [P][team] = 先 [P] 发散 → 退出 → [team] 结构化挑战验证（顺序执行）
-```
 
 ### ce:plan [team]
 
@@ -373,7 +351,7 @@ Risk-Guard → Lead：
 |------|------|---------|
 | ce:work [team] 无合约 | 提示建议先运行 `/ce:plan [team]`；询问是否继续无合约模式（仅宣告角色，不检查边界） | ce:work 会实际修改代码，无合约执行风险较高，需用户知情后确认 |
 | ce:review [team] 无合约 | 跳过 Patch Gate，记录警告："未找到 .team-contract.md，Patch Gate 已禁用" | Patch Gate 是审查加强层，跳过不影响代码修改安全性；中断审查流程对用户影响更大 |
-| ce:brainstorm/plan [team] | 合约不适用于这两个阶段，正常执行 | — |
+| ce:plan [team] | 合约不适用于 plan 前阶段，正常执行合约生成 | — |
 
 ---
 

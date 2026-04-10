@@ -1,7 +1,7 @@
 ---
 name: ce:brainstorm
 description: 'Explore requirements and approaches through collaborative dialogue before writing a right-sized requirements document and planning implementation. Use for feature ideas, problem framing, when the user says ''let''s brainstorm'', or when they want to think through options before deciding what to build. Also use when a user describes a vague or ambitious feature request, asks ''what should we build'', ''help me think through X'', presents a problem with multiple valid solutions, or seems unsure about scope or direction — even if they don''t explicitly ask to brainstorm.'
-argument-hint: "[功能描述] [P=派对模式/多代理讨论] [C=Codex咨询] [G=Gemini咨询] [R=研究:触发learnings-researcher检索历史方案] [team=结构化探索:探索者+挑战者] [team:full=等同[team],brainstorm阶段无风险卫角色]"
+argument-hint: "[功能描述] [P=派对模式/多代理发散讨论，结束后自动收敛找漏洞] [C=Codex咨询] [G=Gemini咨询] [R=研究:触发learnings-researcher检索历史方案]"
 ---
 
 # Brainstorm a Feature or Improvement
@@ -51,47 +51,32 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 
 | Token | Effect |
 |-------|--------|
-| `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. |
+| `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. After Party Mode concludes, automatically run structured convergence (see below). |
 | `[C]` | Auto-consult Codex after Phase 2. |
 | `[G]` | Auto-consult Gemini after Phase 2. |
 | `[R]` | Run learnings-researcher before Phase 1. Inject results as historical reference in Phase 2. |
-| `[team]` | TEAM_MODE = true. Activate structured exploration: **探索者 + 挑战者** role pair (see below). **[team:full]** 传入时等同于 `[team]`（brainstorm 阶段探索者+挑战者角色集，无额外风险卫角色）。 |
 
-### `[team]` Structured Exploration Mode
+### `[P]` Post-Party Structured Convergence（自动，无需额外参数）
 
-> **注意：brainstorm 阶段的 [team] 与 ce:work [team] 是不同的实现机制。**
-> - `ce:work [team]` = 真实 Claude Code Agent Teams（TeamCreate + 独立 context window + SendMessage）
-> - `ce:brainstorm [team]` = 结构化角色模拟（同一 agent 顺序扮演探索者和挑战者）
->
-> 为什么 brainstorm 不用真实 Agent Teams：
-> 1. 探索者和挑战者需要读取对方完整输出才能有意义响应——独立 context window 反而破坏对话连贯性
-> 2. 最多 3 轮对话，Team 生命周期开销（TeamCreate/Delete）完全不合比例
-> 3. 挑战者的价值在于「质疑逻辑」，而非「隔离状态验证」——与 verifier 性质不同
->
-> 为什么 [team] 不等于 [P]（二者是正交工具，不可互相替代）：
-> - `[P]` = **发散**，14 位专家各说各话，无退出条件，不收敛
-> - `[team]` = **收敛**，2 个固定角色，有退出条件，必须输出共识或分歧裁决
-> - 删除 [team] 后 brainstorm 失去唯一的内置轻量收敛机制
-
-When `[team]` is detected, activate a 2-role structured exploration before Phase 1:
+Party Mode 结束后自动执行结构化收敛，不需要用户传任何额外参数。
 
 ```
-探索者：聚焦「这个想法在技术上可行吗？」，提出具体验证路径和可达条件
-挑战者：质疑假设，寻找边界条件和反例，防止过早收敛
+[P] 讨论结束后，自动进入 2 角色结构化验证：
 
-退出条件（满足任一即退出角色对，继续正常流程）：
+探索者视角：从 Party Mode 讨论中提炼出最有希望的方向，
+            聚焦「这个方向在技术上可行吗？」，给出具体验证路径
+
+挑战者视角：质疑探索者的假设，寻找边界条件、反例和未被发现的风险，
+            防止 Party Mode 产生的多视角共鸣带来过早收敛
+
+退出条件（满足任一即结束，继续正常流程）：
   - 双方达成「方向共识」：可行性已确认 + 主要风险已识别
   - 用户输入 [E]
-  - 未达共识降级（经过 3 轮后仍无共识）→ 用 AskUserQuestion 展示双方核心分歧点，让用户选择采纳方向，继续正常流程
-    （「1轮」= 探索者 + 挑战者各回应一次，不含用户初始触发）
+  - 未达共识（3 轮后）→ 用 AskUserQuestion 展示核心分歧，让用户裁决方向
+    （「1轮」= 探索者 + 挑战者各回应一次）
 
-与 [P] 的区别（正交，不可互相替代）：
-  [P]      = 发散（14位专家，无收敛条件，覆盖盲区）
-  [team]   = 收敛（2个角色，3轮上限，必须输出共识或裁决）
-  [P][team] = 先 [P] 发散 → 退出 → [team] 结构化挑战验证（顺序执行，推荐）
+不使用 [P] 时：跳过此步骤，直接进入正常 brainstorm 流程
 ```
-
-Load the `team-mode` skill for full role definitions and behavioral rules.
 
 ---
 
