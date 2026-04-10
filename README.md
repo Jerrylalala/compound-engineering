@@ -101,33 +101,76 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 ## 与同类项目对比
 
-> **项目定位**：本项目不是工具集合，而是在 EveryInc 工程哲学之上，增加了真实多代理编排、分层验证和中文生态支持。
+> 以下对比基于公开文档和代码，力求客观。各工具侧重点不同，无绝对优劣之分。  
+> ✅ = 原生支持 &nbsp; ⚡ = 部分支持 / 需配置 &nbsp; — = 不提供
 
-| 项目 | 类型 | 核心特性 | 适合谁 |
-|------|------|---------|--------|
-| **[EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin)** | 工程框架（上游） | Brainstorm→Plan→Work→Review→Compound 工作流哲学；支持 12+ AI 平台转换（Codex/Gemini/Copilot 等） | 任何团队，尤其是多 AI 平台用户 |
-| **[本项目](https://github.com/Jerrylalala/compound-engineering)** | 增强 Fork | 在上游基础上：真实 Agent Teams `[team]`、四层自验证 `[T]`、Codex+Gemini 双重审查 `[C][G]`、中文文档 | Claude Code 深度用户，中文团队 |
-| **[hesreallyhim/awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code)** | 资源目录 | 500+ 社区技能、工具、Hooks 聚合；最全面的 Claude Code 生态地图 | 想发现 Claude Code 工具的开发者 |
-| **[nyldn/claude-octopus](https://github.com/nyldn/claude-octopus)** | 多模型编排 | 同时调度 8 个 AI 模型协作 | 需要跨模型并行的研究/工程场景 |
-| **[jarrodwatts/claude-hud](https://github.com/jarrodwatts/claude-hud)** | 状态展示 | Claude Code 状态栏 HUD 插件 | 关注实时状态可见性的用户 |
-| **[thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)** | 记忆持久化 | 跨会话记忆系统 | 需要长期上下文保持的用户 |
+### 项目概览
 
-### 本项目 vs 上游的核心差异
+| 项目 | 缩写 | 类型 | 核心定位 |
+|------|------|------|---------|
+| [本项目 (Jerry Fork)](https://github.com/Jerrylalala/compound-engineering) | **CE** | 增强 Fork | 中文 Claude Code 深度工作流，真实 Agent Teams + 分层验证 |
+| [EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin) | **CE-UP** | 上游原版 | 跨平台工程哲学框架（Brainstorm→Compound 循环） |
+| [Superpowers plugin](https://github.com/EveryInc/superpowers) | **SP** | Skill 套件 | 规范化工程流程的精选 Skill 集合，无命名 Agent |
+| [oh-my-claudecode](https://github.com/oh-my-claudecode/oh-my-claudecode) | **OMCC** | Agent 套件 | 角色化命名 Agent（executor/reviewer/tester…） |
+| [ccg-workflow](https://github.com/ccg-workflow/ccg) | **CCG** | Team 命令 | Team 命令式多代理（team-plan/exec/review…） |
 
-| 能力 | EveryInc 上游 | 本项目 |
-|------|--------------|--------|
-| Agent Teams | 概念级（角色模拟） | **真实 TeamCreate/SendMessage/TeamDelete** |
-| 验证框架 | 无正式分层 | **四层：CLI → API/DB → 浏览器 → 验收** |
-| 双模型审查 | 无 | **Codex + Gemini 交叉验证，共识发现提权** |
-| 派对模式 | 无 | **14 视角发散 + 自动收敛** |
-| 文档语言 | 英文 | **中英双语，在线文档站点** |
-| 平台覆盖 | 12+ AI 平台 | **专注 Claude Code 深度集成** |
+---
 
-### 选哪个？
+### Agent / 能力覆盖对比
 
-- **用上游** — 你的团队使用多个 AI 平台（Codex/Gemini/Copilot），或者英文优先
-- **用本项目** — 你深度使用 Claude Code，需要真实 Agent Teams 和多层验证，或中文团队
-- **同时关注** — awesome-claude-code 作为工具发现入口，本项目作为执行框架
+| 能力维度 | CE（本项目） | CE-UP（上游） | SP（Superpowers） | OMCC | CCG |
+|---------|------------|--------------|-----------------|------|-----|
+| **需求/范围探索** | ce-brainstorm | ce-brainstorm | brainstorming skill | analyst | — |
+| **多视角讨论** | [P] 14 视角 + 自动收敛 | — | — | — | — |
+| **规划** | ce-plan | ce-plan | writing-plans skill | planner | /ccg:team-plan |
+| **计划审查/挑战** | document-review agents | — | — | — | — |
+| **架构/设计评审** | architecture-strategist | — | — | architect | init-architect |
+| **调试/根因分析** | systematic-debugging | — | systematic-debugging skill | debugger | — |
+| **实现/执行** | ce-work (subagents) | ce-work | executing-plans skill | executor | /ccg:team-exec |
+| **代码审查（通用）** | ce-review + 57 agents | ce-review | requesting-code-review skill | code-reviewer | /ccg:team-review |
+| **专项审查** | 安全/性能/正确性/可维护性等 10+ 专属 agent | 安全/性能等基础 | — | — | — |
+| **测试/TDD** | test-driven-development | — | TDD skill | test-engineer | — |
+| **验证/完成证明** | [team] verifier (独立 context) | — | verification-before-completion skill | verifier | /ccg:team-review |
+| **知识沉淀** | ce-compound + learnings-researcher | ce-compound | — | — | — |
+| **UI/设计** | figma-design-sync + frontend-design | — | — | — | ui-ux-designer |
+| **文档写作** | cn-tech-writer agent | — | — | writer | — |
+
+---
+
+### 关键特性横向对比
+
+| 特性 | CE | CE-UP | SP | OMCC | CCG |
+|------|----|----|----|----|-----|
+| **真实 Agent Teams** (TeamCreate/SendMessage) | ✅ `[team]` | — | — | — | ⚡ 命令式 |
+| **独立 verifier context** | ✅ | — | — | ⚡ 角色模拟 | ⚡ 命令式 |
+| **合约白名单门控** | ✅ .team-contract.md | — | — | — | — |
+| **分层自验证** (CLI→API→浏览器→验收) | ✅ `[T]` 四层 | — | ⚡ 验证 skill | — | — |
+| **双模型交叉审查** | ✅ Codex + Gemini `[C][G]` | — | — | — | — |
+| **历史经验检索** | ✅ `[R]` docs/solutions/ | ⚡ | — | — | — |
+| **浏览器自动化** | ✅ agent-browser + [PW] | — | — | — | — |
+| **跨 AI 平台支持** | Claude Code 专注 | ✅ 12+ 平台 | Claude Code 专注 | Claude Code 专注 | Claude Code 专注 |
+| **中文生态** | ✅ 中英双语 + 在线文档 | 英文 | 英文 | 英文 | 中文 |
+| **Skill 数量** | 50+ skills | 40+ skills | 15 skills | — | — |
+| **Review Agent 数量** | 57 agents | 40+ agents | — | ~9 agents | — |
+
+---
+
+### 各项目强项总结
+
+| 项目 | 最擅长 | 局限 |
+|------|--------|------|
+| **CE（本项目）** | Claude Code 深度集成；真实 Agent Teams；专项审查 agent 最多；中文支持 | 仅 Claude Code；相对新项目，生态较小 |
+| **CE-UP（上游）** | 最清晰的工程哲学；跨平台（12+ AI 工具）；社区最成熟 | 无真实 Agent Teams；无分层验证；英文为主 |
+| **SP（Superpowers）** | 轻量 Skill 设计模式清晰；适合个人开发者快速上手 | 无命名 Agent；无 Agent Teams；Skill 覆盖较少 |
+| **OMCC** | 角色化 Agent 设计直观；executor/tester/reviewer 职责清晰 | Agent 协作为角色模拟；无合约机制 |
+| **CCG** | Team 命令式多代理架构；有 UI 设计专属 Agent | 命令较固定；知识沉淀弱 |
+
+### 如何选择
+
+- **深度使用 Claude Code / 中文团队** → **本项目 CE**（真实 Agent Teams + 分层验证 + 中文文档）
+- **多 AI 平台（Codex/Gemini/Copilot 混用）** → **CE-UP 上游**（跨平台最佳）
+- **轻量快速启动 / 个人开发** → **SP（Superpowers）**（最简洁）
+- **偏好角色化 Agent 分工** → **OMCC** 或 **CCG**
 
 ---
 

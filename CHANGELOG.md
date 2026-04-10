@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.46.3] - 2026-04-10
+
+### 文档 + UX 改进
+
+- **命令步骤编号**：5 个工作流命令 description 加入 "Step X/5" 前缀，autocomplete 列表直接显示操作顺序（brainstorm=1, plan=2, work=3, review=4, compound=5）
+- **README 竞品对比重写**：新增「Agent / 能力覆盖对比」矩阵（CE / CE-UP / SP / OMCC / CCG），新增「关键特性横向对比」表，加入 Superpowers（SP）、OMCC、CCG，公平评价各项目强项与局限，附「如何选择」决策指南
+
+---
+
 ## [2.46.2] - 2026-04-10
 
 ### 文档 + 准确性修复

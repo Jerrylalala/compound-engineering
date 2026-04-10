@@ -1,6 +1,6 @@
 {
     "name":  "compound-engineering",
-    "version":  "2.46.2",
+    "version":  "2.46.3",
     "description":  "AI-powered development tools. 51 agents, 7 commands, 50 skills + 12 custom overlays, 1 MCP server for code review, research, design, and workflow automation.",
     "author":  {
                    "name":  "Jerry Jian (fork of Kieran Klaassen)",
