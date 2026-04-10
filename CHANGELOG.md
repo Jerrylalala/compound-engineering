@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.46.5] - 2026-04-10
+
+### 命令参数补全（严谨化）
+
+- **ce:plan**：description 加入 `[team:full]`；argument-hint 补充 `[team:full=+追溯审查]` 说明
+- **ce:work**：description 补全所有参数 `[team][team:full][T][PW][R][C][G]`；argument-hint 拆分 `[C/G]` 为独立条目并补充语义
+- **ce:review**：description 加入 `[mode:autofix]` 前缀和 `[team:full]`；argument-hint 补充 `[headless]`、`[base:ref]`、`[team:full=同[team]]`
+- 所有参数均以 SKILL.md 为权威来源验证，无虚构
+
+---
+
 ## [2.46.4] - 2026-04-10
 
 ### UX 精化 + 文档增强
