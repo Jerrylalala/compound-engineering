@@ -1,7 +1,7 @@
 ---
 name: ce:work
 description: Execute work efficiently while maintaining quality and finishing features
-argument-hint: "[Plan doc path or description of work. Blank to auto use latest plan doc] [team=3角色协作:合约主+执行者+验证者] [team:full=4角色:含风险卫,适合auth/payment/migration] [R=研究:bare prompt且非Trivial场景触发learnings-researcher检索历史经验，传文件路径无效] [T=四层自验证:执行后运行CLI+API/DB+浏览器+验收验证,通过验证才算完成] [PW=Playwright MCP浏览器验证（必须同时传[T]，单独传[PW]无效并显示警告；需另行安装Playwright MCP Server，插件不含此依赖）] [C=外部AI参与标记:Codex已参与整体工作流，标记用于审计溯源，不透传给内嵌ce:review] [G=外部AI参与标记:Gemini已参与整体工作流，标记用于审计溯源，不透传给内嵌ce:review]"
+argument-hint: "[计划路径] [T=Agent Teams 3角色:合约主+执行者+验证者] [T+=Agent Teams 4角色:+风险卫，适合auth/payment/migration] [V=四层自验证:CLI→API/DB→浏览器→验收，通过才算完成] [V+=V+Playwright浏览器层（自动含[V]，无需单独传[V]）] [R=历史检索：learnings-researcher搜索docs/solutions] [C=Codex参与标记，仅审计溯源，不触发调用] [G=Gemini参与标记，仅审计溯源，不触发调用]"
 ---
 
 # Work Execution Command
@@ -28,24 +28,30 @@ This command takes a work document (plan, specification, or todo file) or a bare
   - 从参数中移除 `[R]`
 - 否则：R_MODE_ENABLED = false
 
-**[T] 自验证标志检测**（独立执行）：
-- 如果 `$ARGUMENTS` 包含 `[T]` 或 `[t]`：
-  - 设置 T_MODE_ENABLED = true
-  - 从参数中移除 `[T]`
-  - 宣告：「✅ [T] 自验证模式已启用——执行完成后将运行四层验证（Phase 3.5）」
-  - **[PW] 检测**（仅在 T_MODE_ENABLED=true 时执行）：
-    - 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：
+
+> **向后兼容（参数别名）**：以下旧参数名在传入时自动识别并映射：
+> - `[team]` → 等同 `[T]`
+> - `[team:full]` → 等同 `[T+]`
+> - `[T]`（旧：四层验证）→ 等同 `[V]`（新名）
+> - `[PW]` → 等同 `[V+]`
+> 传入旧名不会报错，等同传入新名。
+
+**[V] 自验证标志检测**（独立执行）：
+- 如果 `$ARGUMENTS` 包含 `[V]` 或 `[v]`，或向后兼容的 `[T]`（旧名）：
+  - 设置 V_MODE_ENABLED = true
+  - 从参数中移除 `[V]`（或 `[T]`）
+  - 宣告：「✅ [V] 自验证模式已启用——执行完成后将运行四层验证（Phase 3.5）」
+  - **[V+] 检测**（[V+] 自动启用四层验证，无需单独传 [V]）：
+    - 如果 `$ARGUMENTS` 包含 `[V+]` 或 `[pw]`：
       - 检查 Playwright MCP 工具可用性（`mcp__playwright__browser_navigate` 是否在工具列表中）
-      - 若可用：设置 PW_MODE_ENABLED = true，从参数中移除 `[PW]`，宣告：「✅ [PW] Playwright MCP 模式已启用——Layer 2 将使用 Playwright MCP（高精度浏览器验证）」
-      - 若不可用：PW_MODE_ENABLED = false，输出：「⚠️ Playwright MCP Server 未配置，[PW] 模式不可用，Layer 2 自动降级为 agent-browser。如需 Playwright MCP，请先安装并配置 Playwright MCP Server。」
-    - 否则：PW_MODE_ENABLED = false（Layer 2 使用 agent-browser，token 低 30-50 倍）
-- 否则：T_MODE_ENABLED = false；PW_MODE_ENABLED = false
-  - 如果 `$ARGUMENTS` 包含 `[PW]` 或 `[pw]`：移除 `[PW]`，使用 **AskUserQuestion** 询问：
-      > "⚠️ [PW] 需要配合 [T] 使用，当前未传 [T]，[PW] 单独使用无效。
-      > 1. 以 [T][PW] 模式重新运行（启用四层自验证 + Playwright 浏览器验证）
-      > 2. 继续当前模式（忽略 [PW]，无浏览器验证）
-      > 3. 停止"
-      Based on selection: 选 1 → 以 [T][PW] 标志重新执行；选 2 → 继续（PW_MODE_ENABLED=false）；选 3 → 结束
+      - 若可用：设置 V_PLUS_MODE_ENABLED = true，从参数中移除 `[V+]`，宣告：「✅ [V+] Playwright MCP 模式已启用——Layer 2 将使用 Playwright MCP（高精度浏览器验证）」
+      - 若不可用：V_PLUS_MODE_ENABLED = false，输出：「⚠️ Playwright MCP Server 未配置，[V+] 模式不可用，Layer 2 自动降级为 agent-browser。如需 Playwright MCP，请先安装并配置 Playwright MCP Server。」
+    - 否则：V_PLUS_MODE_ENABLED = false（Layer 2 使用 agent-browser，token 低 30-50 倍）
+- 否则：V_MODE_ENABLED = false
+  - 如果 `$ARGUMENTS` 包含 `[V+]` 或 `[pw]`（向后兼容旧 `[PW]`）：
+    - **自动升级**：设置 V_MODE_ENABLED = true（[V+] 隐含 [V]，无需单独传 [V]）
+    - 按上方 [V+] 检测逻辑继续执行（检查 Playwright MCP 可用性）
+  - V_PLUS_MODE_ENABLED = false（默认）
 
 **[C] Codex 标志检测**：
 - 如果 `$ARGUMENTS` 包含 `[C]` 或 `[c]`：
@@ -61,13 +67,13 @@ This command takes a work document (plan, specification, or todo file) or a bare
   - 宣告：「✅ [G] 标志已检测——标记外部 AI（Gemini）已参与整体工作流。注：[G] 不透传给内嵌 ce:review（透传无收益，详见 Phase 3）」
 - 否则：GEMINI_ENABLED = false
 
-**[team] / [team:full] 检测**（仅当包含时）：
+**[T] / [T+] 检测**（仅当包含时）：
 Strip the team token from arguments before passing to Phase 0.
 Load the `team-mode` skill for the complete initialization sequence:
 - TeamCreate（命名团队）
 - .team-contract.md 加载与版本检测
 - Spawn verifier teammate（独立 context window，只读，接收 SendMessage 通知并验证）
-- [team:full] 额外 spawn risk-guard teammate（高风险路径拦截）
+- [T+] 额外 spawn risk-guard teammate（高风险路径拦截）
 - 宣告团队就绪
 - Phase 2 每 Unit 完成后：SendMessage("verifier", ...) → 等待 PASS/FAIL → 修复或继续
 - 全部 Unit 完成后：SendMessage("verifier", "全量集成验证") → 最终 PASS
@@ -403,13 +409,13 @@ Determine how to proceed based on what was provided in `<input_document>`.
    Every change gets reviewed before shipping. The depth scales with the change's risk profile, but review itself is never skipped.
 
    **Tier 2: Full review (default)** — REQUIRED unless Tier 1 criteria are explicitly met. Invoke the `ce:review` skill with `mode:autofix` to run specialized reviewer agents, auto-apply safe fixes, and surface residual work as todos. When the plan file path is known, pass it as `plan:<path>`. This is the mandatory default — proceed to Tier 1 only after confirming every criterion below.
-   - If TEAM_GATE_ENABLED: also pass `[team]`（或 `[team:full]`）to ce:review（确保 Patch Gate 白名单门控激活，不传则 Patch Gate 静默跳过）
+   - If TEAM_GATE_ENABLED: also pass `[T]`（或 `[T+]`）to ce:review（确保 Patch Gate 白名单门控激活，不传则 Patch Gate 静默跳过）
 
    参数拼接示例：
    - 基础调用：`Skill("ce:review", "mode:autofix")`
    - 含计划路径：`Skill("ce:review", "mode:autofix plan:docs/plans/xxx.md")`
-   - 含 [team]：`Skill("ce:review", "mode:autofix plan:docs/plans/xxx.md [team]")`
-   - 含 [team:full]：`Skill("ce:review", "mode:autofix plan:docs/plans/xxx.md [team:full]")`
+   - 含 [T]：`Skill("ce:review", "mode:autofix plan:docs/plans/xxx.md [T]")`
+   - 含 [T+]：`Skill("ce:review", "mode:autofix plan:docs/plans/xxx.md [T+]")`
 
    注：[C]/[G] **不透传**给内嵌 ce:review。[C]/[G] 在 ce:work 层的作用是标记外部 AI 已参与整体工作流；内嵌 ce:review 仅负责代码质量把关，不涉及外部模型调用，透传只会将 safe_auto 降级为 gated_auto 而无实际收益。
 
@@ -443,7 +449,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 ### Phase 3.5: 四层自验证（仅当 `[T]` 时）
 
-**触发条件**：T_MODE_ENABLED = true（在 Phase -1 中设置）。T_MODE_ENABLED = false 时跳过本节，直接进入 Phase 4。
+**触发条件**：V_MODE_ENABLED = true（在 Phase -1 中设置）。V_MODE_ENABLED = false 时跳过本节，直接进入 Phase 4。
 
 ---
 
@@ -572,9 +578,9 @@ Determine how to proceed based on what was provided in `<input_document>`.
 - 若项目应有 dev server 但**启动失败**（可能是代码问题）→ 记录 `layers.layer2 = "fail"`，标注「⚠️ dev server 启动失败，可能是代码编译错误，Layer 2 计为失败而非跳过」（区别：不掩盖真实构建问题）
 - Layer 2 URL 推断：优先读 CLAUDE.md 中的 dev server URL；其次读计划文件；若均未指定，默认 `http://localhost:3000` 并宣告使用的 URL
 
-**工具选择由 Phase -1 的 PW_MODE_ENABLED 决定（不自动切换）**：
+**工具选择由 Phase -1 的 V_PLUS_MODE_ENABLED 决定（不自动切换）**：
 
-*PW_MODE_ENABLED = false（默认，使用 agent-browser，token 低 30-50 倍）*：
+*V_PLUS_MODE_ENABLED = false（默认，使用 agent-browser，token 低 30-50 倍）*：
 
 ```bash
 Skill("agent-browser")   # 加载 skill 文档（了解 CLI 语法和可用命令）
@@ -585,13 +591,13 @@ agent-browser click @e<N>                            # 根据验收场景执行�
 agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（timestamp 使用 ISO 格式，跨平台兼容）
 ```
 
-*PW_MODE_ENABLED = true（用户显式传入 `[PW]`，使用 Playwright MCP）*——适用于网络请求拦截、JS 执行、拖拽、文件上传：
+*V_PLUS_MODE_ENABLED = true（用户显式传入 `[V+]`，使用 Playwright MCP）*——适用于网络请求拦截、JS 执行、拖拽、文件上传：
 - `mcp__playwright__browser_navigate` + `mcp__playwright__browser_snapshot`
 - `mcp__playwright__browser_console_messages`（捕获 console 错误）
 - `mcp__playwright__browser_network_requests`（拦截 API 调用）
 - `mcp__playwright__browser_evaluate`（执行 JS 断言）
 
-**铁律：不基于任务关键词自动升级到 Playwright MCP。用户传 [PW] 才用。**
+**铁律：不基于任务关键词自动升级到 Playwright MCP。用户传 [V+] 才用。**
 
 成功 → `layers.layer2 = "pass"`；失败 → 修复 → 重试
 
@@ -609,7 +615,7 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
    - 与验收场景逐条比对
 4. 发现未达标项 → 列出 → 修复 → 重试 Layer 3
 
-**[T]+[team] 职责矩阵**：
+**[V]+[T] 职责矩阵**：
 
 | 职责 | Phase 3.5 Layer 3 | team 验证者 Hook |
 |------|-------------------|-----------------|
@@ -619,15 +625,15 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 | 失败行为 | 进入 BLOCKED（AskUserQuestion 三选一） | 停止当前 Unit，等待执行者修复 |
 | 重复检查 | 只核查跨任务维度条目，不重复局部已覆盖条目 | 不关注跨任务组合 |
 
-**[T] + [team] 特殊处理**：
-- **Layer 3 delegation**：[team] 模式的验证者 Hook 在每任务后运行（时机早于 Phase 3.5，逐任务局部验证）。Phase 3.5 的 Layer 3 执行轻量全局确认：
+**[V] + [T] 特殊处理**：
+- **Layer 3 delegation**：[T] 模式的验证者 Hook 在每任务后运行（时机早于 Phase 3.5，逐任务局部验证）。Phase 3.5 的 Layer 3 执行轻量全局确认：
   - **精确职责**：只核查验收场景表中跨任务维度的条目（如"整体流程通过"类场景），不重复核查已被 team 验证者 Hook 覆盖的单任务条目
   - **跨任务组合问题处理**：若发现跨任务组合破坏了不变式，记录到 `.context/compound-engineering/ce-work-verification.json` 的 Layer 3 失败信息，进入标准 BLOCKED 流程（AskUserQuestion 三选一），不触发新一轮 team 验证者 Hook
   - 状态标记：`layers.layer3 = "delegated-to-team+light-check"`（team Hook 已完成局部验证，Phase 3.5 补充全局一致性确认）
   - 若计划无验收场景章节：标记 `"delegated-to-team"`，跳过 Phase 3.5 的 Layer 3
 
-- **BLOCKED 合并**：[T]+[team] 同时激活且验证失败时，使用标准 AskUserQuestion 工具（与非 team 模式相同），在提示文字中标注「团队模式」：
-  > "⚠️ [T]+[team] 验证未通过（已重试 N 轮）
+- **BLOCKED 合并**：[V]+[T] 同时激活且验证失败时，使用标准 AskUserQuestion 工具（与非 team 模式相同），在提示文字中标注「团队模式」：
+  > "⚠️ [V]+[T] 验证未通过（已重试 N 轮）
   > 失败层：[层名] — [失败原因摘要]
   > Layer 0 层内重试：[layer0_inner_retries] 次
   >
@@ -662,7 +668,7 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 
 继续 **Phase 4（Ship It）**。
 
-**[T]+[team] 委派状态的 passes 判断规则**：
+**[V]+[T] 委派状态的 passes 判断规则**：
 - `layers.layer3 = "delegated-to-team"`：该层在 passes 判断中**不计入失败**（team 验证者 Hook 已全权处理，无验收场景章节时跳过 Phase 3.5 Layer 3 是设计如此）
 - `layers.layer3 = "delegated-to-team+light-check"` 且全局一致性检查失败：**计入失败**，进入标准 BLOCKED 流程（AskUserQuestion 三选一）
 
@@ -736,7 +742,7 @@ Based on selection:
    - Link to PR (if one was created)
    - Note any follow-up work needed
 
-5. **[team] 模式：销毁团队**（仅当 TEAM_GATE_ENABLED = true）
+5. **[T] 模式：销毁团队**（仅当 TEAM_GATE_ENABLED = true）
 
    PR 创建完成后，销毁 Agent Teams：
    ```
@@ -755,7 +761,7 @@ Based on selection:
 > 3. **完成** — 无需额外操作"
 
 Based on selection:
-- 选 1 → 调用 `ce:review` skill，传入 `mode:autofix`，plan 路径已知则传入（加 `[team]` 如果 TEAM_GATE_ENABLED）
+- 选 1 → 调用 `ce:review` skill，传入 `mode:autofix`，plan 路径已知则传入（加 `[T]` 如果 TEAM_GATE_ENABLED）
 - 选 2 → 执行 `/workflows:pr` command
 - 选 3 → 结束流程
 

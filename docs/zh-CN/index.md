@@ -27,9 +27,9 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 | 命令 | 用途 | 参数 |
 |------|------|------|
 | `/ce:brainstorm` | 通过对话探索需求，生成需求文档 | `[P][C][G][R]` |
-| `/ce:plan` | 将需求转化为可执行实施计划 | `[team]` |
-| `/ce:work` | 执行计划，支持 Agent Teams 和多层自验证 | `[team][T][PW][C][G]` |
-| `/ce:review` | 多代理代码审查，支持自动修复 | `[mode:autofix][C][G][team]` |
+| `/ce:plan` | 将需求转化为可执行实施计划 | `[T]` |
+| `/ce:work` | 执行计划，支持 Agent Teams 和多层自验证 | `[T][T][V+][C][G]` |
+| `/ce:review` | 多代理代码审查，支持自动修复 | `[mode:autofix][C][G][T]` |
 | `/ce:compound` | 记录解决方案，构建经验库 | — |
 
 ---
@@ -55,7 +55,7 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 ### 真实 Agent Teams（Claude Code 原生）
 
-`ce:work [team]` 使用 Claude Code 原生 Agent Teams：
+`ce:work [V]` 使用 Claude Code 原生 Agent Teams：
 
 - **TeamCreate** 创建命名团队（秒级时间戳，防碰撞）
 - **独立 context window** 的 verifier，不受执行上下文污染
@@ -66,7 +66,7 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 14 个视角发散讨论，结束后自动触发**探索者+挑战者结构化收敛**，找到漏洞，无需额外参数。
 
-### [T] 四层自验证
+### [V] 四层自验证
 
 按任务类型自动选择：构建检查 → 单元测试 → 集成测试 → Playwright 浏览器验收。
 

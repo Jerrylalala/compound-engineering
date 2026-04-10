@@ -126,9 +126,9 @@ description: "私有 Overlay：Review Contract 三档 Tier 分类 + Anti-Lenienc
 
 ---
 
-## Integration with [team] Mode
+## Integration with [T] Mode
 
-当 `ce:review` 使用 `[team]` flag 时，本 skill 的 Tier 分类由 Stage 5 Deterministic Patch Gate **自动消费**。用户不再需要手动加载此 skill — Patch Gate 内联引用 Tier 逻辑。
+当 `ce:review` 使用 `[T]` flag 时，本 skill 的 Tier 分类由 Stage 5 Deterministic Patch Gate **自动消费**。用户不再需要手动加载此 skill — Patch Gate 内联引用 Tier 逻辑。
 
 ### Tier → Patch Gate 行为映射
 
@@ -149,6 +149,6 @@ description: "私有 Overlay：Review Contract 三档 Tier 分类 + Anti-Lenienc
 ### 激活条件
 
 Patch Gate 集成仅在以下条件同时满足时生效：
-- `ce:review` 收到 `[team]` flag
+- `ce:review` 收到 `[T]` flag
 - `mode:autofix` 被选中
 - `.team-contract.md` 存在于 repo 根目录
