@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compound Engineering — 工作流可视化</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3352;
+      --accent: #6c8ef7;
+      --accent2: #a78bfa;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --text: #e2e8f0;
+      --text-muted: #8892b0;
+      --arrow: #4a5568;
+    }
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface2: #f1f5f9;
+      --border: #e2e8f0;
+      --accent: #4f6ef7;
+      --accent2: #7c3aed;
+      --green: #059669;
+      --yellow: #d97706;
+      --red: #dc2626;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --arrow: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .logo svg { width: 28px; height: 28px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .theme-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .gh-link {
+      background: var(--accent);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .gh-link:hover { opacity: 0.85; }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 56px 24px 40px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 14px;
+    }
+    .hero p {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    /* Flow Container */
+    .flow-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+    .flow-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    /* Flow Row */
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    /* Node */
+    .node {
+      position: relative;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 22px;
+      min-width: 140px;
+      max-width: 160px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .node:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(108,142,247,0.18);
+    }
+    .node.active {
+      border-color: var(--accent);
+      background: var(--surface2);
+      box-shadow: 0 0 0 4px rgba(108,142,247,0.15);
+    }
+    .node-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .node-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .node-cmd {
+      font-size: 11px;
+      font-family: 'Roboto Mono', monospace;
+      color: var(--accent);
+      background: rgba(108,142,247,0.12);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .node-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .param-badge {
+      font-size: 10px;
+      font-family: monospace;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: default;
+    }
+    .param-badge.real { border-color: var(--green); color: var(--green); background: rgba(52,211,153,0.08); }
+    .param-badge.optional { border-color: var(--yellow); color: var(--yellow); background: rgba(251,191,36,0.08); }
+
+    /* Arrow */
+    .arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+    .arrow svg { width: 28px; height: 28px; color: var(--arrow); }
+    .arrow.repeat { transform: rotate(180deg); }
+
+    /* Repeat indicator */
+    .repeat-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 16px;
+      gap: 8px;
+    }
+    .repeat-line {
+      flex: 1;
+      max-width: 400px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--border), var(--accent), var(--border), transparent);
+      border-radius: 2px;
+    }
+    .repeat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      padding: 4px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    /* Detail Panel */
+    .detail-panel {
+      max-width: 900px;
+      margin: 40px auto 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.35s ease;
+      display: none;
+    }
+    .detail-panel.visible { display: block; }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 28px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-icon { font-size: 32px; }
+    .panel-title { font-size: 20px; font-weight: 700; }
+    .panel-cmd {
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--accent);
+      background: rgba(108,142,247,0.12);
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-left: auto;
+    }
+    .panel-body { padding: 28px; }
+    .panel-desc { font-size: 15px; color: var(--text-muted); line-height: 1.7; margin-bottom: 28px; }
+    .params-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .params-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .param-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+    .param-card:hover { border-color: var(--accent); }
+    .param-card.implemented { border-left: 3px solid var(--green); }
+    .param-card.optional-param { border-left: 3px solid var(--yellow); }
+    .param-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .param-tag {
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .param-status {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .status-real { background: rgba(52,211,153,0.15); color: var(--green); }
+    .status-optional { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .param-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+    .example-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 10px; }
+    .example-box {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #79c0ff;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    [data-theme="light"] .example-box {
+      background: #f6f8fa;
+      color: #0550ae;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 36px;
+      flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-real { background: var(--green); }
+    .dot-optional { background: var(--yellow); }
+
+    /* Compound section */
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      margin: 60px 0 32px;
+      color: var(--text);
+    }
+    .cards-row {
+      max-width: 900px;
+      margin: 0 auto 60px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .info-card-icon { font-size: 28px; margin-bottom: 12px; }
+    .info-card-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .info-card-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .flow-row { gap: 0; }
+      .node { min-width: 110px; padding: 14px 12px; }
+      header { padding: 12px 16px; }
+      .panel-header { flex-wrap: wrap; }
+      .panel-cmd { margin-left: 0; margin-top: 6px; }
+    }
+    @media (max-width: 500px) {
+      .flow-row { flex-direction: column; align-items: center; }
+      .arrow { transform: rotate(90deg); padding: 4px 0; }
+    }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .detail-panel.visible { animation: fadeIn 0.25s ease; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="2"/>
+        <path d="M8 14l4 4 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Compound Engineering
+    </div>
+    <div class="header-right">
+      <button class="theme-btn" onclick="toggleTheme()">☀ / ☾</button>
+      <a class="gh-link" href="https://github.com/Jerrylalala/compound-engineering" target="_blank">GitHub →</a>
+    </div>
+  </header>
+
+  <div class="hero">
+    <span class="badge">Claude Code 插件 · 交互式工作流指南</span>
+    <h1>复合工程工作流</h1>
+    <p>点击每个阶段，了解参数含义、使用场景和命令示例。<br>每一个工程单元都应该让后续单元更容易。</p>
+  </div>
+
+  <div class="flow-section">
+    <div class="flow-label">点击任意阶段查看详情</div>
+
+    <div class="flow-row" id="flowRow">
+      <!-- Brainstorm -->
+      <div class="node" data-step="brainstorm" onclick="selectStep('brainstorm')">
+        <div class="node-icon">💡</div>
+        <div class="node-label">Brainstorm</div>
+        <div class="node-cmd">/ce:brainstorm</div>
+        <div class="node-badges">
+          <span class="param-badge optional">[P]</span>
+          <span class="param-badge">[C]</span>
+          <span class="param-badge">[G]</span>
+          <span class="param-badge">[R]</span>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg viewBox="0 0 28 28" fill="none"><path d="M8 14h12M16 10l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <!-- Plan -->
+      <div class="node" data-step="plan" onclick="selectStep('plan')">
+        <div class="node-icon">📋</div>
+        <div class="node-label">Plan</div>
+        <div class="node-cmd">/ce:plan</div>
+        <div class="node-badges">
+          <span class="param-badge real">[team]</span>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg viewBox="0 0 28 28" fill="none"><path d="M8 14h12M16 10l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <!-- Work -->
+      <div class="node" data-step="work" onclick="selectStep('work')">
+        <div class="node-icon">⚙️</div>
+        <div class="node-label">Work</div>
+        <div class="node-cmd">/ce:work</div>
+        <div class="node-badges">
+          <span class="param-badge real">[team]</span>
+          <span class="param-badge real">[T]</span>
+          <span class="param-badge optional">[PW]</span>
+          <span class="param-badge">[R]</span>
+          <span class="param-badge">[C]</span>
+          <span class="param-badge">[G]</span>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg viewBox="0 0 28 28" fill="none"><path d="M8 14h12M16 10l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <!-- Review -->
+      <div class="node" data-step="review" onclick="selectStep('review')">
+        <div class="node-icon">🔍</div>
+        <div class="node-label">Review</div>
+        <div class="node-cmd">/ce:review</div>
+        <div class="node-badges">
+          <span class="param-badge real">[team]</span>
+          <span class="param-badge optional">[C]</span>
+          <span class="param-badge optional">[G]</span>
+          <span class="param-badge">[autofix]</span>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg viewBox="0 0 28 28" fill="none"><path d="M8 14h12M16 10l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <!-- Compound -->
+      <div class="node" data-step="compound" onclick="selectStep('compound')">
+        <div class="node-icon">📚</div>
+        <div class="node-label">Compound</div>
+        <div class="node-cmd">/ce:compound</div>
+        <div class="node-badges">
+          <span class="param-badge" style="color:var(--text-muted)">沉淀经验</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="repeat-row">
+      <div class="repeat-line"></div>
+      <div class="repeat-label">↩ Repeat — 每次循环让下次更容易</div>
+      <div class="repeat-line"></div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-panel" id="detailPanel"></div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot dot-real"></div>真实 Agent Teams 实现</div>
+      <div class="legend-item"><div class="legend-dot dot-optional"></div>可选增强功能</div>
+      <div class="legend-item"><span style="font-size:11px;font-family:monospace;color:var(--text-muted)">[param]</span> 普通可选参数</div>
+    </div>
+  </div>
+
+  <!-- Feature Cards -->
+  <div class="flow-section" style="padding-top:0">
+    <div class="section-title">核心能力</div>
+  </div>
+  <div class="cards-row">
+    <div class="info-card">
+      <div class="info-card-icon">🤝</div>
+      <div class="info-card-title">真实 Agent Teams</div>
+      <div class="info-card-desc"><code>[team]</code> 使用 Claude Code 原生 <code>TeamCreate</code> / <code>SendMessage</code> / <code>TeamDelete</code>，verifier 拥有独立 context window，不是角色模拟。</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">🧪</div>
+      <div class="info-card-title">四层自验证 [T]</div>
+      <div class="info-card-desc">Layer 0 CLI 检查 → Layer 1 API/DB 验证 → Layer 2 浏览器 UI → Layer 3 独立验收确认。按任务类型自动选择激活层。</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">🔀</div>
+      <div class="info-card-title">双模型交叉审查</div>
+      <div class="info-card-desc"><code>/ce:review [C][G]</code> 同时调用 Codex 和 Gemini，双方共同发现的问题优先级自动提升，减少漏报。</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">🎉</div>
+      <div class="info-card-title">派对模式 [P]</div>
+      <div class="info-card-desc">14 个专家视角发散讨论（探索者 / 挑战者 / 安全 / 性能 / QA…），结束后自动触发结构化收敛，无需额外参数。</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">📖</div>
+      <div class="info-card-title">历史经验检索 [R]</div>
+      <div class="info-card-desc">执行前自动检索 <code>docs/solutions/</code> 经验库，相关解决方案注入上下文，避免重复踩坑。</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">🔒</div>
+      <div class="info-card-title">合约白名单门控</div>
+      <div class="info-card-desc"><code>/ce:plan [team]</code> 自动生成 <code>.team-contract.md</code>，<code>/ce:work [team]</code> 强制单写者原则，<code>/ce:review [team]</code> 激活 Patch Gate 验证。</div>
+    </div>
+  </div>
+
+  <script>
+    const steps = {
+      brainstorm: {
+        icon: '💡',
+        label: 'Brainstorm',
+        cmd: '/ce:brainstorm',
+        desc: '通过对话式澄清探索需求和实现方案，生成结构化需求文档。这是工作流的起点——先搞清楚"做什么"，再进入规划。对于简单需求可以直接跳到 Plan；对于模糊、复杂或有多个方向的需求，从这里开始。',
+        params: [
+          { tag: '[P]', type: 'optional', label: '可选增强', desc: '派对模式：14 个专家视角（架构师/安全/性能/QA…）发散讨论，结束后自动触发探索者+挑战者结构化收敛。适合思路不清晰或需要多角度评估的场景。' },
+          { tag: '[C]', type: '', label: '可选', desc: 'Codex 咨询：在 Phase 2 方案对比后自动调用 Codex 补充技术视角。' },
+          { tag: '[G]', type: '', label: '可选', desc: 'Gemini 咨询：在 Phase 2 方案对比后自动调用 Gemini 补充外部参考方案。' },
+          { tag: '[R]', type: '', label: '可选', desc: '历史检索：触发 learnings-researcher 搜索 docs/solutions/ 中的历史解决方案，作为方案对比的参考背景。' },
+        ],
+        examples: `# 基础用法
+/ce:brainstorm 实现一个用户认证系统
+
+# 多视角讨论（模糊需求）
+/ce:brainstorm 我们应该用微服务还是单体架构？ [P]
+
+# 检索历史经验
+/ce:brainstorm 重构数据库访问层 [R]
+
+# 全参数组合
+/ce:brainstorm 设计 AI 代码审查流程 [P][R][C][G]`
+      },
+      plan: {
+        icon: '📋',
+        label: 'Plan',
+        cmd: '/ce:plan',
+        desc: '将需求文档或功能描述转化为结构化实施计划。回答"怎么做"：明确实现单元、文件列表、依赖关系、测试场景和验收标准。`[team]` 参数额外生成 `.team-contract.md`（文件白名单 + 不变式约束），为后续 ce:work 和 ce:review 的合约验证提供基础。',
+        params: [
+          { tag: '[team]', type: 'implemented', label: '真实实现', desc: '合约主 + 追溯审查模式：分析实施计划中的文件变更范围，生成 .team-contract.md（allowed_files / forbidden_surfaces / required_invariants / max_files_per_patch）。ce:work 执行时用于单写者原则验证，ce:review 用于 Patch Gate 门控。' },
+          { tag: '[team:full]', type: 'implemented', label: '真实实现', desc: '等同 [team]，生成相同的 .team-contract.md。在 ce:plan 阶段无额外角色；与 ce:work [team:full] 路径兼容（风险卫角色在 work 阶段激活）。' },
+        ],
+        examples: `# 基础规划（传需求文档路径）
+/ce:plan docs/brainstorms/auth-requirements.md
+
+# 直接描述功能
+/ce:plan 为用户表添加软删除功能
+
+# 启用合约模式（推荐用于多任务并行）
+/ce:plan docs/brainstorms/auth-requirements.md [team]
+
+# 深化已有计划
+/ce:plan docs/plans/auth-plan.md  # 自动检测并进入 deepening 流程`
+      },
+      work: {
+        icon: '⚙️',
+        label: 'Work',
+        cmd: '/ce:work',
+        desc: '执行计划文档或直接描述的工作任务。1 个任务使用标准模式；≥2 个任务自动启用 Subagent 并行执行（每个任务独立 context window，防止上下文污染）。`[team]` 启用真实 Agent Teams——verifier teammate 独立运行，每个执行单元完成后通过 SendMessage 触发验证，不依赖执行者自我报告。',
+        params: [
+          { tag: '[team]', type: 'implemented', label: '真实实现', desc: 'TeamCreate 创建命名团队（时间戳防碰撞），spawn verifier teammate（独立 context window），每 Unit 完成后 SendMessage 通知验证，全量完成后全局不变式验证，TeamDelete 清理。' },
+          { tag: '[team:full]', type: 'implemented', label: '真实实现', desc: '在 [team] 基础上额外 spawn risk-guard teammate，实时拦截 auth/payment/migration 等高风险路径，阻止未经合约授权的操作。' },
+          { tag: '[T]', type: 'implemented', label: '真实实现', desc: '四层自验证：Layer 0 CLI 静态检查 / Layer 1 API+DB 验证 / Layer 2 浏览器 UI 验证 / Layer 3 独立验收确认。按任务类型自动选择激活层，支持 session 中断恢复。' },
+          { tag: '[PW]', type: 'optional', label: '需配合 [T]', desc: '需同时传 [T]。使用 Playwright MCP Server 代替 agent-browser 执行 Layer 2 浏览器验证，支持网络请求拦截、JS 执行、文件上传等高精度操作。需预先安装 Playwright MCP Server。' },
+          { tag: '[R]', type: '', label: '可选', desc: '历史检索：仅对 bare prompt 生效（传文件路径无效）。检索 docs/solutions/ 历史经验，在每个 Unit 执行前注入相关洞察作为参考。' },
+          { tag: '[C]', type: '', label: '审计标记', desc: '标记 Codex 已参与整体工作流（用于审计溯源）。不透传给内嵌的 ce:review，不触发 Codex 调用。' },
+          { tag: '[G]', type: '', label: '审计标记', desc: '标记 Gemini 已参与整体工作流（用于审计溯源）。不透传给内嵌的 ce:review，不触发 Gemini 调用。' },
+        ],
+        examples: `# 基础执行（传计划文档）
+/ce:work docs/plans/auth-plan.md
+
+# 启用 Agent Teams（推荐多任务计划）
+/ce:work docs/plans/auth-plan.md [team]
+
+# 四层自验证
+/ce:work docs/plans/auth-plan.md [T]
+
+# 全功能组合（最严格模式）
+/ce:work docs/plans/auth-plan.md [team][T]
+
+# 风险卫（auth/payment/migration 场景）
+/ce:work docs/plans/payment-plan.md [team:full][T]
+
+# Playwright 浏览器验证（需先装 Playwright MCP）
+/ce:work docs/plans/ui-plan.md [T][PW]`
+      },
+      review: {
+        icon: '🔍',
+        label: 'Review',
+        cmd: '/ce:review',
+        desc: '多代理并行代码审查，基于 Tier 分级框架（安全/性能/正确性/可维护性等专属审查者），自动 merge 发现并去重。`mode:autofix` 安全发现自动修复，残余问题以 TODO 形式输出。`[team]` 激活 Deterministic Patch Gate——规则引擎验证所有变更是否在 .team-contract.md 白名单内，不消耗额外 token。',
+        params: [
+          { tag: '[mode:autofix]', type: 'implemented', label: '推荐默认', desc: '自动修复安全级别的发现（low-risk 自动应用，medium-risk 确认后应用，high-risk 仅报告）。建议大多数情况使用此模式。' },
+          { tag: '[team]', type: 'implemented', label: '真实实现', desc: 'TEAM_GATE_ENABLED = true。加载 .team-contract.md，在 Stage 5 运行 Deterministic Patch Gate：规则引擎验证所有变更文件是否在 allowed_files 白名单内，拦截越界修改。在 report-only / headless 模式下不生效。' },
+          { tag: '[team:full]', type: 'implemented', label: '真实实现', desc: '等同 [team]（ce:review 阶段无风险卫角色，Patch Gate 行为与 [team] 相同）。' },
+          { tag: '[C]', type: 'optional', label: '可选增强', desc: 'Codex 审核：调用 Codex CLI 对同一 diff 进行独立审查，双方共同发现的问题优先级提升，减少漏报。' },
+          { tag: '[G]', type: 'optional', label: '可选增强', desc: 'Gemini 审核：调用 Gemini 对同一 diff 进行独立审查，与 [C] 组合使用时形成三方交叉验证。' },
+          { tag: 'plan:<路径>', type: '', label: '可选', desc: '传入计划文件路径，审查者可对照需求检查实现是否符合原始规格，发现 scope creep 或遗漏。' },
+        ],
+        examples: `# 标准审查（当前分支 diff）
+/ce:review mode:autofix
+
+# 含计划文件（规格合规检查）
+/ce:review mode:autofix plan:docs/plans/auth-plan.md
+
+# 审查 PR #123
+/ce:review 123 mode:autofix
+
+# 含 Agent Teams 合约验证
+/ce:review mode:autofix plan:docs/plans/auth-plan.md [team]
+
+# 双模型交叉验证（最严格）
+/ce:review mode:autofix [C][G]
+
+# 完整组合
+/ce:review mode:autofix plan:docs/plans/auth-plan.md [team][C][G]`
+      },
+      compound: {
+        icon: '📚',
+        label: 'Compound',
+        cmd: '/ce:compound',
+        desc: '将本次解决的问题沉淀为可复用的经验文档，写入 docs/solutions/。这是"复合"哲学的核心——每次循环积累的知识让下一次循环更高效。经验库通过 [R] 参数在 brainstorm 和 work 阶段自动检索，形成正向飞轮。',
+        params: [
+          { tag: '无必需参数', type: '', label: '手动触发', desc: '描述本次解决的问题和关键洞察，生成结构化 YAML 文档（frontmatter + 解决方案 + 核心教训）。支持智能升级：普通修复 → 经验 → 模式 → 最佳实践的分层晋升。' },
+        ],
+        examples: `# 记录本次解决的问题
+/ce:compound
+
+# 然后在下次遇到类似问题时
+/ce:brainstorm 类似功能 [R]  # 自动检索历史经验
+/ce:work 相关计划 [R]        # 执行时注入历史洞察`
+      }
+    };
+
+    let activeStep = null;
+
+    function selectStep(step) {
+      // Toggle if same step clicked
+      if (activeStep === step) {
+        activeStep = null;
+        document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+        document.getElementById('detailPanel').classList.remove('visible');
+        return;
+      }
+      activeStep = step;
+
+      // Highlight node
+      document.querySelectorAll('.node').forEach(n => {
+        n.classList.toggle('active', n.dataset.step === step);
+      });
+
+      // Render panel
+      const s = steps[step];
+      const paramsHtml = s.params.map(p => `
+        <div class="param-card ${p.type === 'implemented' ? 'implemented' : p.type === 'optional' ? 'optional-param' : ''}">
+          <div class="param-card-header">
+            <span class="param-tag">${p.tag}</span>
+            ${p.type === 'implemented' ? `<span class="param-status status-real">${p.label}</span>` :
+              p.type === 'optional' ? `<span class="param-status status-optional">${p.label}</span>` :
+              `<span class="param-status" style="background:var(--surface2);color:var(--text-muted)">${p.label}</span>`}
+          </div>
+          <div class="param-desc">${p.desc}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('detailPanel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-icon">${s.icon}</div>
+          <div>
+            <div class="panel-title">${s.label}</div>
+          </div>
+          <div class="panel-cmd">${s.cmd}</div>
+        </div>
+        <div class="panel-body">
+          <div class="panel-desc">${s.desc}</div>
+          <div class="params-title">参数说明</div>
+          <div class="params-grid">${paramsHtml}</div>
+          <div class="example-title">使用示例</div>
+          <div class="example-box">${escHtml(s.examples)}</div>
+        </div>
+      `;
+      document.getElementById('detailPanel').classList.add('visible');
+
+      // Scroll panel into view
+      setTimeout(() => {
+        document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      if (root.dataset.theme === 'light') {
+        delete root.dataset.theme;
+      } else {
+        root.dataset.theme = 'light';
+      }
+    }
+
+    // Auto-select work on first load for demo
+    setTimeout(() => selectStep('work'), 400);
+  </script>
+</body>
+</html>

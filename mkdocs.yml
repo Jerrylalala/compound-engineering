@@ -38,6 +38,7 @@ docs_dir: docs/zh-CN
 
 nav:
   - 首页: index.md
+  - 交互式工作流: workflow.html
   - 安装与使用: INSTALL.md
   - 工作流指南: WORKFLOW-VISUAL.md
   - 核心概念: CONCEPTS.md

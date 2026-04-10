@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.46.3] - 2026-04-10
+
+### 文档 + UX 改进
+
+- **命令步骤编号**：5 个工作流命令 description 加入 "Step X/5" 前缀，autocomplete 列表直接显示操作顺序（brainstorm=1, plan=2, work=3, review=4, compound=5）
+- **README 竞品对比重写**：新增「Agent / 能力覆盖对比」矩阵（CE / CE-UP / SP / OMCC / CCG），新增「关键特性横向对比」表，加入 Superpowers（SP）、OMCC、CCG，公平评价各项目强项与局限，附「如何选择」决策指南
+
+---
+
+## [2.46.2] - 2026-04-10
+
+### 文档 + 准确性修复
+
+- **[ce:brainstorm] 命令**：删除 `[team]` 参数标记（该参数已于 `ca86a3c` 有意从 SKILL.md 移除，探索者+挑战者收敛已内置为 `[P]` 的自动行为；`ac9f2b4` 为修复自动补全意外将其加回 description，造成误导）。保留 `[P][C][G][R]` 实际支持的参数，`[P]` 的 argument-hint 明确标注包含自动收敛
+- **README**：新增「与同类项目对比」章节，包含 EveryInc 上游、awesome-claude-code、claude-octopus 等 5 个项目的横向对比，以及本项目 vs 上游的功能差异矩阵
+- **交互式工作流可视化**：新增 `docs/zh-CN/workflow.html` 单页交互应用，点击每个工作流阶段展示参数说明（区分真实实现/可选增强）和使用示例；MkDocs 导航新增「交互式工作流」入口
+- **版本号**：2.46.1 → 2.46.2
+
+---
+
 ## [2.46.1] - 2026-04-10
 
 ### Bug 修复：P0/P1 一致性修复
