@@ -246,11 +246,13 @@ Determine how to proceed based on what was provided in `<input_document>`.
    - Any resolved deferred questions relevant to that unit
    - Instruction to check whether the unit's test scenarios cover all applicable categories (happy paths, edge cases, error paths, integration) and supplement gaps before writing tests
 
-   **Team mode dispatch (when TEAM_MODE is active):** The verifier teammate (spawned in Phase -1) handles verification independently. Each subagent should:
+   **Team mode dispatch (when TEAM_MODE is active):** The verifier teammate (spawned in Phase -1) handles verification independently. Pass to each subagent:
+   - TEAM_NAME（即 Phase -1 创建的团队名，如"ce-work-20260410T143022"，subagent 用它调用 SendMessage）
    - TEAM_VARIANT (default/full)
-   - Receive the content of `.team-contract.md` (allowed_files, forbidden_surfaces, required_invariants, max_files_per_patch)
-   - Enforce single-writer principle: only write files in this unit's Files list, verify they are in allowed_files
-   - After completing its unit, SendMessage("verifier", "Unit X 已完成。变更文件：[...]。请验证。") and await PASS/FAIL reply before marking done
+   - The content of `.team-contract.md` (allowed_files, forbidden_surfaces, required_invariants, max_files_per_patch)
+   - Instruction: enforce single-writer principle — only write files in this unit's Files list, verify they are in allowed_files
+   - Instruction: after completing its unit, call `SendMessage("verifier", "Unit X 已完成。变更文件：[...]。请验证。")` and await PASS/FAIL reply before marking done
+   - Note: subagents share the same verifier teammate; they must use the TEAM_NAME they were passed to route messages correctly
 
    **Permission mode:** Omit the `mode` parameter when dispatching subagents so the user's configured permission settings apply. Do not pass `mode: "auto"` — it overrides user-level settings like `bypassPermissions`.
 

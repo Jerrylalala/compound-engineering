@@ -6,7 +6,13 @@ argument-hint: "[team] | [team:full]"
 
 # Team Mode Overlay
 
-> **核心理念**：稳定性来自规则，不来自更多 agent。合约白名单 + 单写者原则 + 验证前移 = 问题被拦截在发生前。
+> **核心理念**：合约边界 + 单写者原则 + 独立验证者 = 问题在发生前被拦截。
+>
+> **各命令的实现层次不同**：
+> - `ce:work [team]`：真实 Claude Code Agent Teams（TeamCreate + 独立 context window + SendMessage）
+> - `ce:brainstorm [team]`：同一 agent 顺序切换（有意设计，探索者和挑战者需要读取对方输出才能有意义响应，独立 context window 会破坏对话流）
+> - `ce:plan [team]`：同一 agent 多任务（有意设计，合约生成和追溯审查是顺序文档处理，不需要验证循环）
+> - `ce:review [team]`：规则引擎（有意设计，Patch Gate 是 deterministic whitelist check，零 token）
 
 本 skill 是叠加在 `ce:brainstorm`/`ce:plan`/`ce:work`/`ce:review` 之上的 overlay。各命令通过检测 `[team]`、`[team:full]` token 激活对应的角色集和机制。
 
@@ -14,10 +20,10 @@ argument-hint: "[team] | [team:full]"
 
 ## 参数变体
 
-| Token | 角色集 | 适用场景 |
-|-------|--------|---------|
-| `[team]` | 合约主 + 执行者 + 验证者（3角色） | 默认，大多数任务 |
-| `[team:full]` | 合约主 + 执行者 + 验证者 + 风险卫（4角色） | auth/payment/migration 高风险路径 |
+| Token | ce:work 实现 | ce:brainstorm/plan/review 实现 | 适用场景 |
+|-------|-------------|-------------------------------|---------|
+| `[team]` | TeamCreate + verifier teammate（独立 context window）+ lead 扮演合约主+执行者 | 角色模拟（同一 agent，有意设计） | 默认，大多数任务 |
+| `[team:full]` | 在 `[team]` 基础上额外 spawn risk-guard teammate | 同 `[team]`（brainstorm/plan/review 无额外角色） | auth/payment/migration 高风险路径 |
 
 ---
 
@@ -122,6 +128,9 @@ last_verification_failure: null
 
 ### ce:brainstorm [team]
 
+> **实现层次**：同一 agent 顺序扮演探索者和挑战者（有意设计，非遗漏）。
+> 原因：探索者和挑战者需要读取对方的完整输出才能有意义响应；若使用独立 context window，双方只能通过 SendMessage 传递消息，会破坏来回对话的连贯性，验证质量反而下降。
+
 激活探索者 + 挑战者角色对（结构化探索，有明确收敛条件）：
 
 ```
@@ -142,6 +151,9 @@ last_verification_failure: null
 ```
 
 ### ce:plan [team]
+
+> **实现层次**：同一 agent 执行合约主和追溯审查两项任务（有意设计）。
+> 原因：plan 阶段是文档生成，不是验证循环；合约主从计划文件提取 allowed_files 是文档处理，追溯审查是历史搜索，两者都是顺序任务，spawn 真实 teammate 的开销不合理。`.team-contract.md` 作为后续 ce:work 阶段所有 teammate 共享的团队章程。
 
 在 Phase 4（Write the Plan）之后触发 Phase 4.5（合约生成）：
 
@@ -168,8 +180,8 @@ last_verification_failure: null
 ```
 1. 检测 team token 变体（default/full）
 
-2. 创建命名团队：
-   TEAM_NAME = "ce-work-{ISO时间戳前13位，如2026-04-10T14}"
+2. 创建命名团队（精确到秒，防止同小时内重复碰撞）：
+   TEAM_NAME = "ce-work-{YYYYMMDDTHHmmss，如20260410T143022}"
    TeamCreate(TEAM_NAME)
 
 3. 读取 .team-contract.md（如存在，来自 ce:plan [team] 生成的合约）
@@ -335,6 +347,9 @@ Risk-Guard → Lead：
 - 选 3 → 结束，保留 `.context/compound-engineering/ce-work-verification.json` 供后续参考
 
 ### ce:review [team]（autofix 和 interactive 模式有效，report-only/headless 无效）
+
+> **实现层次**：规则引擎，无需 Agent Teams（有意设计）。
+> Patch Gate 是 deterministic whitelist check：对每条 finding 检查 allowed_files/forbidden_surfaces/max_files_per_patch/required_invariants，无需 agent 间通信，零额外 token。
 
 在 Stage 5 路由规范化后执行 Deterministic Patch Gate（规则引擎，不消耗额外 token）。
 

@@ -31,6 +31,14 @@
 3. 超时降级（60s 无回复 → 主 agent 直接验证）
 4. 全量集成验证（所有 Unit 完成后额外一次）
 
+### 修复（链路审查 5 个 bug）
+
+- **[team-mode] Bug 1 修复**：头部"核心理念"「不来自更多 agent」与 ce:work 新设计矛盾，改为分层说明（ce:work=真实 Agent Teams，brainstorm/plan/review=有意设计的角色模拟/规则引擎）
+- **[team-mode] Bug 2 修复**："参数变体"表格更新，明确 ce:work 使用真实 teammate，brainstorm/plan/review 保留角色模拟
+- **[team-mode] Bug 3 修复**：TEAM_NAME 时间戳粒度从小时级改为秒级（`YYYYMMDDTHHmmss`），防止同小时内重复运行碰撞
+- **[ce-work] Bug 4 修复**：并行 subagent 场景新增传递 TEAM_NAME 的明确指令，确保 subagent 能正确调用 SendMessage 找到 verifier
+- **[team-mode] Bug 5 修复**：brainstorm/plan/review 节各增加实现层次说明注释，明确标注"有意设计，非遗漏"
+
 ## [2.45.23] - 2026-04-09
 
 ### 修复（第三方审核 + 事实核查：5 个确认问题）
