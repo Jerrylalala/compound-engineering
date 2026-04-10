@@ -59,6 +59,20 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 
 ### `[team]` Structured Exploration Mode
 
+> **注意：brainstorm 阶段的 [team] 与 ce:work [team] 是不同的实现机制。**
+> - `ce:work [team]` = 真实 Claude Code Agent Teams（TeamCreate + 独立 context window + SendMessage）
+> - `ce:brainstorm [team]` = 结构化角色模拟（同一 agent 顺序扮演探索者和挑战者）
+>
+> 为什么 brainstorm 不用真实 Agent Teams：
+> 1. 探索者和挑战者需要读取对方完整输出才能有意义响应——独立 context window 反而破坏对话连贯性
+> 2. 最多 3 轮对话，Team 生命周期开销（TeamCreate/Delete）完全不合比例
+> 3. 挑战者的价值在于「质疑逻辑」，而非「隔离状态验证」——与 verifier 性质不同
+>
+> 为什么 [team] 不等于 [P]（二者是正交工具，不可互相替代）：
+> - `[P]` = **发散**，14 位专家各说各话，无退出条件，不收敛
+> - `[team]` = **收敛**，2 个固定角色，有退出条件，必须输出共识或分歧裁决
+> - 删除 [team] 后 brainstorm 失去唯一的内置轻量收敛机制
+
 When `[team]` is detected, activate a 2-role structured exploration before Phase 1:
 
 ```
@@ -71,10 +85,10 @@ When `[team]` is detected, activate a 2-role structured exploration before Phase
   - 未达共识降级（经过 3 轮后仍无共识）→ 用 AskUserQuestion 展示双方核心分歧点，让用户选择采纳方向，继续正常流程
     （「1轮」= 探索者 + 挑战者各回应一次，不含用户初始触发）
 
-与 [P] 的区别：
-  [P]      = 发散（14位专家自由讨论，无明确收敛条件）
-  [team]   = 收敛（2个角色结构化验证，有明确退出条件）
-  [P][team] = 先 [P] 发散 → 退出 → [team] 结构化挑战验证（顺序执行）
+与 [P] 的区别（正交，不可互相替代）：
+  [P]      = 发散（14位专家，无收敛条件，覆盖盲区）
+  [team]   = 收敛（2个角色，3轮上限，必须输出共识或裁决）
+  [P][team] = 先 [P] 发散 → 退出 → [team] 结构化挑战验证（顺序执行，推荐）
 ```
 
 Load the `team-mode` skill for full role definitions and behavioral rules.
