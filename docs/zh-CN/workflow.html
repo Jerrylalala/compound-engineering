@@ -453,7 +453,7 @@
         <div class="node-label">Plan</div>
         <div class="node-cmd">/ce:plan</div>
         <div class="node-badges">
-          <span class="param-badge real">[team]</span>
+          <span class="param-badge real">[T]</span>
         </div>
       </div>
 
@@ -467,9 +467,9 @@
         <div class="node-label">Work</div>
         <div class="node-cmd">/ce:work</div>
         <div class="node-badges">
-          <span class="param-badge real">[team]</span>
           <span class="param-badge real">[T]</span>
-          <span class="param-badge optional">[PW]</span>
+          <span class="param-badge real">[T]</span>
+          <span class="param-badge optional">[V+]</span>
           <span class="param-badge">[R]</span>
           <span class="param-badge">[C]</span>
           <span class="param-badge">[G]</span>
@@ -486,7 +486,7 @@
         <div class="node-label">Review</div>
         <div class="node-cmd">/ce:review</div>
         <div class="node-badges">
-          <span class="param-badge real">[team]</span>
+          <span class="param-badge real">[T]</span>
           <span class="param-badge optional">[C]</span>
           <span class="param-badge optional">[G]</span>
           <span class="param-badge">[autofix]</span>
@@ -532,11 +532,11 @@
     <div class="info-card">
       <div class="info-card-icon">🤝</div>
       <div class="info-card-title">真实 Agent Teams</div>
-      <div class="info-card-desc"><code>[team]</code> 使用 Claude Code 原生 <code>TeamCreate</code> / <code>SendMessage</code> / <code>TeamDelete</code>，verifier 拥有独立 context window，不是角色模拟。</div>
+      <div class="info-card-desc"><code>[T]</code> 使用 Claude Code 原生 <code>TeamCreate</code> / <code>SendMessage</code> / <code>TeamDelete</code>，verifier 拥有独立 context window，不是角色模拟。</div>
     </div>
     <div class="info-card">
       <div class="info-card-icon">🧪</div>
-      <div class="info-card-title">四层自验证 [T]</div>
+      <div class="info-card-title">四层自验证 [V]</div>
       <div class="info-card-desc">Layer 0 CLI 检查 → Layer 1 API/DB 验证 → Layer 2 浏览器 UI → Layer 3 独立验收确认。按任务类型自动选择激活层。</div>
     </div>
     <div class="info-card">
@@ -557,7 +557,7 @@
     <div class="info-card">
       <div class="info-card-icon">🔒</div>
       <div class="info-card-title">合约白名单门控</div>
-      <div class="info-card-desc"><code>/ce:plan [team]</code> 自动生成 <code>.team-contract.md</code>，<code>/ce:work [team]</code> 强制单写者原则，<code>/ce:review [team]</code> 激活 Patch Gate 验证。</div>
+      <div class="info-card-desc"><code>/ce:plan [T]</code> 自动生成 <code>.team-contract.md</code>，<code>/ce:work [T]</code> 强制单写者原则，<code>/ce:review [T]</code> 激活 Patch Gate 验证。</div>
     </div>
   </div>
 
@@ -617,10 +617,10 @@
         icon: '📋',
         label: 'Plan',
         cmd: '/ce:plan',
-        desc: '将需求文档或功能描述转化为结构化实施计划。回答"怎么做"：明确实现单元、文件列表、依赖关系、测试场景和验收标准。`[team]` 参数额外生成 `.team-contract.md`（文件白名单 + 不变式约束），为后续 ce:work 和 ce:review 的合约验证提供基础。',
+        desc: '将需求文档或功能描述转化为结构化实施计划。回答"怎么做"：明确实现单元、文件列表、依赖关系、测试场景和验收标准。`[T]` 参数额外生成 `.team-contract.md`（文件白名单 + 不变式约束），为后续 ce:work 和 ce:review 的合约验证提供基础。',
         params: [
-          { tag: '[team]', type: 'implemented', label: '真实实现', desc: '合约主 + 追溯审查模式：分析实施计划中的文件变更范围，生成 .team-contract.md（allowed_files / forbidden_surfaces / required_invariants / max_files_per_patch）。ce:work 执行时用于单写者原则验证，ce:review 用于 Patch Gate 门控。' },
-          { tag: '[team:full]', type: 'implemented', label: '真实实现', desc: '等同 [team]，生成相同的 .team-contract.md。在 ce:plan 阶段无额外角色；与 ce:work [team:full] 路径兼容（风险卫角色在 work 阶段激活）。' },
+          { tag: '[T]', type: 'implemented', label: '真实实现', desc: '合约主 + 追溯审查模式：分析实施计划中的文件变更范围，生成 .team-contract.md（allowed_files / forbidden_surfaces / required_invariants / max_files_per_patch）。ce:work 执行时用于单写者原则验证，ce:review 用于 Patch Gate 门控。' },
+          { tag: '[T+]', type: 'implemented', label: '真实实现', desc: '等同 [T]，生成相同的 .team-contract.md。在 ce:plan 阶段无额外角色；与 ce:work [T+] 路径兼容（风险卫角色在 work 阶段激活）。' },
         ],
         examples: `# 基础规划（传需求文档路径）
 /ce:plan docs/brainstorms/auth-requirements.md
@@ -629,7 +629,7 @@
 /ce:plan 为用户表添加软删除功能
 
 # 启用合约模式（推荐用于多任务并行）
-/ce:plan docs/brainstorms/auth-requirements.md [team]
+/ce:plan docs/brainstorms/auth-requirements.md [T]
 
 # 深化已有计划
 /ce:plan docs/plans/auth-plan.md  # 自动检测并进入 deepening 流程`
@@ -638,12 +638,12 @@
         icon: '⚙️',
         label: 'Work',
         cmd: '/ce:work',
-        desc: '执行计划文档或直接描述的工作任务。1 个任务使用标准模式；≥2 个任务自动启用 Subagent 并行执行（每个任务独立 context window，防止上下文污染）。`[team]` 启用真实 Agent Teams——verifier teammate 独立运行，每个执行单元完成后通过 SendMessage 触发验证，不依赖执行者自我报告。',
+        desc: '执行计划文档或直接描述的工作任务。1 个任务使用标准模式；≥2 个任务自动启用 Subagent 并行执行（每个任务独立 context window，防止上下文污染）。`[T]` 启用真实 Agent Teams——verifier teammate 独立运行，每个执行单元完成后通过 SendMessage 触发验证，不依赖执行者自我报告。',
         params: [
-          { tag: '[team]', type: 'implemented', label: '真实实现', desc: 'TeamCreate 创建命名团队（时间戳防碰撞），spawn verifier teammate（独立 context window），每 Unit 完成后 SendMessage 通知验证，全量完成后全局不变式验证，TeamDelete 清理。' },
-          { tag: '[team:full]', type: 'implemented', label: '真实实现', desc: '在 [team] 基础上额外 spawn risk-guard teammate，实时拦截 auth/payment/migration 等高风险路径，阻止未经合约授权的操作。' },
-          { tag: '[T]', type: 'implemented', label: '真实实现', desc: '四层自验证：Layer 0 CLI 静态检查 / Layer 1 API+DB 验证 / Layer 2 浏览器 UI 验证 / Layer 3 独立验收确认。按任务类型自动选择激活层，支持 session 中断恢复。' },
-          { tag: '[PW]', type: 'optional', label: '需配合 [T]', desc: '需同时传 [T]。使用 Playwright MCP Server 代替 agent-browser 执行 Layer 2 浏览器验证，支持网络请求拦截、JS 执行、文件上传等高精度操作。需预先安装 Playwright MCP Server。' },
+          { tag: '[T]', type: 'implemented', label: '真实实现', desc: 'TeamCreate 创建命名团队（时间戳防碰撞），spawn verifier teammate（独立 context window），每 Unit 完成后 SendMessage 通知验证，全量完成后全局不变式验证，TeamDelete 清理。' },
+          { tag: '[T+]', type: 'implemented', label: '真实实现', desc: '在 [T] 基础上额外 spawn risk-guard teammate，实时拦截 auth/payment/migration 等高风险路径，阻止未经合约授权的操作。' },
+          { tag: '[V]', type: 'implemented', label: '真实实现', desc: '四层自验证：Layer 0 CLI 静态检查 / Layer 1 API+DB 验证 / Layer 2 浏览器 UI 验证 / Layer 3 独立验收确认。按任务类型自动选择激活层，支持 session 中断恢复。' },
+          { tag: '[V+]', type: 'optional', label: '自动含[V]', desc: '自动启用四层验证([V])并升级 Layer 2 为 Playwright MCP Server（无需单独传 [V]）。支持网络请求拦截、JS 执行、文件上传等高精度浏览器操作。需预先安装 Playwright MCP Server。' },
           { tag: '[R]', type: '', label: '可选', desc: '历史检索：仅对 bare prompt 生效（传文件路径无效）。检索 docs/solutions/ 历史经验，在每个 Unit 执行前注入相关洞察作为参考。' },
           { tag: '[C]', type: '', label: '审计标记', desc: '标记 Codex 已参与整体工作流（用于审计溯源）。不透传给内嵌的 ce:review，不触发 Codex 调用。' },
           { tag: '[G]', type: '', label: '审计标记', desc: '标记 Gemini 已参与整体工作流（用于审计溯源）。不透传给内嵌的 ce:review，不触发 Gemini 调用。' },
@@ -652,29 +652,29 @@
 /ce:work docs/plans/auth-plan.md
 
 # 启用 Agent Teams（推荐多任务计划）
-/ce:work docs/plans/auth-plan.md [team]
-
-# 四层自验证
 /ce:work docs/plans/auth-plan.md [T]
 
-# 全功能组合（最严格模式）
-/ce:work docs/plans/auth-plan.md [team][T]
+# 四层自验证
+/ce:work docs/plans/auth-plan.md [V]
+
+# 全功能组合（Agent Teams + 四层验证）
+/ce:work docs/plans/auth-plan.md [T][V]
 
 # 风险卫（auth/payment/migration 场景）
-/ce:work docs/plans/payment-plan.md [team:full][T]
+/ce:work docs/plans/payment-plan.md [T+][V]
 
-# Playwright 浏览器验证（需先装 Playwright MCP）
-/ce:work docs/plans/ui-plan.md [T][PW]`
+# Playwright 浏览器验证（需先装 Playwright MCP，自动含四层验证）
+/ce:work docs/plans/ui-plan.md [T][V+]`
       },
       review: {
         icon: '🔍',
         label: 'Review',
         cmd: '/ce:review',
-        desc: '多代理并行代码审查，基于 Tier 分级框架（安全/性能/正确性/可维护性等专属审查者），自动 merge 发现并去重。`mode:autofix` 安全发现自动修复，残余问题以 TODO 形式输出。`[team]` 激活 Deterministic Patch Gate——规则引擎验证所有变更是否在 .team-contract.md 白名单内，不消耗额外 token。',
+        desc: '多代理并行代码审查，基于 Tier 分级框架（安全/性能/正确性/可维护性等专属审查者），自动 merge 发现并去重。`mode:autofix` 安全发现自动修复，残余问题以 TODO 形式输出。`[T]` 激活 Deterministic Patch Gate——规则引擎验证所有变更是否在 .team-contract.md 白名单内，不消耗额外 token。',
         params: [
           { tag: '[mode:autofix]', type: 'implemented', label: '推荐默认', desc: '自动修复安全级别的发现（low-risk 自动应用，medium-risk 确认后应用，high-risk 仅报告）。建议大多数情况使用此模式。' },
-          { tag: '[team]', type: 'implemented', label: '真实实现', desc: 'TEAM_GATE_ENABLED = true。加载 .team-contract.md，在 Stage 5 运行 Deterministic Patch Gate：规则引擎验证所有变更文件是否在 allowed_files 白名单内，拦截越界修改。在 report-only / headless 模式下不生效。' },
-          { tag: '[team:full]', type: 'implemented', label: '真实实现', desc: '等同 [team]（ce:review 阶段无风险卫角色，Patch Gate 行为与 [team] 相同）。' },
+          { tag: '[T]', type: 'implemented', label: '真实实现', desc: 'TEAM_GATE_ENABLED = true。加载 .team-contract.md，在 Stage 5 运行 Deterministic Patch Gate：规则引擎验证所有变更文件是否在 allowed_files 白名单内，拦截越界修改。在 report-only / headless 模式下不生效。' },
+          { tag: '[T+]', type: 'implemented', label: '真实实现', desc: '等同 [T]（ce:review 阶段无风险卫角色，Patch Gate 行为与 [T] 相同）。' },
           { tag: '[C]', type: 'optional', label: '可选增强', desc: 'Codex 审核：调用 Codex CLI 对同一 diff 进行独立审查，双方共同发现的问题优先级提升，减少漏报。' },
           { tag: '[G]', type: 'optional', label: '可选增强', desc: 'Gemini 审核：调用 Gemini 对同一 diff 进行独立审查，与 [C] 组合使用时形成三方交叉验证。' },
           { tag: 'plan:<路径>', type: '', label: '可选', desc: '传入计划文件路径，审查者可对照需求检查实现是否符合原始规格，发现 scope creep 或遗漏。' },
@@ -689,13 +689,13 @@
 /ce:review 123 mode:autofix
 
 # 含 Agent Teams 合约验证
-/ce:review mode:autofix plan:docs/plans/auth-plan.md [team]
+/ce:review mode:autofix plan:docs/plans/auth-plan.md [T]
 
 # 双模型交叉验证（最严格）
 /ce:review mode:autofix [C][G]
 
 # 完整组合
-/ce:review mode:autofix plan:docs/plans/auth-plan.md [team][C][G]`
+/ce:review mode:autofix plan:docs/plans/auth-plan.md [T][C][G]`
       },
       compound: {
         icon: '📚',

@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.47.0] - 2026-04-10
+
+### 参数体系重命名（MINOR — 用户界面 breaking change）
+
+**命名变更：**
+- `[team]` → `[T]`（Agent Teams 多代理协作）
+- `[team:full]` → `[T+]`（+风险卫，适合 auth/payment/migration）
+- `[T]`（旧：四层自验证）→ `[V]`（Verify，语义更准确）
+- `[PW]`（Playwright）→ `[V+]`（V 超集，自动含 `[V]`，无需单独传）
+
+**设计原则：**
+- `[T]` = Teams（直觉：T=Team）；`[V]` = Verify（直觉：V=胜利/通过）
+- `[V+]` 传入时自动启用四层验证，不再需要同时传 `[V][V+]`
+- ce:plan / ce:review 只展示 `[T]`，移除 `[T+]` 伪选择（两者在这两个命令中效果相同）
+- ce:work `[C][G]` 从 description 移除（纯审计标记，不触发任何调用）
+
+**向后兼容：**
+- 所有旧参数名（`[team]`/`[team:full]`/旧`[T]`/`[PW]`）在 ce:work SKILL.md 中有向后兼容映射
+- 传入旧参数名不会报错，等同传入新名
+
+**影响文件：** ce-work/ce-plan/ce-review/team-mode SKILL.md、所有 command 定义、CLAUDE.md、README.md、workflow.html、index.md
+
+---
+
 ## [2.46.5] - 2026-04-10
 
 ### 命令参数补全（严谨化）

@@ -1,7 +1,7 @@
 ---
 name: ce:plan
 description: "Create structured plans for any multi-step task -- software features, research workflows, events, study plans, or any goal that benefits from structured breakdown. Also deepen existing plans with interactive review of sub-agent findings. Use for plan creation when the user says 'plan this', 'create a plan', 'write a tech plan', 'plan the implementation', 'how should we build', 'what's the approach for', 'break this down', 'plan a trip', 'create a study plan', or when a brainstorm/requirements document is ready for planning. Use for plan deepening when the user says 'deepen the plan', 'deepen my plan', 'deepening pass', or uses 'deepen' in reference to a plan. For exploratory or ambiguous requests where the user is unsure what to do, prefer ce:brainstorm first."
-argument-hint: "[optional: feature description, requirements doc path, plan path to deepen, or any task to plan] [team=合约主+追溯审查+自动生成.team-contract.md] [team:full=同[team]（ce:plan阶段无额外角色，与ce:work [team:full]路径兼容）]"
+argument-hint: "[功能/需求文档路径] [T=生成.team-contract.md+追溯审查] [T+=同[T]，传入时等同[T]]"
 ---
 
 # Create Technical Plan
@@ -619,11 +619,11 @@ For larger `Deep` plans, extend the core template only when useful with sections
 
 When the plan contains 4+ implementation units with non-linear dependencies, 3+ interacting surfaces in System-Wide Impact, 3+ behavioral modes/variants in Overview or Problem Frame, or 3+ interacting decisions in Key Technical Decisions or alternatives in Alternative Approaches, read `references/visual-communication.md` for diagram and table guidance. This covers plan-structure visuals (dependency graphs, interaction diagrams, comparison tables) — not solution-design diagrams, which are covered in Section 3.4.
 
-### Phase 4.5: Contract Generation（仅当 `[team]` 标志存在时）
+### Phase 4.5: Contract Generation（仅当 `[T]` 标志存在时）
 
 > ⚠️ **延迟执行指令**：读到此处时**不要执行**——跳过，继续 Phase 5。待 Phase 5.3.7（Deepening Execution）完成后，在进入 Phase 5.3.8（Document Review）之前返回此处执行。
 
-**触发条件**: `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`
+**触发条件**: `$ARGUMENTS` 包含 `[T]` 或 `[T+]`
 
 **执行时机**: Phase 5.3.7 完成后，Phase 5.3.8（Document Review）之前
 
@@ -660,13 +660,13 @@ Load the `team-mode` skill for role definitions (合约主, 追溯审查).
 ```yaml
 ---
 team_mode: true
-generated_by: "ce:plan [team]"
+generated_by: "ce:plan [T]"
 generated_at: YYYY-MM-DD
 plan_source: <刚生成的计划文件路径>
 plan_source_commit: null   # 计划文件在 Phase 5 写入后尚未 commit，此处始终为 null
                            # 启用版本检测方法：在 Phase 5 写入计划文件后，运行：
                            #   git log -1 --format='%H' -- <plan_file>
-                           # 将结果填入此字段，或让 ce:work [team] 在执行前手动更新
+                           # 将结果填入此字段，或让 ce:work [T] 在执行前手动更新
 allowed_files:
   - <从 Implementation Units 提取的文件路径>
 forbidden_surfaces:
@@ -708,7 +708,7 @@ plan_source_commit: <PLAN_HASH>
 ```
 
 如 `PLAN_HASH` 为空（计划文件尚未提交，是常见状态），保留 null 即可。
-建议：在首次运行 `ce:work [team]` 前手动 commit 计划文件，以启用完整版本保护。
+建议：在首次运行 `ce:work [T]` 前手动 commit 计划文件，以启用完整版本保护。
 
 ---
 
@@ -802,7 +802,7 @@ When deepening is warranted, read `references/deepening-workflow.md` for confide
 
 ##### 5.3.8–5.4 Document Review, Final Checks, and Post-Generation Options
 
-> **[team] 触发点**：如果 `$ARGUMENTS` 包含 `[team]` 或 `[team:full]`，在进入 Document Review 之前，**立即执行 Phase 4.5（Contract Generation）**。
+> **[T] 触发点**：如果 `$ARGUMENTS` 包含 `[T]` 或 `[T+]`，在进入 Document Review 之前，**立即执行 Phase 4.5（Contract Generation）**。
 
 When reaching this phase, read `references/plan-handoff.md` for document review instructions (5.3.8), final checks and cleanup (5.3.9), post-generation options menu (5.4), and issue creation. Do not load this file earlier. Document review is mandatory — do not skip it even if the confidence check already ran.
 

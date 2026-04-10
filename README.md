@@ -29,9 +29,9 @@
 | # | 命令 | 参数 | 用途 |
 |---|------|------|------|
 | 1 | `/ce:brainstorm` | `[P][C][G][R]` | 探索需求，生成需求文档；`[P]` 14视角发散+自动收敛 |
-| 2 | `/ce:plan` | `[team]` | 制定实施计划，`[team]` 自动生成 `.team-contract.md` |
-| 3 | `/ce:work` | `[team][T][PW][R][C][G]` | 执行计划，`[team]` 真实 Agent Teams，`[T]` 四层自验证 |
-| 4 | `/ce:review` | `[mode:autofix][C][G][team]` | 多代理代码审查，`[team]` 合约白名单门控 |
+| 2 | `/ce:plan` | `[T]` | 制定实施计划，`[T]` 自动生成 `.team-contract.md` |
+| 3 | `/ce:work` | `[T][T][V+][R][C][G]` | 执行计划，`[T]` 真实 Agent Teams，`[V]` 四层自验证 |
+| 4 | `/ce:review` | `[mode:autofix][C][G][T]` | 多代理代码审查，`[T]` 合约白名单门控 |
 | 5 | `/ce:compound` | — | 沉淀经验，构建团队知识库 |
 
 ---
@@ -69,18 +69,18 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 ## 主要特性
 
-### [team] 真实 Agent Teams（Claude Code 原生）
+### [T] 真实 Agent Teams（Claude Code 原生）
 
-`ce:work [team]` 使用 Claude Code 原生 Agent Teams，不是角色扮演：
+`ce:work [V]` 使用 Claude Code 原生 Agent Teams，不是角色扮演：
 
 - **TeamCreate** 创建命名团队（时间戳命名，防碰撞）
 - **独立 context window** 的 verifier teammate，不受执行上下文污染
 - **SendMessage** 实时通信，每 Unit 完成后触发验证
 - **TeamDelete** 收尾清理，无资源泄漏
 
-### [T] 四层自验证
+### [V] 四层自验证
 
-`ce:work [T]` 按任务类型自动选择验证层，任务完成必须通过全部激活层：
+`ce:work [V]` 按任务类型自动选择验证层，任务完成必须通过全部激活层：
 
 | Layer | 内容 | 触发条件 |
 |-------|------|---------|
@@ -155,7 +155,7 @@ Figma / Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对
 | **代码审查（通用）** | ce-review + 57 agents | ce-review | requesting-code-review skill | code-reviewer | /ccg:team-review |
 | **专项审查** | 安全/性能/正确性/可维护性等 10+ 专属 agent | 安全/性能等基础 | — | — | — |
 | **测试/TDD** | test-driven-development | — | TDD skill | test-engineer | — |
-| **验证/完成证明** | [team] verifier（独立 context） | — | verification-before-completion skill | verifier | /ccg:team-review |
+| **验证/完成证明** | [T] verifier（独立 context） | — | verification-before-completion skill | verifier | /ccg:team-review |
 | **知识沉淀** | ce-compound + learnings-researcher | ce-compound | — | — | — |
 | **UI 设计联动** | Pencil MCP + figma-design-sync + frontend-design | — | — | — | ui-ux-designer |
 | **文档写作** | cn-tech-writer agent | — | — | writer | — |
@@ -166,13 +166,13 @@ Figma / Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对
 
 | 特性 | CE | CE-UP | SP | OMCC | CCG |
 |------|----|----|----|----|-----|
-| **真实 Agent Teams** (TeamCreate/SendMessage) | ✅ `[team]` | — | — | — | ⚡ 命令式 |
+| **真实 Agent Teams** (TeamCreate/SendMessage) | ✅ `[T]` | — | — | — | ⚡ 命令式 |
 | **独立 verifier context** | ✅ | — | — | ⚡ 角色模拟 | ⚡ 命令式 |
 | **合约白名单门控** | ✅ .team-contract.md | — | — | — | — |
-| **分层自验证**（CLI→API→浏览器→验收） | ✅ `[T]` 四层 | — | ⚡ 验证 skill | — | — |
+| **分层自验证**（CLI→API→浏览器→验收） | ✅ `[V]` 四层 | — | ⚡ 验证 skill | — | — |
 | **双模型交叉审查** | ✅ Codex + Gemini `[C][G]` | — | — | — | — |
 | **历史经验检索** | ✅ `[R]` docs/solutions/ | ⚡ | — | — | — |
-| **浏览器自动化** | ✅ agent-browser + [PW] | — | — | — | — |
+| **浏览器自动化** | ✅ agent-browser + [V+] | — | — | — | — |
 | **UI 设计联动** | ✅ Pencil MCP + Figma | — | — | — | ⚡ |
 | **跨 AI 平台支持** | Claude Code 专注 | ✅ 12+ 平台 | Claude Code 专注 | Claude Code 专注 | Claude Code 专注 |
 | **中文生态** | ✅ 中英双语 + 在线文档 | 英文 | 英文 | 英文 | 中文 |
@@ -207,7 +207,7 @@ Figma / Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对
 在原版基础上进行了以下扩展：
 - 全面中文化（命令提示、文档、注释）
 - Claude Code Agent Teams 真实多代理实现（TeamCreate/SendMessage/TeamDelete）
-- 四层自验证框架（[T] 参数）
+- 四层自验证框架（[V] 参数）
 - [P] 派对模式后自动结构化收敛
 - Codex / Gemini 双重交叉验证
 - Pencil MCP + Figma UI 设计联动

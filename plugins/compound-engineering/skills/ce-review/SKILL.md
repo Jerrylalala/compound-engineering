@@ -1,7 +1,7 @@
 ---
 name: ce:review
 description: "Structured code review using tiered persona agents, confidence-gated findings, and a merge/dedup pipeline. Use when reviewing code changes before creating a PR."
-argument-hint: "[PR# 或留空=当前分支] [mode:autofix|report-only|headless] [plan:路径] [base:ref] [C=Codex审核] [G=Gemini审核] [team=合约白名单门控,需.team-contract.md] [team:full=等同[team],Patch Gate行为相同]"
+argument-hint: "[PR#或留空=当前分支] [mode:autofix|report-only|headless] [plan:路径] [base:ref] [C=Codex审核] [G=Gemini审核] [T=合约Patch Gate门控,需.team-contract.md] [T+=同[T],Patch Gate行为相同]"
 ---
 
 # Code Review
@@ -29,8 +29,8 @@ Parse `$ARGUMENTS` for the following optional tokens. Strip each recognized toke
 | `plan:<path>` | `plan:docs/plans/2026-03-25-001-feat-foo-plan.md` | Load this plan for requirements verification |
 | `[C]` | `[C]` | CODEX_ENABLED = true. 标记 Codex 将作为外部审查方参与（由 workflows:review [C] 调用）。激活 6.5a 安全规则：将所有 safe_auto 降级为 gated_auto，防止可能缺乏 codebase 上下文的建议被自动应用。 |
 | `[G]` | `[G]` | GEMINI_ENABLED = true. 标记 Gemini 将作为外部审查方参与（由 workflows:review [G] 调用）。激活 6.5a 安全规则（同 [C]）。 |
-| `[team]` | `[team]` | TEAM_GATE_ENABLED = true. Load `.team-contract.md` and execute Deterministic Patch Gate in Stage 5 (see below). Has no effect in `mode:report-only` or `mode:headless`. Patch Gate runs in both `mode:autofix` and interactive mode. |
-| `[team:full]` | `[team:full]` | 等同于 `[team]`（ce:review 阶段无风险卫角色，Patch Gate 行为与 [team] 相同，TEAM_GATE_ENABLED = true）。 |
+| `[T]` | `[T]` | TEAM_GATE_ENABLED = true. Load `.team-contract.md` and execute Deterministic Patch Gate in Stage 5 (see below). Has no effect in `mode:report-only` or `mode:headless`. Patch Gate runs in both `mode:autofix` and interactive mode. |
+| `[T+]` | `[T+]` | 等同于 `[T]`（ce:review 阶段无风险卫角色，Patch Gate 行为与 [T] 相同，TEAM_GATE_ENABLED = true）。 |
 
 All tokens are optional. Each one present means one less thing to infer. When absent, fall back to existing behavior for that stage.
 
@@ -433,7 +433,7 @@ Convert multiple reviewer JSON payloads into one deduplicated, confidence-gated 
 5. **Resolve disagreements.** When reviewers flag the same code region but disagree on severity, autofix_class, or owner, record the disagreement in the finding's evidence (e.g., "security rated P0, correctness rated P1 -- keeping P0"). This transparency helps the user understand why a finding was routed the way it was.
 6. **Normalize routing.** For each merged finding, set the final `autofix_class`, `owner`, and `requires_verification`. If reviewers disagree, keep the most conservative route. Synthesis may narrow a finding from `safe_auto` to `gated_auto` or `manual`, but must not widen it without new evidence.
 
-6.5a. **外部模型建议强制 gated_auto（无条件生效，不依赖 [team] 模式）**
+6.5a. **外部模型建议强制 gated_auto（无条件生效，不依赖 [T] 模式）**
 
 **注意**：ce:review 本身不主动调用 Codex/Gemini CLI。`[C]`/`[G]` 标志由外层编排（如 `workflows:review [C]`）传入，表示外部 AI 已参与或将参与审查。6.5a 规则是一个轻量级安全层，对所有 safe_auto 发现保守降级，防止外部 AI 建议（可能缺乏全局 context）被自动应用。
 
@@ -453,12 +453,12 @@ Stage-level detection: if (CODEX_ENABLED OR GEMINI_ENABLED):
   # This rule applies when EITHER Codex OR Gemini participated in the review —
   # it is not possible to determine which specific finding originated from them,
   # so all safe_auto findings are conservatively downgraded.
-  # This rule is intentionally unconditional — [team] mode is NOT required,
+  # This rule is intentionally unconditional — [T] mode is NOT required,
   # and applies to ALL modes (interactive, autofix, headless) equally.
   # Interactive mode also auto-applies safe_auto fixes, so the downgrade
   # must cover it — otherwise the most common mode is unprotected.
   # The existing Patch Gate (6.5b) provides deeper contract-based checks
-  # for [team] mode; this rule provides a lightweight baseline for all modes.
+  # for [T] mode; this rule provides a lightweight baseline for all modes.
   #
   # Note: This rule only affects automation_mode (safe_auto → gated_auto),
   # NOT severity_tier (P1/P2/P3 remains unchanged). P1 blocking behavior is preserved.

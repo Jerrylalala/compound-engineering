@@ -114,24 +114,24 @@
 
 ## Agent Teams 集成
 
-**Claude Code Teammates 功能**：在 Claude Code 设置中开启 "Agent Teams" / "Teammates" 实验性功能后，`ce:work [team]` 会使用真实 Agent Teams（独立 context window 的 teammate），而非角色模拟。
+**Claude Code Teammates 功能**：在 Claude Code 设置中开启 "Agent Teams" / "Teammates" 实验性功能后，`ce:work [T]` 会使用真实 Agent Teams（独立 context window 的 teammate），而非角色模拟。
 
 | 启用方式 | 说明 |
 |---------|------|
 | Claude Code 设置 → 开启 Teammates | 平台层功能，一次性配置 |
-| 手动触发 | `ce:work [team]` 或 `ce:work [team:full]` |
+| 手动触发 | `ce:work [T]` 或 `ce:work [T+]` |
 | 降级 | Agent Teams 不可用时自动降级为主 agent 顺序验证（不报错，宣告降级） |
 
-**`[team]` 参数（真实 Agent Teams）**：
+**`[T]` 参数（真实 Agent Teams）**：
 - `TeamCreate` 创建命名团队，`TeamDelete` 收尾清理
 - verifier teammate 有独立 context window，持续等待 `SendMessage` 通知
 - 每 Unit 完成后：lead → `SendMessage("verifier", ...)` → 等待 PASS/FAIL → 继续或修复
 - 全量集成验证：所有 Unit 完成后 verifier 额外运行一次全局不变式检查
-- `[team:full]` 额外 spawn risk-guard teammate，拦截高风险路径（auth/payment/migration）
+- `[T+]` 额外 spawn risk-guard teammate，拦截高风险路径（auth/payment/migration）
 
 **与角色模拟的根本区别**：
-- 旧 `[team]`：同一 agent 顺序扮演 合约主/执行者/验证者，文件 I/O 通信
-- 新 `[team]`：真实独立 context window，`SendMessage` 实时通信，verifier 不会被 lead 的实现上下文污染
+- 旧 `[team]`（已重命名为 `[T]`）：真实独立 context window，`SendMessage` 实时通信
+- `[T+]`：在 `[T]` 基础上追加 risk-guard teammate，拦截 auth/payment/migration 路径
 
 **前置条件**：需在 Claude Code Settings → 开启 Agent Teams（Teammates 实验性功能）。不开启时自动降级。
 
@@ -182,9 +182,9 @@ skills/
 | 命令 | 说明 |
 |------|------|
 | `/ce:brainstorm` | 探索需求和方案 `[P][C][G][R]`（[P] 结束后自动收敛找漏洞） |
-| `/ce:plan` | 创建实施计划 `[team]`（生成 .team-contract.md） |
-| `/ce:work` | 执行工作计划 `[team][team:full][R][T=四层自验证][PW=Playwright浏览器][C=Codex参与标记][G=Gemini参与标记]` |
-| `/ce:review` | 代码审查 `[mode:autofix] [C][G][team]`（[team]=合约白名单门控） |
+| `/ce:plan` | 创建实施计划 `[T]`（生成 .team-contract.md） |
+| `/ce:work` | 执行工作计划 `[T][T+][V][V+][R]`（[T]=Agent Teams，[V]=四层验证，[V+]=+Playwright） |
+| `/ce:review` | 代码审查 `[mode:autofix] [C][G][T]`（[T]=合约白名单门控） |
 
 **独立工具命令（手动调用）：**
 
@@ -195,23 +195,23 @@ skills/
 | `/workflows:pr` | 创建 PR |
 | `/workflows:doctor` | 健康检查 |
 
-### `[team]` 参数说明
+### `[T]` / `[T+]` 参数说明
 
 多代理协作稳定性框架。核心机制：合约白名单 + 单写者原则 + 事件驱动验证前移。
 
 | 参数 | 阶段 | 效果 |
 |------|------|------|
 | `[P]` + 自动收敛 | ce:brainstorm | [P] 发散讨论结束后自动触发探索者+挑战者结构化收敛（无需额外参数） |
-| `[team]` | ce:plan | 合约主 + 追溯审查，自动生成 `.team-contract.md` |
-| `[team]` | ce:work | 真实 Agent Teams：TeamCreate + verifier teammate（独立 context window）+ SendMessage 通信 + TeamDelete |
-| `[team:full]` | ce:work | 在 `[team]` 基础上额外 spawn risk-guard teammate，拦截 auth/payment/migration 高风险路径 |
-| `[team]` | ce:review | autofix 路径增加 Deterministic Patch Gate（规则引擎，不耗额外 token） |
+| `[T]` | ce:plan | 合约主 + 追溯审查，自动生成 `.team-contract.md` |
+| `[T]` | ce:work | 真实 Agent Teams：TeamCreate + verifier teammate（独立 context window）+ SendMessage 通信 + TeamDelete |
+| `[T+]` | ce:work | 在 `[T]` 基础上额外 spawn risk-guard teammate，拦截 auth/payment/migration 高风险路径 |
+| `[T]` | ce:review | autofix 路径增加 Deterministic Patch Gate（规则引擎，不耗额外 token） |
 
 **使用流程**：
 ```bash
-/ce:plan [team]           # 生成计划 + .team-contract.md
-/ce:work [team]           # 执行（合约边界保护 + 验证者 Hook）
-/ce:review mode:autofix [team]  # autofix 受合约白名单门控
+/ce:plan [T]           # 生成计划 + .team-contract.md
+/ce:work [T]           # 执行（合约边界保护 + 验证者 Hook）
+/ce:review mode:autofix [T]  # autofix 受合约白名单门控
 ```
 
 加载 `team-mode` skill 查看完整角色定义和行为规则。
