@@ -646,8 +646,8 @@
         params: [
           { tag: '[T]', type: 'implemented', label: '真实实现', desc: 'TeamCreate 创建命名团队（时间戳防碰撞），spawn verifier teammate（独立 context window），每 Unit 完成后 SendMessage 通知验证，全量完成后全局不变式验证，TeamDelete 清理。' },
           { tag: '[T+]', type: 'implemented', label: '真实实现', desc: '在 [T] 基础上额外 spawn risk-guard teammate，实时拦截 auth/payment/migration 等高风险路径，阻止未经合约授权的操作。' },
-          { tag: '[V]', type: 'implemented', label: '真实实现', desc: '四层自验证：Layer 0 CLI 静态检查 / Layer 1 API+DB 验证 / Layer 2 浏览器 UI 验证 / Layer 3 独立验收确认。按任务类型自动选择激活层，支持 session 中断恢复。' },
-          { tag: '[V+]', type: 'optional', label: '自动含[V]', desc: '自动启用四层验证([V])并升级 Layer 2 为 Playwright MCP Server（无需单独传 [V]）。支持网络请求拦截、JS 执行、文件上传等高精度浏览器操作。需预先安装 Playwright MCP Server。' },
+          { tag: '[V]', type: 'implemented', label: '真实实现', desc: '四层自验证：Layer 0 CLI 静态检查 / Layer 1 API+DB 验证 / Layer 2 浏览器 UI 验证 / Layer 3 独立验收确认。按任务类型自动选择激活层，支持 session 中断恢复。内置环境指纹（Phase -1.5）：执行前自动检测应用启动命令（读取 CLAUDE.md 覆盖 → 解析 package.json → 一次性询问并持久化），无需用户记忆。' },
+          { tag: '[V+]', type: 'optional', label: '自动含[V]', desc: '自动启用四层验证([V])并升级 Layer 2 为 Playwright MCP Server（无需单独传 [V]）。零配置支持 Electron 桌面应用（自动识别 npm/yarn/pnpm + electron-forge，检测漂移）。支持网络请求拦截、JS 执行、文件上传等高精度浏览器操作。需预先安装 Playwright MCP Server。' },
           { tag: '[R]', type: '', label: '可选', desc: '历史检索：仅对 bare prompt 生效（传文件路径无效）。检索 docs/solutions/ 历史经验，在每个 Unit 执行前注入相关洞察作为参考。' },
           { tag: '[C]', type: '', label: '审计标记', desc: '标记 Codex 已参与整体工作流（用于审计溯源）。不透传给内嵌的 ce:review，不触发 Codex 调用。' },
           { tag: '[G]', type: '', label: '审计标记', desc: '标记 Gemini 已参与整体工作流（用于审计溯源）。不透传给内嵌的 ce:review，不触发 Gemini 调用。' },
@@ -668,7 +668,10 @@
 /ce:work docs/plans/payment-plan.md [T+][V]
 
 # Playwright 浏览器验证（需先装 Playwright MCP，自动含四层验证）
-/ce:work docs/plans/ui-plan.md [T][V+]`
+/ce:work docs/plans/ui-plan.md [T][V+]
+
+# Electron 桌面应用（零配置，自动检测启动命令，AI 改了 package.json 也不怕）
+/ce:work docs/plans/desktop-feature.md [V+]`
       },
       review: {
         icon: '🔍',
