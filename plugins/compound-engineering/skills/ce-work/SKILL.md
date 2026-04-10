@@ -63,7 +63,15 @@ This command takes a work document (plan, specification, or todo file) or a bare
 
 **[team] / [team:full] 检测**（仅当包含时）：
 Strip the team token from arguments before passing to Phase 0.
-Load the `team-mode` skill for the complete initialization sequence: token detection, contract loading, role announcement, single-writer law, verifier hooks, and 风险卫 logic.
+Load the `team-mode` skill for the complete initialization sequence:
+- TeamCreate（命名团队）
+- .team-contract.md 加载与版本检测
+- Spawn verifier teammate（独立 context window，只读，接收 SendMessage 通知并验证）
+- [team:full] 额外 spawn risk-guard teammate（高风险路径拦截）
+- 宣告团队就绪
+- Phase 2 每 Unit 完成后：SendMessage("verifier", ...) → 等待 PASS/FAIL → 修复或继续
+- 全部 Unit 完成后：SendMessage("verifier", "全量集成验证") → 最终 PASS
+- Phase 4 完成后：TeamDelete
 
 ---
 
@@ -238,11 +246,11 @@ Determine how to proceed based on what was provided in `<input_document>`.
    - Any resolved deferred questions relevant to that unit
    - Instruction to check whether the unit's test scenarios cover all applicable categories (happy paths, edge cases, error paths, integration) and supplement gaps before writing tests
 
-   **Team mode dispatch (when TEAM_MODE is active):** Additionally pass to each subagent:
-   - TEAM_VARIANT (default/light/full)
-   - The content of `.team-contract.md` (allowed_files, forbidden_surfaces, required_invariants, max_files_per_patch)
-   - Instruction to enforce single-writer principle: only write files in this unit's Files list, and verify they are in allowed_files
-   - Instruction to run the verifier hook after completing this unit (run Verification commands + check required_invariants)
+   **Team mode dispatch (when TEAM_MODE is active):** The verifier teammate (spawned in Phase -1) handles verification independently. Each subagent should:
+   - TEAM_VARIANT (default/full)
+   - Receive the content of `.team-contract.md` (allowed_files, forbidden_surfaces, required_invariants, max_files_per_patch)
+   - Enforce single-writer principle: only write files in this unit's Files list, verify they are in allowed_files
+   - After completing its unit, SendMessage("verifier", "Unit X 已完成。变更文件：[...]。请验证。") and await PASS/FAIL reply before marking done
 
    **Permission mode:** Omit the `mode` parameter when dispatching subagents so the user's configured permission settings apply. Do not pass `mode: "auto"` — it overrides user-level settings like `bypassPermissions`.
 

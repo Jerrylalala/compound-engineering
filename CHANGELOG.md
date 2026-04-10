@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.46.0] - 2026-04-10
+
+### 新功能：[team] 升级为 Claude Code 原生 Agent Teams
+
+**核心变更**：`ce:work [team]` 从角色模拟升级为真实 Claude Code Agent Teams。
+
+旧机制：同一 agent 顺序扮演 合约主/执行者/验证者，文件 I/O 通信（角色模拟）
+新机制：`TeamCreate` 创建命名团队，spawn 独立 context window 的 verifier/risk-guard teammate，`SendMessage` 实时通信，`TeamDelete` 收尾
+
+**变更文件（2个核心文件 + CLAUDE.md）**：
+
+- **[team-mode] SKILL.md 大改**：ce:work [team] 节完整重写为真实 Agent Teams 流程
+  - Phase -1：TeamCreate + spawn verifier（只读，独立 context window）+ [team:full] 额外 spawn risk-guard
+  - Phase 2：每 Unit 完成后 SendMessage("verifier", ...) → 等 PASS/FAIL → 修复或继续
+  - 全量集成验证：所有 Unit 完成后 verifier 额外运行一次
+  - Phase 4：TeamDelete 清理
+  - 固定消息协议（4 种消息格式）
+  - 降级策略（Agent Teams 不可用时自动降级为主 agent 顺序验证）
+  - 角色定义表格同步更新（合约主/验证者/风险卫描述与新机制对齐）
+  - `.team-contract.md` 定位改为"团队章程"（所有 teammate 启动时读取）
+
+- **[ce:work] SKILL.md 中改**：Phase -1 [team] 检测说明更新为完整 Agent Teams 流程摘要；Phase 1 team mode dispatch 更新为 SendMessage 协议
+
+- **[CLAUDE.md] 小改**：Agent Teams 集成章节重写，[team] 参数说明更新为真实 Agent Teams 语义
+
+**Codex 交叉验证（2026-04-10）纳入的 4 个关键约束**：
+1. verifier 只读约束（严禁修改任何文件，含 .team-contract.md）
+2. 固定消息协议（unit_id / files / 修复说明 / 全量验证）
+3. 超时降级（60s 无回复 → 主 agent 直接验证）
+4. 全量集成验证（所有 Unit 完成后额外一次）
+
 ## [2.45.23] - 2026-04-09
 
 ### 修复（第三方审核 + 事实核查：5 个确认问题）
