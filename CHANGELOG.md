@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.48.0] - 2026-04-10
+
+### ce:work [V+] 环境指纹自动检测（MINOR — 新功能）
+
+**Phase -1.5: Environment Fingerprint（环境指纹）**
+
+在 `ce:work [V]` / `ce:work [V+]` 执行前，自动确定应用启动命令，实现对非开发者用户的零记忆负担：
+
+- **三级决策树**（按优先级）：
+  1. 读取 CLAUDE.md 显式覆盖标记（`<!-- ce-work-start-command: ... -->`）→ 直接使用
+  2. 从当前 `package.json` 动态推导（每次新鲜读取，不依赖缓存）：Electron 项目按 scripts/main/forge 优先级匹配，普通 Web 项目匹配 dev/start
+  3. 询问用户一次（业务友好语言），答案写入 CLAUDE.md，后续会话自动复用
+- **主动漂移检测**：会话中若修改了 `package.json` scripts，自动重新推导并与已存储命令对比，不一致时提示用户确认更新
+- **CLAUDE.md 持久化格式**：标准化三行注释块，记录命令、来源（auto-detected/user-provided）和更新日期
+
+适用场景：非开发者用 AI 全程写 Electron + Node.js + HTML/JS 桌面应用，忘记启动命令不再是阻塞问题。
+
+---
+
 ## [2.47.1] - 2026-04-10
 
 ### 参数链路修复 + Pencil MCP 设计联动独立页面

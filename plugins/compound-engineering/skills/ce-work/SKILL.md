@@ -81,6 +81,108 @@ Load the `team-mode` skill for the complete initialization sequence:
 
 ---
 
+### Phase -1.5: 环境指纹（Environment Fingerprint）
+
+**触发条件**：V_MODE_ENABLED = true（由 [V] 或 [V+] 激活）。否则跳过本阶段。
+
+**目标**：在进入执行流程前，自动确定「应用启动命令」（START_COMMAND），确保 Layer 2/4 验证时可以启动应用——对非开发者用户完全零记忆负担。
+
+---
+
+#### 决策树（按优先级顺序执行，找到即停止）
+
+**Level 1：读取 CLAUDE.md 显式覆盖（最高优先级）**
+
+搜索当前项目的 CLAUDE.md，寻找 ce-work 启动命令标记：
+
+```
+<!-- ce-work-start-command: <command> -->
+```
+
+- 若找到：
+  - 设置 `START_COMMAND = <command>`
+  - 宣告：`✅ 已读取 CLAUDE.md 启动命令覆盖：\`<command>\``
+  - **跳转至「Level 4：验证命令可用性」**
+- 若未找到：继续 Level 2
+
+**Level 2：从 package.json 动态推导（每次新鲜读取，禁止依赖缓存）**
+
+读取当前目录下的 `package.json`（若不存在则跳过此 Level）：
+
+按以下优先级顺序匹配 scripts：
+
+| 优先级 | 匹配条件 | 推导结果 |
+|--------|---------|---------|
+| 1 | scripts 中有 key 包含 `electron` 的条目（如 `electron`, `start:electron`） | `npm run <该key>` |
+| 2 | scripts.dev 或 scripts.serve 存在，且 devDependencies 中含 `electron` | `npm run dev` / `npm run serve` |
+| 3 | scripts.start 存在，且 devDependencies 中含 `electron` | `npm run start` |
+| 4 | `main` 字段存在，且 devDependencies 含 `electron`，且无上述 scripts | `npx electron .` |
+| 5 | devDependencies 含 `electron-forge` 或 config 含 `electron-forge` | `npm run start`（electron-forge 默认） |
+| 6 | scripts.dev 存在（普通 Web 项目） | `npm run dev` |
+| 7 | scripts.start 存在（普通 Web 项目） | `npm run start` |
+
+- 若推导成功：
+  - 设置 `START_COMMAND = <推导结果>`
+  - 宣告：`✅ 自动检测到启动命令：\`<command>\`（来源：package.json scripts）`
+  - **跳转至「Level 3：写入 CLAUDE.md 备忘（首次检测时）」**
+- 若 package.json 不存在或无法推导：继续 Level 3（询问用户）
+
+**Level 3：询问用户一次（业务友好语言）**
+
+用 `AskUserQuestion` 以业务语言提问（不展示技术错误信息）：
+
+> 我需要知道怎么启动这个应用，才能帮你自动验证效果。
+>
+> 请告诉我启动命令，比如 `npm run dev`、`npm start`、`electron .` 等。
+> （我会记住这个，以后不会再问了）
+
+- 用户回答后：
+  - 设置 `START_COMMAND = <用户答案>`
+  - **继续「Level 3b：写入 CLAUDE.md」**
+
+**Level 3b：写入 CLAUDE.md 持久化（Level 2 首次成功 或 Level 3 用户回答后执行）**
+
+在项目 CLAUDE.md 中追加启动命令记录（若已有标记行则替换）：
+
+```markdown
+<!-- ce-work-start-command: <command> -->
+<!-- ce-work-start-command-source: auto-detected|user-provided -->
+<!-- ce-work-start-command-updated: <YYYY-MM-DD> -->
+```
+
+宣告：`✅ 启动命令已记录到 CLAUDE.md，后续会话自动复用，无需再次配置`
+
+**Level 4：验证命令可用性（仅做格式检查，不实际启动）**
+
+检查 START_COMMAND 基本格式是否合法（非空，不含明显拼写错误如多余引号）。
+- 若格式异常：以业务语言告知用户并重新进入 Level 3
+- 若正常：环境指纹阶段完成，宣告：
+  ```
+  ✅ 环境指纹就绪：启动命令 = `<START_COMMAND>`
+     Layer 2/4 验证将使用此命令启动应用
+  ```
+
+---
+
+#### 主动漂移检测（防止 AI 修改 package.json 后启动命令失效）
+
+**触发时机**：本次会话执行过程中，若任何步骤修改了 `package.json` 的 `scripts` 字段：
+
+1. **重新执行 Level 2 推导**（从磁盘新鲜读取修改后的 package.json）
+2. **对比结果**：
+   - 若推导结果 = 当前 START_COMMAND → 无漂移，静默继续
+   - 若推导结果 ≠ 当前 START_COMMAND（或 CLAUDE.md 中的覆盖值）：
+     - 宣告：`⚠️ 检测到 package.json scripts 已更新，启动命令可能已变更`
+     - 展示：`旧命令：<old> → 新推导：<new>`
+     - 用 `AskUserQuestion` 询问：
+       > package.json 的启动脚本有更新。是否同步更新启动命令？
+       > 1. 是，使用新命令 `<new>`（推荐）
+       > 2. 保持旧命令 `<old>` 不变
+     - 用户选 1：更新 START_COMMAND，同步更新 CLAUDE.md 标记行
+     - 用户选 2：保持 START_COMMAND 不变，CLAUDE.md 保持旧覆盖值
+
+---
+
 ### Phase 0: Input Triage
 
 Determine how to proceed based on what was provided in `<input_document>`.
