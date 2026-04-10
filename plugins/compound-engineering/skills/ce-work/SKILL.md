@@ -109,22 +109,29 @@ Load the `team-mode` skill for the complete initialization sequence:
 
 读取当前目录下的 `package.json`（若不存在则跳过此 Level）：
 
-按以下优先级顺序匹配 scripts：
+**先检测包管理器**（影响命令前缀）：
+- `packageManager` 字段含 `yarn` → 使用 `yarn` 前缀（`yarn dev`）
+- `packageManager` 字段含 `pnpm` → 使用 `pnpm run` 前缀
+- 目录下存在 `pnpm-lock.yaml` → 使用 `pnpm run` 前缀
+- 目录下存在 `yarn.lock`（且无 `pnpm-lock.yaml`）→ 使用 `yarn` 前缀
+- 其他：使用 `npm run` 前缀（默认）
+
+**按以下优先级顺序匹配 scripts**（PKG_RUN = 上方检测到的前缀）：
 
 | 优先级 | 匹配条件 | 推导结果 |
 |--------|---------|---------|
-| 1 | scripts 中有 key 包含 `electron` 的条目（如 `electron`, `start:electron`） | `npm run <该key>` |
-| 2 | scripts.dev 或 scripts.serve 存在，且 devDependencies 中含 `electron` | `npm run dev` / `npm run serve` |
-| 3 | scripts.start 存在，且 devDependencies 中含 `electron` | `npm run start` |
-| 4 | `main` 字段存在，且 devDependencies 含 `electron`，且无上述 scripts | `npx electron .` |
-| 5 | devDependencies 含 `electron-forge` 或 config 含 `electron-forge` | `npm run start`（electron-forge 默认） |
-| 6 | scripts.dev 存在（普通 Web 项目） | `npm run dev` |
-| 7 | scripts.start 存在（普通 Web 项目） | `npm run start` |
+| 1 | scripts 中有 key 包含 `electron` 的条目（如 `electron`, `start:electron`） | `<PKG_RUN> <该key>` |
+| 2 | scripts.dev 或 scripts.serve 存在，且 devDependencies 或 dependencies 中含 `electron` | `<PKG_RUN> dev` / `<PKG_RUN> serve` |
+| 3 | scripts.start 存在，且 devDependencies 或 dependencies 中含 `electron` | `<PKG_RUN> start` |
+| 4 | `main` 字段存在，且 devDependencies 或 dependencies 含 `electron`，且无上述 scripts | `npx electron .` |
+| 5 | devDependencies 或 dependencies 含 `electron-forge`，或 config 含 `electron-forge` | `<PKG_RUN> start`（electron-forge 默认） |
+| 6 | scripts.dev 存在（普通 Web 项目） | `<PKG_RUN> dev` |
+| 7 | scripts.start 存在（普通 Web 项目） | `<PKG_RUN> start` |
 
 - 若推导成功：
   - 设置 `START_COMMAND = <推导结果>`
-  - 宣告：`✅ 自动检测到启动命令：\`<command>\`（来源：package.json scripts）`
-  - **跳转至「Level 3：写入 CLAUDE.md 备忘（首次检测时）」**
+  - 宣告：`✅ 自动检测到启动命令：\`<command>\`（来源：package.json scripts，包管理器：<npm/yarn/pnpm>）`
+  - **跳转至「Level 3b：写入 CLAUDE.md」**
 - 若 package.json 不存在或无法推导：继续 Level 3（询问用户）
 
 **Level 3：询问用户一次（业务友好语言）**
@@ -140,9 +147,9 @@ Load the `team-mode` skill for the complete initialization sequence:
   - 设置 `START_COMMAND = <用户答案>`
   - **继续「Level 3b：写入 CLAUDE.md」**
 
-**Level 3b：写入 CLAUDE.md 持久化（Level 2 首次成功 或 Level 3 用户回答后执行）**
+**Level 3b：写入 CLAUDE.md 持久化（Level 2 推导成功 或 Level 3 用户回答后执行）**
 
-在项目 CLAUDE.md 中追加启动命令记录（若已有标记行则替换）：
+在项目 CLAUDE.md 中追加启动命令记录（若已有 `<!-- ce-work-start-command:` 标记行则替换，否则追加到文件末尾）：
 
 ```markdown
 <!-- ce-work-start-command: <command> -->
