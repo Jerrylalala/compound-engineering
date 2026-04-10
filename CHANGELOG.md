@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.47.1] - 2026-04-10
+
+### 参数链路修复 + Pencil MCP 设计联动独立页面
+
+**参数链路修复（audit after v2.47.0）：**
+- `README.md`：ce:work 参数列表 `[T][T][V+][R][C][G]` → `[T][T+][V][V+][R]`（修复重复 `[T]`、缺失 `[V]`、错误含 `[C][G]`）
+- `README.md`：「[T] 真实 Agent Teams」章节描述用例由 `ce:work [V]` 修正为 `ce:work [T]`
+- `docs/zh-CN/index.md`：ce:work 参数列 `[T][T][V+][C][G]` → `[T][T+][V][V+][R]`
+- `docs/zh-CN/index.md`：Agent Teams 描述 `ce:work [V]` → `ce:work [T]`
+- `docs/zh-CN/workflow.html`：ce:work 参数 badge 第二个 `[T]` → `[T+]`，补 `[V]` badge，移除 `[C][G]` badge
+
+**新增 Pencil MCP 设计联动独立页面：**
+- 新建 `docs/zh-CN/pencil.html`：Pencil MCP 完整文档页，包含工具列表（13 个 MCP 工具）、设计工作流五步说明、内置设计 Agent 概览、配置方法、三个实战场景示例
+- `docs/zh-CN/workflow.html`：UI 设计联动节添加跳转链接
+- `README.md`：文档表格新增 Pencil MCP 条目，UI 设计联动节新增链接
+- `docs/zh-CN/index.md`：快速导航新增 pencil.html 条目
+- `CLAUDE.md`：相关文档表格新增 pencil.html 条目
+
+---
+
 ## [2.47.0] - 2026-04-10
 
 ### 参数体系重命名（MINOR — 用户界面 breaking change）

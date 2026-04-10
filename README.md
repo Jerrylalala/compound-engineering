@@ -30,7 +30,7 @@
 |---|------|------|------|
 | 1 | `/ce:brainstorm` | `[P][C][G][R]` | 探索需求，生成需求文档；`[P]` 14视角发散+自动收敛 |
 | 2 | `/ce:plan` | `[T]` | 制定实施计划，`[T]` 自动生成 `.team-contract.md` |
-| 3 | `/ce:work` | `[T][T][V+][R][C][G]` | 执行计划，`[T]` 真实 Agent Teams，`[V]` 四层自验证 |
+| 3 | `/ce:work` | `[T][T+][V][V+][R]` | 执行计划，`[T]` 真实 Agent Teams，`[V]` 四层自验证 |
 | 4 | `/ce:review` | `[mode:autofix][C][G][T]` | 多代理代码审查，`[T]` 合约白名单门控 |
 | 5 | `/ce:compound` | — | 沉淀经验，构建团队知识库 |
 
@@ -71,7 +71,7 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 ### [T] 真实 Agent Teams（Claude Code 原生）
 
-`ce:work [V]` 使用 Claude Code 原生 Agent Teams，不是角色扮演：
+`ce:work [T]` 使用 Claude Code 原生 Agent Teams，不是角色扮演：
 
 - **TeamCreate** 创建命名团队（时间戳命名，防碰撞）
 - **独立 context window** 的 verifier teammate，不受执行上下文污染
@@ -107,8 +107,10 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 - **ce:work Figma 同步**：执行阶段自动检查 UI 实现是否与设计图匹配
 
 ```
-Figma / Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验证 → 迭代修复
+Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验证 → 迭代修复
 ```
+
+→ **[Pencil MCP 完整设计联动文档](docs/zh-CN/pencil.html)**（工具列表 · 工作流 · 使用示例）
 
 ---
 
@@ -118,6 +120,7 @@ Figma / Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对
 |------|------|
 | [在线文档](https://jerrylalala.github.io/compound-engineering/) | 完整文档站点（自动更新） |
 | [交互式工作流](https://jerrylalala.github.io/compound-engineering/workflow.html) | 参数可视化，点击展开详情 |
+| [Pencil MCP 设计联动](docs/zh-CN/pencil.html) | AI 设计工作流 · 工具列表 · 使用示例 |
 | [安装指南](docs/zh-CN/INSTALL.md) | 详细安装步骤 |
 | [核心概念](docs/zh-CN/CONCEPTS.md) | Skills vs Agents vs Commands |
 | [更新日志](CHANGELOG.md) | 版本历史 |

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pencil MCP — 设计联动 | Compound Engineering</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3352;
+      --accent: #6c8ef7;
+      --accent2: #a78bfa;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --purple: #c084fc;
+      --text: #e2e8f0;
+      --text-muted: #8892b0;
+      --arrow: #4a5568;
+    }
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface2: #f1f5f9;
+      --border: #e2e8f0;
+      --accent: #4f6ef7;
+      --accent2: #7c3aed;
+      --green: #059669;
+      --yellow: #d97706;
+      --red: #dc2626;
+      --purple: #9333ea;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --arrow: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .logo-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: var(--accent); background: var(--surface2); }
+    .theme-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .gh-link {
+      background: var(--accent);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .gh-link:hover { opacity: 0.85; }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 64px 24px 48px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(192,132,252,0.12);
+      border: 1px solid rgba(192,132,252,0.3);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--purple);
+      margin-bottom: 20px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--purple), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      line-height: 1.15;
+    }
+    .hero p {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 28px;
+      line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--purple);
+      color: white;
+      padding: 10px 22px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 22px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Sections */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .section-heading {
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .section-subheading {
+      font-size: 15px;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.65;
+    }
+
+    /* Cards grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card-icon { font-size: 28px; margin-bottom: 12px; }
+    .card-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .card.purple { border-top: 2px solid rgba(192,132,252,0.5); }
+    .card.blue { border-top: 2px solid rgba(108,142,247,0.5); }
+    .card.green { border-top: 2px solid rgba(52,211,153,0.5); }
+
+    /* Tool table */
+    .tool-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+    .tool-table th {
+      background: var(--surface2);
+      padding: 12px 18px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .tool-table td {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+    .tool-table tr:last-child td { border-bottom: none; }
+    .tool-table tr:hover td { background: var(--surface2); }
+    .tool-name {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      background: rgba(108,142,247,0.12);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+    .tool-desc { color: var(--text-muted); }
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+    .tag.read { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+    .tag.write { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+    .tag.nav { background: rgba(108,142,247,0.1); color: var(--accent); border: 1px solid rgba(108,142,247,0.3); }
+
+    /* Workflow steps */
+    .workflow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      margin-bottom: 40px;
+    }
+    .workflow-step {
+      display: flex;
+      gap: 24px;
+      padding: 24px 0;
+      position: relative;
+    }
+    .workflow-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 68px;
+      bottom: -4px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--border), transparent);
+    }
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--accent);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .step-content { flex: 1; }
+    .step-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 10px; }
+
+    /* Code block */
+    .code-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      font-family: 'Roboto Mono', 'Consolas', monospace;
+      font-size: 12.5px;
+      color: var(--text);
+      overflow-x: auto;
+      line-height: 1.75;
+      margin: 10px 0;
+    }
+    .code-block .comment { color: var(--text-muted); }
+    .code-block .keyword { color: var(--accent); }
+    .code-block .string { color: var(--green); }
+    .code-block .tool { color: var(--purple); }
+
+    /* Integration flow */
+    .integration-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 32px 0;
+    }
+    .flow-node {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: border-color 0.2s;
+    }
+    .flow-node:hover { border-color: var(--accent); }
+    .flow-node.highlight { border-color: var(--purple); background: rgba(192,132,252,0.07); color: var(--purple); }
+    .flow-arrow { color: var(--arrow); font-size: 18px; padding: 0 2px; }
+
+    /* Setup box */
+    .setup-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .setup-box-header {
+      background: var(--surface2);
+      padding: 14px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .setup-box-body { padding: 20px; }
+    .setup-step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+    .setup-step:last-child { margin-bottom: 0; }
+    .setup-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .setup-text { font-size: 13.5px; color: var(--text-muted); line-height: 1.65; }
+    .setup-text code {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--accent);
+      font-family: monospace;
+    }
+
+    /* Notice */
+    .notice {
+      background: rgba(251,191,36,0.07);
+      border: 1px solid rgba(251,191,36,0.25);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 13.5px;
+      color: var(--text);
+      line-height: 1.65;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .notice-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* Agent comparison */
+    .agent-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 640px) {
+      .agent-row { grid-template-columns: 1fr; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .agent-card-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .agent-card-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .agent-card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:18px">
+    <a class="logo" href="workflow.html">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" width="26" height="26">
+        <rect width="28" height="28" rx="8" fill="currentColor" opacity="0.15"/>
+        <path d="M7 14h4l3-6 3 12 3-9 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      CE
+    </a>
+    <span class="logo-sub">/ Pencil MCP 设计联动</span>
+  </div>
+  <div class="header-right">
+    <a href="workflow.html" class="nav-link">工作流</a>
+    <a href="index.md" class="nav-link">文档</a>
+    <button class="theme-btn" onclick="toggleTheme()">☀️ 切换主题</button>
+    <a href="https://github.com/Jerrylalala/compound-engineering-plugin-private" class="gh-link" target="_blank">GitHub</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-badge">✏️ Pencil MCP + Claude Code</div>
+  <h1>AI 原生<br>设计联动工作流</h1>
+  <p>在 Claude Code 会话中直接读写 <code style="background:var(--surface2);border:1px solid var(--border);padding:2px 7px;border-radius:5px;font-size:15px">.pen</code> 设计文件——AI 即是设计师。从设计稿到代码，全链路无缝衔接。</p>
+  <div class="hero-actions">
+    <a href="#workflow" class="btn-primary">查看工作流</a>
+    <a href="#tools" class="btn-secondary">MCP 工具列表</a>
+  </div>
+</div>
+
+<!-- What is Pencil MCP -->
+<div class="section">
+  <div class="section-title">概览</div>
+  <div class="section-heading">什么是 Pencil MCP？</div>
+  <div class="section-subheading">Pencil 是专为 Web / 移动端设计的 AI 设计编辑器，通过 MCP 协议与 Claude Code 集成，让 AI 直接操作 .pen 设计文件。</div>
+
+  <div class="cards-grid">
+    <div class="card purple">
+      <div class="card-icon">✏️</div>
+      <div class="card-title">直接读写设计文件</div>
+      <div class="card-desc">Claude Code 通过 MCP 工具直接读取和修改 <code>.pen</code> 设计文件，无需手动切换工具或导出流程。AI 在同一会话中完成设计和实现。</div>
+    </div>
+    <div class="card blue">
+      <div class="card-icon">🔒</div>
+      <div class="card-title">加密格式，专用工具</div>
+      <div class="card-desc"><code>.pen</code> 文件格式加密，<strong>必须通过 Pencil MCP 工具</strong>访问——不能用 Read/Grep 等文本工具读取。批量操作通过 <code>batch_get</code> 和 <code>batch_design</code> 实现。</div>
+    </div>
+    <div class="card green">
+      <div class="card-icon">🔗</div>
+      <div class="card-title">与 CE 工作流深度集成</div>
+      <div class="card-desc">在 <code>ce:brainstorm</code> 阶段探索 UI 方向，<code>ce:plan</code> 阶段用设计稿锁定验收标准，<code>ce:work</code> 阶段通过截图验证实现是否与设计吻合。</div>
+    </div>
+  </div>
+
+  <div class="notice">
+    <span class="notice-icon">⚠️</span>
+    <span><strong>重要</strong>：<code>.pen</code> 文件内容已加密，任何时候都<strong>只能使用 Pencil MCP 工具</strong>（<code>batch_get</code>、<code>batch_design</code> 等）读写。使用 Read、Grep 等通用文件工具会返回乱码或失败。</span>
+  </div>
+</div>
+
+<!-- Tools Reference -->
+<div class="section" id="tools">
+  <div class="section-title">工具参考</div>
+  <div class="section-heading">Pencil MCP 工具列表</div>
+  <div class="section-subheading">所有工具通过 MCP 协议注入 Claude Code 会话，Claude 可在对话中直接调用。</div>
+
+  <table class="tool-table">
+    <thead>
+      <tr>
+        <th>工具名</th>
+        <th>类型</th>
+        <th>用途</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tool-name">get_editor_state</span></td>
+        <td><span class="tag read">读</span></td>
+        <td class="tool-desc">获取当前编辑器状态——活跃文件路径、当前选中的节点、画布尺寸等。<strong>任务开始时的第一步</strong>，建立工作上下文。支持 <code>include_schema</code> 参数获取节点 Schema 定义。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">open_document</span></td>
+        <td><span class="tag nav">导航</span></td>
+        <td class="tool-desc">打开指定路径的 <code>.pen</code> 文件，或传 <code>'new'</code> 创建空白设计文件。当编辑器无活跃文件时必须先调用。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">get_guidelines</span></td>
+        <td><span class="tag read">读</span></td>
+        <td class="tool-desc">加载设计指南和样式规范（颜色、间距、字体、组件规则）。支持 <code>category</code>、<code>name</code>、<code>params</code> 过滤，按需加载避免 token 浪费。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">batch_get</span></td>
+        <td><span class="tag read">读</span></td>
+        <td class="tool-desc">按 glob 模式或节点 ID 批量读取设计节点。用于探索现有设计结构、查找组件、理解布局层次。<strong>读取 .pen 文件的唯一正确方式。</strong></td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">batch_design</span></td>
+        <td><span class="tag write">写</span></td>
+        <td class="tool-desc">在单次调用中执行多个设计操作（Insert / Copy / Update / Replace / Move / Delete / Image）。每次最多 25 个操作，保证进展同时不超负荷。<strong>修改 .pen 文件的唯一正确方式。</strong></td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">get_screenshot</span></td>
+        <td><span class="tag read">读</span></td>
+        <td class="tool-desc">对当前设计画布截图，供视觉验证和与代码实现对比。在 <code>ce:work [V+]</code> 阶段与 Playwright 配合，实现像素级对比验收。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">get_variables</span></td>
+        <td><span class="tag read">读</span></td>
+        <td class="tool-desc">读取设计 Token 变量（颜色、间距、字体大小等）。确保代码实现使用与设计系统一致的变量值。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">set_variables</span></td>
+        <td><span class="tag write">写</span></td>
+        <td class="tool-desc">批量修改设计 Token 变量，实现全局主题切换或设计系统更新。修改后所有引用该变量的组件自动更新。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">snapshot_layout</span></td>
+        <td><span class="tag read">读</span></td>
+        <td class="tool-desc">快照当前画布布局结构，用于版本对比或作为验收基线。在迭代设计前记录初始状态。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">find_empty_space_on_canvas</span></td>
+        <td><span class="tag read">读</span></td>
+        <td class="tool-desc">在画布上寻找空闲区域，用于放置新组件时避免遮挡已有内容。插入新设计元素前自动调用。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">replace_all_matching_properties</span></td>
+        <td><span class="tag write">写</span></td>
+        <td class="tool-desc">全局替换所有匹配属性值（如批量改颜色、字体、间距）。重构设计系统时的高效工具。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">search_all_unique_properties</span></td>
+        <td><span class="tag read">读</span></td>
+        <td class="tool-desc">搜索画布中所有唯一属性值（颜色、字体等），帮助找出设计中的不一致，审计前先用此工具盘点现状。</td>
+      </tr>
+      <tr>
+        <td><span class="tool-name">export_nodes</span></td>
+        <td><span class="tag write">写</span></td>
+        <td class="tool-desc">将设计节点导出为图片（PNG/SVG 等格式），用于生成设计文档、嵌入 PRD，或作为代码实现的参照图。</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Design Workflow -->
+<div class="section" id="workflow">
+  <div class="section-title">工作流</div>
+  <div class="section-heading">设计 → 实现 全链路</div>
+  <div class="section-subheading">Pencil MCP 深度嵌入 CE 五步工作流，从需求探索到验收，全程 AI 辅助。</div>
+
+  <div class="integration-flow">
+    <div class="flow-node">💡 Brainstorm</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">📋 Plan</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node highlight">✏️ Pencil 设计</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">⚙️ Work</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">🔍 Review</div>
+  </div>
+
+  <div class="workflow-steps">
+    <div class="workflow-step">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <div class="step-title">打开 / 创建设计文件</div>
+        <div class="step-desc">在 Claude Code 会话中，先通过 <code>get_editor_state</code> 了解当前编辑器状态，再用 <code>open_document</code> 打开已有设计或新建空白文件。</div>
+        <div class="code-block"><span class="comment"># 检查当前编辑器状态</span>
+<span class="tool">get_editor_state</span>({ include_schema: false })
+
+<span class="comment"># 打开已有设计</span>
+<span class="tool">open_document</span>(<span class="string">"designs/landing-page.pen"</span>)
+
+<span class="comment"># 或创建新文件</span>
+<span class="tool">open_document</span>(<span class="string">"new"</span>)</div>
+      </div>
+    </div>
+
+    <div class="workflow-step">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <div class="step-title">探索现有设计结构</div>
+        <div class="step-desc">用 <code>get_guidelines</code> 加载设计规范，用 <code>batch_get</code> 读取已有节点，理解组件层次和设计意图，避免破坏已有结构。</div>
+        <div class="code-block"><span class="comment"># 加载设计指南（颜色/间距/字体规范）</span>
+<span class="tool">get_guidelines</span>({ category: <span class="string">"colors"</span> })
+
+<span class="comment"># 读取所有顶层 Frame</span>
+<span class="tool">batch_get</span>({ patterns: [<span class="string">"**/Frame/**"</span>] })
+
+<span class="comment"># 读取具体节点</span>
+<span class="tool">batch_get</span>({ nodeIds: [<span class="string">"hero-section"</span>, <span class="string">"nav-bar"</span>] })</div>
+      </div>
+    </div>
+
+    <div class="workflow-step">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <div class="step-title">生成 / 修改设计</div>
+        <div class="step-desc">通过 <code>batch_design</code> 执行批量设计操作——插入组件、调整布局、修改样式、更换变量。一次调用最多 25 个操作，保证原子性。</div>
+        <div class="code-block"><span class="comment"># 插入新组件（I = Insert）</span>
+<span class="tool">batch_design</span>({
+  operations: <span class="string">`
+btn=I("hero-section", { type: "Button", label: "立即开始", style: "primary" })
+U(btn, { width: 160, height: 44, borderRadius: 10 })
+  `</span>
+})
+
+<span class="comment"># 全局替换主色</span>
+<span class="tool">replace_all_matching_properties</span>({
+  property: <span class="string">"fill"</span>,
+  from: <span class="string">"#6c8ef7"</span>,
+  to: <span class="string">"#a78bfa"</span>
+})</div>
+      </div>
+    </div>
+
+    <div class="workflow-step">
+      <div class="step-number">4</div>
+      <div class="step-content">
+        <div class="step-title">截图验证设计</div>
+        <div class="step-desc">用 <code>get_screenshot</code> 截图当前设计，直观确认布局和样式是否符合预期。截图会在对话中直接显示，无需切换窗口。</div>
+        <div class="code-block"><span class="comment"># 截图当前画布</span>
+<span class="tool">get_screenshot</span>()
+
+<span class="comment"># 快照布局用于版本对比</span>
+<span class="tool">snapshot_layout</span>()</div>
+      </div>
+    </div>
+
+    <div class="workflow-step">
+      <div class="step-number">5</div>
+      <div class="step-content">
+        <div class="step-title">导出设计规格，移交实现</div>
+        <div class="step-desc">从 <code>get_variables</code> 提取设计 Token，用 <code>export_nodes</code> 导出参照图，作为 <code>ce:work</code> 的验收标准。在 <code>[V+]</code> 模式下，Playwright 自动截图并与设计对比。</div>
+        <div class="code-block"><span class="comment"># 读取设计变量（颜色 Token、间距等）</span>
+<span class="tool">get_variables</span>()
+
+<span class="comment"># 导出 Hero 区域为 PNG</span>
+<span class="tool">export_nodes</span>({ nodeIds: [<span class="string">"hero-section"</span>], format: <span class="string">"png"</span> })
+
+<span class="comment"># ce:work [V+] 自动对比设计稿与实现截图</span>
+<span class="keyword">/ce:work</span> docs/plans/landing-page-plan.md [T][V+]</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Design Agents -->
+<div class="section">
+  <div class="section-title">设计代理</div>
+  <div class="section-heading">内置设计 Agent</div>
+  <div class="section-subheading">CE 插件内置以下设计相关 Agent，配合 Pencil MCP 完成设计→实现的完整循环。</div>
+
+  <div class="agent-row">
+    <div class="agent-card">
+      <div class="agent-card-label">设计对比</div>
+      <div class="agent-card-name">🔍 figma-design-sync</div>
+      <div class="agent-card-desc">对比 Figma 设计稿与 Web 实现的视觉差异。使用 agent-browser 截图，逐项分析颜色、字体、间距、布局偏差，自动修复代码，迭代直到像素对齐。</div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-card-label">UI 审查</div>
+      <div class="agent-card-name">✅ design-implementation-reviewer</div>
+      <div class="agent-card-desc">审查代码实现是否符合设计规范。按严重性（Critical / Major / Minor）分类问题，输出可操作的修复建议，不只列问题。</div>
+    </div>
+  </div>
+  <div class="agent-row">
+    <div class="agent-card">
+      <div class="agent-card-label">迭代优化</div>
+      <div class="agent-card-name">🔄 design-iterator</div>
+      <div class="agent-card-desc">通过 N 轮截图→分析→改进循环，系统性打磨 UI 质感。每轮聚焦一个最高价值改进点，支持竞品研究和风格参考（Stripe / Linear / Vercel）。</div>
+    </div>
+    <div class="agent-card" style="border:1px dashed var(--border);opacity:0.7">
+      <div class="agent-card-label">配合使用</div>
+      <div class="agent-card-name">🎨 frontend-design skill</div>
+      <div class="agent-card-desc">生成有设计意图的 Web UI（非 AI 模板堆砌），支持响应式、深浅色主题。在 Pencil 设计完成后，用此 skill 生成对应的 HTML/CSS/JS 实现。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Setup -->
+<div class="section" id="setup">
+  <div class="section-title">配置</div>
+  <div class="section-heading">快速上手</div>
+  <div class="section-subheading">Pencil MCP 通过 Claude Code 的 MCP 配置自动注入会话，无需手动安装。</div>
+
+  <div class="setup-box">
+    <div class="setup-box-header">
+      <span>🔧</span> 接入 Pencil MCP
+    </div>
+    <div class="setup-box-body">
+      <div class="setup-step">
+        <div class="setup-num">1</div>
+        <div class="setup-text">安装 <a href="https://withpencil.ai" target="_blank" style="color:var(--accent)">Pencil</a>（Web 设计工具），创建账号并打开设计项目。</div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-num">2</div>
+        <div class="setup-text">在 Pencil 应用中启用 MCP 集成——进入 <strong>Settings → Integrations → MCP</strong>，获取 MCP 端点 URL 和 Token。</div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-num">3</div>
+        <div class="setup-text">在 Claude Code 的 <code>.mcp/config.json</code> 中添加 Pencil 配置：
+          <div class="code-block" style="margin-top:10px">{
+  "mcpServers": {
+    "pencil": {
+      "type": "http",
+      "url": "https://your-pencil-mcp-endpoint",
+      "headers": { "Authorization": "Bearer YOUR_TOKEN" }
+    }
+  }
+}</div>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-num">4</div>
+        <div class="setup-text">重启 Claude Code，验证工具可用：在对话中输入 <code>get_editor_state</code> 应返回编辑器状态。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice">
+    <span class="notice-icon">💡</span>
+    <span>本仓库 <code>plugin.json</code> 已预配置 Context7 MCP。Pencil MCP 需单独在你的 Claude Code 账户 MCP 设置中添加——它是账户级功能，不随插件分发。</span>
+  </div>
+</div>
+
+<!-- Usage examples -->
+<div class="section">
+  <div class="section-title">示例</div>
+  <div class="section-heading">实战用法</div>
+  <div class="section-subheading">以下场景展示 Pencil MCP 与 CE 工作流的具体结合方式。</div>
+
+  <div class="setup-box">
+    <div class="setup-box-header">🚀 场景一：从零设计落地页，一键交付代码</div>
+    <div class="setup-box-body">
+      <div class="code-block"><span class="comment"># Step 1: 需求探索</span>
+<span class="keyword">/ce:brainstorm</span> 设计一个 SaaS 产品落地页 [P]
+
+<span class="comment"># Step 2: 在 Pencil 中创建设计稿（Claude 直接操作）</span>
+<span class="comment"># Claude 自动调用: open_document("new") → get_guidelines() → batch_design(…)</span>
+
+<span class="comment"># Step 3: 生成实施计划，以设计稿截图为验收标准</span>
+<span class="keyword">/ce:plan</span> docs/brainstorms/saas-landing-requirements.md [T]
+
+<span class="comment"># Step 4: 执行实现，V+ 自动对比设计与实现</span>
+<span class="keyword">/ce:work</span> docs/plans/saas-landing-plan.md [T][V+]</div>
+    </div>
+  </div>
+
+  <div class="setup-box">
+    <div class="setup-box-header">🔄 场景二：已有代码，与 Figma 设计对比迭代</div>
+    <div class="setup-box-body">
+      <div class="code-block"><span class="comment"># 用 figma-design-sync agent 自动对比并修复视觉差异</span>
+请检查 Hero 组件是否与 Figma 设计匹配：
+https://figma.com/file/xxx/design?node-id=1:2
+
+<span class="comment"># Claude 自动调用 figma-design-sync agent：</span>
+<span class="comment"># 1. 截图 Figma 设计稿</span>
+<span class="comment"># 2. agent-browser 截图当前实现</span>
+<span class="comment"># 3. 逐项对比，输出差异清单</span>
+<span class="comment"># 4. 修复代码，再次验证</span></div>
+    </div>
+  </div>
+
+  <div class="setup-box">
+    <div class="setup-box-header">🎨 场景三：修改设计系统主题色</div>
+    <div class="setup-box-body">
+      <div class="code-block"><span class="comment"># 全局替换品牌色</span>
+请把所有设计文件的主色从蓝色 #6c8ef7 改为紫色 #a78bfa
+
+<span class="comment"># Claude 自动调用:</span>
+<span class="tool">search_all_unique_properties</span>({ property: "fill" })
+<span class="tool">replace_all_matching_properties</span>({ property: "fill", from: "#6c8ef7", to: "#a78bfa" })
+<span class="tool">get_variables</span>()
+<span class="tool">set_variables</span>({ "color-primary": "#a78bfa" })
+<span class="tool">get_screenshot</span>()  <span class="comment"># 验证效果</span></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p style="margin-bottom:8px">
+    <a href="workflow.html">工作流可视化</a> &nbsp;·&nbsp;
+    <a href="index.md">文档首页</a> &nbsp;·&nbsp;
+    <a href="https://github.com/Jerrylalala/compound-engineering-plugin-private">GitHub</a> &nbsp;·&nbsp;
+    <a href="https://withpencil.ai" target="_blank">Pencil 官网</a>
+  </p>
+  <p>Compound Engineering Plugin — 中文增强版 · Jerry Jian Fork</p>
+</footer>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    if (html.getAttribute('data-theme') === 'light') {
+      html.removeAttribute('data-theme');
+      document.querySelector('.theme-btn').textContent = '☀️ 切换主题';
+    } else {
+      html.setAttribute('data-theme', 'light');
+      document.querySelector('.theme-btn').textContent = '🌙 切换主题';
+    }
+  }
+</script>
+</body>
+</html>

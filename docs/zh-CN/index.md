@@ -28,7 +28,7 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 |------|------|------|
 | `/ce:brainstorm` | 通过对话探索需求，生成需求文档 | `[P][C][G][R]` |
 | `/ce:plan` | 将需求转化为可执行实施计划 | `[T]` |
-| `/ce:work` | 执行计划，支持 Agent Teams 和多层自验证 | `[T][T][V+][C][G]` |
+| `/ce:work` | 执行计划，支持 Agent Teams 和多层自验证 | `[T][T+][V][V+][R]` |
 | `/ce:review` | 多代理代码审查，支持自动修复 | `[mode:autofix][C][G][T]` |
 | `/ce:compound` | 记录解决方案，构建经验库 | — |
 
@@ -55,7 +55,7 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 ### 真实 Agent Teams（Claude Code 原生）
 
-`ce:work [V]` 使用 Claude Code 原生 Agent Teams：
+`ce:work [T]` 使用 Claude Code 原生 Agent Teams：
 
 - **TeamCreate** 创建命名团队（秒级时间戳，防碰撞）
 - **独立 context window** 的 verifier，不受执行上下文污染
@@ -76,6 +76,7 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 - [安装与使用](INSTALL.md) — 详细安装步骤和配置
 - [工作流指南](WORKFLOW-VISUAL.md) — 可视化流程图和参数说明
+- [Pencil MCP 设计联动](pencil.html) — AI 设计工作流 · 工具列表 · 使用示例
 - [核心概念](CONCEPTS.md) — Skills vs Agents vs Commands
 - [更新日志](https://github.com/Jerrylalala/compound-engineering/blob/main/CHANGELOG.md) — 版本历史
 

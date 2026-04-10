@@ -242,6 +242,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | 文档                                     | 说明               |
 | ---------------------------------------- | ------------------ |
 | `docs/zh-CN/WORKFLOW-VISUAL.md`          | 🔄 **工作流可视化指南**（用户必读） |
+| `docs/zh-CN/pencil.html`                 | ✏️ **Pencil MCP 设计联动**（工具列表·工作流·示例） |
 | `docs/zh-CN/INSTALL.md`                  | 安装与使用指南     |
 | `docs/zh-CN/CONCEPTS.md`                 | 核心概念（Skills vs Agents） |
 | `docs/zh-CN/SCRIPTS.md`                  | 脚本使用说明       |
