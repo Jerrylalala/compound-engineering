@@ -1,5 +1,56 @@
 # Changelog
 
+## [2.46.1] - 2026-04-10
+
+### Bug 修复：P0/P1 一致性修复
+
+- **[team-mode] SKILL.md**：删除 `ce:brainstorm [team:full]` 行（该行暗示 brainstorm 支持 [team:full]，与设计矛盾）
+- **[team-mode] SKILL.md**：修正 overlay 声明，明确 `ce:brainstorm` 不在 [team] 覆盖范围内
+- **[team-mode] SKILL.md**：修正 verifier/risk-guard 的"持续等待"措辞 → "等待激活，每次收到消息执行一次，完成后等待下一次"（one-shot 语义，非 daemon）
+- **[ce:brainstorm] SKILL.md**：将 [P] 收敛执行逻辑从 Parameter Handling 移至 Execution Flow Phase 0.5（有明确挂载点，执行时机清晰）
+- **[ce:work] SKILL.md**：在 Phase 4 Step 5 添加 `TeamDelete(TEAM_NAME)` 销毁步骤（此前仅 team-mode 提及，ce:work 本体遗漏）
+
+---
+
+## [2.46.0] - 2026-04-10
+
+### 新功能：[team] 升级为 Claude Code 原生 Agent Teams
+
+**核心变更**：`ce:work [team]` 从角色模拟升级为真实 Claude Code Agent Teams。
+
+旧机制：同一 agent 顺序扮演 合约主/执行者/验证者，文件 I/O 通信（角色模拟）
+新机制：`TeamCreate` 创建命名团队，spawn 独立 context window 的 verifier/risk-guard teammate，`SendMessage` 实时通信，`TeamDelete` 收尾
+
+**变更文件（2个核心文件 + CLAUDE.md）**：
+
+- **[team-mode] SKILL.md 大改**：ce:work [team] 节完整重写为真实 Agent Teams 流程
+  - Phase -1：TeamCreate + spawn verifier（只读，独立 context window）+ [team:full] 额外 spawn risk-guard
+  - Phase 2：每 Unit 完成后 SendMessage("verifier", ...) → 等 PASS/FAIL → 修复或继续
+  - 全量集成验证：所有 Unit 完成后 verifier 额外运行一次
+  - Phase 4：TeamDelete 清理
+  - 固定消息协议（4 种消息格式）
+  - 降级策略（Agent Teams 不可用时自动降级为主 agent 顺序验证）
+  - 角色定义表格同步更新（合约主/验证者/风险卫描述与新机制对齐）
+  - `.team-contract.md` 定位改为"团队章程"（所有 teammate 启动时读取）
+
+- **[ce:work] SKILL.md 中改**：Phase -1 [team] 检测说明更新为完整 Agent Teams 流程摘要；Phase 1 team mode dispatch 更新为 SendMessage 协议
+
+- **[CLAUDE.md] 小改**：Agent Teams 集成章节重写，[team] 参数说明更新为真实 Agent Teams 语义
+
+**Codex 交叉验证（2026-04-10）纳入的 4 个关键约束**：
+1. verifier 只读约束（严禁修改任何文件，含 .team-contract.md）
+2. 固定消息协议（unit_id / files / 修复说明 / 全量验证）
+3. 超时降级（60s 无回复 → 主 agent 直接验证）
+4. 全量集成验证（所有 Unit 完成后额外一次）
+
+### 修复（链路审查 5 个 bug）
+
+- **[team-mode] Bug 1 修复**：头部"核心理念"「不来自更多 agent」与 ce:work 新设计矛盾，改为分层说明（ce:work=真实 Agent Teams，brainstorm/plan/review=有意设计的角色模拟/规则引擎）
+- **[team-mode] Bug 2 修复**："参数变体"表格更新，明确 ce:work 使用真实 teammate，brainstorm/plan/review 保留角色模拟
+- **[team-mode] Bug 3 修复**：TEAM_NAME 时间戳粒度从小时级改为秒级（`YYYYMMDDTHHmmss`），防止同小时内重复运行碰撞
+- **[ce-work] Bug 4 修复**：并行 subagent 场景新增传递 TEAM_NAME 的明确指令，确保 subagent 能正确调用 SendMessage 找到 verifier
+- **[team-mode] Bug 5 修复**：brainstorm/plan/review 节各增加实现层次说明注释，明确标注"有意设计，非遗漏"
+
 ## [2.45.23] - 2026-04-09
 
 ### 修复（第三方审核 + 事实核查：5 个确认问题）

@@ -1,23 +1,31 @@
 ---
 name: team-mode
-description: "Multi-agent collaboration overlay for ce:brainstorm/plan/work/review. Enables contract-gated execution with single writer principle, verifier hooks, and deterministic patch gate for autofix stability."
+description: "Multi-agent collaboration overlay for ce:plan/work/review. ce:brainstorm structured convergence is built-in to [P] mode, not via [team]. Enables contract-gated execution with single writer principle, real Agent Teams verifier, and deterministic patch gate."
 argument-hint: "[team] | [team:full]"
 ---
 
 # Team Mode Overlay
 
-> **核心理念**：稳定性来自规则，不来自更多 agent。合约白名单 + 单写者原则 + 验证前移 = 问题被拦截在发生前。
+> **核心理念**：合约边界 + 单写者原则 + 独立验证者 = 问题在发生前被拦截。
+>
+> **各命令的实现层次不同**：
+> - `ce:work [team]`：真实 Claude Code Agent Teams（TeamCreate + 独立 context window + SendMessage）
+> - `ce:brainstorm [P]`：[P] 结束后自动触发探索者+挑战者收敛（无独立 [team] 参数，避免与 Claude Code Agent Teams 混淆）
+> - `ce:plan [team]`：同一 agent 多任务（有意设计，合约生成和追溯审查是顺序文档处理，不需要验证循环）
+> - `ce:review [team]`：规则引擎（有意设计，Patch Gate 是 deterministic whitelist check，零 token）
 
-本 skill 是叠加在 `ce:brainstorm`/`ce:plan`/`ce:work`/`ce:review` 之上的 overlay。各命令通过检测 `[team]`、`[team:full]` token 激活对应的角色集和机制。
+本 skill 是叠加在 `ce:plan`/`ce:work`/`ce:review` 之上的 overlay。各命令通过检测 `[team]`、`[team:full]` token 激活对应的角色集和机制。`ce:brainstorm` 不支持 `[team]` 参数，结构化收敛已内置为 `[P]` 的自动后续行为。
 
 ---
 
 ## 参数变体
 
-| Token | 角色集 | 适用场景 |
-|-------|--------|---------|
-| `[team]` | 合约主 + 执行者 + 验证者（3角色） | 默认，大多数任务 |
-| `[team:full]` | 合约主 + 执行者 + 验证者 + 风险卫（4角色） | auth/payment/migration 高风险路径 |
+| Token | ce:work 实现 | ce:plan/review 实现 | 适用场景 |
+|-------|-------------|---------------------|---------|
+| `[team]` | TeamCreate + verifier teammate（独立 context window）+ lead 扮演合约主+执行者 | 同一 agent（plan=合约生成，review=规则引擎） | 默认，大多数任务 |
+| `[team:full]` | 在 `[team]` 基础上额外 spawn risk-guard teammate | 同 `[team]`（plan/review 无额外角色） | auth/payment/migration 高风险路径 |
+
+> **ce:brainstorm 不使用 [team] 参数**：结构化收敛（探索者+挑战者）已内置为 [P] 结束后的自动行为，避免与 Claude Code 原生 Agent Teams 混淆。
 
 ---
 
@@ -25,25 +33,24 @@ argument-hint: "[team] | [team:full]"
 
 | 中文名 | 适用阶段 | 职责 | 生命周期 |
 |--------|---------|------|---------|
-| **合约主** | plan, work | 执行前写边界合约（allowed_files/forbidden_surfaces/invariants），全程持有合约权威。通过 `.team-contract.md` 文件持久化，不是独立 subagent | 全程存活（文件持久化） |
+| **合约主** | plan, work | 执行前写边界合约（allowed_files/forbidden_surfaces/invariants），全程持有合约权威。`.team-contract.md` 作为团队章程（所有 teammate 启动时读取），不是通信介质 | 全程存活（文件持久化） |
 | **执行者** | work | **唯一可写共享代码的角色**（单写者原则）。遇越界暂停上报，不自行决策 | 按任务运行 |
-| **验证者** | work | 每 Implementation Unit 完成后运行集成测试和不变式检查，只读不写。发现回归立即报警，不继续 | 事件驱动（每任务后） |
-| **风险卫** | work（[team:full]） | 专门拦截高风险路径（auth/session/permission/payment/billing/migration/schema），执行前生成风险摘要并要求用户确认 | 仅 [team:full] 模式 |
+| **验证者** | work | 独立 context window 的真实 teammate。等待 lead 发 SendMessage 通知，运行不变式检查，只读不写，回复 PASS/FAIL | 事件驱动（每 Unit 完成后收到 SendMessage） |
+| **风险卫** | work（[team:full]） | 独立 context window 的真实 teammate。等待 lead 发 Unit 开始通知，检测高风险关键词，回复拦截或通过，要求用户确认才继续 | 仅 [team:full] 模式，Unit 开始前 |
 | **追溯审查** | plan | 搜索 `docs/solutions/` 查找历史相关案例，检查计划决策是否与已记录 gotcha 矛盾，将发现追加到计划 Open Questions 节 | ce:plan Phase 4.5（只读） |
-| **探索者** | brainstorm | 聚焦「这个想法在技术上可行吗？」，提出具体验证路径和可达条件 | ce:brainstorm [team] 激活期间 |
-| **挑战者** | brainstorm | 质疑假设，寻找边界条件和反例，防止过早收敛 | ce:brainstorm [team] 激活期间 |
+| **探索者** | brainstorm | 聚焦「这个想法在技术上可行吗？」，提出具体验证路径和可达条件 | ce:brainstorm [P] 结束后自动触发（非独立参数） |
+| **挑战者** | brainstorm | 质疑假设，寻找边界条件和反例，防止过早收敛 | ce:brainstorm [P] 结束后自动触发（非独立参数） |
 
 ### 各阶段角色集
 
 | 阶段 | 默认角色 | [team:full] 追加 |
 |------|---------|-----------------|
-| `/ce:brainstorm [team]` | 探索者 + 挑战者 | — |
+| `/ce:brainstorm [P]` | [P] 结束后自动收敛（探索者+挑战者，内置，无需 [team]） | — |
 | `/ce:plan [team]` | 合约主 + 追溯审查 | — |
 | `/ce:work [team]` | 合约主 + 执行者 + 验证者 | 风险卫 |
 | `/ce:review [team]` | 现有多个专业审查 agent + Patch Gate | — |
 
 **[team:full] 在各命令的行为**：
-- `ce:brainstorm [team:full]`：等同于 `[team]`（brainstorm 阶段无风险卫角色，[team:full] 与 [team] 行为相同）
 - `ce:plan [team:full]`：等同于 `[team]`（plan 阶段无风险卫角色，触发同样的 Phase 4.5 合约生成）
 - `ce:work [team:full]`：在 3 角色基础上追加风险卫（4 角色完整模式）
 - `ce:review [team:full]`：等同于 `[team]`（Patch Gate 行为无差别）
@@ -120,28 +127,10 @@ last_verification_failure: null
 
 ## 各命令激活方式
 
-### ce:brainstorm [team]
-
-激活探索者 + 挑战者角色对（结构化探索，有明确收敛条件）：
-
-```
-探索者：聚焦「这个想法在技术上可行吗？」，提出具体验证路径
-挑战者：质疑假设，寻找边界条件和反例，防止过早收敛
-
-退出条件（满足任一）：
-  - 双方达成「方向共识」（可行性 + 主要风险均已识别）
-  - 用户输入 [E]
-  - 未达共识降级（经过 3 轮）：用 AskUserQuestion 展示双方核心分歧点，让用户选择采纳方向，然后继续
-
-「1轮」= 探索者 + 挑战者各回应一次（不含用户初始触发）
-  
-与 [P] 的区别：
-  [P] = 发散（14个专家自由讨论）
-  [team] = 收敛（2个角色结构化验证）
-  [P][team] = 先 [P] 发散 → 退出 → [team] 结构化挑战验证（顺序执行）
-```
-
 ### ce:plan [team]
+
+> **实现层次**：同一 agent 执行合约主和追溯审查两项任务（有意设计）。
+> 原因：plan 阶段是文档生成，不是验证循环；合约主从计划文件提取 allowed_files 是文档处理，追溯审查是历史搜索，两者都是顺序任务，spawn 真实 teammate 的开销不合理。`.team-contract.md` 作为后续 ce:work 阶段所有 teammate 共享的团队章程。
 
 在 Phase 4（Write the Plan）之后触发 Phase 4.5（合约生成）：
 
@@ -161,46 +150,155 @@ last_verification_failure: null
 
 ### ce:work [team] / [team:full]
 
-在 Phase 0（Input Triage）之前执行 Phase -1（Team Mode 初始化）：
+使用 Claude Code 原生 Agent Teams（真实独立 context window），而非角色模拟。
+
+#### Phase -1: 真实 Agent Teams 初始化
 
 ```
 1. 检测 team token 变体（default/full）
-2. 加载 .team-contract.md（如不存在，提示并询问是否继续无合约模式）
+
+2. 创建命名团队（精确到秒，防止同小时内重复碰撞）：
+   TEAM_NAME = "ce-work-{YYYYMMDDTHHmmss，如20260410T143022}"
+   TeamCreate(TEAM_NAME)
+
+3. 读取 .team-contract.md（如存在，来自 ce:plan [team] 生成的合约）
    版本检测：合约加载后，运行：
      git log -1 --format='%H' -- <plan_source>
    将结果与合约中的 plan_source_commit 对比：
    - plan_source_commit 为 null：提示"计划版本未记录"，跳过版本检测，继续
-   **版本检测说明**：`plan_source_commit` 在典型工作流（ce:plan 生成后立即执行 ce:work，计划未提交）中始终为 null，版本检测跳过是预期行为。
-   如需启用版本检测：
-   1. 运行 `ce:plan [team]` 生成计划和合约
-   2. `git commit` 计划文件
-   3. 手动更新 `.team-contract.md` 中的 `plan_source_commit` 字段为 commit hash
-   4. 再运行 `ce:work [team]`
+   **版本检测说明**：`plan_source_commit` 在典型工作流（ce:plan 生成后立即执行 ce:work）中始终为 null，版本检测跳过是预期行为。
    - 一致：正常继续
-   - 不一致：警告"⚠️ 计划已更新（合约版本不匹配），建议重新运行 /ce:plan [team] 刷新合约"
-             询问用户是否继续使用旧合约
-3. 宣告激活的角色集
-4. 在每个 Implementation Unit 前：
-   - 执行者检查文件边界（allowed_files / forbidden_surfaces）
-   - [team:full] 风险卫检查高风险模式 → 要求用户确认
-     **风险卫执行规范**：
-     - 时机：每个 Implementation Unit 开始前（执行者读计划、准备修改文件前）
-     - 输入：当前 Unit 的描述文字 + Files 列表（不读代码，不消耗额外 token）
-     - 匹配：检测高风险关键词（`auth`/`session`/`permission`/`payment`/`billing`/`migration`/`schema`/`seed`）
-     - 用户确认后：继续执行该 Unit
-     - 用户拒绝后：跳过该 Unit，记录到 `.team-contract.md` 的 work_log，不自动 fail
+   - 不一致：警告"⚠️ 计划已更新，建议重新运行 /ce:plan [team] 刷新合约"，询问用户是否继续
 
-**并行 subagent 的文件边界约束**（当 ce:work 派发多个并行 subagent 时）：
-- 合约主在派发前检查各 Implementation Unit 的 Files 列表：
-  - 各 subagent 的文件集合必须**互不重叠**（no intersection）
-  - 如有交集：将涉及共享文件的任务改为串行执行，不并行
-- 所有并行 subagent 完成后，验证者额外运行一次全局不变式检查（覆盖跨 subagent 的组合影响）
-- 这不影响每个 subagent 完成后的局部验证者 Hook（局部 + 全局双层保护）
+4. Spawn verifier teammate（只读角色，独立 context window）：
+   Agent(
+     team=TEAM_NAME,
+     name="verifier",
+     prompt="""
+       你是验证者 teammate（只读角色，不修改任何文件）。
+       启动后读取 .team-contract.md，了解 required_invariants。
+       等待 lead 通过 SendMessage 激活。每次收到消息时执行一次验证，完成后回复结果，然后等待下一次激活。
 
-5. 在每个 Implementation Unit 完成后：
-   - 验证者运行 Verification 步骤中的测试命令
-   - 验证者检查 required_invariants
-   - 如失败：停止，写入 last_verification_failure，等待执行者修复
+       消息格式（Lead → 你）：
+         「Unit {unit_id} 已完成。变更文件：[file1, file2, ...]。请验证。」
+         「所有 Unit 完成。请运行全量集成验证。」
+
+       收到后执行：
+       1. 读取 .team-contract.md 中的 required_invariants（只读）
+       2. 读取变更文件内容（只读）
+       3. 运行 required_invariants 中的所有验证命令
+       4. 通过 SendMessage 回复 lead：
+          - 通过：「Unit {unit_id}: PASS. 所有 invariants 验证通过。」
+          - 失败：「Unit {unit_id}: FAIL. 原因：{reason}. 命令输出：{output}」
+
+       铁律：
+       - 严禁修改任何文件（包括 .team-contract.md）
+       - 严禁执行写操作（git commit、文件写入等）
+       - 收到「所有 Unit 完成」后，运行全量验证，这是最后一次检查
+     """
+   )
+
+5. [team:full] 额外 spawn risk-guard teammate（只读角色）：
+   Agent(
+     team=TEAM_NAME,
+     name="risk-guard",
+     prompt="""
+       你是风险卫 teammate（只读角色，不修改任何文件）。
+       等待 lead 发来 Unit 开始通知。每次收到通知时执行一次风险检测，完成后回复结果，然后等待下一次通知。
+
+       消息格式（Lead → 你）：
+         「Unit {unit_id} 开始。描述：{desc}。文件：[file1, ...]」
+
+       收到后执行：
+       检测以下高风险关键词（在描述和文件名中）：
+         auth / session / permission / payment / billing / migration / schema / seed
+
+       回复格式：
+       - 无风险：「Unit {unit_id}: 风险卫通过。」
+       - 有风险：「⚠️ Unit {unit_id}: 风险拦截。涉及高风险路径 [{keywords}]。需用户确认后继续。」
+
+       铁律：严禁修改任何文件
+     """
+   )
+
+6. 宣告团队就绪：
+   「🤝 Agent Team 已就绪：{TEAM_NAME}
+    - lead（主 agent）：执行实现，持有合约权威
+    - verifier：独立 context window，接收单元完成通知，运行不变式验证（只读）
+    [team:full]: - risk-guard：独立 context window，拦截高风险路径（只读）」
+```
+
+#### Phase 2: 每个 Implementation Unit 的执行流程
+
+```
+[team:full] 模式 - Unit 开始前：
+  1. SendMessage("risk-guard", "Unit {unit_id} 开始。描述：{desc}。文件：[files]")
+  2. 等待 risk-guard 回复（最多 30 秒）：
+     - 通过 → 继续执行该 Unit
+     - 风险拦截 → 使用 AskUserQuestion 要求用户确认，用户确认后继续，拒绝后跳过该 Unit
+
+执行前文件边界检查（主 agent 自检）：
+  - 核对 Unit 的 Files 列表是否都在 allowed_files 内
+  - 如有越界：暂停，上报，等待用户确认
+
+Unit 执行完成后：
+  1. SendMessage("verifier", "Unit {unit_id} 已完成。变更文件：[files]。请验证。")
+  2. 等待 verifier 回复（最多 60 秒）：
+     - PASS → 继续下一 Unit
+     - FAIL → 读取失败详情 → 修复 → 重发：
+       「Unit {unit_id} 已修复：{修复说明}。变更文件：[files]。请重新验证。」
+     - 超时（60s 无回复）：
+       「⚠️ Verifier 未响应，切换主 agent 同步验证模式」
+       主 agent 直接运行 required_invariants，继续流程
+
+并行 subagent 的文件边界约束（当 ce:work 派发多个并行 subagent 时）：
+  - 合约主在派发前检查各 Unit 的 Files 列表是否互不重叠
+  - 如有交集：将涉及共享文件的任务改为串行
+  - 所有并行 subagent 完成后，verifier 额外运行一次全量集成验证
+
+全部 Unit 完成后（全量集成验证）：
+  SendMessage("verifier", "所有 Unit 完成。请运行全量集成验证（所有 required_invariants）。")
+  等待最终 PASS
+```
+
+#### Phase 4: 收尾
+
+```
+TeamDelete(TEAM_NAME)
+清理 .context/compound-engineering/ 中 team 相关状态文件（如有）
+```
+
+#### 消息协议（固定格式）
+
+```
+Lead → Verifier：
+  「Unit {unit_id} 已完成。变更文件：[file1, file2, ...]。请验证。」
+  「Unit {unit_id} 已修复：{修复说明}。变更文件：[files]。请重新验证。」
+  「所有 Unit 完成。请运行全量集成验证。」
+
+Verifier → Lead：
+  「Unit {unit_id}: PASS. {可选说明}」
+  「Unit {unit_id}: FAIL. 原因：{reason}. 命令输出：{output}」
+
+Lead → Risk-Guard：
+  「Unit {unit_id} 开始。描述：{desc}。文件：[file1, ...]」
+
+Risk-Guard → Lead：
+  「Unit {unit_id}: 风险卫通过。」
+  「⚠️ Unit {unit_id}: 风险拦截。涉及高风险路径 [{keywords}]。需用户确认。」
+```
+
+#### 降级策略
+
+```
+若 TeamCreate 调用失败或平台不支持 Agent Teams：
+  - 宣告：「⚠️ Agent Teams 不可用，降级为角色模拟模式（主 agent 顺序切换角色）」
+  - 验证者逻辑：每 Unit 完成后，主 agent 直接运行 required_invariants
+  - 其余流程不变（合约边界、风险卫关键词检测仍生效）
+
+若 verifier teammate 意外停止（TeammateIdle hook 触发）：
+  - 宣告：「⚠️ Verifier teammate 已停止，切换主 agent 验证模式」
+  - 主 agent 直接运行 required_invariants 完成剩余验证
 ```
 
 **[T]+[team] 的 Phase 3.5 Layer 3 全局确认**（补充单任务局部验证）：
@@ -227,6 +325,9 @@ last_verification_failure: null
 
 ### ce:review [team]（autofix 和 interactive 模式有效，report-only/headless 无效）
 
+> **实现层次**：规则引擎，无需 Agent Teams（有意设计）。
+> Patch Gate 是 deterministic whitelist check：对每条 finding 检查 allowed_files/forbidden_surfaces/max_files_per_patch/required_invariants，无需 agent 间通信，零额外 token。
+
 在 Stage 5 路由规范化后执行 Deterministic Patch Gate（规则引擎，不消耗额外 token）。
 
 完整 Patch Gate 逻辑见 `ce:review Stage 5 步骤 6.5`。规则摘要：
@@ -249,7 +350,7 @@ last_verification_failure: null
 |------|------|---------|
 | ce:work [team] 无合约 | 提示建议先运行 `/ce:plan [team]`；询问是否继续无合约模式（仅宣告角色，不检查边界） | ce:work 会实际修改代码，无合约执行风险较高，需用户知情后确认 |
 | ce:review [team] 无合约 | 跳过 Patch Gate，记录警告："未找到 .team-contract.md，Patch Gate 已禁用" | Patch Gate 是审查加强层，跳过不影响代码修改安全性；中断审查流程对用户影响更大 |
-| ce:brainstorm/plan [team] | 合约不适用于这两个阶段，正常执行 | — |
+| ce:plan [team] | 合约不适用于 plan 前阶段，正常执行合约生成 | — |
 
 ---
 

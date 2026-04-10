@@ -114,20 +114,26 @@
 
 ## Agent Teams 集成
 
-**Claude Code Teammates 功能**：在 Claude Code 设置中开启 "Agent Teams" / "Teammates" 实验性功能后，`ce:work` 会在任务数量 ≥10 时自动启用 Swarm 模式。
+**Claude Code Teammates 功能**：在 Claude Code 设置中开启 "Agent Teams" / "Teammates" 实验性功能后，`ce:work [team]` 会使用真实 Agent Teams（独立 context window 的 teammate），而非角色模拟。
 
 | 启用方式 | 说明 |
 |---------|------|
 | Claude Code 设置 → 开启 Teammates | 平台层功能，一次性配置 |
-| 自动触发 | `ce:work` 检测到 ≥10 个任务时自动路由到 Swarm |
-| 手动触发 | 在 `ce:work` 中说「启用 swarm」或「use swarm mode」 |
+| 手动触发 | `ce:work [team]` 或 `ce:work [team:full]` |
+| 降级 | Agent Teams 不可用时自动降级为主 agent 顺序验证（不报错，宣告降级） |
 
-**Swarm 模式特点**：
-- 每个子任务由独立的 Teammate 实例执行（真正的并行）
-- Teammate 之间互相验证输出，减少单点失误
-- 相比 `parallel-subagents` 模式，Teammates 有独立上下文窗口
+**`[team]` 参数（真实 Agent Teams）**：
+- `TeamCreate` 创建命名团队，`TeamDelete` 收尾清理
+- verifier teammate 有独立 context window，持续等待 `SendMessage` 通知
+- 每 Unit 完成后：lead → `SendMessage("verifier", ...)` → 等待 PASS/FAIL → 继续或修复
+- 全量集成验证：所有 Unit 完成后 verifier 额外运行一次全局不变式检查
+- `[team:full]` 额外 spawn risk-guard teammate，拦截高风险路径（auth/payment/migration）
 
-**与插件的关系**：Agent Teams 是 Claude Code 平台能力，本插件通过 `ce:work` 的任务路由策略自动利用它，用户无需手动选择。
+**与角色模拟的根本区别**：
+- 旧 `[team]`：同一 agent 顺序扮演 合约主/执行者/验证者，文件 I/O 通信
+- 新 `[team]`：真实独立 context window，`SendMessage` 实时通信，verifier 不会被 lead 的实现上下文污染
+
+**前置条件**：需在 Claude Code Settings → 开启 Agent Teams（Teammates 实验性功能）。不开启时自动降级。
 
 ---
 
@@ -175,10 +181,10 @@ skills/
 
 | 命令 | 说明 |
 |------|------|
-| `/ce:brainstorm` | 探索需求和方案 `[P][C][G][R][team]` |
-| `/ce:plan` | 创建实施计划 `[team]` |
+| `/ce:brainstorm` | 探索需求和方案 `[P][C][G][R]`（[P] 结束后自动收敛找漏洞） |
+| `/ce:plan` | 创建实施计划 `[team]`（生成 .team-contract.md） |
 | `/ce:work` | 执行工作计划 `[team][team:full][R][T=四层自验证][PW=Playwright浏览器][C=Codex参与标记][G=Gemini参与标记]` |
-| `/ce:review` | 代码审查 `[mode:autofix] [C][G][team]` |
+| `/ce:review` | 代码审查 `[mode:autofix] [C][G][team]`（[team]=合约白名单门控） |
 
 **独立工具命令（手动调用）：**
 
@@ -195,10 +201,10 @@ skills/
 
 | 参数 | 阶段 | 效果 |
 |------|------|------|
-| `[team]` | ce:brainstorm | 探索者 + 挑战者结构化验证角色对 |
+| `[P]` + 自动收敛 | ce:brainstorm | [P] 发散讨论结束后自动触发探索者+挑战者结构化收敛（无需额外参数） |
 | `[team]` | ce:plan | 合约主 + 追溯审查，自动生成 `.team-contract.md` |
-| `[team]` | ce:work | 3角色默认（合约主+执行者+验证者），每任务后运行验证者 Hook |
-| `[team:full]` | ce:work | 4角色（加风险卫），适合 auth/payment/migration 高风险路径 |
+| `[team]` | ce:work | 真实 Agent Teams：TeamCreate + verifier teammate（独立 context window）+ SendMessage 通信 + TeamDelete |
+| `[team:full]` | ce:work | 在 `[team]` 基础上额外 spawn risk-guard teammate，拦截 auth/payment/migration 高风险路径 |
 | `[team]` | ce:review | autofix 路径增加 Deterministic Patch Gate（规则引擎，不耗额外 token） |
 
 **使用流程**：

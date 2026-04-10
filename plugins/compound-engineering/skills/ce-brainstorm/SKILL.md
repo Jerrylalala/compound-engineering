@@ -1,7 +1,7 @@
 ---
 name: ce:brainstorm
 description: 'Explore requirements and approaches through collaborative dialogue before writing a right-sized requirements document and planning implementation. Use for feature ideas, problem framing, when the user says ''let''s brainstorm'', or when they want to think through options before deciding what to build. Also use when a user describes a vague or ambitious feature request, asks ''what should we build'', ''help me think through X'', presents a problem with multiple valid solutions, or seems unsure about scope or direction — even if they don''t explicitly ask to brainstorm.'
-argument-hint: "[功能描述] [P=派对模式/多代理讨论] [C=Codex咨询] [G=Gemini咨询] [R=研究:触发learnings-researcher检索历史方案] [team=结构化探索:探索者+挑战者] [team:full=等同[team],brainstorm阶段无风险卫角色]"
+argument-hint: "[功能描述] [P=派对模式/多代理发散讨论，结束后自动收敛找漏洞] [C=Codex咨询] [G=Gemini咨询] [R=研究:触发learnings-researcher检索历史方案]"
 ---
 
 # Brainstorm a Feature or Improvement
@@ -51,33 +51,10 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 
 | Token | Effect |
 |-------|--------|
-| `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. |
+| `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. After Party Mode concludes, automatically run structured convergence (see below). |
 | `[C]` | Auto-consult Codex after Phase 2. |
 | `[G]` | Auto-consult Gemini after Phase 2. |
 | `[R]` | Run learnings-researcher before Phase 1. Inject results as historical reference in Phase 2. |
-| `[team]` | TEAM_MODE = true. Activate structured exploration: **探索者 + 挑战者** role pair (see below). **[team:full]** 传入时等同于 `[team]`（brainstorm 阶段探索者+挑战者角色集，无额外风险卫角色）。 |
-
-### `[team]` Structured Exploration Mode
-
-When `[team]` is detected, activate a 2-role structured exploration before Phase 1:
-
-```
-探索者：聚焦「这个想法在技术上可行吗？」，提出具体验证路径和可达条件
-挑战者：质疑假设，寻找边界条件和反例，防止过早收敛
-
-退出条件（满足任一即退出角色对，继续正常流程）：
-  - 双方达成「方向共识」：可行性已确认 + 主要风险已识别
-  - 用户输入 [E]
-  - 未达共识降级（经过 3 轮后仍无共识）→ 用 AskUserQuestion 展示双方核心分歧点，让用户选择采纳方向，继续正常流程
-    （「1轮」= 探索者 + 挑战者各回应一次，不含用户初始触发）
-
-与 [P] 的区别：
-  [P]      = 发散（14位专家自由讨论，无明确收敛条件）
-  [team]   = 收敛（2个角色结构化验证，有明确退出条件）
-  [P][team] = 先 [P] 发散 → 退出 → [team] 结构化挑战验证（顺序执行）
-```
-
-Load the `team-mode` skill for full role definitions and behavioral rules.
 
 ---
 
@@ -151,6 +128,27 @@ Task compound-engineering:research:learnings-researcher(feature_description)
 - 检索结果作为 Phase 2 方案对比的「历史参考」上下文
 - 在 Phase 2 展示方案时，增加「📚 历史参考」子节，列出相关 solution 文档及其核心洞察
 - 若无相关历史记录 → 在「历史参考」节注明：`No relevant learnings found — 本次为全新探索`
+
+#### 0.5 [P] Post-Party Structured Convergence（仅当 `[P]` 标志存在时）
+
+**触发时机**：Party Mode（`[P]`）讨论轮次结束后，进入此阶段。不使用 `[P]` 时跳过，直接进入 Phase 1。
+
+**执行方式**：以 2 个对立视角顺序输出（同一 agent 切换视角），不创建独立 teammate：
+
+- **探索者视角**：从 Party Mode 讨论中提炼出最有希望的方向，聚焦「这个方向在技术上可行吗？」，给出具体验证路径
+- **挑战者视角**：质疑探索者的假设，寻找边界条件、反例和未被发现的风险，防止 Party Mode 多视角共鸣带来过早收敛
+
+**退出条件**（满足任一即结束，继续 Phase 1）：
+- 双方达成「方向共识」：可行性已确认 + 主要风险已识别
+- 用户输入 `[E]`
+- 未达共识（3 轮后）→ 用 `AskUserQuestion` 展示核心分歧，让用户裁决方向（「1 轮」= 探索者 + 挑战者各回应一次）
+
+**输出格式**：
+```
+[探索者] <2-4 句：当前最有希望方向 + 验证路径>
+
+[挑战者] <2-4 句：假设质疑 + 关键风险>
+```
 
 ### Phase 1: Understand the Idea
 
