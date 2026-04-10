@@ -96,9 +96,11 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 `ce:brainstorm [P]` 14 个专家视角发散讨论（架构/安全/性能/QA…），结束后**自动触发探索者+挑战者结构化收敛**，无需额外参数。
 
-### Codex / Gemini 双重审查
+### Codex / Gemini 双重审查 + Claude 裁决
 
 `/ce:review [C][G]` 同时调用 Codex 和 Gemini 进行交叉验证，双方共同发现的问题优先级自动提升。
+
+Claude 收到外部 AI 审核结果后，会先出**裁决表**（`✅ 认同` / `⚠️ 调整实施` / `❌ 不适用`）供用户确认，再动手修复。Claude 是最终裁判，不照单全收——外部 AI 只看局部，Claude 掌握全局上下文。
 
 ### 🎨 UI 设计联动（Pencil MCP + Figma）
 

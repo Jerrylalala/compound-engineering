@@ -680,8 +680,8 @@
         desc: '多代理并行代码审查，基于 Tier 分级框架（安全/性能/正确性/可维护性等专属审查者），自动 merge 发现并去重。`mode:autofix` 安全发现自动修复，残余问题以 TODO 形式输出。`[T]` 激活 Deterministic Patch Gate——规则引擎验证所有变更是否在 .team-contract.md 白名单内，不消耗额外 token。',
         params: [
           { tag: '[mode:autofix]', type: 'implemented', label: '推荐默认', desc: '自动修复安全级别的发现（low-risk 自动应用，medium-risk 确认后应用，high-risk 仅报告）。建议大多数情况使用此模式。' },
-          { tag: '[C]', type: 'optional', label: '可选增强', desc: 'Codex 审核：调用 Codex CLI 对同一 diff 进行独立审查，双方共同发现的问题优先级提升，减少漏报。' },
-          { tag: '[G]', type: 'optional', label: '可选增强', desc: 'Gemini 审核：调用 Gemini 对同一 diff 进行独立审查，与 [C] 组合使用时形成三方交叉验证。' },
+          { tag: '[C]', type: 'optional', label: '可选增强', desc: 'Codex 审核：Codex 对同一 diff 独立审查。Claude 收到结果后先出裁决表（✅认同 / ⚠️调整 / ❌不适用），等用户确认后才实施——Claude 是最终裁判，不照单全收。双方共同发现的问题优先级提升。' },
+          { tag: '[G]', type: 'optional', label: '可选增强', desc: 'Gemini 审核：Gemini 对同一 diff 独立审查，同样经过 Claude 裁决表确认后实施。与 [C] 组合使用时形成三方交叉验证，Claude 综合评判所有外部 AI 发现。' },
           { tag: '[T]', type: 'implemented', label: '真实实现', desc: 'TEAM_GATE_ENABLED = true。加载 .team-contract.md，在 Stage 5 运行 Deterministic Patch Gate：规则引擎验证所有变更文件是否在 allowed_files 白名单内，拦截越界修改。在 report-only / headless 模式下不生效。' },
           { tag: 'plan:<路径>', type: '', label: '可选', desc: '传入计划文件路径，审查者可对照需求检查实现是否符合原始规格，发现 scope creep 或遗漏。' },
         ],
