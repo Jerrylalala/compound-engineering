@@ -28,13 +28,15 @@
 Brainstorm → Plan → Work → Review → Compound → Repeat
 ```
 
-| 命令 | 用途 |
-|------|------|
-| `/ce:brainstorm` | 通过对话探索需求，生成需求文档 `[P][C][G][R]` |
-| `/ce:plan` | 将需求转化为可执行的实施计划 `[team]` |
-| `/ce:work` | 执行计划，支持 Agent Teams、自验证、Playwright `[team][T][PW][C][G]` |
-| `/ce:review` | 多代理代码审查，支持自动修复 `[mode:autofix][C][G][team]` |
-| `/ce:compound` | 记录解决方案，构建经验库 |
+| 命令 | 参数 | 用途 |
+|------|------|------|
+| `/ce:brainstorm` | `[P][C][G][R]` | 通过对话探索需求，生成需求文档 |
+| `/ce:plan` | `[team]` | 将需求转化为可执行的实施计划，`[team]` 自动生成 `.team-contract.md` |
+| `/ce:work` | `[team][team:full][T][PW][R][C][G]` | 执行计划，`[team]` 启用真实 Agent Teams，`[T]` 四层自验证 |
+| `/ce:review` | `[mode:autofix][C][G][team]` | 多代理代码审查，`[team]` 激活合约白名单门控 |
+| `/ce:compound` | — | 记录解决方案，构建经验库 |
+
+📊 **[交互式工作流可视化](https://jerrylalala.github.io/compound-engineering/workflow.html)** — 点击每个步骤查看参数说明和使用示例
 
 ---
 
@@ -94,6 +96,38 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 | [安装指南](docs/zh-CN/INSTALL.md) | 详细安装步骤 |
 | [核心概念](docs/zh-CN/CONCEPTS.md) | Skills vs Agents vs Commands |
 | [更新日志](CHANGELOG.md) | 版本历史 |
+
+---
+
+## 与同类项目对比
+
+> **项目定位**：本项目不是工具集合，而是在 EveryInc 工程哲学之上，增加了真实多代理编排、分层验证和中文生态支持。
+
+| 项目 | 类型 | 核心特性 | 适合谁 |
+|------|------|---------|--------|
+| **[EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin)** | 工程框架（上游） | Brainstorm→Plan→Work→Review→Compound 工作流哲学；支持 12+ AI 平台转换（Codex/Gemini/Copilot 等） | 任何团队，尤其是多 AI 平台用户 |
+| **[本项目](https://github.com/Jerrylalala/compound-engineering)** | 增强 Fork | 在上游基础上：真实 Agent Teams `[team]`、四层自验证 `[T]`、Codex+Gemini 双重审查 `[C][G]`、中文文档 | Claude Code 深度用户，中文团队 |
+| **[hesreallyhim/awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code)** | 资源目录 | 500+ 社区技能、工具、Hooks 聚合；最全面的 Claude Code 生态地图 | 想发现 Claude Code 工具的开发者 |
+| **[nyldn/claude-octopus](https://github.com/nyldn/claude-octopus)** | 多模型编排 | 同时调度 8 个 AI 模型协作 | 需要跨模型并行的研究/工程场景 |
+| **[jarrodwatts/claude-hud](https://github.com/jarrodwatts/claude-hud)** | 状态展示 | Claude Code 状态栏 HUD 插件 | 关注实时状态可见性的用户 |
+| **[thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)** | 记忆持久化 | 跨会话记忆系统 | 需要长期上下文保持的用户 |
+
+### 本项目 vs 上游的核心差异
+
+| 能力 | EveryInc 上游 | 本项目 |
+|------|--------------|--------|
+| Agent Teams | 概念级（角色模拟） | **真实 TeamCreate/SendMessage/TeamDelete** |
+| 验证框架 | 无正式分层 | **四层：CLI → API/DB → 浏览器 → 验收** |
+| 双模型审查 | 无 | **Codex + Gemini 交叉验证，共识发现提权** |
+| 派对模式 | 无 | **14 视角发散 + 自动收敛** |
+| 文档语言 | 英文 | **中英双语，在线文档站点** |
+| 平台覆盖 | 12+ AI 平台 | **专注 Claude Code 深度集成** |
+
+### 选哪个？
+
+- **用上游** — 你的团队使用多个 AI 平台（Codex/Gemini/Copilot），或者英文优先
+- **用本项目** — 你深度使用 Claude Code，需要真实 Agent Teams 和多层验证，或中文团队
+- **同时关注** — awesome-claude-code 作为工具发现入口，本项目作为执行框架
 
 ---
 
