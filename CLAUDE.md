@@ -110,10 +110,14 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 
 | 修改类型 | 必须更新的文档 |
 |----------|----------------|
-| 新功能 | CHANGELOG.md、版本号、INSTALL.md（如需要） |
-| 修改命令/agent | CHANGELOG.md、版本号 |
-| 修改工作流 | CHANGELOG.md、版本号、WORKFLOW-VISUAL.md |
-| Bug 修复 | CHANGELOG.md、版本号（如重要） |
+| 新功能（Skill/Agent/Command） | CHANGELOG.md、版本号、README.md、docs/zh-CN/workflow.html、docs/zh-CN/index.md |
+| 修改命令/agent 行为 | CHANGELOG.md、版本号、README.md、docs/zh-CN/workflow.html |
+| 修改工作流参数或说明 | CHANGELOG.md、版本号、README.md、docs/zh-CN/workflow.html、docs/zh-CN/index.md |
+| Bug 修复（用户可感知） | CHANGELOG.md、版本号、README.md（如功能描述有误） |
+| Bug 修复（内部逻辑） | CHANGELOG.md、版本号 |
+| 纯文档修改 | 不需要版本号，直接更新对应文档 |
+
+> **检查顺序**：每次功能变更完成后，主动对照上表逐项核对，不需要用户提醒。
 
 **Codex 集成同步（铁律）**：
 
