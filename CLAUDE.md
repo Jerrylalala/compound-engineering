@@ -251,8 +251,6 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | `docs/zh-CN/FORK-SETUP.md`               | Fork 仓库初始化    |
 | `docs/development/VERSIONING.md`         | 版本管理规范（权威） |
 | `plugins/compound-engineering/CLAUDE.md` | 插件开发指南       |
-| `UPSTREAM-MERGE-RECOMMENDATION.md`       | 🚨 **上游合并推荐**（关键） |
-| `docs/MERGE-VISUAL-SUMMARY.md`           | 上游合并可视化摘要 |
 
 ---
 
