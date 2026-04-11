@@ -23,8 +23,18 @@
 ## 工作流
 
 ```
-1: Brainstorm → 2: Plan → 3: Work → 4: Review → 5: Compound → Repeat
+[Resume] → 0: Ideate/Ideas → 1: Brainstorm → 2: Plan → 3: Work → 4: Review → 5: Compound → Repeat
 ```
+
+**入口命令**（回到项目 / 选方向）：
+
+| 命令 | 用途 |
+|------|------|
+| `/ce:resume` | 回归项目入口：读 git log + IDEAS.md + active plan，输出三段摘要 |
+| `/ce:ideas` | 管理 IDEAS.md 停车场：无参数选已有方向，有参数生成新方向 |
+| `/ce:ideate` | 从零生成新改进方向（无停车场时或想全新探索时） |
+
+**主工作流**：
 
 | # | 命令 | 参数 | 用途 |
 |---|------|------|------|
@@ -184,7 +194,7 @@ Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验�
 | **UI 设计联动** | ✅ Pencil MCP + Figma | — | — | — | ⚡ |
 | **跨 AI 平台支持** | Claude Code 专注 | ✅ 12+ 平台 | Claude Code 专注 | Claude Code 专注 | Claude Code 专注 |
 | **中文生态** | ✅ 中英双语 + 在线文档 | 英文 | 英文 | 英文 | 中文 |
-| **Skill 数量** | 50+ skills | 40+ skills | 15 skills | — | — |
+| **Skill 数量** | 52+ skills | 40+ skills | 15 skills | — | — |
 | **Review Agent 数量** | 57 agents | 40+ agents | — | ~9 agents | — |
 
 ---
