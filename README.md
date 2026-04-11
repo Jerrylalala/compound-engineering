@@ -94,13 +94,13 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 | Layer | 内容 | 触发条件 |
 |-------|------|---------|
-| -1.5 | 环境指纹：自动检测应用启动命令（CLAUDE.md 覆盖 → package.json 推导 → 询问一次并持久化） | V/V+ 启用时 |
-| 0 | CLI 构建/语法检查 | 始终 |
+| -1.5 | 环境指纹：自动检测启动命令 + 测试命令（npm/pytest/cargo/go test） | V/V+ 启用时 |
+| 0 | CLI 构建/语法检查（3 次修复循环） | 始终 |
 | 1 | API / 数据库验证 | 后端变更 |
-| 2 | 浏览器 UI 验证 | 前端变更 |
+| 2 | **多路由验证**：浏览器 UI + TEST_COMMAND + CLI + API + 设计图对比 | 按项目类型自动选择 |
 | 3 | 独立验收确认 | 始终 |
 
-`[V+]` 额外支持零配置 Electron 桌面应用：自动识别 npm/yarn/pnpm 和 electron-forge，会话内检测启动命令漂移（AI 修改了 package.json scripts 时自动重推导）。
+`[V+]` 额外支持零配置 Electron 桌面应用。Layer 2 自动检测项目类型：前端跑 Playwright，后端跑 TEST_COMMAND + curl，CLI 跑参数验证，有设计图时自动对比。失败后最多 3 轮自动修复（诊断修复 → 缩小范围 → 仅诊断报告）。
 
 ### [P] 派对模式 + 自动收敛
 
