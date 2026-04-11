@@ -225,7 +225,7 @@ Load the `team-mode` skill for the complete initialization sequence:
 
 **Level 2：从项目配置文件动态推导（每次新鲜读取）**
 
-按以下优先级顺序匹配（PKG_RUN = START_COMMAND 推导中已检测的包管理器前缀）：
+按以下优先级顺序匹配（PKG_RUN = START_COMMAND 推导中已检测的包管理器前缀；若 START_COMMAND 推导跳过了 package.json 阶段导致 PKG_RUN 未定义，则对 package.json 相关条目重新执行包管理器检测）：
 
 | 优先级 | 匹配条件 | 推导结果 |
 |--------|---------|---------|
@@ -699,6 +699,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
   "verification_rounds": 0,
   "current_layer": "layer0",
   "layer0_inner_retries": 0,
+  "layer2_inner_retries": 0,
   "layers": {
     "layer0": "pending",
     "layer1": "pending",
@@ -713,6 +714,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 - `task_id`：`前20字 + ISO日期` 确保同日内同前缀任务不冲突
 - `current_layer`：当前正在执行的层（`layer0/1/2/3`）；session 中断重启后，Phase 3.5.0 会检测此文件并从此层继续，而非全部重跑
 - `layer0_inner_retries`：Layer 0 层内重试次数，上限 3 次，不计入 verification_rounds
+- `layer2_inner_retries`：Layer 2 层内重试次数，上限 3 次，不计入 verification_rounds
 - `passes: false` 初始值：防止验证未完成就进入 Phase 4
 
 **只读文件系统降级**：若 `.context/compound-engineering/` 不可写（如 CI 只读容器），以内存状态继续执行：
@@ -772,7 +774,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 **修复约束**：
 - **禁止修改测试断言来"修复"失败**：修复前检查 diff，若只改了测试文件的断言 → 阻止并提示「不应修改测试断言来通过测试」（除非测试本身有明确 bug，如 import 路径拼写错误）
 - **环境错误不进修复循环**：检测 `ModuleNotFoundError` / `command not found` / `No module named` / `Cannot find module` → 直接提示用户安装依赖，不修代码
-- **第 2 次回滚保护**：若第 2 次修复引入新失败（失败数增加）→ 回滚第 2 次改动（`git checkout` 修改的文件），以第 1 次状态进入第 3 次诊断
+- **第 2 次回滚保护**：若第 2 次修复引入新失败（失败数增加）→ 仅回滚第 2 次修复涉及的具体文件（`git checkout -- <file1> <file2>`，不使用 `git checkout .`），以第 1 次状态进入第 3 次诊断
 
 **第 3 次诊断报告格式**：
 ```
@@ -910,19 +912,25 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 
 ```bash
 # 启动时记录
-<command> & echo $! >> "$TMPDIR/ce-verify-pids"
+PID_FILE="${TMPDIR:-${TEMP:-/tmp}}/ce-verify-pids"
+<command> & echo $! >> "$PID_FILE"
 
-# 清理（trap EXIT 兜底）
-trap 'cat "$TMPDIR/ce-verify-pids" 2>/dev/null | xargs kill 2>/dev/null; rm -f "$TMPDIR/ce-verify-pids"' EXIT INT TERM
+# 清理（trap EXIT 兜底，跨平台）
+if [[ "$(uname -s)" == MINGW* ]] || [[ "$(uname -s)" == MSYS* ]]; then
+  trap 'cat "$PID_FILE" 2>/dev/null | while read pid; do taskkill /F /PID "$pid" 2>/dev/null; done; rm -f "$PID_FILE"' EXIT INT TERM
+else
+  trap 'cat "$PID_FILE" 2>/dev/null | xargs kill 2>/dev/null; rm -f "$PID_FILE"' EXIT INT TERM
+fi
 ```
 
-- 超时硬杀：300 秒后 SIGKILL
-- 端口扫描兜底：清理后检查目标端口是否仍被占用，残留则宣告 PID 信息
-- **Windows 适配**：`kill` → `taskkill /F /PID`，端口检查用 `netstat -ano | findstr :<PORT>`
+- 超时硬杀：300 秒后 SIGKILL（Windows 下 taskkill /F 等效）
+- 端口扫描兜底：清理后检查目标端口是否仍被占用（Unix: `lsof -i :$PORT`，Windows: `netstat -ano | findstr :<PORT>`），残留则宣告 PID 信息
 
 ---
 
 **Layer 2 综合结果**：所有执行的路由均通过 → `layers.layer2 = "pass"`；任一路由失败 → `layers.layer2 = "fail"`，进入修复循环
+
+> 设计决策：采用 all-or-nothing 策略（任一路由失败则整体失败）。理由：测试失败意味着代码有问题，即使 UI 看起来没问题也不应跳过。若特定路由的失败是误判（如过时的单元测试与本次改动无关），用户可在 BLOCKED 阶段选择跳过验证。
 
 ---
 
@@ -958,7 +966,7 @@ trap 'cat "$TMPDIR/ce-verify-pids" 2>/dev/null | xargs kill 2>/dev/null; rm -f "
 - **BLOCKED 合并**：[V]+[T] 同时激活且验证失败时，使用标准 AskUserQuestion 工具（与非 team 模式相同），在提示文字中标注「团队模式」：
   > "⚠️ [V]+[T] 验证未通过（已重试 N 轮）
   > 失败层：[层名] — [失败原因摘要]
-  > Layer 0 层内重试：[layer0_inner_retries] 次
+  > Layer 0 层内重试：[layer0_inner_retries] 次，Layer 2 层内重试：[layer2_inner_retries] 次
   >
   > 1. 查看详细错误，执行者手动修复后重新运行验证（重置 verification_rounds）
   > 2. 跳过验证，降级为标准模式继续 Phase 4
@@ -1000,7 +1008,7 @@ trap 'cat "$TMPDIR/ce-verify-pids" 2>/dev/null | xargs kill 2>/dev/null; rm -f "
 使用 **AskUserQuestion** 工具询问：
 > "⚠️ [T] 验证未通过（已重试 2 轮）
 > 失败层：[层名] — [失败原因摘要]
-> （Layer 0 层内重试次数：[layer0_inner_retries] 次）
+> （Layer 0 层内重试：[layer0_inner_retries] 次，Layer 2 层内重试：[layer2_inner_retries] 次）
 >
 > 1. 查看详细错误，手动修复后重新运行验证（重置轮次）
 > 2. 跳过验证，降级为标准模式继续 Phase 4
