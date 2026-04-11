@@ -19,7 +19,7 @@ $workflows-review
 4. 回到 Claude，继续执行：
 
 ```text
-/workflows:work docs/plans/<your-plan>.md
+/ce:work docs/plans/<your-plan>.md
 ```
 
 如果你后续修改了本仓库里与 `brainstorm / plan / review` 或 Codex 最小技能同步相关的功能，开发完成后在 Claude 里执行：
@@ -46,7 +46,7 @@ $workflows-review
 共享的是**文档协议**，不是运行时实现。
 
 - Codex 负责生成 `docs/brainstorms/` 与 `docs/plans/` 中的文档
-- Claude 后续继续读取这些文档并执行 `/workflows:work`
+- Claude 后续继续读取这些文档并执行 `/ce:work`
 
 ## 本地直接使用
 
@@ -126,13 +126,13 @@ Codex 产物写入：
 然后你可以回到 Claude，继续使用：
 
 ```text
-/workflows:work <plan_path>
+/ce:work <plan_path>
 ```
 
 例如：
 
 ```text
-/workflows:work docs/plans/2026-04-01-feat-example-plan.md
+/ce:work docs/plans/2026-04-01-feat-example-plan.md
 ```
 
 ## 通过安装链路写入到全局 Codex

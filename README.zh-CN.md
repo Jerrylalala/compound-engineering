@@ -12,7 +12,7 @@
 **推荐：通过 Marketplace 安装**
 
 ```
-/plugins → Add marketplace → Jerrylalala/compound-engineering-plugin-private
+/plugins → Add marketplace → Jerrylalala/compound-engineering
 ```
 
 **本地开发（可选）：**
@@ -31,11 +31,11 @@ bun run src/index.ts install ./plugins/compound-engineering --to gemini
 
 # 从私有仓库远程安装（临时设置环境变量）
 # Windows PowerShell:
-$env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering-plugin-private"
+$env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering"
 bunx @every-env/compound-plugin install compound-engineering --to gemini
 
 # Linux/macOS:
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering-plugin-private \
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering \
   bunx @every-env/compound-plugin install compound-engineering --to gemini
 ```
 
@@ -49,13 +49,11 @@ COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineerin
 
 | 命令 | 说明 |
 |------|------|
-| `/workflows:load` | 加载项目上下文，恢复之前的会话 |
-| `/workflows:brainstorm` | 探索需求和方案 |
-| `/workflows:plan` | 把需求描述整理成可执行的计划 |
-| `/workflows:work` | 按计划执行并交付 |
-| `/workflows:review` | 多代理代码审查 |
-| `/workflows:compound` | 沉淀解决方案与知识 |
-| `/workflows:save` | 保存项目上下文，用于跨会话恢复 |
+| `/ce:brainstorm` | 探索需求和方案 |
+| `/ce:plan` | 把需求描述整理成可执行的计划 |
+| `/ce:work` | 按计划执行并交付 |
+| `/ce:review` | 多代理代码审查 |
+| `/ce:compound` | 沉淀解决方案与知识 |
 
 ## 更多文档
 

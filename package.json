@@ -7,8 +7,8 @@
   "bin": {
     "compound-plugin": "src/index.ts"
   },
-  "homepage": "https://github.com/Jerrylalala/compound-engineering-plugin-private",
-  "repository": "https://github.com/Jerrylalala/compound-engineering-plugin-private",
+  "homepage": "https://github.com/Jerrylalala/compound-engineering",
+  "repository": "https://github.com/Jerrylalala/compound-engineering",
   "publishConfig": {
     "access": "public"
   },

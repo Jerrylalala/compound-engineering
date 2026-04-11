@@ -74,16 +74,19 @@ Commands 是用户可调用的斜杠命令。
 
 ```
 commands/
-├── workflows/
-│   ├── brainstorm.md    # /workflows:brainstorm
-│   ├── plan.md          # /workflows:plan
-│   └── work.md          # /workflows:work
-└── changelog.md         # /changelog
+├── ce/
+│   ├── brainstorm.md    # /ce:brainstorm
+│   ├── plan.md          # /ce:plan
+│   ├── work.md          # /ce:work
+│   ├── review.md        # /ce:review
+│   └── ...
+├── codex.md             # /codex
+└── gemini.md            # /gemini
 ```
 
 **命名规范**：
-- 使用 `workflows:` 前缀避免与内置命令冲突
-- Claude Code 有内置 `/plan`，所以我们用 `/workflows:plan`
+- 使用 `ce:` 前缀避免与内置命令冲突
+- Claude Code 有内置 `/plan`，所以我们用 `/ce:plan`
 
 ---
 
@@ -95,7 +98,7 @@ commands/
     ▼
 ┌─────────────────────────────────────────┐
 │  Commands（命令）                        │
-│  /workflows:plan, /workflows:work       │
+│  /ce:plan, /ce:work       │
 └─────────────────────────────────────────┘
     │                           │
     ▼                           ▼
