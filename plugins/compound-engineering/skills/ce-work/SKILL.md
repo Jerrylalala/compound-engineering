@@ -85,7 +85,11 @@ Load the `team-mode` skill for the complete initialization sequence:
 
 **触发条件**：V_MODE_ENABLED = true（由 [V] 或 [V+] 激活）。否则跳过本阶段。
 
-**目标**：在进入执行流程前，自动确定「应用启动命令」（START_COMMAND），确保 Layer 2/4 验证时可以启动应用——对非开发者用户完全零记忆负担。
+**目标**：在进入执行流程前，自动确定两个命令：
+- **START_COMMAND**：应用启动命令，确保 Layer 2/4 验证时可以启动应用
+- **TEST_COMMAND**：项目测试命令，确保 Layer 0/2 可以自动跑测试
+
+两个命令独立推导、独立存储，对非开发者用户完全零记忆负担。
 
 ---
 
@@ -174,11 +178,7 @@ Load the `team-mode` skill for the complete initialization sequence:
 - 若命令为空 → 以业务语言提示，重进 Level 3
 - 若命令包含 `-->` 或换行符 → 以业务语言提示"命令格式有误，请检查"，重进 Level 3（**安全防护：避免破坏 CLAUDE.md HTML 注释结构**）
 - 若命令形如 `<PKG_RUN> <script>`：验证 package.json 中该 script 是否存在（警告但不阻断）
-- 若通过：环境指纹阶段完成，宣告：
-  ```
-  ✅ 环境指纹就绪：启动命令 = `<START_COMMAND>`
-     Layer 2/4 验证将使用此命令启动应用
-  ```
+- 若通过：START_COMMAND 推导完成，继续 TEST_COMMAND 推导（见下方「TEST_COMMAND 推导」章节）
 
 ---
 
@@ -198,6 +198,101 @@ Load the `team-mode` skill for the complete initialization sequence:
        > 2. 保持旧命令 `<old>` 不变
      - 用户选 1：更新 START_COMMAND，同步更新 CLAUDE.md 标记行
      - 用户选 2：保持 START_COMMAND 不变，CLAUDE.md 保持旧覆盖值
+
+---
+
+#### TEST_COMMAND 推导（与 START_COMMAND 并行，同一 Phase -1.5 内执行）
+
+**目标**：自动确定项目的测试命令（TEST_COMMAND），供 Layer 0 和 Layer 2 使用。
+
+**决策树（按优先级顺序执行，找到即停止）**
+
+**Level 1：读取 CLAUDE.md 显式覆盖**
+
+搜索当前项目的 CLAUDE.md，寻找 ce-work 测试命令标记：
+
+```
+<!-- ce-work-test-command: <command> -->
+<!-- ce-work-test-command-source: auto-detected|user-provided -->
+```
+
+- 若找到：
+  - `source: user-provided` → 无条件使用，设置 `TEST_COMMAND = <command>`，**跳转 Level 4**
+  - `source: auto-detected` → 重新执行 Level 2 推导并比对：
+    - 一致 → 使用，**跳转 Level 4**
+    - 不一致 → 清除旧记录，**继续 Level 2**
+- 若未找到：继续 Level 2
+
+**Level 2：从项目配置文件动态推导（每次新鲜读取）**
+
+按以下优先级顺序匹配（PKG_RUN = START_COMMAND 推导中已检测的包管理器前缀）：
+
+| 优先级 | 匹配条件 | 推导结果 |
+|--------|---------|---------|
+| 1 | `package.json` scripts.test 存在，且**不是** `"echo \"Error: no test specified\" && exit 1"`（npm 默认空命令） | `<PKG_RUN> test` |
+| 2 | `Makefile` 有 `test:` target 或 `Justfile` 有 `test:` recipe | `make test` / `just test` |
+| 3 | `pyproject.toml` 有 `[tool.pytest]`，或 `pytest.ini` 存在，或 `setup.cfg` 有 `[tool:pytest]` | `pytest` |
+| 4 | `Cargo.toml` 存在 | `cargo test` |
+| 5 | `go.mod` 存在 | `go test ./...` |
+| 6 | 无法推导 | 继续 Level 3 |
+
+- 若推导成功：设置 `TEST_COMMAND = <推导结果>`，宣告 `✅ 自动检测到测试命令：\`<command>\``，**跳转 Level 3b**
+
+**Level 3：询问用户（与 START_COMMAND 合并为一次交互）**
+
+若 START_COMMAND 也需要询问，合并为一次 AskUserQuestion：
+
+> 检测到以下命令配置：
+> - 启动命令：`<START_COMMAND 或"未检测到">`
+> - 测试命令：`<TEST_COMMAND 或"未检测到">`
+>
+> 1. 都对
+> 2. 修改测试命令
+> 3. 修改启动命令
+> 4. 都需要修改
+
+若仅 TEST_COMMAND 需要询问：
+
+> 我需要知道怎么跑测试，才能帮你自动验证。
+> 请输入测试命令（如 `npm test`、`pytest`、`cargo test`），或输入"无"表示项目无测试。
+
+- 用户输入"无" → TEST_COMMAND 设为空，Layer 0/2 的测试路由标记 skip
+- 用户输入命令 → 语义校验（与 START_COMMAND 一致：防 `-->` 注入 + script 存在性检查）
+- 校验通过 → 设置 `TEST_COMMAND = <用户答案>`，SOURCE = `user-provided`
+
+**Level 3b：写入 CLAUDE.md 持久化**
+
+在项目 CLAUDE.md 中追加（若已有 `<!-- ce-work-test-command:` 标记行则替换）：
+
+```markdown
+<!-- ce-work-test-command: <command> -->
+<!-- ce-work-test-command-source: auto-detected|user-provided -->
+<!-- ce-work-test-command-updated: <YYYY-MM-DD> -->
+```
+
+**Level 4：验证命令可用性**
+
+- 若命令为空 → TEST_COMMAND 未设置，Layer 0/2 测试路由标记 skip
+- 若命令包含 `-->` 或换行符 → 提示格式有误，重进 Level 3
+- 若命令形如 `<PKG_RUN> <script>` → 验证 package.json 中 script 是否存在（警告但不阻断）
+- 若通过 → 宣告：
+  ```
+  ✅ 环境指纹就绪：
+     启动命令 = `<START_COMMAND>`
+     测试命令 = `<TEST_COMMAND>`
+  ```
+
+**Monorepo 处理**：
+- 根 package.json 有 scripts.test → 用根命令（通常是 turbo test / nx test 编排）
+- 根无 test，当前 Unit 只改了 `packages/foo/` → `cd packages/foo && <PKG_RUN> test`
+- 根无 test，改了多个子包 → AskUserQuestion 列出涉及的子包让用户选择
+
+**主动漂移检测（TEST_COMMAND）**：
+
+与 START_COMMAND 共用触发条件（package.json / Cargo.toml / pyproject.toml 被修改时）：
+1. 重新执行 Level 2 推导
+2. 若推导结果 ≠ 当前 TEST_COMMAND → 询问用户是否更新
+3. 用户确认后同步更新 CLAUDE.md 标记行
 
 ---
 
@@ -631,10 +726,14 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 | 触发信号 | 激活层 | 判断依据 |
 |----------|--------|----------|
-| 描述含「前端/UI/组件/页面/样式/交互」或变更含 `.tsx/.vue/.html/.css` | Layer 2 | 关键词 + 扩展名 |
-| 描述含「API/接口/数据库/路由/endpoint/migration」或变更含 `routes/controllers/models/migrations` | Layer 1 | 关键词 + 路径 |
+| 描述含「前端/UI/组件/页面/样式/交互」或变更含 `.tsx/.vue/.html/.css` | Layer 2（浏览器路由） | 关键词 + 扩展名 |
+| 描述含「API/接口/数据库/路由/endpoint/migration」或变更含 `routes/controllers/models/migrations` | Layer 1 + Layer 2（API 附加路由） | 关键词 + 路径 |
+| 描述含「CLI/命令行/参数解析」或变更含 argparse/clap/commander 相关文件 | Layer 2（CLI 附加路由） | 关键词 + 路径 |
+| TEST_COMMAND 存在且非空（Phase -1.5 推导成功） | Layer 2（TEST_COMMAND 路由） | 环境指纹 |
 | 描述含「Markdown/文档/提示词/SKILL」 | 跳过 Layer 1/2，仅 Layer 0 + Layer 3 | 关键词 |
 | 始终 | Layer 0（无条件激活） | — |
+
+**Layer 2 路由优先级**（可叠加）：浏览器 > API 附加 > CLI 附加 > TEST_COMMAND。前端项目同时跑浏览器 + TEST_COMMAND。
 
 **Layer 0 无命令兜底**：若项目 CLAUDE.md 中未找到构建/测试命令（如纯 Markdown/SKILL 插件项目），Layer 0 执行文件格式检查（如 markdownlint）或版本一致性检查（如 `scripts/check-versions.ps1`）。若确无任何可执行命令，记录 `layers.layer0 = "skip"`，输出：「⚠️ 未检测到构建命令，Layer 0 跳过 CLI 执行，仅记录 skip」。
 
@@ -658,12 +757,43 @@ Determine how to proceed based on what was provided in `<input_document>`.
 1. 读取项目 CLAUDE.md，提取构建/测试命令（如 `npm run build`、`pytest`、`cargo test`）
 2. 执行命令，捕获 exit code + stderr
 3. exit code = 0 → 更新 `layers.layer0 = "pass"`
-4. exit code ≠ 0 → 分析错误输出 → 修复代码/配置 → 重试 Layer 0（**不计入 verification_rounds**，属于层内重试）
-   - **层内最大重试次数：3 次**。每次重试 `layer0_inner_retries +1`（记录在 .context/compound-engineering/ce-work-verification.json 或内存中）。
-   - 超过 3 次后：
-     - 更新 `layers.layer0 = "fail"` 并记录错误摘要
-     - 继续本轮的后续激活层（Layer 1/2/3），不提前中断
-     - **本轮所有层执行完毕后**，`verification_rounds +1`（Layer 0 内部重试不独立计入轮次）
+4. exit code ≠ 0 → 进入**层内修复循环**（不计入 verification_rounds），遵循通用修复循环规则（见下方）
+
+**通用层内修复循环**（适用于 Layer 0 和 Layer 2）：
+
+**最大重试次数：3 次**。每次重试 `layer<N>_inner_retries +1`。
+
+| 重试轮次 | 行为 | 修复范围 |
+|---------|------|---------|
+| **第 1 次** | 完整诊断 + 修复代码 + 重跑 | 不限制 |
+| **第 2 次** | 缩小范围 + 只改一个文件 + 重跑 | 单文件 |
+| **第 3 次** | **仅诊断，不修代码** + 输出诊断报告 | 零修改 |
+
+**修复约束**：
+- **禁止修改测试断言来"修复"失败**：修复前检查 diff，若只改了测试文件的断言 → 阻止并提示「不应修改测试断言来通过测试」（除非测试本身有明确 bug，如 import 路径拼写错误）
+- **环境错误不进修复循环**：检测 `ModuleNotFoundError` / `command not found` / `No module named` / `Cannot find module` → 直接提示用户安装依赖，不修代码
+- **第 2 次回滚保护**：若第 2 次修复引入新失败（失败数增加）→ 回滚第 2 次改动（`git checkout` 修改的文件），以第 1 次状态进入第 3 次诊断
+
+**第 3 次诊断报告格式**：
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❌ 自动修复未能解决，需要人工介入
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+失败测试：[测试名或命令]
+根因分析：[AI 判断]
+已尝试修复：
+  - 第 1 轮：[做了什么] → [结果]
+  - 第 2 轮：[做了什么] → [结果]（已回滚）
+建议手动操作：[具体步骤]
+相关文件：[文件列表]
+错误日志：[关键行]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+超过 3 次后：
+   - 更新 `layers.layer<N> = "fail"` 并记录错误摘要
+   - 继续本轮的后续激活层，不提前中断
+   - **本轮所有层执行完毕后**，`verification_rounds +1`
 
 ---
 
@@ -689,13 +819,19 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 ---
 
-**Layer 2：浏览器 UI 验证**（条件执行）
+**Layer 2：项目类型特定验证**（条件执行——多路由）
 
 *如未触发*：`layers.layer2 = "skip"`
 
+Layer 2 根据 Phase 3.5.1 的触发判断，执行一个或多个验证路由：
+
+---
+
+**路由 A：浏览器 UI 验证**（前端项目触发时执行）
+
 *如 dev server 未运行*：
-- 尝试启动；若本项目无 dev server（纯 API/CLI 项目）→ `layers.layer2 = "skip"`，记录「⚠️ 项目无 dev server，Layer 2 跳过」
-- 若项目应有 dev server 但**启动失败**（可能是代码问题）→ 记录 `layers.layer2 = "fail"`，标注「⚠️ dev server 启动失败，可能是代码编译错误，Layer 2 计为失败而非跳过」（区别：不掩盖真实构建问题）
+- 尝试启动；若本项目无 dev server（纯 API/CLI 项目）→ 跳过路由 A
+- 若项目应有 dev server 但**启动失败**（可能是代码问题）→ 记录 `layers.layer2 = "fail"`，标注「⚠️ dev server 启动失败，可能是代码编译错误，Layer 2 计为失败而非跳过」
 - Layer 2 URL 推断：优先读 CLAUDE.md 中的 dev server URL；其次读计划文件；若均未指定，默认 `http://localhost:3000` 并宣告使用的 URL
 
 **工具选择由 Phase -1 的 V_PLUS_MODE_ENABLED 决定（不自动切换）**：
@@ -719,7 +855,74 @@ agent-browser screenshot verification-<timestamp>.png  # 捕获视觉证据（ti
 
 **铁律：不基于任务关键词自动升级到 Playwright MCP。用户传 [V+] 才用。**
 
-成功 → `layers.layer2 = "pass"`；失败 → 修复 → 重试
+**设计图对比**（路由 A 完成后，可选增强）：
+- 检测设计文件：Glob `*.pen` / `*.fig`，或 plan 文档中引用了设计文件路径
+- 若有设计文件 → 派发 `design-implementation-reviewer` agent（截图 vs 设计稿 → 差异列表）
+- 若有 ❌ Major Issues → 派发 `design-iterator` agent（最多 3 轮迭代修复）
+- 若无设计文件 → 跳过，不影响路由 A 结果
+
+---
+
+**路由 B：TEST_COMMAND 验证**（TEST_COMMAND 存在且非空时执行）
+
+1. **安全检查**（执行前必须通过）：
+   - 扫描 `.env` 中 `DATABASE_URL`：若含 `amazonaws.com` / `azure` / 生产域名 → 用 AskUserQuestion 警告并确认
+   - 检查 TEST_COMMAND 不含 migration 关键词（`db:migrate` / `alembic upgrade` / `diesel migration`）
+   - 启动的任何服务必须绑定 `127.0.0.1`（不允许 `0.0.0.0`）
+
+2. **执行 TEST_COMMAND**（通过 Bash 工具）：
+   - 设置超时 300 秒
+   - 捕获 exit code + stdout + stderr
+
+3. **测试输出解析**（不仅依赖退出码）：
+   - jest/vitest：匹配 `Tests: N passed, M failed`
+   - pytest：匹配 `N passed, M failed` 或 `no tests ran`
+   - cargo test：匹配 `test result: ok. N passed; M failed`
+   - go test：匹配 `ok` / `FAIL`
+   - 通用 fallback：退出码 0 = pass，非 0 = fail + 输出原始 stderr
+   - **空跑检测**：匹配 `0 tests` / `no tests ran` / `no tests collected` → 标记为 ⚠️ 警告（不视为 pass）
+   - **环境错误检测**：匹配 `ModuleNotFoundError` / `command not found` / `No module named` → 标记为环境错误，**不进入修复循环**，直接提示用户安装缺失依赖
+
+4. 结果 → `layers.layer2 = "pass"` / `"fail"` / `"skip"`
+
+---
+
+**路由 C：CLI 附加验证**（CLI 项目触发时执行，在路由 B 之后）
+
+1. 跑 `<CLI命令> --help` → 验证可执行且无崩溃（exit code 0）
+2. 若 plan 中有 CLI 验收条件（Given/When/Then 格式）→ 按条件执行典型输入 → 验证退出码 + stdout 包含预期字符串
+3. 若无 CLI 验收条件 → 仅跑 --help，通过即可
+
+---
+
+**路由 D：API 附加验证**（API 项目触发时执行，在路由 B 之后）
+
+1. 若 START_COMMAND 存在 → 启动服务（后台运行）
+2. 等待端口就绪（每秒检测，最多 30 秒超时）
+3. 若 plan 中有 API 验收条件 → 按条件执行 curl 请求 → 验证状态码 + 响应结构
+4. 测试完成 → 杀掉服务进程（见下方进程管理）
+
+---
+
+**进程管理与清理**（所有路由共用）：
+
+所有启动的进程记录 PID 到 `$TMPDIR/ce-verify-pids`（Windows 用 `$TEMP`）：
+
+```bash
+# 启动时记录
+<command> & echo $! >> "$TMPDIR/ce-verify-pids"
+
+# 清理（trap EXIT 兜底）
+trap 'cat "$TMPDIR/ce-verify-pids" 2>/dev/null | xargs kill 2>/dev/null; rm -f "$TMPDIR/ce-verify-pids"' EXIT INT TERM
+```
+
+- 超时硬杀：300 秒后 SIGKILL
+- 端口扫描兜底：清理后检查目标端口是否仍被占用，残留则宣告 PID 信息
+- **Windows 适配**：`kill` → `taskkill /F /PID`，端口检查用 `netstat -ano | findstr :<PORT>`
+
+---
+
+**Layer 2 综合结果**：所有执行的路由均通过 → `layers.layer2 = "pass"`；任一路由失败 → `layers.layer2 = "fail"`，进入修复循环
 
 ---
 

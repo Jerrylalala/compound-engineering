@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.49.0] - 2026-04-11
+
+### 通用自动化验证引擎（MINOR）
+
+- **新增 TEST_COMMAND 自动推导**：在 Phase -1.5 环境指纹中新增测试命令检测，支持 npm/pnpm/yarn test、Makefile、pytest、cargo test、go test，推导结果持久化到 CLAUDE.md 跨会话复用
+- **扩展 [V] Layer 2 为多路由验证**：从「仅浏览器」扩展为 4 条路由——浏览器 UI 测试、TEST_COMMAND 执行、CLI 附加验证、API 附加验证，非前端项目不再 skip Layer 2
+- **自动修复循环增强**：统一为 3 次内部重试（诊断修复 → 缩小范围 → 仅诊断报告），新增回滚保护、环境错误跳过、禁止修改测试断言
+- **设计图对比集成**：有 .pen/Figma 设计文件时，浏览器测试后自动派发 design-implementation-reviewer + design-iterator 迭代修复
+- **安全约束**：服务绑定 localhost、生产环境检测、migration 命令拦截、进程三层清理（PID + trap + 端口扫描）
+- **Plan 测试场景结构化**：ce:plan 推荐 Given/When/Then 格式，默认 test-first 执行姿态
+- **测试输出智能解析**：按框架解析通过/失败数，检测空跑模式，区分环境错误与代码错误
+
+---
+
 ## [2.48.4] - 2026-04-10
 
 ### 新增 /ce:ideas 和 /ce:resume 工作流命令（PATCH）
