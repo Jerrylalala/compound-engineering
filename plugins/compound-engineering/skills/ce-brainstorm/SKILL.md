@@ -52,8 +52,8 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 | Token | Effect |
 |-------|--------|
 | `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. After Party Mode concludes, automatically run structured convergence (see below). |
-| `[C]` | Auto-consult Codex after Phase 2. |
-| `[G]` | Auto-consult Gemini after Phase 2. |
+| `[C]` | CODEX_ENABLED = true. Phase 2 结束后自动调用 Codex CLI 咨询，结果整合到 brainstorm 文档。 |
+| `[G]` | GEMINI_ENABLED = true. Phase 2 结束后自动调用 Gemini CLI 咨询，结果整合到 brainstorm 文档。 |
 | `[R]` | Run learnings-researcher before Phase 1. Inject results as historical reference in Phase 2. |
 
 ---
@@ -238,6 +238,152 @@ If relevant, call out whether the choice is:
 - Reuse an existing pattern
 - Extend an existing capability
 - Build something net new
+
+### Phase 2.5: 外部 AI 咨询（[C][G] 参数触发）
+
+**检查 Parameter Handling 阶段解析的 CODEX_ENABLED 和 GEMINI_ENABLED 标志。**
+
+如果两者都为 false，跳过此步骤，直接进入 Phase 3。
+
+---
+
+#### 当 CODEX_ENABLED = true 时：
+
+**Step 2.5.1: 检查 Codex CLI 可用性**
+
+```bash
+command -v codex || echo "Codex CLI 未安装，请运行: npm install -g @openai/codex"
+```
+
+如果未安装，提示用户安装并跳过 Codex 咨询（主流程不中断）。
+
+**Step 2.5.2: 构建方案咨询 Prompt 并调用**
+
+构建结构化 prompt（从当前对话上下文中提取）：
+
+```
+## 项目背景
+[技术栈、框架]
+
+## 本轮头脑风暴的需求
+[feature_description]
+
+## Claude 提出的方案
+[Phase 2 中提出的 2-3 个方案，包含各方案的描述、优缺点]
+
+## 用户倾向的方向（如有）
+[用户在 Phase 2 中选择的偏好]
+
+## 请特别评估
+1. 这些方案中是否有最优解？如果都不是，更好的方案是什么？
+2. 有没有我们忽略的替代方案或开源库/框架？
+3. 性价比方面：是否存在更简洁、更高效的实现路径？
+4. 有没有潜在的坑或长期维护风险？
+```
+
+**执行流程**：
+
+```
+Step 1: 前台调用 Codex（不用 run_in_background）
+  - 使用 Bash 工具，设置 timeout=300000（5 分钟）
+  - 调用:
+    CODEX_OUTPUT="${TEMP:-/tmp}/codex-brainstorm-$(date +%s).md"
+    cat <<'PROMPT_EOF' | codex exec --output-last-message "$CODEX_OUTPUT" -
+    <构建好的prompt>
+    PROMPT_EOF
+    echo "---CODEX_EXIT: $?---"
+    cat "$CODEX_OUTPUT" 2>/dev/null
+
+Step 2: 检查结果
+  - 如果退出码非 0 或输出为空：
+    → 记录失败，继续主流程（不中断）
+    → 在 brainstorm 文档中注明 Codex 咨询失败
+  - 如果成功：
+    → 整合到后续 brainstorm 文档中
+
+注意：使用前台调用而非后台，因为后台模式在 Windows 上的 heredoc + stdin 管道更易出问题。
+不指定 -m 参数，使用 Codex 默认模型（见项目 CLAUDE.md Codex 模型策略）。
+```
+
+**如果调用失败**：
+- 未安装 → 提示：`npm install -g @openai/codex`
+- 网络/认证问题 → 运行 `codex login` 重新认证
+- 运行 `/ce:doctor` 进行完整健康检查
+
+---
+
+#### 当 GEMINI_ENABLED = true 时：
+
+**Step 2.5.4: 检查 Gemini CLI 可用性**
+
+```bash
+command -v gemini || echo "Gemini CLI 未安装，请运行: npm install -g @google/gemini-cli"
+```
+
+如果未安装，提示用户安装并跳过 Gemini 咨询（主流程不中断）。
+
+**Step 2.5.5: 构建方案咨询 Prompt 并调用**
+
+使用与 Codex 相同的 prompt 结构，通过 Gemini CLI 调用：
+
+```
+Step 1: 后台启动 Gemini
+  - 使用 Bash 工具，设置 run_in_background=true
+  - 调用:
+    cat <<'PROMPT_EOF' | gemini -m gemini-3-pro-preview -p '' -o json
+    <构建好的prompt>
+    PROMPT_EOF
+  - 记录返回的 task_id
+
+Step 2: 等待完成（最多 5 分钟）
+
+Step 3: 读取结果，解析并整合
+```
+
+---
+
+#### 当 CODEX_ENABLED 和 GEMINI_ENABLED 都为 true 时：
+
+在 Phase 3 的 brainstorm 文档中生成三方对比：
+
+```markdown
+## 外部咨询综合
+
+| 评估维度 | Claude | Codex | Gemini | 共识度 |
+|----------|--------|-------|--------|--------|
+| 推荐方案 | [X] | [Y] | [Z] | 一致/分歧 |
+| 替代建议 | ... | ... | ... | ... |
+| 风险提示 | ... | ... | ... | ... |
+
+**综合建议**：
+1. 多方一致的观点（可信度最高）
+2. 双方一致的建议（次优先）
+3. 单方独特见解（供参考）
+```
+
+---
+
+#### 超时处理
+
+如果 Codex 或 Gemini 在 5 分钟内未完成：
+
+```markdown
+## ⏱️ [Codex/Gemini] 咨询超时
+
+咨询未在 5 分钟内完成。可手动运行：
+- Codex：`/codex [你的问题]`
+- Gemini：`/gemini [你的问题]`
+
+brainstorm 主流程结果仍然有效。
+```
+
+---
+
+#### Phase 3 文档追加（CODEX_ENABLED 或 GEMINI_ENABLED 为 true 时）
+
+将 Phase 2.5 的外部咨询结果写入 brainstorm 文档的「外部 AI 咨询结果」小节（使用上方三方对比表格格式）。
+
+---
 
 ### Phase 3: Capture the Requirements
 
