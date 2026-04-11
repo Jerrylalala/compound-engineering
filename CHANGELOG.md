@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.48.3] - 2026-04-10
+
+### 工作流体验增强（PATCH）
+
+- **新增 `/ce:ideate` 命令入口**：恢复丢失的命令入口，skill 已存在，命令文件重新添加
+- **新增 `IDEAS.md` 想法停车场**：从现有 brainstorm/plan 文件中提取所有未执行方向，分类整理为 5 个区块（工作流体验、Feature Extensions、架构方向、Agent 扩展、知识记忆）
+- **新增 `docs/brainstorms/2026-04-10-workflow-chain-ideas-resume-requirements.md`**：工作流链路重构需求文档，经 Party Mode + Codex 多视角分析后裁决精简为 7 节点
+- **修复 `scripts/bump-version.ps1`**：将 `&&` 替换为 `;` 修复 PowerShell 5.x 解析错误
+
+---
+
 ## [2.48.2] - 2026-04-10
 
 ### ce:review 新增外部 AI 审核裁决协议（PATCH）
