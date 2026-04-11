@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.48.4] - 2026-04-10
+
+### 新增 /ce:ideas 和 /ce:resume 工作流命令（PATCH）
+
+- **新增 `/ce:ideas` 命令**（命令 + skill）：合并 ideate + next，统一管理 IDEAS.md 停车场。无参数时展示并推荐待执行想法，有参数时生成新方向建议，结束时询问是否存入 IDEAS.md
+- **新增 `/ce:resume` 命令**（命令 + skill）：回归项目唯一入口。读取 git log + IDEAS.md + active plan，输出「上次做了什么 / 有什么在等待 / 建议下一步」三段摘要，并引导用户选择继续路径
+- **扩展 `ce:brainstorm` handoff**：新增「存入 IDEAS.md」选项，允许用户在 brainstorm 结束时将未采纳的旁支想法保存到停车场，防止想法丢失
+
+---
+
 ## [2.48.3] - 2026-04-10
 
 ### 工作流体验增强（PATCH）
