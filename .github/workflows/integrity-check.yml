@@ -1,0 +1,18 @@
+name: 功能完整性校验
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'plugins/compound-engineering/**'
+
+jobs:
+  integrity-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 运行功能完整性校验
+        run: bash scripts/check-feature-integrity.sh
