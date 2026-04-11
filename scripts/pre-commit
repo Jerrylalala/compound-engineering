@@ -1,48 +1,82 @@
 #!/bin/bash
-# Git pre-commit hook - 版本一致性检查 + 组件变更检查
+# Git pre-commit hook — 强制执行完整性校验
 # 安装方法: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+#
+# 设计原则：文字规则靠不住，必须变成代码。
+# CLAUDE.md 里的「铁律核查清单」在这里用代码强制执行。
 
-# 检查是否有组件文件被修改
-COMPONENT_FILES_CHANGED=$(git diff --cached --name-only | grep -E "plugins/compound-engineering/(agents|commands|skills)/" || true)
+set -euo pipefail
 
-if [ -n "$COMPONENT_FILES_CHANGED" ]; then
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "⚠️  检测到组件变更，请确认是否已更新版本号"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    echo "变更的组件:"
-    echo "$COMPONENT_FILES_CHANGED"
-    echo ""
-    echo "如果这是新功能/修改，请运行:"
-    echo "  powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch"
-    echo ""
-    echo "如果已更新版本号，请忽略此提示。"
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
+# ──────────────────────────────────────────
+# 检查 1：密钥扫描（gitleaks）
+# ──────────────────────────────────────────
+if command -v gitleaks &> /dev/null; then
+    echo "🔍 运行 gitleaks 密钥扫描..."
+    gitleaks protect --staged --no-banner 2>/dev/null || {
+        echo "❌ gitleaks 发现潜在密钥泄露，提交已阻止"
+        exit 1
+    }
+    echo "✅ 密钥扫描通过"
 fi
 
-# 检查是否有版本相关文件被修改
+# ──────────────────────────────────────────
+# 检查 2：分支保护（不允许直接 commit 到 main）
+# ──────────────────────────────────────────
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
+    echo "❌ 已阻止：不允许在 $current_branch 分支上直接 commit"
+    echo "   请先创建功能分支：git checkout -b feat/your-feature"
+    echo ""
+    echo "   如果你确定要直接提交（例如 README.md 修改），使用："
+    echo "   git commit --no-verify"
+    exit 1
+fi
+
+# ──────────────────────────────────────────
+# 检查 3：功能完整性校验（铁律核查清单的代码化）
+# 每次 commit 都运行，不管改了什么文件。
+# 这就是 CLAUDE.md 核查清单 #3/#4/#5 的自动化。
+# ──────────────────────────────────────────
+if [ -f "scripts/check-feature-integrity.sh" ]; then
+    echo ""
+    bash scripts/check-feature-integrity.sh
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "❌ 功能完整性校验失败，提交已阻止"
+        echo "   请修复上述问题后重新提交"
+        exit 1
+    fi
+fi
+
+# ──────────────────────────────────────────
+# 检查 4：版本一致性（当版本文件被修改时）
+# ──────────────────────────────────────────
 VERSION_FILES_CHANGED=$(git diff --cached --name-only | grep -E "(marketplace\.json|plugin\.json)" || true)
 
-if [ -z "$VERSION_FILES_CHANGED" ]; then
-    # 没有版本文件被修改，跳过检查
-    exit 0
+if [ -n "$VERSION_FILES_CHANGED" ]; then
+    echo ""
+    echo "检测到版本文件变更，执行一致性检查..."
+    if [ -f "scripts/check-versions.sh" ]; then
+        bash scripts/check-versions.sh
+        if [ $? -ne 0 ]; then
+            echo "❌ 版本一致性检查失败"
+            exit 1
+        fi
+    elif command -v powershell &> /dev/null; then
+        powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+    fi
 fi
 
-echo "检测到版本文件变更，执行一致性检查..."
+# ──────────────────────────────────────────
+# 检查 5：组件变更提醒（不阻止，但提示 bump 版本）
+# ──────────────────────────────────────────
+COMPONENT_CHANGED=$(git diff --cached --name-only | grep -E "plugins/compound-engineering/(agents|commands|skills)" || true)
+VERSION_BUMPED=$(git diff --cached --name-only | grep "plugin\.json" || true)
 
-# 运行检查脚本
-if [ -f "scripts/check-versions.sh" ]; then
-    bash scripts/check-versions.sh
-    exit $?
-elif command -v powershell &> /dev/null; then
-    powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
-    exit $?
-else
-    echo "警告: 无法运行版本检查脚本"
-    echo "请手动确认版本号一致性:"
-    echo "  - .claude-plugin/marketplace.json"
-    echo "  - plugins/compound-engineering/.claude-plugin/plugin.json"
-    exit 0
+if [ -n "$COMPONENT_CHANGED" ] && [ -z "$VERSION_BUMPED" ]; then
+    echo ""
+    echo "⚠️  检测到组件变更但未更新版本号"
+    echo "   变更文件: $(echo "$COMPONENT_CHANGED" | wc -l | tr -d ' ') 个"
+    echo "   建议运行: powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch"
+    echo ""
 fi
