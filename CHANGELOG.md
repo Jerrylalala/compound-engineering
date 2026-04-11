@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.49.1] - 2026-04-11
+
+### 恢复 ce:brainstorm [C][G] + 功能丢失防护（PATCH）
+
+- **恢复 `ce:brainstorm [C][G]`**：从 git 历史（`98030d3`）迁移丢失的 Phase 2.5 外部 AI 咨询逻辑到当前 SKILL.md。包含 Codex/Gemini CLI 调用、三方对比表、超时降级
+- **新增 `scripts/check-feature-integrity.sh`**：参数声明-实现一致性校验——自动扫描所有 SKILL.md 的 argument-hint，检测声明了参数但无实现的空壳问题
+- **新增行数骤降检测**：SKILL.md 行数降幅 >30% 时告警，防止大规模代码意外删除
+
+---
+
 ## [2.49.0] - 2026-04-11
 
 ### 通用自动化验证引擎（MINOR）
