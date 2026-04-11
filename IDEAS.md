@@ -73,6 +73,13 @@
 
 ---
 
+## 已声明但未实现
+
+- [ ] **`ce:brainstorm [C]` Codex 集成**：参数表声明了 `[C] = Auto-consult Codex after Phase 2`，但 SKILL.md 中无任何实现逻辑。计划文件 `docs/plans/2026-02-04-feat-brainstorm-cg-integration-plan.md` 已存在但未执行。需要实现 Phase 2.5 Codex 调用 + 结果评判逻辑，或移除空壳声明。  
+  来源：2026-04-11 代码审查发现
+
+---
+
 ## 探索中（尚未形成 brainstorm 文档）
 
 - [ ] **IDEAS.md 老化提醒**：条目超过 90 天未动，AI 下次遇到时提示「还需要这个吗？」，防止 IDEAS.md 变成死文档。
