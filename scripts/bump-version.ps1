@@ -93,13 +93,22 @@ if ($verifyPlugin -eq $newVersion) {
     Write-Host "  发版流程" -ForegroundColor Yellow
     Write-Host "========================================" -ForegroundColor Cyan
     Write-Host "1. 更新 CHANGELOG.md（添加 v$newVersion 的变更内容）"
-    Write-Host "2. 更新 README.md 组件数量（如有变更）"
-    Write-Host "3. 提交并推送 PR：git add . ; git commit -m 'chore: 升级版本至 v$newVersion'"
-    Write-Host "4. PR 合并到 main 后，打 tag 触发自动 Release："
+    Write-Host "2. 提交并推送 PR：git add . ; git commit -m 'chore: 升级版本至 v$newVersion'"
+    Write-Host "3. PR 合并到 main 后，tag 由 GitHub Actions 自动创建，无需手动打。"
     Write-Host ""
-    Write-Host "     git tag v$newVersion ; git push origin v$newVersion" -ForegroundColor Yellow
+    Write-Host "========================================" -ForegroundColor Yellow
+    Write-Host "  文档核查清单（合并前必须全部完成）" -ForegroundColor Yellow
+    Write-Host "========================================" -ForegroundColor Yellow
+    Write-Host "  新增 Skill/Agent/Command 时："
+    Write-Host "  [ ] README.md — 工作流表、组件数量是否已更新"
+    Write-Host "  [ ] docs/zh-CN/workflow.html — 工作流节点是否已更新（如链路有变）"
+    Write-Host "  [ ] CHANGELOG.md — 变更内容是否已记录"
+    Write-Host "  [ ] plugin.json description — 组件数量字符串是否已更新"
     Write-Host ""
-    Write-Host "   GitHub Actions 将自动从 CHANGELOG.md 提取内容并创建 Release。" -ForegroundColor Cyan
+    Write-Host "  修改已有命令/参数行为时："
+    Write-Host "  [ ] README.md — 参数说明是否同步"
+    Write-Host "  [ ] docs/zh-CN/workflow.html — 参数/示例是否同步"
+    Write-Host "  [ ] CHANGELOG.md — 变更是否已记录"
     Write-Host ""
 } else {
     Write-Err "Verification failed, please check files manually"
