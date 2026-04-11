@@ -428,7 +428,53 @@
   </div>
 
   <div class="flow-section">
-    <div class="flow-label">点击任意阶段查看详情</div>
+    <div class="flow-label">入口 — 回到项目 / 找方向</div>
+
+    <div class="flow-row" id="entryRow">
+      <!-- Resume -->
+      <div class="node" data-step="resume" onclick="selectStep('resume')">
+        <div class="node-icon">🏠</div>
+        <div class="node-label">Resume</div>
+        <div class="node-cmd">/ce:resume</div>
+        <div class="node-badges">
+          <span class="param-badge" style="color:var(--text-muted)">回到项目</span>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg viewBox="0 0 28 28" fill="none"><path d="M8 14h12M16 10l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <!-- Ideate -->
+      <div class="node" data-step="ideate" onclick="selectStep('ideate')">
+        <div class="node-icon">🔮</div>
+        <div class="node-label">Ideate</div>
+        <div class="node-cmd">/ce:ideate</div>
+        <div class="node-badges">
+          <span class="param-badge" style="color:var(--text-muted)">AI 生成方向</span>
+        </div>
+      </div>
+
+      <div class="arrow">
+        <svg viewBox="0 0 28 28" fill="none"><path d="M8 14h12M16 10l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <!-- Ideas -->
+      <div class="node" data-step="ideas" onclick="selectStep('ideas')">
+        <div class="node-icon">💾</div>
+        <div class="node-label">Ideas</div>
+        <div class="node-cmd">/ce:ideas</div>
+        <div class="node-badges">
+          <span class="param-badge" style="color:var(--text-muted)">管理想法</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin:20px 0 8px">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style="color:var(--arrow)"><path d="M14 8v12M10 16l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <div class="flow-label">主工作流 — 点击任意阶段查看详情</div>
 
     <div class="flow-row" id="flowRow">
       <!-- Brainstorm -->
@@ -578,6 +624,65 @@
       </a>
     </p>
   </div>
+  <!-- Scenario Guide -->
+  <div class="flow-section" style="padding-top:0;padding-bottom:20px">
+    <div class="section-title">场景指南 — 什么情况用什么命令</div>
+  </div>
+  <div class="cards-row">
+    <div class="info-card">
+      <div class="info-card-icon">🏠</div>
+      <div class="info-card-title">刚打开项目</div>
+      <div class="info-card-desc"><code>/ce:resume</code> → 看完摘要后选下一步</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">🔮</div>
+      <div class="info-card-title">不知道做什么</div>
+      <div class="info-card-desc">完全没想法 → <code>/ce:ideate</code><br>之前记了一些 → <code>/ce:ideas</code> 选一个</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">💡</div>
+      <div class="info-card-title">有功能想做</div>
+      <div class="info-card-desc"><code>/ce:brainstorm</code> 想清楚 → <code>plan</code> → <code>work</code> → <code>review</code></div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">📋</div>
+      <div class="info-card-title">需求很清楚</div>
+      <div class="info-card-desc">跳过 brainstorm，直接 <code>/ce:plan</code> → <code>work</code> → <code>review</code></div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">🐛</div>
+      <div class="info-card-title">修 Bug</div>
+      <div class="info-card-desc">简单 bug → 直接改 → <code>/ce:review</code><br>复杂 bug → <code>brainstorm</code> 分析 → <code>plan</code> → <code>work</code></div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">📚</div>
+      <div class="info-card-title">沉淀经验</div>
+      <div class="info-card-desc">解决了有价值的问题 → <code>/ce:compound</code> 记录到经验库</div>
+    </div>
+  </div>
+
+  <!-- Tool Commands -->
+  <div class="flow-section" style="padding-top:0;padding-bottom:20px">
+    <div class="section-title">工具命令</div>
+  </div>
+  <div class="cards-row">
+    <div class="info-card">
+      <div class="info-card-icon">🩺</div>
+      <div class="info-card-title">/ce:doctor</div>
+      <div class="info-card-desc">健康检查：检测 CLI、MCP、认证状态，支持一键修复。</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">🔀</div>
+      <div class="info-card-title">/ce:pr</div>
+      <div class="info-card-desc">创建 Pull Request 并询问是否合并到主分支。</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">🔄</div>
+      <div class="info-card-title">/ce:sync-upstream</div>
+      <div class="info-card-desc">检测上游仓库最近 30 天更新，生成智能分析报告。</div>
+    </div>
+  </div>
+
   <div class="cards-row" style="margin-bottom:80px">
     <div class="info-card" style="border-top:2px solid rgba(167,139,250,0.5)">
       <div class="info-card-icon">✏️</div>
@@ -598,6 +703,52 @@
 
   <script>
     const steps = {
+      resume: {
+        icon: '🏠',
+        label: 'Resume',
+        cmd: '/ce:resume',
+        desc: '回归项目入口。自动读取最近 git log、IDEAS.md 和活跃计划文档，输出三段摘要：上次做到哪了、待办事项、建议下一步。适合新会话开始时使用。',
+        params: [
+          { tag: '无参数', type: '', label: '自动', desc: '自动扫描 git 历史、IDEAS.md 停车场和 docs/plans/ 中的活跃计划，无需手动指定。' },
+        ],
+        examples: `# 新会话开始时
+/ce:resume
+
+# 输出示例：
+# 📋 上次进度：完成了用户认证模块的 brainstorm 和 plan
+# 📌 待办：docs/plans/auth-plan.md 有 3 个未完成 Unit
+# 💡 建议：继续执行 /ce:work docs/plans/auth-plan.md`
+      },
+      ideate: {
+        icon: '🔮',
+        label: 'Ideate',
+        cmd: '/ce:ideate',
+        desc: '让 AI 分析项目现状，自动生成有根据的改进方向。适合「不知道做什么」的场景——AI 会读代码、读 git log、分析项目结构，然后给出几个建议方向并写入 IDEAS.md。与 ideas 的区别：ideate 是让 AI 生成想法，ideas 是管理你已有的想法。',
+        params: [
+          { tag: '功能领域', type: '', label: '可选', desc: '可以指定关注方向（如"性能"、"用户体验"），AI 会在该方向上深入分析。留空则全面扫描。' },
+        ],
+        examples: `# 完全没想法，让 AI 自由分析
+/ce:ideate
+
+# 指定关注方向
+/ce:ideate 性能优化
+/ce:ideate 用户体验改进`
+      },
+      ideas: {
+        icon: '💾',
+        label: 'Ideas',
+        cmd: '/ce:ideas',
+        desc: '管理 IDEAS.md 想法停车场。不带参数时展示已有想法并推荐一个开始做；带参数时把你的新想法加进去。与 ideate 的区别：ideas 管理你自己的想法，ideate 让 AI 生成想法。',
+        params: [
+          { tag: '新想法描述', type: '', label: '可选', desc: '带参数=把你的想法加入 IDEAS.md 停车场。不带参数=展示已有想法，AI 推荐一个最适合现在做的。' },
+        ],
+        examples: `# 查看并选择已有想法
+/ce:ideas
+
+# 记录新想法到停车场
+/ce:ideas 给 review 加一个 diff 大小预警功能
+/ce:ideas 支持自定义 agent 模板`
+      },
       brainstorm: {
         icon: '💡',
         label: 'Brainstorm',
