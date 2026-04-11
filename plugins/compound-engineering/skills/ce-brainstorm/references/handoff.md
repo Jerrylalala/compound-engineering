@@ -24,6 +24,7 @@ Present only the options that apply:
 - **Run additional document review** - Offer this only when a requirements document exists. Runs another pass for further refinement
 - **Ask more questions** - Continue clarifying scope, preferences, or edge cases
 - **Share to Proof** - Offer this only when a requirements document exists
+- **存入 IDEAS.md** - 将本次 brainstorm 中未采纳的旁支想法或备选方向保存到 IDEAS.md 停车场
 - **Done for now** - Return later
 
 If the direct-to-work gate is not satisfied, omit that option entirely.
@@ -60,6 +61,26 @@ If the curl fails, skip silently. Then return to the Phase 4 options.
 Load the `document-review` skill and apply it to the requirements document for another pass.
 
 When document-review returns "Review complete", return to the normal Phase 4 options and present only the options that still apply. Do not show the closing summary yet.
+
+**If user selects "存入 IDEAS.md":**
+
+1. 回顾本次 brainstorm 对话，识别所有「讨论过但未进入主方向」的旁支想法或备选方案（标题 + 1 句描述）
+2. 若找到旁支想法，展示给用户确认：
+   ```
+   本次 brainstorm 中有以下旁支想法可存入 IDEAS.md：
+   • [想法 1 标题]：[描述]
+   • [想法 2 标题]：[描述]
+   ...
+   ```
+   使用 `AskUserQuestion` 询问「确认存入这些条目吗？（可选择全部 / 部分 / 取消）」
+3. 若用户确认：将确认的条目追加到 `IDEAS.md` 末尾，格式：
+   ```
+   - [ ] **[标题]**：[1 句描述]
+     来源：[requirements 文档路径]（[当前日期 YYYY-MM-DD]）
+   ```
+   若 `IDEAS.md` 不存在，先创建（带标准头部注释）再写入
+4. 若本次 brainstorm 无旁支想法可存 → 提示「本次 brainstorm 无额外旁支想法」
+5. 存入后返回 Phase 4.1 选项，继续主流程（不中断）
 
 #### 4.3 Closing Summary
 
