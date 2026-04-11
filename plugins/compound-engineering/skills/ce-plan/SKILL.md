@@ -47,8 +47,13 @@ Every plan should contain:
 - Explicit test file paths for feature-bearing implementation units
 - Decisions with rationale, not just tasks
 - Existing patterns or code references to follow
-- Enumerated test scenarios for each feature-bearing unit, specific enough that an implementer knows exactly what to test without inventing coverage themselves
+- Enumerated test scenarios for each feature-bearing unit, using **Given/When/Then** format when possible:
+  ```
+  - Given: [前置条件]; When: [操作]; Then: [可验证的断言]
+  ```
+  Then 断言应为可机器验证的谓词（退出码、状态码、输出包含字符串、文件存在等）。模糊断言（如「用户体验流畅」）标记为 `(需手动验证)`。
 - Clear dependencies and sequencing
+- Default execution posture: **test-first** — 每个 feature-bearing 实现单元无显式 `Execution note` 时，默认 `Execution note: test-first`（纯配置/scaffolding/styling/文档单元除外，这些标记 `Test expectation: none`）
 
 A plan is ready when an implementer can start confidently without needing the plan to write the code for them.
 

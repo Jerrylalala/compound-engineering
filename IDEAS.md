@@ -59,6 +59,20 @@
 
 ---
 
+## 验证增强
+
+- [ ] **`[V]` Layer 2 通用验证引擎**（含 TEST_COMMAND 检测 + 自动修复循环 + 安全约束 + 设计图对比 + Plan Given/When/Then）：将 Layer 2 从「仅浏览器」扩展为「根据项目类型自动选测试策略」，自动修复最多 3 轮，三层进程清理防护。  
+  来源：[2026-04-11-universal-verification-engine-requirements.md](docs/brainstorms/2026-04-11-universal-verification-engine-requirements.md) — 已有需求文档，33 条需求
+
+---
+
+## Party Mode 优化
+
+- [ ] **`[P]` / `[P+]` 分层**：`[P]` 默认 3 个核心视角（用户代言人 + 技术专家 + 魔鬼代言人），`[P+]` 全量 12-14 视角发散。当前 `[P]` 每次都跑 14 视角太重，大多数场景不需要。  
+  来源：2026-04-11 用户反馈
+
+---
+
 ## 探索中（尚未形成 brainstorm 文档）
 
 - [ ] **IDEAS.md 老化提醒**：条目超过 90 天未动，AI 下次遇到时提示「还需要这个吗？」，防止 IDEAS.md 变成死文档。
