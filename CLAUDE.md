@@ -106,18 +106,24 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 
 **新功能/修改必须更新文档（铁律）**：
 
-> 添加新功能或修改现有功能时，**必须同步更新相关文档**，否则不算完成。
+> 功能代码写完、准备 commit 之前，必须完成以下核查，否则不算完成。**不需要用户提醒，不需要用户询问。**
 
-| 修改类型 | 必须更新的文档 |
-|----------|----------------|
-| 新功能（Skill/Agent/Command） | CHANGELOG.md、版本号、README.md、docs/zh-CN/workflow.html、docs/zh-CN/index.md |
-| 修改命令/agent 行为 | CHANGELOG.md、版本号、README.md、docs/zh-CN/workflow.html |
-| 修改工作流参数或说明 | CHANGELOG.md、版本号、README.md、docs/zh-CN/workflow.html、docs/zh-CN/index.md |
-| Bug 修复（用户可感知） | CHANGELOG.md、版本号、README.md（如功能描述有误） |
-| Bug 修复（内部逻辑） | CHANGELOG.md、版本号 |
-| 纯文档修改 | 不需要版本号，直接更新对应文档 |
+**触发时机**：写完新 Skill/Command/Agent，或修改了已有命令的行为/参数，准备 commit 时。
 
-> **检查顺序**：每次功能变更完成后，主动对照上表逐项核对，不需要用户提醒。
+**核查清单（逐项确认，跳过需有明确理由）**：
+
+| # | 检查项 | 说明 |
+|---|--------|------|
+| 1 | `CHANGELOG.md` | 在最新版本号下添加变更描述 |
+| 2 | `plugin.json` version | 运行 `bump-version.ps1 -BumpType patch` |
+| 3 | `plugin.json` description | 更新组件数量字符串（agents/commands/skills 数字） |
+| 4 | `README.md` 工作流表 | 新增命令是否出现在表中；参数变化是否同步 |
+| 5 | `README.md` 组件数量 | 比较文本与实际文件数，不一致则更新 |
+| 6 | `docs/zh-CN/workflow.html` | **仅当主工作流节点/链路结构变化时**才需更新；纯新增辅助命令可跳过 |
+
+**跳过规则**：
+- 第 6 项：新增的是辅助入口命令（非主循环节点）→ 跳过，注明理由
+- 第 4/5 项：纯 bug 修复、内部逻辑改动 → 跳过
 
 **Codex 集成同步（铁律）**：
 
