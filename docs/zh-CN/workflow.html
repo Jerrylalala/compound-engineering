@@ -438,6 +438,7 @@
         <div class="node-cmd">/ce:brainstorm</div>
         <div class="node-badges">
           <span class="param-badge optional">[P]</span>
+          <span class="param-badge optional">[P+]</span>
           <span class="param-badge">[C]</span>
           <span class="param-badge">[G]</span>
           <span class="param-badge">[R]</span>
@@ -601,7 +602,8 @@
         cmd: '/ce:brainstorm',
         desc: '通过对话式澄清探索需求和实现方案，生成结构化需求文档。这是工作流的起点——先搞清楚"做什么"，再进入规划。对于简单需求可以直接跳到 Plan；对于模糊、复杂或有多个方向的需求，从这里开始。',
         params: [
-          { tag: '[P]', type: 'optional', label: '可选增强', desc: '派对模式：14 个专家视角（架构师/安全/性能/QA…）发散讨论，结束后自动触发探索者+挑战者结构化收敛。适合思路不清晰或需要多角度评估的场景。' },
+          { tag: '[P]', type: 'optional', label: '可选增强', desc: '派对模式（轻量）：3 个核心视角（用户代言人+技术专家+魔鬼代言人）快速验证，结束后自动收敛。大多数场景推荐。' },
+          { tag: '[P+]', type: 'optional', label: '可选增强', desc: '派对模式（全量）：12-14 个专家视角（架构师/安全/性能/QA…）深度发散讨论，结束后自动收敛。适合思路不清晰或高风险决策。' },
           { tag: '[C]', type: '', label: '可选', desc: 'Codex 咨询：在 Phase 2 方案对比后自动调用 Codex 补充技术视角。' },
           { tag: '[G]', type: '', label: '可选', desc: 'Gemini 咨询：在 Phase 2 方案对比后自动调用 Gemini 补充外部参考方案。' },
           { tag: '[R]', type: '', label: '可选', desc: '历史检索：触发 learnings-researcher 搜索 docs/solutions/ 中的历史解决方案，作为方案对比的参考背景。' },

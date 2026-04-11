@@ -62,9 +62,9 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 - **SendMessage** 每 Unit 完成后实时通信验证
 - **TeamDelete** 收尾自动清理
 
-### [P] 派对模式 + 自动收敛
+### [P]/[P+] 派对模式 + 自动收敛
 
-14 个视角发散讨论，结束后自动触发**探索者+挑战者结构化收敛**，找到漏洞，无需额外参数。
+`[P]` 3 个核心视角快速验证，`[P+]` 全量 12-14 视角深度发散，结束后自动触发**探索者+挑战者结构化收敛**，找到漏洞。
 
 ### [V] 四层自验证
 

@@ -181,7 +181,7 @@ skills/
 
 | 命令 | 说明 |
 |------|------|
-| `/ce:brainstorm` | 探索需求和方案 `[P][C][G][R]`（[P] 结束后自动收敛找漏洞） |
+| `/ce:brainstorm` | 探索需求和方案 `[P][P+][C][G][R]`（[P] 3 视角快速验证，[P+] 全量发散+收敛） |
 | `/ce:plan` | 创建实施计划 `[T]`（生成 .team-contract.md） |
 | `/ce:work` | 执行工作计划 `[T][T+][V][V+][R]`（[T]=Agent Teams，[V]=四层验证，[V+]=+Playwright） |
 | `/ce:review` | 代码审查 `[mode:autofix] [C][G][T]`（[T]=合约白名单门控） |
@@ -201,7 +201,7 @@ skills/
 
 | 参数 | 阶段 | 效果 |
 |------|------|------|
-| `[P]` + 自动收敛 | ce:brainstorm | [P] 发散讨论结束后自动触发探索者+挑战者结构化收敛（无需额外参数） |
+| `[P]` / `[P+]` + 自动收敛 | ce:brainstorm | [P] 3 视角快速验证，[P+] 全量 12-14 视角发散，均自动触发探索者+挑战者收敛 |
 | `[T]` | ce:plan | 合约主 + 追溯审查，自动生成 `.team-contract.md` |
 | `[T]` | ce:work | 真实 Agent Teams：TeamCreate + verifier teammate（独立 context window）+ SendMessage 通信 + TeamDelete |
 | `[T+]` | ce:work | 在 `[T]` 基础上额外 spawn risk-guard teammate，拦截 auth/payment/migration 高风险路径 |

@@ -38,7 +38,7 @@
 
 | # | 命令 | 参数 | 用途 |
 |---|------|------|------|
-| 1 | `/ce:brainstorm` | `[P][C][G][R]` | 探索需求，生成需求文档；`[P]` 14视角发散+自动收敛 |
+| 1 | `/ce:brainstorm` | `[P][P+][C][G][R]` | 探索需求，生成需求文档；`[P]` 3 视角快速验证，`[P+]` 全量发散 |
 | 2 | `/ce:plan` | `[T]` | 制定实施计划，`[T]` 自动生成 `.team-contract.md` |
 | 3 | `/ce:work` | `[T][T+][V][V+][R]` | 执行计划，`[T]` 真实 Agent Teams，`[V]` 四层自验证 |
 | 4 | `/ce:review` | `[mode:autofix][C][G][T]` | 多代理代码审查，`[T]` 合约白名单门控 |
@@ -104,7 +104,7 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 ### [P] 派对模式 + 自动收敛
 
-`ce:brainstorm [P]` 14 个专家视角发散讨论（架构/安全/性能/QA…），结束后**自动触发探索者+挑战者结构化收敛**，无需额外参数。
+`ce:brainstorm [P]` 3 个核心视角快速验证，`[P+]` 全量 12-14 视角深度发散，结束后**自动触发探索者+挑战者结构化收敛**。
 
 ### Codex / Gemini 双重审查 + Claude 裁决
 
@@ -164,7 +164,7 @@ Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验�
 | 能力维度 | CE（本项目） | CE-UP（上游） | SP（Superpowers） | OMCC | CCG |
 |---------|------------|--------------|-----------------|------|-----|
 | **需求/范围探索** | ce-brainstorm | ce-brainstorm | brainstorming skill | analyst | — |
-| **多视角讨论** | [P] 14 视角 + 自动收敛 | — | — | — | — |
+| **多视角讨论** | [P] 3 视角 / [P+] 全量 + 自动收敛 | — | — | — | — |
 | **规划** | ce-plan | ce-plan | writing-plans skill | planner | /ccg:team-plan |
 | **计划审查/挑战** | document-review agents | — | — | — | — |
 | **架构/设计评审** | architecture-strategist | — | — | architect | init-architect |

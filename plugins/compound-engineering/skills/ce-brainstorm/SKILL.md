@@ -51,7 +51,8 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 
 | Token | Effect |
 |-------|--------|
-| `[P]` | Activate Party Mode (14-persona free-form discussion). Load `party-mode` skill. After Party Mode concludes, automatically run structured convergence (see below). |
+| `[P]` | Party Mode（3 核心视角：用户代言人 + 技术专家 + 魔鬼代言人）。快速多角度验证，结束后自动收敛。 |
+| `[P+]` | Party Mode 全量（12-14 视角发散讨论）。思路不清晰或高风险决策时使用，结束后自动收敛。 |
 | `[C]` | CODEX_ENABLED = true. Phase 2 结束后自动调用 Codex CLI 咨询，结果整合到 brainstorm 文档。 |
 | `[G]` | GEMINI_ENABLED = true. Phase 2 结束后自动调用 Gemini CLI 咨询，结果整合到 brainstorm 文档。 |
 | `[R]` | Run learnings-researcher before Phase 1. Inject results as historical reference in Phase 2. |
@@ -129,9 +130,13 @@ Task compound-engineering:research:learnings-researcher(feature_description)
 - 在 Phase 2 展示方案时，增加「📚 历史参考」子节，列出相关 solution 文档及其核心洞察
 - 若无相关历史记录 → 在「历史参考」节注明：`No relevant learnings found — 本次为全新探索`
 
-#### 0.5 [P] Post-Party Structured Convergence（仅当 `[P]` 标志存在时）
+#### 0.5 [P]/[P+] Post-Party Structured Convergence（仅当 `[P]` 或 `[P+]` 标志存在时）
 
-**触发时机**：Party Mode（`[P]`）讨论轮次结束后，进入此阶段。不使用 `[P]` 时跳过，直接进入 Phase 1。
+**触发时机**：Party Mode 讨论轮次结束后，进入此阶段。不使用 `[P]`/`[P+]` 时跳过，直接进入 Phase 1。
+
+**视角数量由标志决定**：
+- `[P]`：3 个核心视角（用户代言人 + 技术专家 + 魔鬼代言人），每个视角 1 个 sub-agent
+- `[P+]`：12-14 个视角（架构师 / 安全 / 性能 / QA / 用户代言人 / 产品策略 / 极简主义 / 逆向思维 / 基础设施 / 风险分析 / UX 设计 / 代码专家等），每个视角 1 个 sub-agent，并行派发
 
 **执行方式**：以 2 个对立视角顺序输出（同一 agent 切换视角），不创建独立 teammate：
 
