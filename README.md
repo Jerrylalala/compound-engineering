@@ -23,40 +23,66 @@
 ## 工作流
 
 ```
-[Resume] → 0: Ideate/Ideas → 1: Brainstorm → 2: Plan → 3: Work → 4: Review → 5: Compound → Repeat
+Resume → 0: Ideate/Ideas → 1: Brainstorm → 2: Plan → 3: Work → 4: Review → 5: Compound → Repeat
 ```
 
-**入口命令**（回到项目 / 选方向）：
+### 命令一览
+
+| # | 命令 | 一句话 | 常用参数 |
+|---|------|--------|---------|
+| — | `/ce:resume` | 回来了，告诉我现在啥状态 | — |
+| 0 | `/ce:ideate` | 不知道做什么，AI 帮我想方向 | — |
+| 0.5 | `/ce:ideas` | 管理想法停车场，帮我挑一个开始做 | — |
+| 1 | `/ce:brainstorm` | 知道大概要做什么，帮我想清楚 | `[P]` `[P+]` `[C]` `[G]` `[R]` |
+| 2 | `/ce:plan` | 想清楚了，拆成可执行的步骤 | `[T]` |
+| 3 | `/ce:work` | 按计划动手干 | `[T]` `[T+]` `[V]` `[V+]` `[R]` |
+| 4 | `/ce:review` | 干完了，帮我审查代码 | `[C]` `[G]` `[T]` |
+| 5 | `/ce:compound` | 审完了，把经验记下来 | — |
+
+> **ideate** = 让 AI 分析项目现状，**生成**改进方向建议（输出写入 IDEAS.md）
+> **ideas** = 管理你**已有的**想法（无参数=选一个开始做，有参数=加新想法）
+
+### 不同场景该怎么走
+
+```
+你的状态是什么？
+│
+├── 刚打开项目，不记得上次干到哪了
+│   └── /ce:resume → 看完摘要后选下一步
+│
+├── 不知道做什么，想找方向
+│   ├── 完全没想法 → /ce:ideate → 生成建议到 IDEAS.md
+│   └── 之前记了一些 → /ce:ideas → 选一个
+│       └── 选好后 → brainstorm → plan → work → review
+│
+├── 知道要做什么功能
+│   └── /ce:brainstorm 我要做XXX → plan → work → review
+│
+├── 需求已经很清楚，不需要讨论
+│   └── /ce:plan 做XXX功能 → work → review
+│
+├── 修 Bug
+│   ├── 简单 bug → 直接改 → /ce:review
+│   └── 复杂 bug → brainstorm 分析 → plan → work → review
+│
+├── 代码写完了，要审查
+│   └── /ce:review [C]
+│
+└── 刚解决了一个有价值的问题
+    └── /ce:compound
+```
+
+### 工具命令
 
 | 命令 | 用途 |
 |------|------|
-| `/ce:resume` | 回归项目入口：读 git log + IDEAS.md + active plan，输出三段摘要 |
-| `/ce:ideas` | 管理 IDEAS.md 停车场：无参数选已有方向，有参数生成新方向 |
-| `/ce:ideate` | 从零生成新改进方向（无停车场时或想全新探索时） |
+| `/ce:doctor` | 健康检查：检测 CLI、MCP、认证状态 |
+| `/ce:pr` | 创建 PR 并询问是否合并 |
+| `/ce:sync-upstream` | 检测上游仓库更新 |
 
-**主工作流**：
+### 交互式工作流可视化
 
-| # | 命令 | 参数 | 用途 |
-|---|------|------|------|
-| 1 | `/ce:brainstorm` | `[P][P+][C][G][R]` | 探索需求，生成需求文档；`[P]` 3 视角快速验证，`[P+]` 全量发散 |
-| 2 | `/ce:plan` | `[T]` | 制定实施计划，`[T]` 自动生成 `.team-contract.md` |
-| 3 | `/ce:work` | `[T][T+][V][V+][R]` | 执行计划，`[T]` 真实 Agent Teams，`[V]` 四层自验证 |
-| 4 | `/ce:review` | `[mode:autofix][C][G][T]` | 多代理代码审查，`[T]` 合约白名单门控 |
-| 5 | `/ce:compound` | — | 沉淀经验，构建团队知识库 |
-
----
-
-<!--
-  ╔══════════════════════════════════════════════════════════════╗
-  ║  点击下方链接，查看每个步骤的参数说明和交互演示              ║
-  ╚══════════════════════════════════════════════════════════════╝
--->
-
-### 📊 交互式工作流可视化
-
-> **[→ 打开交互式工作流图](https://jerrylalala.github.io/compound-engineering/workflow.html)**
->
-> 点击每个阶段，展开参数详情（真实实现 / 可选增强 / 普通参数三色标注）+ 使用示例代码。
+> **[→ 打开交互式工作流图](https://jerrylalala.github.io/compound-engineering/workflow.html)** — 点击每个阶段，展开参数详情 + 使用示例
 
 ---
 
