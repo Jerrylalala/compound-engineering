@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.49.4] - 2026-04-11
+
+### README + workflow.html 工作流完善（PATCH）
+
+- **README 工作流重写**：命令表改为场景导向「一句话」风格，新增场景决策树
+- **workflow.html 补全入口命令**：新增 Resume、Ideate、Ideas 三个入口节点
+- **workflow.html 新增场景指南**：6 个常见场景卡片（刚打开项目/没想法/有需求/修 Bug/要审查/沉淀经验）
+- **workflow.html 新增工具命令**：Doctor、PR、sync-upstream 工具命令卡片
+- 区分 ideate（AI 生成方向）和 ideas（管理已有想法）的说明
+
+---
+
 ## [2.49.3] - 2026-04-11
 
 ### 文档准确性修复 + CI 防回归（PATCH）
