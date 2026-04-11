@@ -170,7 +170,7 @@ Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验�
 | **架构/设计评审** | architecture-strategist | — | — | architect | init-architect |
 | **调试/根因分析** | systematic-debugging | — | systematic-debugging skill | debugger | — |
 | **实现/执行** | ce-work (subagents) | ce-work | executing-plans skill | executor | /ccg:team-exec |
-| **代码审查（通用）** | ce-review + 57 agents | ce-review | requesting-code-review skill | code-reviewer | /ccg:team-review |
+| **代码审查（通用）** | ce-review + 51 agents | ce-review | requesting-code-review skill | code-reviewer | /ccg:team-review |
 | **专项审查** | 安全/性能/正确性/可维护性等 10+ 专属 agent | 安全/性能等基础 | — | — | — |
 | **测试/TDD** | test-driven-development | — | TDD skill | test-engineer | — |
 | **验证/完成证明** | [T] verifier（独立 context） | — | verification-before-completion skill | verifier | /ccg:team-review |
@@ -195,7 +195,7 @@ Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验�
 | **跨 AI 平台支持** | Claude Code 专注 | ✅ 12+ 平台 | Claude Code 专注 | Claude Code 专注 | Claude Code 专注 |
 | **中文生态** | ✅ 中英双语 + 在线文档 | 英文 | 英文 | 英文 | 中文 |
 | **Skill 数量** | 52+ skills | 40+ skills | 15 skills | — | — |
-| **Review Agent 数量** | 57 agents | 40+ agents | — | ~9 agents | — |
+| **Review Agent 数量** | 51 agents | 40+ agents | — | ~9 agents | — |
 
 ---
 

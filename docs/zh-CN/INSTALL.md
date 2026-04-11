@@ -7,7 +7,7 @@
 ```
 /plugins
 # 选择 Add marketplace
-# 输入：Jerrylalala/compound-engineering-plugin-private
+# 输入：Jerrylalala/compound-engineering
 # 选择安装插件
 ```
 
@@ -34,7 +34,7 @@
 清除缓存后重新安装：
 
 1. `/plugins` → 选 marketplace → **Remove marketplace**
-2. 重新 **Add marketplace**，输入：`Jerrylalala/compound-engineering-plugin-private`
+2. 重新 **Add marketplace**，输入：`Jerrylalala/compound-engineering`
 3. Claude Code 会用 HTTPS 重新克隆仓库
 4. **重启 Claude Code**
 
@@ -69,18 +69,16 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 
 | 命令                       | 说明                              | 何时使用     |
 | -------------------------- | --------------------------------- | ------------ |
-| `/workflows:load`          | 加载项目上下文，恢复之前的会话    | 开始新会话时 |
-| `/workflows:brainstorm`    | 探索需求和方案（支持 Party Mode） | 需求不清晰时 |
-| `/workflows:plan`          | 创建实施计划（Bite-Sized 格式）   | 开始新功能前 |
-| `/workflows:work`          | 执行工作计划（自动选择执行模式）  | 有计划文档后 |
-| `/workflows:review`        | 多代理代码评审                    | 代码写完后   |
-| `/workflows:compound`      | 记录解决方案                      | 问题解决后   |
-| `/workflows:sync-upstream` | 检测上游仓库更新，生成分析报告    | 定期同步时   |
-| `/workflows:save`          | 保存项目上下文，用于跨会话恢复    | 结束会话时   |
+| `/ce:brainstorm`    | 探索需求和方案（支持 Party Mode） | 需求不清晰时 |
+| `/ce:plan`          | 创建实施计划（Bite-Sized 格式）   | 开始新功能前 |
+| `/ce:work`          | 执行工作计划（自动选择执行模式）  | 有计划文档后 |
+| `/ce:review`        | 多代理代码评审                    | 代码写完后   |
+| `/ce:compound`      | 记录解决方案                      | 问题解决后   |
+| `/ce:sync-upstream` | 检测上游仓库更新，生成分析报告    | 定期同步时   |
 
 ### 自动执行模式（v2.32.0 新增）
 
-`/workflows:work` 会根据任务数量自动选择执行模式：
+`/ce:work` 会根据任务数量自动选择执行模式：
 
 | 任务数量 | 执行模式        | 说明                        |
 | -------- | --------------- | --------------------------- |
@@ -108,15 +106,15 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 ### 场景 1：新功能开发
 
 ```
-1. /workflows:brainstorm 探索用户登录功能
+1. /ce:brainstorm 探索用户登录功能
    ↓ 输出决策文档
-2. /workflows:plan 用户登录功能
+2. /ce:plan 用户登录功能
    ↓ 输出计划文档
-3. /workflows:work docs/plans/xxx-plan.md
+3. /ce:work docs/plans/xxx-plan.md
    ↓ 开发、测试、提交
-4. /workflows:review [PR号]
+4. /ce:review [PR号]
    ↓ 评审、修复
-5. /workflows:compound
+5. /ce:compound
    ↓ 记录经验
 ```
 
@@ -124,9 +122,9 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 
 ```
 1. 描述 Bug（跳过 brainstorm）
-2. /workflows:plan 修复登录页报错
-3. /workflows:work
-4. /workflows:compound（可选）
+2. /ce:plan 修复登录页报错
+3. /ce:work
+4. /ce:compound（可选）
 ```
 
 ### 场景 3：新项目架构
@@ -134,8 +132,8 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 ```
 1. /glue-coding 我要做一个博客系统
    ↓ 完整技术选型 + 开源库推荐
-2. /workflows:plan 博客系统基础架构
-3. /workflows:work
+2. /ce:plan 博客系统基础架构
+3. /ce:work
 ```
 
 ---
@@ -166,9 +164,9 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 
 ### 自动化
 
-- **首次运行** `/workflows:compound` 时自动创建目录和配置
-- **搜索**：`/workflows:plan` 自动搜索两个目录
-- **记录**：`/workflows:compound` 自动判断写入位置
+- **首次运行** `/ce:compound` 时自动创建目录和配置
+- **搜索**：`/ce:plan` 自动搜索两个目录
+- **记录**：`/ce:compound` 自动判断写入位置
 
 ---
 
@@ -218,7 +216,7 @@ claude --plugin-dir "完整路径\plugins\compound-engineering"
 
 ```bash
 # 进入仓库目录
-cd F:\StudyFolder\StudyDest\project\compound-engineering-plugin-private
+cd /path/to/compound-engineering
 
 # 转换到 Codex
 bun run src/index.ts install ./plugins/compound-engineering --to codex
@@ -241,7 +239,7 @@ bun run src/index.ts install ./plugins/compound-engineering --to opencode --also
 
 ```powershell
 # 临时设置环境变量并安装
-$env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering-plugin-private"
+$env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering"
 bunx @every-env/compound-plugin install compound-engineering --to gemini
 bunx @every-env/compound-plugin install compound-engineering --to codex
 ```
@@ -250,7 +248,7 @@ bunx @every-env/compound-plugin install compound-engineering --to codex
 
 ```bash
 # 一行命令（临时设置）
-COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering-plugin-private \
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering \
   bunx @every-env/compound-plugin install compound-engineering --to gemini
 ```
 

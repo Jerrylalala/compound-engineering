@@ -26,9 +26,9 @@
   └──────────────────────────────────────────────────────────────────────┘
 
   独立工具（手动调用）：
-  • 📚 /workflows:compound - 记录已解决的问题
-  • 🔄 /workflows:sync-upstream - 检测上游更新
-  • 🔀 /workflows:pr - 创建 PR
+  • 📚 /ce:compound - 记录已解决的问题
+  • 🔄 /ce:sync-upstream - 检测上游更新
+  • 🔀 /ce:pr - 创建 PR
 ```
 
 ### 📌 图例说明
@@ -45,13 +45,13 @@
 
 ---
 
-### 🔄 独立工具: `/workflows:sync-upstream`
+### 🔄 独立工具: `/ce:sync-upstream`
 
 > 💬 **作用**: 检测上游仓库更新，生成智能分析报告
 
 ```
 ╭─────────────────────────────────────────────────────────────╮
-│  🔄 /workflows:sync-upstream [F]                             │
+│  🔄 /ce:sync-upstream [F]                             │
 │                                                             │
 │  ⭐ 可选参数: [F] - 强制全量扫描（v1 无实际差异）             │
 ╰─────────────────────────────────────────────────────────────╯
@@ -111,7 +111,7 @@
   ─────────────────────────────────────────────
 
   📄 输出: docs/sync-reports/YYYY-MM-DD-upstream-sync.md
-  （含 YAML frontmatter，支持 /workflows:plan 自动发现）
+  （含 YAML frontmatter，支持 /ce:plan 自动发现）
 
 
   🔹 Phase 4: 讨论
@@ -121,7 +121,7 @@
   │ 🎯 选择下一步                                │
   │                                             │
   │  1️⃣  逐项讨论 — 逐个评估高相关变更            │
-  │  2️⃣  创建整合计划 — 运行 /workflows:plan     │
+  │  2️⃣  创建整合计划 — 运行 /ce:plan     │
   │  3️⃣  执行上游合并 — git merge upstream       │
   │  4️⃣  稍后处理 — 报告已保存                   │
   └─────────────────────────────────────────────┘
@@ -131,14 +131,14 @@
 
 ---
 
-### 💡 Step 1: `/workflows:brainstorm`
+### 💡 Step 1: `/ce:brainstorm`
 
 > 💬 **作用**: 探索需求和方案，协作对话
 
 
 ```
 ╭─────────────────────────────────────────────────────────────╮
-│  💡 /workflows:brainstorm [功能描述]                         │
+│  💡 /ce:brainstorm [功能描述]                         │
 │                                                             │
 │  ⭐ 可选参数: [P] - 激活 Party Mode 多代理讨论               │
 ╰─────────────────────────────────────────────────────────────╯
@@ -241,13 +241,13 @@
 
 ---
 
-### 📋 Step 2: `/workflows:plan`
+### 📋 Step 2: `/ce:plan`
 
 > 💬 **作用**: 将功能描述转化为结构清晰的项目计划
 
 ```
 ╭─────────────────────────────────────────────────────────────╮
-│  📋 /workflows:plan [功能描述]                               │
+│  📋 /ce:plan [功能描述]                               │
 ╰─────────────────────────────────────────────────────────────╯
 
   🔹 Step 0: 想法细化
@@ -345,7 +345,7 @@
   │  1️⃣  打开计划文件                           │
   │  2️⃣  /deepen-plan - 并行研究增强            │
   │  3️⃣  /plan_review - 多代理评审              │
-  │  4️⃣  /workflows:work - 开始执行  ← 常用     │
+  │  4️⃣  /ce:work - 开始执行  ← 常用     │
   │  5️⃣  创建 GitHub Issue                     │
   │  6️⃣  简化计划                              │
   └─────────────────────────────────────────────┘
@@ -361,13 +361,13 @@
 
 ---
 
-### ⚡ Step 3: `/workflows:work`
+### ⚡ Step 3: `/ce:work`
 
 > 💬 **作用**: 高效执行工作计划
 
 ```
 ╭─────────────────────────────────────────────────────────────╮
-│  ⚡ /workflows:work [计划文件路径]                           │
+│  ⚡ /ce:work [计划文件路径]                           │
 ╰─────────────────────────────────────────────────────────────╯
 
   🔹 Phase 1: 快速启动
@@ -472,13 +472,13 @@
 
 ---
 
-### 🔍 Step 4: `/workflows:review`
+### 🔍 Step 4: `/ce:review`
 
 > 💬 **作用**: 使用多代理分析进行全面代码审查
 
 ```
 ╭─────────────────────────────────────────────────────────────╮
-│  🔍 /workflows:review [PR号/URL/分支名] [C]                  │
+│  🔍 /ce:review [PR号/URL/分支名] [C]                  │
 │                                                             │
 │  ⭐ 可选参数: [C] - 自动调用 Codex 额外审核                  │
 ╰─────────────────────────────────────────────────────────────╯
@@ -655,10 +655,10 @@
 #### 📝 使用示例
 
 ```bash
-/workflows:review              # 仅 Claude 审核
-/workflows:review 123          # 审核 PR #123
-/workflows:review [C]          # Claude + Codex 审核  ← ⭐
-/workflows:review 123 [C]      # PR #123 + Codex 审核 ← ⭐
+/ce:review              # 仅 Claude 审核
+/ce:review 123          # 审核 PR #123
+/ce:review [C]          # Claude + Codex 审核  ← ⭐
+/ce:review 123 [C]      # PR #123 + Codex 审核 ← ⭐
 ```
 
 #### ⚙️ Codex 前提条件
@@ -679,14 +679,14 @@ codex
 
 | 命令 | 可选参数 | 说明 | 示例 |
 |:-----|:--------:|------|------|
-| `/workflows:brainstorm` | `[P]` | 🎉 激活 Party Mode 多代理讨论 | `/workflows:brainstorm [P] 用户认证方案` |
-| `/workflows:review` | `[C]` | 🤖 额外调用 Codex 审核 | `/workflows:review 123 [C]` |
+| `/ce:brainstorm` | `[P]` | 🎉 激活 Party Mode 多代理讨论 | `/ce:brainstorm [P] 用户认证方案` |
+| `/ce:review` | `[C]` | 🤖 额外调用 Codex 审核 | `/ce:review 123 [C]` |
 
 ---
 
 ## 🔀 条件分支快速参考
 
-### ⚡ `/workflows:work` 自动模式选择
+### ⚡ `/ce:work` 自动模式选择
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -702,7 +702,7 @@ codex
 └──────────────────────────────────────────────────────┘
 ```
 
-### 📋 `/workflows:plan` 外部研究决策
+### 📋 `/ce:plan` 外部研究决策
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -716,7 +716,7 @@ codex
 └──────────────────────────────────────────────────────┘
 ```
 
-### 🔍 `/workflows:review` 条件代理
+### 🔍 `/ce:review` 条件代理
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -739,52 +739,52 @@ codex
 ### 🚀 示例 1：完整功能开发
 
 ```
-💡 /workflows:brainstorm [P] 用户登录功能    ← Party Mode 讨论
+💡 /ce:brainstorm [P] 用户登录功能    ← Party Mode 讨论
      │
      ↓
-📋 /workflows:plan 用户登录功能              ← 创建计划
+📋 /ce:plan 用户登录功能              ← 创建计划
      │
      ↓
-⚡ /workflows:work docs/plans/xxx-plan.md   ← 自动选择执行模式
+⚡ /ce:work docs/plans/xxx-plan.md   ← 自动选择执行模式
      │
      ↓
-🔍 /workflows:review [C]                    ← Claude + Codex 审核
+🔍 /ce:review [C]                    ← Claude + Codex 审核
 ```
 
 ### 🐛 示例 2：快速 Bug 修复
 
 ```
-📋 /workflows:plan 修复登录页报错
+📋 /ce:plan 修复登录页报错
      │
      ↓
-⚡ /workflows:work                          ← 单任务 → 标准模式
+⚡ /ce:work                          ← 单任务 → 标准模式
      │
      ↓
-🔍 /workflows:review
+🔍 /ce:review
 ```
 
 ### 🏗️ 示例 3：大型重构
 
 ```
-💡 /workflows:brainstorm 重构认证模块
+💡 /ce:brainstorm 重构认证模块
      │
      ↓
-📋 /workflows:plan 认证模块重构
+📋 /ce:plan 认证模块重构
      │
      ↓
-⚡ /workflows:work                          ← 多任务 → Subagent 模式
+⚡ /ce:work                          ← 多任务 → Subagent 模式
      │
      ↓
-🔍 /workflows:review [C]                    ← Claude + Codex 双重审核
+🔍 /ce:review [C]                    ← Claude + Codex 双重审核
 ```
 
 ### 💡 示例 4：记录解决方案（可选）
 
 ```
-🔍 /workflows:review                        ← 完成审核
+🔍 /ce:review                        ← 完成审核
      │
      ↓
-📚 /workflows:compound                      ← 手动记录经验（可选）
+📚 /ce:compound                      ← 手动记录经验（可选）
 ```
 
 ---
@@ -794,7 +794,7 @@ codex
 | 日期 | 版本 | 变更 |
 |:----:|:----:|------|
 | 2026-03-24 | v2.44.15 | Review 报告增加裁决过滤可选展开；流程图补充 Step 4.5/4.6 裁决链 |
-| 2026-02-04 | v2.40.0 | 添加 `/workflows:sync-upstream` 上游同步检测 |
+| 2026-02-04 | v2.40.0 | 添加 `/ce:sync-upstream` 上游同步检测 |
 | 2026-02-02 | v2.35.0 | ✨ 初始文档创建；添加 [C] Codex 参数说明 |
 
 ---

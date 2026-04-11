@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - 'plugins/compound-engineering/**'
+      - 'README*.md'
+      - 'docs/zh-CN/**'
+      - '.claude-plugin/**'
+      - 'package.json'
 
 jobs:
   integrity-check:

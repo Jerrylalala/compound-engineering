@@ -474,6 +474,8 @@
           <span class="param-badge implemented">[V]</span>
           <span class="param-badge optional">[V+]</span>
           <span class="param-badge">[R]</span>
+          <span class="param-badge">[C]</span>
+          <span class="param-badge">[G]</span>
         </div>
       </div>
 
@@ -490,7 +492,7 @@
           <span class="param-badge optional">[C]</span>
           <span class="param-badge optional">[G]</span>
           <span class="param-badge real">[T]</span>
-          <span class="param-badge">[autofix]</span>
+          <span class="param-badge">[mode:*]</span>
         </div>
       </div>
 
@@ -548,7 +550,7 @@
     <div class="info-card">
       <div class="info-card-icon">🎉</div>
       <div class="info-card-title">派对模式 [P]</div>
-      <div class="info-card-desc">14 个专家视角发散讨论（探索者 / 挑战者 / 安全 / 性能 / QA…），结束后自动触发结构化收敛，无需额外参数。</div>
+      <div class="info-card-desc"><code>[P]</code> 3 核心视角快速验证（用户代言人 + 技术专家 + 魔鬼代言人），<code>[P+]</code> 12-14 专家视角深度发散。两种模式结束后均自动触发探索者+挑战者结构化收敛。</div>
     </div>
     <div class="info-card">
       <div class="info-card-icon">📖</div>
@@ -679,9 +681,12 @@
         icon: '🔍',
         label: 'Review',
         cmd: '/ce:review',
-        desc: '多代理并行代码审查，基于 Tier 分级框架（安全/性能/正确性/可维护性等专属审查者），自动 merge 发现并去重。`mode:autofix` 安全发现自动修复，残余问题以 TODO 形式输出。`[T]` 激活 Deterministic Patch Gate——规则引擎验证所有变更是否在 .team-contract.md 白名单内，不消耗额外 token。',
+        desc: '多代理并行代码审查，基于 Tier 分级框架。默认为 Interactive 模式（有交互问答）。支持 4 种模式：Interactive（默认）、autofix（无人值守）、report-only（只读）、headless（程序化）。`[T]` 激活 Deterministic Patch Gate。',
         params: [
-          { tag: '[mode:autofix]', type: 'implemented', label: '推荐默认', desc: '自动修复安全级别的发现（low-risk 自动应用，medium-risk 确认后应用，high-risk 仅报告）。建议大多数情况使用此模式。' },
+          { tag: '[mode:autofix]', type: 'implemented', label: '真实实现', desc: 'autofix 模式：无人值守，自动修复 safe_auto 级别发现，残余问题以 TODO 输出。**注意：不传 mode 参数时默认为 Interactive 模式**（有交互问答）。' },
+          { tag: '[mode:report-only]', type: '', label: '可选', desc: '纯只读审查模式：只审查和报告，不修改任何文件、不写 artifact、不创建 TODO。唯一可以与浏览器测试并行运行的模式。' },
+          { tag: '[mode:headless]', type: '', label: '可选', desc: '程序化模式：供 skill-to-skill 调用。单轮修复 safe_auto，返回结构化文本输出，以 "Review complete" 信号结束。不交互、不创建 TODO。' },
+          { tag: 'base:<ref>', type: '', label: '可选', desc: '指定 diff 基准引用（SHA、分支名或 origin/main）。跳过所有基准分支检测，直接使用提供的引用计算 diff。自动化调用者推荐使用。' },
           { tag: '[C]', type: 'optional', label: '可选增强', desc: 'Codex 审核：Codex 对同一 diff 独立审查。Claude 收到结果后先出裁决表（✅认同 / ⚠️调整 / ❌不适用），等用户确认后才实施——Claude 是最终裁判，不照单全收。双方共同发现的问题优先级提升。' },
           { tag: '[G]', type: 'optional', label: '可选增强', desc: 'Gemini 审核：Gemini 对同一 diff 独立审查，同样经过 Claude 裁决表确认后实施。与 [C] 组合使用时形成三方交叉验证，Claude 综合评判所有外部 AI 发现。' },
           { tag: '[T]', type: 'implemented', label: '真实实现', desc: 'TEAM_GATE_ENABLED = true。加载 .team-contract.md，在 Stage 5 运行 Deterministic Patch Gate：规则引擎验证所有变更文件是否在 allowed_files 白名单内，拦截越界修改。在 report-only / headless 模式下不生效。' },
@@ -703,7 +708,13 @@
 /ce:review mode:autofix [C][G]
 
 # 完整组合
-/ce:review mode:autofix plan:docs/plans/auth-plan.md [C][G][T]`
+/ce:review mode:autofix plan:docs/plans/auth-plan.md [C][G][T]
+
+# 纯只读审查（不修改文件）
+/ce:review mode:report-only
+
+# 程序化调用（skill-to-skill）
+/ce:review mode:headless base:origin/main`
       },
       compound: {
         icon: '📚',

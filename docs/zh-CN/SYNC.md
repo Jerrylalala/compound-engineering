@@ -27,14 +27,14 @@
 
 ```text
 upstream -> https://github.com/EveryInc/compound-engineering-plugin.git  (上游，只读)
-origin   -> https://github.com/Jerrylalala/compound-engineering-plugin-private.git  (你的私有仓库)
+origin   -> https://github.com/Jerrylalala/compound-engineering.git  (你的私有仓库)
 ```
 
 ---
 
 ## 自动化检测（推荐）
 
-使用 `/workflows:sync-upstream` 命令可自动检测上游更新：
+使用 `/ce:sync-upstream` 命令可自动检测上游更新：
 - 自动获取 4 个上游仓库最近 30 天的变更
 - 智能过滤噪音，分析相关性
 - 生成结构化报告供决策

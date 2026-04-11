@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.49.3] - 2026-04-11
+
+### 文档准确性修复 + CI 防回归（PATCH）
+
+- **P0 修复**：中文文档 70+ 处旧命令名 `/workflows:*` → `/ce:*` 迁移（INSTALL.md、WORKFLOW-VISUAL.md、CONCEPTS.md、CODEX-WORKFLOWS.md、README.zh-CN.md、SYNC.md）
+- **P0 修复**：移除不存在的 `/workflows:load` 和 `/workflows:save` 命令引用
+- **P0 修复**：plugin.json / marketplace.json / package.json 的 homepage/repository URL 从旧私有仓库名 `compound-engineering-plugin-private` 更新为 `compound-engineering`
+- **P1 修复**：README.md agent 数量从虚高的 57 修正为实际的 51
+- **P1 修复**：plugin.json description 中 command 数量从 9 修正为实际的 15
+- **P1 修复**：workflow.html review 步骤补全 `mode:report-only`、`mode:headless`、`base:<ref>` 三个缺失参数
+- **P1 修复**：workflow.html review 的 `mode:autofix` 从错误的"推荐默认"改为标注默认模式是 Interactive
+- **P1 修复**：workflow.html 派对模式卡片从混淆的"14 个视角"改为区分 `[P]`(3 核心) 和 `[P+]`(12-14 全量)
+- **P2 修复**：pencil.html 4 处旧仓库名链接更新
+- **P2 修复**：workflow.html Work 节点补充 `[C]` `[G]` badges
+- **CI 增强**：`check-feature-integrity.sh` 新增组件数量校验、规范 URL 校验、旧命令名校验三项检查
+- **CI 增强**：`integrity-check.yml` 触发范围扩大到覆盖 README、docs、marketplace 元数据
+
+---
+
 ## [2.49.2] - 2026-04-11
 
 ### [P]/[P+] 派对模式分层 + IDEAS.md 清理（PATCH）
