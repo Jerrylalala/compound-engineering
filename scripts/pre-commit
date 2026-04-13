@@ -1,51 +1,88 @@
 #!/bin/bash
-# Git pre-commit hook — 强制执行完整性校验
-# 安装方法: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# 项目级 pre-commit hook：强制执行功能完整性校验
+# 文件位置：.githooks/pre-commit（通过 core.hooksPath 生效）
 #
 # 设计原则：文字规则靠不住，必须变成代码。
 # CLAUDE.md 里的「铁律核查清单」在这里用代码强制执行。
-
-set -euo pipefail
-
-# ──────────────────────────────────────────
-# 检查 1：密钥扫描（gitleaks）
-# ──────────────────────────────────────────
-if command -v gitleaks &> /dev/null; then
-    echo "🔍 运行 gitleaks 密钥扫描..."
-    gitleaks protect --staged --no-banner 2>/dev/null || {
-        echo "❌ gitleaks 发现潜在密钥泄露，提交已阻止"
-        exit 1
-    }
-    echo "✅ 密钥扫描通过"
-fi
+#
+# 逃生机制：
+#   git commit --no-verify          # 跳过所有 hook
+#   CE_SKIP_INTEGRITY=1 git commit  # 只跳过完整性校验，保留密钥扫描和分支保护
 
 # ──────────────────────────────────────────
-# 检查 2：分支保护（不允许直接 commit 到 main）
+# 检查 1：分支保护（不允许直接 commit 到 main）
 # ──────────────────────────────────────────
-current_branch=$(git rev-parse --abbrev-ref HEAD)
+current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
 if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
-    echo "❌ 已阻止：不允许在 $current_branch 分支上直接 commit"
-    echo "   请先创建功能分支：git checkout -b feat/your-feature"
-    echo ""
-    echo "   如果你确定要直接提交（例如 README.md 修改），使用："
-    echo "   git commit --no-verify"
-    exit 1
+  echo ""
+  echo "❌ 已阻止：不允许在 ${current_branch} 分支上直接 commit"
+  echo "   请先创建功能分支：git checkout -b feat/your-feature"
+  echo ""
+  echo "   如果你确定要直接提交（例如 README.md 修改），使用："
+  echo "   git commit --no-verify"
+  exit 1
 fi
 
 # ──────────────────────────────────────────
-# 检查 3：功能完整性校验（铁律核查清单的代码化）
-# 每次 commit 都运行，不管改了什么文件。
-# 这就是 CLAUDE.md 核查清单 #3/#4/#5 的自动化。
+# 检查 2：密钥扫描（gitleaks 或正则回退）
 # ──────────────────────────────────────────
-if [ -f "scripts/check-feature-integrity.sh" ]; then
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "🔍 运行 gitleaks 密钥扫描..."
+  gitleaks protect --staged --no-banner --exit-code 1 2>/dev/null
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ gitleaks 检测到潜在密钥！请检查 staged 文件。"
+    echo "   如果确认是误报：git commit --no-verify"
+    exit 1
+  fi
+  echo "✅ 密钥扫描通过"
+else
+  # 正则回退扫描
+  staged_files=$(git diff --cached --name-only 2>/dev/null)
+  if [ -n "$staged_files" ]; then
+    text_files=$(echo "$staged_files" | grep -v -E '\.(png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|mp4|zip|tar|gz|bin|exe|dll|so|dylib|lock|sum)$' 2>/dev/null)
+    if [ -n "$text_files" ]; then
+      leak=$(git diff --cached -- $text_files 2>/dev/null | grep -E '^\+' | grep -v '^\+\+\+' | grep -iE '(api[_-]?key|secret[_-]?key|private[_-]?key|access[_-]?token|auth[_-]?token|password|passwd|credential)[[:space:]]*[=:][[:space:]]*[A-Za-z0-9/+_-]{20,}' 2>/dev/null)
+      if [ -n "$leak" ]; then
+        echo ""
+        echo "⚠️  检测到可能的密钥（正则扫描）："
+        echo "$leak" | head -5
+        echo "   如果确认是误报：git commit --no-verify"
+        exit 1
+      fi
+    fi
+  fi
+fi
+
+# ──────────────────────────────────────────
+# 检查 3：功能完整性校验（按 staged 文件路径触发）
+#
+# 只有 staged 文件命中相关路径时才运行，避免每次 commit 全量扫描。
+# 逃生：CE_SKIP_INTEGRITY=1 git commit
+# ──────────────────────────────────────────
+if [ "${CE_SKIP_INTEGRITY:-0}" = "1" ]; then
+  echo "⚠️  CE_SKIP_INTEGRITY=1，跳过功能完整性校验"
+else
+  STAGED=$(git diff --cached --name-only 2>/dev/null)
+  NEED_INTEGRITY=false
+
+  # 命中这些路径时触发完整性校验
+  if echo "$STAGED" | grep -qE "plugins/compound-engineering/|\.claude-plugin/|README|docs/zh-CN/|package\.json"; then
+    NEED_INTEGRITY=true
+  fi
+
+  if [ "$NEED_INTEGRITY" = true ] && [ -f "scripts/check-feature-integrity.sh" ]; then
     echo ""
     bash scripts/check-feature-integrity.sh
     if [ $? -ne 0 ]; then
-        echo ""
-        echo "❌ 功能完整性校验失败，提交已阻止"
-        echo "   请修复上述问题后重新提交"
-        exit 1
+      echo ""
+      echo "❌ 功能完整性校验失败，提交已阻止"
+      echo "   修复上述问题后重新提交"
+      echo "   紧急逃生：CE_SKIP_INTEGRITY=1 git commit -m '...'"
+      exit 1
     fi
+  fi
 fi
 
 # ──────────────────────────────────────────
@@ -54,17 +91,17 @@ fi
 VERSION_FILES_CHANGED=$(git diff --cached --name-only | grep -E "(marketplace\.json|plugin\.json)" || true)
 
 if [ -n "$VERSION_FILES_CHANGED" ]; then
-    echo ""
-    echo "检测到版本文件变更，执行一致性检查..."
-    if [ -f "scripts/check-versions.sh" ]; then
-        bash scripts/check-versions.sh
-        if [ $? -ne 0 ]; then
-            echo "❌ 版本一致性检查失败"
-            exit 1
-        fi
-    elif command -v powershell &> /dev/null; then
-        powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+  echo ""
+  echo "检测到版本文件变更，执行一致性检查..."
+  if [ -f "scripts/check-versions.sh" ]; then
+    bash scripts/check-versions.sh
+    if [ $? -ne 0 ]; then
+      echo "❌ 版本一致性检查失败"
+      exit 1
     fi
+  elif command -v powershell >/dev/null 2>&1; then
+    powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+  fi
 fi
 
 # ──────────────────────────────────────────
@@ -74,9 +111,11 @@ COMPONENT_CHANGED=$(git diff --cached --name-only | grep -E "plugins/compound-en
 VERSION_BUMPED=$(git diff --cached --name-only | grep "plugin\.json" || true)
 
 if [ -n "$COMPONENT_CHANGED" ] && [ -z "$VERSION_BUMPED" ]; then
-    echo ""
-    echo "⚠️  检测到组件变更但未更新版本号"
-    echo "   变更文件: $(echo "$COMPONENT_CHANGED" | wc -l | tr -d ' ') 个"
-    echo "   建议运行: powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch"
-    echo ""
+  echo ""
+  echo "⚠️  检测到组件变更但未更新版本号"
+  echo "   变更文件: $(echo "$COMPONENT_CHANGED" | wc -l | tr -d ' ') 个"
+  echo "   建议运行: powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch"
+  echo ""
 fi
+
+exit 0
