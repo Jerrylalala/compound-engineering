@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.49.5] - 2026-04-24
+
+### /ce:* 单一入口去重（PATCH）
+
+- **修复重复补全注册**：删除 `plugins/compound-engineering/commands/ce/` 下 8 个与 skill 同名的纯转发壳层，避免 `/ce:brainstorm`、`/ce:plan`、`/ce:work`、`/ce:review` 等在 Claude Code 补全中重复出现
+- **保留中文显示体验**：将原壳层中的中文 `description` / `argument-hint` 迁移到对应 `skills/ce-*/SKILL.md`，保持单入口下的中文说明与参数提示
+- **收敛公共入口**：`ce:` 主工作流改为仅由 skill 暴露，独立工具命令仅保留 `ce:doctor`、`ce:pr`、`ce:sync-upstream`
+- **元数据同步**：`plugin.json` command 数量从 15 更新为 7
+
+---
+
 ## [2.49.4] - 2026-04-11
 
 ### README + workflow.html 工作流完善（PATCH）

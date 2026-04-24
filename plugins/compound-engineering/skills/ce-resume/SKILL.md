@@ -1,6 +1,6 @@
 ---
 name: ce:resume
-description: "回归项目入口：读取 git log + IDEAS.md + active plan，输出三段摘要，引导下一步"
+description: "回归项目入口：读取最近 git log、IDEAS.md 和 active plan，输出三段摘要"
 ---
 
 # 回归项目入口
