@@ -1,7 +1,7 @@
 ---
 name: ce:work
-description: Execute work efficiently while maintaining quality and finishing features
-argument-hint: "[计划路径] [T=Agent Teams 3角色:合约主+执行者+验证者] [T+=Agent Teams 4角色:+风险卫，适合auth/payment/migration] [V=四层自验证:CLI→API/DB→浏览器→验收，通过才算完成] [V+=V+Playwright浏览器层（自动含[V]，无需单独传[V]）] [R=历史检索：learnings-researcher搜索docs/solutions] [C=Codex参与标记，仅审计溯源，不触发调用] [G=Gemini参与标记，仅审计溯源，不触发调用]"
+description: "3: [T][T+][V][V+][R] 执行计划（Agent Teams+四层验证）"
+argument-hint: "[计划路径] [T=Agent Teams 3角色] [T+=4角色+风险卫] [V=四层自验证] [V+=V+Playwright浏览器] [R=历史检索]"
 ---
 
 # Work Execution Command

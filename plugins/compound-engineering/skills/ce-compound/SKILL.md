@@ -1,6 +1,7 @@
 ---
 name: ce:compound
-description: Document a recently solved problem to compound your team's knowledge
+description: "5: 沉淀经验，构建团队知识库"
+argument-hint: "[可选：问题描述]"
 ---
 
 # /compound
