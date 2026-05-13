@@ -146,7 +146,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 >
 > `bun run src/index.ts install ./plugins/compound-engineering --to codex`
 >
-> 原因：它会把整个转换后的插件重新装进 `~/.codex`，导致多余的 `ce-*`、额外 `workflows-*` 回流，破坏“只保留 3 个主入口”的目标。
+> 原因：它会把整个转换后的插件重新装进 `~/.codex`，导致多余的 `ce-*`、额外 `workflows-*` 回流，破坏“Codex workflow 只维护 3 个主入口”的目标。
 
 触发条件：
 - 修改 `plugins/compound-engineering/commands/workflows/brainstorm.md`
@@ -183,10 +183,12 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
    ```
 2. **禁止**运行任何 `install --to codex`
 3. 如果用户只是说“同步到 Codex”“更新 Codex 里的版本”“让 Codex 用最新 skill”，默认理解为运行 `scripts/sync-codex-workflows.ps1`
-4. 完成后检查 `~/.codex/skills/` 顶层是否只保留：
+4. 完成后检查 `~/.codex/skills/` 顶层是否包含并更新：
    - `workflows-brainstorm`
    - `workflows-plan`
    - `workflows-review`
+
+   其它用户全局 Codex skills 可以继续存在；同步脚本只清理已知旧 workflow 副本，不删除任意用户技能。
 
 **版本号位置（唯一权威来源）：**
 - `plugins/compound-engineering/.claude-plugin/plugin.json` → `version`

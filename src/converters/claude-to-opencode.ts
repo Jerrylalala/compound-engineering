@@ -83,7 +83,9 @@ export function convertClaudeToOpenCode(
     agents: agentFiles,
     commandFiles: cmdFiles,
     plugins,
-    skillDirs: plugin.skills.map((skill) => ({ sourceDir: skill.sourceDir, name: skill.name })),
+    skillDirs: plugin.skills
+      .filter((skill) => !skill.claudeCodeOnly)
+      .map((skill) => ({ sourceDir: skill.sourceDir, name: skill.name })),
   }
 }
 

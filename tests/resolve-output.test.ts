@@ -98,7 +98,7 @@ describe("resolveTargetOutputRoot", () => {
       openclawHome: "/custom/openclaw/extensions",
       pluginName: "my-plugin",
     })
-    expect(result).toBe("/custom/openclaw/extensions/my-plugin")
+    expect(result).toBe(path.join("/custom/openclaw/extensions", "my-plugin"))
   })
 
   test("openclaw falls back to default home when not provided", () => {
@@ -117,7 +117,7 @@ describe("resolveTargetOutputRoot", () => {
       qwenHome: "/custom/qwen/extensions",
       pluginName: "my-plugin",
     })
-    expect(result).toBe("/custom/qwen/extensions/my-plugin")
+    expect(result).toBe(path.join("/custom/qwen/extensions", "my-plugin"))
   })
 
   test("qwen falls back to default home when not provided", () => {

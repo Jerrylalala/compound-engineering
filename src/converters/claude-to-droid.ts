@@ -45,10 +45,12 @@ export function convertClaudeToDroid(
 ): DroidBundle {
   const commands = plugin.commands.map((command) => convertCommand(command))
   const droids = plugin.agents.map((agent) => convertAgent(agent))
-  const skillDirs = plugin.skills.map((skill) => ({
-    name: skill.name,
-    sourceDir: skill.sourceDir,
-  }))
+  const skillDirs = plugin.skills
+    .filter((skill) => !skill.claudeCodeOnly)
+    .map((skill) => ({
+      name: skill.name,
+      sourceDir: skill.sourceDir,
+    }))
 
   return { commands, droids, skillDirs }
 }

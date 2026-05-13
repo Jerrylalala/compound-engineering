@@ -76,9 +76,9 @@ Resume → 0: Ideate/Ideas → 1: Brainstorm → 2: Plan → 3: Work → 4: Revi
 
 | 命令 | 用途 |
 |------|------|
-| `/ce:doctor` | 健康检查：检测 CLI、MCP、认证状态 |
-| `/ce:pr` | 创建 PR 并询问是否合并 |
-| `/ce:sync-upstream` | 检测上游仓库更新 |
+| `/ce:doctor` | 健康检查：检测 CLI、MCP、认证状态（skill 入口） |
+| `/ce:pr` | 创建 PR 并询问是否合并（skill 入口） |
+| `/ce:sync-upstream` | 检测上游仓库更新（skill 入口） |
 
 ### 交互式工作流可视化
 
@@ -220,7 +220,7 @@ Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验�
 | **UI 设计联动** | ✅ Pencil MCP + Figma | — | — | — | ⚡ |
 | **跨 AI 平台支持** | Claude Code 专注 | ✅ 12+ 平台 | Claude Code 专注 | Claude Code 专注 | Claude Code 专注 |
 | **中文生态** | ✅ 中英双语 + 在线文档 | 英文 | 英文 | 英文 | 中文 |
-| **Skill 数量** | 52+ skills | 40+ skills | 15 skills | — | — |
+| **Skill 数量** | 66 skills | 40+ skills | 15 skills | — | — |
 | **Review Agent 数量** | 51 agents | 40+ agents | — | ~9 agents | — |
 
 ---

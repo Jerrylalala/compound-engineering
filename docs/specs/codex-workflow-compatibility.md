@@ -49,13 +49,25 @@ status: draft
 Recommended sections:
 
 - `## What We're Building`
+- `## Problem Frame`
 - `## Why This Approach`
 - `## Approaches Considered`
 - `## Key Decisions`
+- `## Scope Boundaries`
+- `## Historical Context`
 - `## Open Questions`
 - `## Next Step`
 
-Claude's `workflows:plan` does not require exact section names, but it does expect the document to preserve decisions, constraints, scope, and unresolved questions.
+When Codex brainstorm uses `[P]` or `[P+]`, include:
+
+- `## Party Mode Summary`
+- `## Areas Of Agreement`
+- `## Areas Of Disagreement`
+- `## Coverage Matrix`
+
+`[R]` means historical experience retrieval from repository artifacts such as `docs/solutions/`; Standard and Deep brainstorms should perform this automatically even when the token is absent. Codex brainstorm does not call external AI consultation CLIs.
+
+Claude's `workflows:plan` does not require exact section names, but it does expect the document to preserve decisions, constraints, scope, historical context, and unresolved questions.
 
 ## Plan Compatibility Contract
 

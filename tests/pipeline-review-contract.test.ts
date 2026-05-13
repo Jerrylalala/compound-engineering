@@ -39,14 +39,16 @@ describe("ce:work review contract", () => {
   test("ce:work-beta mirrors review and commit delegation", async () => {
     const beta = await readRepoFile("plugins/compound-engineering/skills/ce-work-beta/SKILL.md")
 
-    // Both have mandatory review
-    expect(beta).toContain("2. **Code Review**")
+    // Both have mandatory review in the extracted shipping workflow
+    const shipping = await readRepoFile("plugins/compound-engineering/skills/ce-work-beta/references/shipping-workflow.md")
+    expect(shipping).toContain("3. **Code Review**")
+    expect(beta).toContain("references/shipping-workflow.md")
     expect(beta).not.toContain("Consider Code Review")
 
     // Both delegate to git skills
-    expect(beta).toContain("`git-commit-push-pr` skill")
-    expect(beta).toContain("`git-commit` skill")
-    expect(beta).not.toContain("gh pr create")
+    expect(shipping).toContain("`ce-commit-push-pr` skill")
+    expect(shipping).toContain("`ce-commit` skill")
+    expect(shipping).not.toContain("gh pr create")
   })
 
   test("includes per-task testing deliberation in execution loop", async () => {
@@ -80,12 +82,14 @@ describe("ce:work review contract", () => {
     // Testing deliberation in loop
     expect(beta).toContain("Assess testing coverage")
 
-    // New checklist language
-    expect(beta).toContain("Testing addressed")
+    const shipping = await readRepoFile("plugins/compound-engineering/skills/ce-work-beta/references/shipping-workflow.md")
 
-    // Old language removed
-    expect(beta).not.toContain("Tests pass (run project's test command)")
-    expect(beta).not.toContain("- All tests pass")
+    // New checklist language
+    expect(shipping).toContain("Testing addressed")
+
+    // Old language removed from the shipping workflow
+    expect(shipping).not.toContain("Tests pass (run project's test command)")
+    expect(shipping).not.toContain("- All tests pass")
   })
 })
 
@@ -105,6 +109,44 @@ describe("ce:brainstorm review contract", () => {
     const handoff = await readRepoFile("plugins/compound-engineering/skills/ce-brainstorm/references/handoff.md")
     expect(handoff).toContain("**Run additional document review**")
     expect(handoff).not.toContain("**Review and refine**")
+  })
+})
+
+describe("Codex workflows-brainstorm contract", () => {
+  test("keeps Codex brainstorm deep without external AI consultation flags", async () => {
+    const content = await readRepoFile(".codex/skills/workflows-brainstorm/SKILL.md")
+
+    expect(content).toContain("[P+]")
+    expect(content).toContain("HISTORICAL_RESEARCH")
+    expect(content).toContain("自动运行 `$learnings-researcher`")
+    expect(content).toContain("最少 2 轮")
+    expect(content).toContain("覆盖矩阵")
+    expect(content).toContain("完成度门禁")
+    expect(content).toContain("不要调用 Codex CLI")
+    expect(content).toContain("不要调用 Gemini CLI")
+
+    expect(content).not.toContain("CODEX_ENABLED")
+    expect(content).not.toContain("GEMINI_ENABLED")
+    expect(content).not.toContain("[C]")
+    expect(content).not.toContain("[G]")
+  })
+})
+
+describe("Codex workflow sync contract", () => {
+  test("removes stale ce workflow entrypoints from global Codex sync", async () => {
+    const script = await readRepoFile("scripts/sync-codex-workflows.ps1")
+
+    for (const staleEntry of [
+      "ce-brainstorm",
+      "ce-ideas",
+      "ce-ideate",
+      "ce-resume",
+      "ce-compound-refresh",
+      "ce-work",
+    ]) {
+      expect(script).toContain(`"${staleEntry}"`)
+      expect(script).toContain(`"${staleEntry}.md"`)
+    }
   })
 })
 

@@ -42,7 +42,7 @@ describe("syncToOpenClaw", () => {
       console.warn = originalWarn
     }
 
-    expect((await fs.lstat(path.join(tempRoot, "skills", "skill-one"))).isSymbolicLink()).toBe(true)
+    expect(await fs.readFile(path.join(tempRoot, "skills", "skill-one", "SKILL.md"), "utf8")).toContain("name: skill-one")
     const openclawConfigExists = await fs.access(path.join(tempRoot, "openclaw.json")).then(() => true).catch(() => false)
     expect(openclawConfigExists).toBe(false)
     expect(warnings.some((warning) => warning.includes("OpenClaw personal command sync is skipped"))).toBe(true)

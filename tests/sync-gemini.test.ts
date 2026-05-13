@@ -28,8 +28,7 @@ describe("syncToGemini", () => {
 
     // Check skill symlink
     const linkedSkillPath = path.join(tempRoot, "skills", "skill-one")
-    const linkedStat = await fs.lstat(linkedSkillPath)
-    expect(linkedStat.isSymbolicLink()).toBe(true)
+    expect(await fs.readFile(path.join(linkedSkillPath, "SKILL.md"), "utf8")).toContain("name: skill-one")
 
     // Check settings.json
     const settingsPath = path.join(tempRoot, "settings.json")
@@ -123,8 +122,7 @@ describe("syncToGemini", () => {
 
     // Skills should still be symlinked
     const linkedSkillPath = path.join(tempRoot, "skills", "skill-one")
-    const linkedStat = await fs.lstat(linkedSkillPath)
-    expect(linkedStat.isSymbolicLink()).toBe(true)
+    expect(await fs.readFile(path.join(linkedSkillPath, "SKILL.md"), "utf8")).toContain("name: skill-one")
 
     // But settings.json should not exist
     const settingsExists = await fs.access(path.join(tempRoot, "settings.json")).then(() => true).catch(() => false)
@@ -139,7 +137,7 @@ describe("syncToGemini", () => {
     await fs.mkdir(path.join(agentsSkillDir), { recursive: true })
     await fs.writeFile(path.join(agentsSkillDir, "SKILL.md"), "# Skill One\n", "utf8")
     await fs.mkdir(path.join(geminiRoot, "skills"), { recursive: true })
-    await fs.symlink(agentsSkillDir, path.join(geminiRoot, "skills", "skill-one"))
+    await fs.symlink(agentsSkillDir, path.join(geminiRoot, "skills", "skill-one"), "junction")
 
     const config: ClaudeHomeConfig = {
       skills: [

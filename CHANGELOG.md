@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.49.6] - 2026-05-12
+
+### 上游优先迁移 P1/P4/P5（PATCH）
+
+- **继续收敛 skill-first 入口**：将剩余 `ce:doctor`、`ce:pr`、`ce:sync-upstream` 从 command 壳层迁移为 skill 入口，源码侧仅保留 4 个独立工具命令
+- **补强 Codex brainstorm 深度**：Codex 版 `$workflows-brainstorm` 新增 `[P+]`、历史经验检索、覆盖矩阵和完成度门禁，并明确不调用 Codex/Gemini CLI
+- **补强 Codex 同步清理**：`sync-codex-workflows.ps1` 清理已知旧 `ce-*` workflow 副本和 prompt，避免全局 Codex 入口漂移
+- **引入上游新增 skill 候选**：新增 `ce-commit`、`ce-commit-push-pr`、`ce-polish-beta`、`ce-product-pulse`、`ce-release-notes`、`ce-sessions`、`ce-setup`、`ce-simplify-code`、`ce-strategy`、`ce-update`、`ce-work-beta` 等 skill 入口
+- **元数据自动计数**：release metadata 改为根据 agents/commands/skills/MCP 实际数量生成插件描述，并兼容 `.claude-plugin/plugin.json` 中的 MCP 配置
+
+---
+
 ## [2.49.5] - 2026-04-24
 
 ### /ce:* 单一入口去重（PATCH）

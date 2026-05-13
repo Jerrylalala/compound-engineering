@@ -84,6 +84,7 @@ describe("CLI", () => {
         ...process.env,
         HOME: tempRoot,
         USERPROFILE: tempRoot,
+        BUN_CONFIG_INSTALL: "fallback",
       },
     })
 
@@ -145,7 +146,7 @@ describe("CLI", () => {
 
     await runGit(["init"], repoRoot, gitEnv)
     await runGit(["add", "."], repoRoot, gitEnv)
-    await runGit(["commit", "-m", "fixture"], repoRoot, gitEnv)
+    await runGit(["commit", "-m", "test: add fixture"], repoRoot, gitEnv)
 
     const projectRoot = path.join(import.meta.dir, "..")
     const proc = Bun.spawn([
@@ -164,6 +165,7 @@ describe("CLI", () => {
         ...process.env,
         HOME: tempRoot,
         USERPROFILE: tempRoot,
+        BUN_CONFIG_INSTALL: "fallback",
         COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
       },
     })
@@ -203,6 +205,8 @@ describe("CLI", () => {
       env: {
         ...process.env,
         HOME: tempRoot,
+        USERPROFILE: tempRoot,
+        BUN_CONFIG_INSTALL: "fallback",
         COMPOUND_PLUGIN_GITHUB_SOURCE: "/definitely-not-a-valid-plugin-source",
       },
     })
@@ -247,7 +251,7 @@ describe("CLI", () => {
     }
     await runGit(["init"], repoRoot, gitEnv)
     await runGit(["add", "."], repoRoot, gitEnv)
-    await runGit(["commit", "-m", "fixture"], repoRoot, gitEnv)
+    await runGit(["commit", "-m", "test: add fixture"], repoRoot, gitEnv)
 
     const projectRoot = path.join(import.meta.dir, "..")
     const proc = Bun.spawn([
@@ -267,6 +271,8 @@ describe("CLI", () => {
       env: {
         ...process.env,
         HOME: tempRoot,
+        USERPROFILE: tempRoot,
+        BUN_CONFIG_INSTALL: "fallback",
         COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
       },
     })
@@ -303,11 +309,11 @@ describe("CLI", () => {
 
     await runGit(["init", "-b", "main"], repoRoot, gitEnv)
     await runGit(["add", "."], repoRoot, gitEnv)
-    await runGit(["commit", "-m", "initial"], repoRoot, gitEnv)
+    await runGit(["commit", "-m", "test: add initial fixture"], repoRoot, gitEnv)
     await runGit(["checkout", "-b", "feat/test-branch"], repoRoot, gitEnv)
     await fs.writeFile(path.join(pluginRoot, "BRANCH_MARKER.txt"), "from-branch")
     await runGit(["add", "."], repoRoot, gitEnv)
-    await runGit(["commit", "-m", "branch commit"], repoRoot, gitEnv)
+    await runGit(["commit", "-m", "test: add branch marker"], repoRoot, gitEnv)
     await runGit(["checkout", "main"], repoRoot, gitEnv)
 
     const projectRoot = path.join(import.meta.dir, "..")
@@ -330,6 +336,8 @@ describe("CLI", () => {
       env: {
         ...process.env,
         HOME: tempRoot,
+        USERPROFILE: tempRoot,
+        BUN_CONFIG_INSTALL: "fallback",
         COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
       },
     })
@@ -443,7 +451,7 @@ describe("CLI", () => {
     }
 
     expect(stdout).toContain("Converted compound-engineering")
-    expect(await exists(path.join(tempRoot, ".gemini", "GEMINI.md"))).toBe(true)
+    expect(await exists(path.join(tempRoot, ".gemini", "skills", "skill-one", "SKILL.md"))).toBe(true)
   })
 
   test("install supports --also with codex output", async () => {
@@ -701,6 +709,7 @@ describe("CLI", () => {
       env: {
         ...process.env,
         HOME: tempHome,
+        USERPROFILE: tempHome,
       },
     })
 

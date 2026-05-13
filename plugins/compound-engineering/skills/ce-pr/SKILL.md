@@ -8,6 +8,15 @@ argument-hint: "[--draft=草稿PR] [--no-merge=仅创建不合并]"
 
 创建 Pull Request 并可选合并到主分支。可在 `/ce:work` 或 `/ce:review` 完成后自动触发，也可独立使用。
 
+## 参数解析
+
+开始时解析用户参数：
+
+- `--draft`：创建 draft PR
+- `--no-merge`：创建或定位 PR 后直接结束，不进入合并询问
+
+移除已识别参数后，其余内容可作为 PR 标题/描述的额外上下文。
+
 ## Phase 1: Pre-flight Checks
 
 ### Step 1: 检测当前分支
@@ -23,12 +32,18 @@ current_branch=$(git branch --show-current)
 ### Step 2: 检测主分支
 
 ```bash
-default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
-
-if [ -z "$default_branch" ]; then
-  default_branch=$(git rev-parse --verify origin/main >/dev/null 2>&1 && echo "main" || echo "master")
-fi
+git symbolic-ref refs/remotes/origin/HEAD
 ```
+
+如果输出形如 `refs/remotes/origin/main`，去掉 `refs/remotes/origin/` 前缀作为 `default_branch`。
+
+如果命令失败或输出为空，执行：
+
+```bash
+git rev-parse --verify origin/main
+```
+
+如果命令成功，使用 `main` 作为 `default_branch`；如果失败，使用 `master`。
 
 ### Step 3: 分支安全检查
 
@@ -55,7 +70,7 @@ git status --porcelain
 3. **取消** - 先手动处理更改再创建 PR
 
 Based on selection:
-- **自动提交** → 执行 `git add . && git commit -m "feat: [auto-generated message]"`
+- **自动提交** → 读取 `git status --porcelain`，按相关变更列出具体文件，使用 `git add <file...>` 暂存确认后的文件，再执行 `git commit -m "feat: [auto-generated message]"`
 - **忽略** → 继续流程
 - **取消** → 终止流程
 
@@ -66,7 +81,8 @@ existing_pr=$(gh pr list --head "$current_branch" --json number,url --jq '.[0]')
 ```
 
 如果已有 PR：
-→ 使用 **AskUserQuestion tool** 询问：
+→ 如果 `--no-merge` 参数存在，显示已有 PR URL 后结束流程。
+→ 否则使用 **AskUserQuestion tool** 询问：
 
 **Question:** "当前分支已有 PR: $existing_pr_url。如何处理？"
 
@@ -82,14 +98,22 @@ Based on selection:
 
 ## Phase 2: Create PR
 
-### Step 1: 推送分支
+### Step 1: 检查远端分支
 
 ```bash
-if ! git ls-remote --exit-code origin "$current_branch" >/dev/null 2>&1; then
-  git push -u origin "$current_branch"
-else
-  git push
-fi
+git ls-remote --exit-code origin "$current_branch"
+```
+
+如果命令失败，执行：
+
+```bash
+git push -u origin "$current_branch"
+```
+
+如果命令成功，执行：
+
+```bash
+git push
 ```
 
 ### Step 2: 生成 PR 标题
@@ -114,6 +138,14 @@ diff_stat=$(git diff "$default_branch"..."$current_branch" --stat)
 gh pr create --title "$pr_title" --body "$pr_body" --base "$default_branch"
 ```
 
+如果 `--draft` 参数存在，执行：
+
+```bash
+gh pr create --draft --title "$pr_title" --body "$pr_body" --base "$default_branch"
+```
+
+如果 `--no-merge` 参数存在，显示 PR URL 后结束流程。
+
 ## Phase 3: Handoff（合并决策）
 
 使用 **AskUserQuestion tool** 呈现选项：
@@ -126,6 +158,6 @@ gh pr create --title "$pr_title" --body "$pr_body" --base "$default_branch"
 3. **完成** - PR 已创建，不合并
 
 Based on selection:
-- **合并** → `gh pr merge --merge --delete-branch` → `git checkout "$default_branch" && git pull`
+- **合并** → 执行 `gh pr merge --merge --delete-branch`，成功后执行 `git checkout "$default_branch"`，再执行 `git pull`
 - **查看** → `gh pr view --web`，然后再次询问是否合并
 - **完成** → 结束流程

@@ -27,7 +27,7 @@ describe("syncToWindsurf", () => {
 
     await syncToWindsurf(config, tempRoot)
 
-    expect((await fs.lstat(path.join(tempRoot, "skills", "skill-one"))).isSymbolicLink()).toBe(true)
+    expect(await fs.readFile(path.join(tempRoot, "skills", "skill-one", "SKILL.md"), "utf8")).toContain("name: skill-one")
 
     const content = JSON.parse(
       await fs.readFile(path.join(tempRoot, "mcp_config.json"), "utf8"),
@@ -50,7 +50,9 @@ describe("syncToWindsurf", () => {
     expect(content.mcpServers.remoteSse?.url).toBe("https://example.com/sse")
 
     const perms = (await fs.stat(path.join(tempRoot, "mcp_config.json"))).mode & 0o777
-    expect(perms).toBe(0o600)
+    if (process.platform !== "win32") {
+      expect(perms).toBe(0o600)
+    }
   })
 
   test("merges existing config and overwrites same-named servers", async () => {
