@@ -36,10 +36,12 @@ export function convertClaudeToKiro(
   const usedSkillNames = new Set<string>()
 
   // Pass-through skills are processed first — they're the source of truth
-  const skillDirs = plugin.skills.map((skill) => ({
-    name: skill.name,
-    sourceDir: skill.sourceDir,
-  }))
+  const skillDirs = plugin.skills
+    .filter((skill) => !skill.claudeCodeOnly)
+    .map((skill) => ({
+      name: skill.name,
+      sourceDir: skill.sourceDir,
+    }))
   for (const skill of skillDirs) {
     usedSkillNames.add(normalizeName(skill.name))
   }

@@ -70,23 +70,28 @@ Task(general-purpose): "使用 systematic-debugging skill 调试问题"  # ✓
 
 ## Commands（命令）
 
-Commands 是用户可调用的斜杠命令。
+Commands 是传统斜杠命令目录。上游新版已经把绝大多数用户入口迁移到 `skills/<name>/SKILL.md`，本 fork 也采用 **skill-first**：主工作流和 `ce:` 工具入口都由 skill frontmatter 暴露为斜杠入口。
 
 ```
+skills/
+├── ce-brainstorm/SKILL.md    # /ce:brainstorm
+├── ce-plan/SKILL.md          # /ce:plan
+├── ce-work/SKILL.md          # /ce:work
+├── ce-review/SKILL.md        # /ce:review
+├── ce-pr/SKILL.md            # /ce:pr
+├── ce-doctor/SKILL.md        # /ce:doctor
+└── ce-sync-upstream/SKILL.md # /ce:sync-upstream
+
 commands/
-├── ce/
-│   ├── brainstorm.md    # /ce:brainstorm
-│   ├── plan.md          # /ce:plan
-│   ├── work.md          # /ce:work
-│   ├── review.md        # /ce:review
-│   └── ...
-├── codex.md             # /codex
-└── gemini.md            # /gemini
+├── codex.md                  # /codex（Claude Code only）
+├── gemini.md                 # /gemini（Claude Code only）
+└── slfg.md                   # /slfg
 ```
 
 **命名规范**：
-- 使用 `ce:` 前缀避免与内置命令冲突
+- 用户主入口使用 `ce:` 前缀避免与内置命令冲突
 - Claude Code 有内置 `/plan`，所以我们用 `/ce:plan`
+- 不要同时创建同名 `commands/ce/*.md` 和 `skills/ce-*/SKILL.md`，否则 Claude Code 补全会重复
 
 ---
 

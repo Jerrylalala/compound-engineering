@@ -1,0 +1,203 @@
+---
+date: 2026-05-12
+type: upstream-local-mapping
+---
+
+# Upstream / Local Mapping — 2026-05-12
+
+## Skill comparison
+- Common skills: 7
+- Upstream-only skills: 30
+- Local-only skills: 45
+
+### Upstream-only skills to evaluate
+- ce-agent-native-architecture
+- ce-agent-native-audit
+- ce-clean-gone-branches
+- ce-code-review
+- ce-commit
+- ce-commit-push-pr
+- ce-debug
+- ce-demo-reel
+- ce-dhh-rails-style
+- ce-doc-review
+- ce-frontend-design
+- ce-gemini-imagegen
+- ce-optimize
+- ce-polish-beta
+- ce-product-pulse
+- ce-proof
+- ce-release-notes
+- ce-report-bug
+- ce-resolve-pr-feedback
+- ce-riffrec-feedback-analysis
+- ce-sessions
+- ce-setup
+- ce-simplify-code
+- ce-slack-research
+- ce-strategy
+- ce-test-browser
+- ce-test-xcode
+- ce-update
+- ce-work-beta
+- ce-worktree
+
+### Local-only skills/overlays to preserve
+- agent-browser
+- agent-native-architecture
+- agent-native-audit
+- andrew-kane-gem-writer
+- ce-ideas
+- ce-resume
+- ce-review
+- changelog
+- claude-permissions-optimizer
+- create-agent-skills
+- deploy-docs
+- dhh-rails-style
+- document-review
+- dspy-ruby
+- every-style-editor
+- feature-video
+- finishing-a-feature
+- frontend-design
+- gemini-imagegen
+- git-clean-gone-branches
+- git-commit
+- git-commit-push-pr
+- git-worktree
+- glue-coding
+- onboarding
+- orchestrating-swarms
+- party-mode
+- proof
+- rclone
+- receiving-code-review
+- report-bug-ce
+- reproduce-bug
+- resolve-pr-feedback
+- resolve-pr-parallel
+- setup
+- skill-creator
+- slfg
+- spec-compliance-review
+- systematic-debugging
+- test-browser
+- test-driven-development
+- test-xcode
+- todo-create
+- todo-resolve
+- todo-triage
+
+## Agent structure comparison
+- Local agent files: 51
+- Upstream agent files: 49
+
+### Upstream agent examples
+- plugins/compound-engineering/agents/ce-adversarial-document-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-adversarial-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-agent-native-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-ankane-readme-writer.agent.md
+- plugins/compound-engineering/agents/ce-api-contract-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-architecture-strategist.agent.md
+- plugins/compound-engineering/agents/ce-best-practices-researcher.agent.md
+- plugins/compound-engineering/agents/ce-code-simplicity-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-coherence-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-correctness-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-data-integrity-guardian.agent.md
+- plugins/compound-engineering/agents/ce-data-migration-expert.agent.md
+- plugins/compound-engineering/agents/ce-data-migrations-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-deployment-verification-agent.agent.md
+- plugins/compound-engineering/agents/ce-design-implementation-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-design-iterator.agent.md
+- plugins/compound-engineering/agents/ce-design-lens-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-dhh-rails-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-feasibility-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-figma-design-sync.agent.md
+- plugins/compound-engineering/agents/ce-framework-docs-researcher.agent.md
+- plugins/compound-engineering/agents/ce-git-history-analyzer.agent.md
+- plugins/compound-engineering/agents/ce-issue-intelligence-analyst.agent.md
+- plugins/compound-engineering/agents/ce-julik-frontend-races-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-kieran-python-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-kieran-rails-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-kieran-typescript-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-learnings-researcher.agent.md
+- plugins/compound-engineering/agents/ce-maintainability-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-pattern-recognition-specialist.agent.md
+- plugins/compound-engineering/agents/ce-performance-oracle.agent.md
+- plugins/compound-engineering/agents/ce-performance-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-pr-comment-resolver.agent.md
+- plugins/compound-engineering/agents/ce-previous-comments-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-product-lens-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-project-standards-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-reliability-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-repo-research-analyst.agent.md
+- plugins/compound-engineering/agents/ce-schema-drift-detector.agent.md
+- plugins/compound-engineering/agents/ce-scope-guardian-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-security-lens-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-security-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-security-sentinel.agent.md
+- plugins/compound-engineering/agents/ce-session-historian.agent.md
+- plugins/compound-engineering/agents/ce-slack-researcher.agent.md
+- plugins/compound-engineering/agents/ce-spec-flow-analyzer.agent.md
+- plugins/compound-engineering/agents/ce-swift-ios-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-testing-reviewer.agent.md
+- plugins/compound-engineering/agents/ce-web-researcher.agent.md
+
+### Local agent examples
+- plugins\compound-engineering\agents\design\design-implementation-reviewer.md
+- plugins\compound-engineering\agents\design\design-iterator.md
+- plugins\compound-engineering\agents\design\figma-design-sync.md
+- plugins\compound-engineering\agents\docs\ankane-readme-writer.md
+- plugins\compound-engineering\agents\docs\cn-tech-writer.md
+- plugins\compound-engineering\agents\document-review\adversarial-document-reviewer.md
+- plugins\compound-engineering\agents\document-review\coherence-reviewer.md
+- plugins\compound-engineering\agents\document-review\design-lens-reviewer.md
+- plugins\compound-engineering\agents\document-review\feasibility-reviewer.md
+- plugins\compound-engineering\agents\document-review\product-lens-reviewer.md
+- plugins\compound-engineering\agents\document-review\scope-guardian-reviewer.md
+- plugins\compound-engineering\agents\document-review\security-lens-reviewer.md
+- plugins\compound-engineering\agents\research\best-practices-researcher.md
+- plugins\compound-engineering\agents\research\framework-docs-researcher.md
+- plugins\compound-engineering\agents\research\git-history-analyzer.md
+- plugins\compound-engineering\agents\research\issue-intelligence-analyst.md
+- plugins\compound-engineering\agents\research\learnings-researcher.md
+- plugins\compound-engineering\agents\research\repo-research-analyst.md
+- plugins\compound-engineering\agents\research\slack-researcher.md
+- plugins\compound-engineering\agents\review\adversarial-reviewer.md
+- plugins\compound-engineering\agents\review\agent-native-reviewer.md
+- plugins\compound-engineering\agents\review\api-contract-reviewer.md
+- plugins\compound-engineering\agents\review\architecture-strategist.md
+- plugins\compound-engineering\agents\review\cli-agent-readiness-reviewer.md
+- plugins\compound-engineering\agents\review\cli-readiness-reviewer.md
+- plugins\compound-engineering\agents\review\code-simplicity-reviewer.md
+- plugins\compound-engineering\agents\review\correctness-reviewer.md
+- plugins\compound-engineering\agents\review\data-integrity-guardian.md
+- plugins\compound-engineering\agents\review\data-migration-expert.md
+- plugins\compound-engineering\agents\review\data-migrations-reviewer.md
+- plugins\compound-engineering\agents\review\deployment-verification-agent.md
+- plugins\compound-engineering\agents\review\dhh-rails-reviewer.md
+- plugins\compound-engineering\agents\review\julik-frontend-races-reviewer.md
+- plugins\compound-engineering\agents\review\kieran-python-reviewer.md
+- plugins\compound-engineering\agents\review\kieran-rails-reviewer.md
+- plugins\compound-engineering\agents\review\kieran-typescript-reviewer.md
+- plugins\compound-engineering\agents\review\maintainability-reviewer.md
+- plugins\compound-engineering\agents\review\pattern-recognition-specialist.md
+- plugins\compound-engineering\agents\review\performance-oracle.md
+- plugins\compound-engineering\agents\review\performance-reviewer.md
+- plugins\compound-engineering\agents\review\previous-comments-reviewer.md
+- plugins\compound-engineering\agents\review\project-standards-reviewer.md
+- plugins\compound-engineering\agents\review\reliability-reviewer.md
+- plugins\compound-engineering\agents\review\schema-drift-detector.md
+- plugins\compound-engineering\agents\review\security-reviewer.md
+- plugins\compound-engineering\agents\review\security-sentinel.md
+- plugins\compound-engineering\agents\review\testing-reviewer.md
+- plugins\compound-engineering\agents\workflow\bug-reproduction-validator.md
+- plugins\compound-engineering\agents\workflow\lint.md
+- plugins\compound-engineering\agents\workflow\pr-comment-resolver.md
+- plugins\compound-engineering\agents\workflow\spec-flow-analyzer.md
+
+## Initial migration conclusion
+- Direct upstream has more ce-prefixed skills and flattened ce-*.agent.md agents.
+- Local fork has private overlays and several legacy/non-ce skills that must be preserved or consciously merged.
+- Next step is command/skill surface rebuild, then agent identity matrix before moving files.

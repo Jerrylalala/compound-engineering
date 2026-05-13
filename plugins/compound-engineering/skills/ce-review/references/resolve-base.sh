@@ -54,16 +54,18 @@ if [ -n "$REVIEW_BASE_BRANCH" ]; then
     if [ -n "$PR_BASE_REMOTE" ]; then
       git rev-parse --verify "$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" >/dev/null 2>&1 || git fetch --no-tags "$PR_BASE_REMOTE" "$REVIEW_BASE_BRANCH:refs/remotes/$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" 2>/dev/null || git fetch --no-tags "$PR_BASE_REMOTE" "$REVIEW_BASE_BRANCH" 2>/dev/null || true
       BASE_REF=$(git rev-parse --verify "$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" 2>/dev/null || true)
+    else
+      PR_BASE_URL="https://github.com/$PR_BASE_REPO.git"
+      if git fetch --no-tags "$PR_BASE_URL" "$REVIEW_BASE_BRANCH" 2>/dev/null; then
+        BASE_REF=$(git rev-parse --verify FETCH_HEAD 2>/dev/null || true)
+      fi
     fi
   fi
   if [ -z "$BASE_REF" ]; then
-    # Only try origin if it exists as a remote; otherwise skip to avoid
-    # confusing errors in fork setups where origin points at the user's fork.
     if git remote get-url origin >/dev/null 2>&1; then
       git rev-parse --verify "origin/$REVIEW_BASE_BRANCH" >/dev/null 2>&1 || git fetch --no-tags origin "$REVIEW_BASE_BRANCH:refs/remotes/origin/$REVIEW_BASE_BRANCH" 2>/dev/null || git fetch --no-tags origin "$REVIEW_BASE_BRANCH" 2>/dev/null || true
       BASE_REF=$(git rev-parse --verify "origin/$REVIEW_BASE_BRANCH" 2>/dev/null || true)
     fi
-    # Fall back to a bare local ref only if remote resolution failed
     if [ -z "$BASE_REF" ]; then
       BASE_REF=$(git rev-parse --verify "$REVIEW_BASE_BRANCH" 2>/dev/null || true)
     fi
@@ -82,6 +84,9 @@ if [ -n "$BASE_REF" ]; then
       git fetch --no-tags --unshallow "$PR_BASE_REMOTE" 2>/dev/null || true
       BASE=$(git merge-base HEAD "$BASE_REF" 2>/dev/null) || BASE=""
     fi
+  fi
+  if [ -z "$BASE" ]; then
+    BASE=""
   fi
 else
   BASE=""

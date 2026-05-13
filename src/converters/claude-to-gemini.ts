@@ -14,10 +14,12 @@ export function convertClaudeToGemini(
   const usedSkillNames = new Set<string>()
   const usedCommandNames = new Set<string>()
 
-  const skillDirs = plugin.skills.map((skill) => ({
-    name: skill.name,
-    sourceDir: skill.sourceDir,
-  }))
+  const skillDirs = plugin.skills
+    .filter((skill) => !skill.claudeCodeOnly)
+    .map((skill) => ({
+      name: skill.name,
+      sourceDir: skill.sourceDir,
+    }))
 
   // Reserve skill names from pass-through skills
   for (const skill of skillDirs) {

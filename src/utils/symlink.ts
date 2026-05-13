@@ -4,7 +4,9 @@ import fs from "fs/promises"
  * Create a symlink, safely replacing any existing symlink at target.
  * Only removes existing symlinks - skips real directories with a warning.
  */
-export async function forceSymlink(source: string, target: string): Promise<void> {
+export type DirectorySymlinkResult = "linked" | "skipped-real-directory"
+
+export async function forceDirectorySymlink(source: string, target: string): Promise<DirectorySymlinkResult> {
   try {
     const stat = await fs.lstat(target)
     if (stat.isSymbolicLink()) {
@@ -13,7 +15,7 @@ export async function forceSymlink(source: string, target: string): Promise<void
     } else if (stat.isDirectory()) {
       // Skip real directories rather than deleting them
       console.warn(`Skipping ${target}: a real directory exists there (remove it manually to replace with a symlink).`)
-      return
+      return "skipped-real-directory"
     } else {
       // Regular file - remove it
       await fs.unlink(target)
@@ -24,7 +26,8 @@ export async function forceSymlink(source: string, target: string): Promise<void
       throw err
     }
   }
-  await fs.symlink(source, target)
+  await fs.symlink(source, target, process.platform === "win32" ? "junction" : "dir")
+  return "linked"
 }
 
 /**

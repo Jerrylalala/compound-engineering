@@ -232,7 +232,7 @@ type ResolvedPluginPath = {
 
 async function resolvePluginPath(input: string, branch?: string): Promise<ResolvedPluginPath> {
   // Only treat as a local path if it explicitly looks like one
-  if (input.startsWith(".") || input.startsWith("/") || input.startsWith("~")) {
+  if (looksLikePath(input)) {
     const expanded = expandHome(input)
     const directPath = path.resolve(expanded)
     if (await pathExists(directPath)) return { path: directPath }
@@ -301,6 +301,16 @@ async function resolveGitHubPluginPath(pluginName: string, branch?: string): Pro
       await fs.rm(tempRoot, { recursive: true, force: true })
     },
   }
+}
+
+function looksLikePath(input: string): boolean {
+  return input.startsWith(".")
+    || input.startsWith("/")
+    || input.startsWith("~")
+    || input.startsWith("\\\\")
+    || /^[A-Za-z]:[\\/]/.test(input)
+    || input.includes("\\")
+    || path.isAbsolute(input)
 }
 
 function resolveGitHubSource(): string {

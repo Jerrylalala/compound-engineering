@@ -27,11 +27,13 @@ powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
 
 ## Verify
 
-After syncing, check that `~/.codex/skills/` only exposes these workflow entrypoints for this repository:
+After syncing, check that `~/.codex/skills/` contains the updated workflow entrypoints for this repository:
 
 - `workflows-brainstorm`
 - `workflows-plan`
 - `workflows-review`
+
+Other user-installed global Codex skills may still exist. The sync script removes known stale workflow duplicates, not arbitrary user skills.
 
 ## Hard Guardrail
 

@@ -23,13 +23,15 @@ export function convertClaudeToCopilot(
   const agents = plugin.agents.map((agent) => convertAgent(agent, usedAgentNames))
 
   // Reserve sanitized skill names so generated skills (from commands) don't collide on disk
-  const skillDirs = plugin.skills.map((skill) => {
-    usedSkillNames.add(sanitizePathName(skill.name))
-    return {
-      name: skill.name,
-      sourceDir: skill.sourceDir,
-    }
-  })
+  const skillDirs = plugin.skills
+    .filter((skill) => !skill.claudeCodeOnly)
+    .map((skill) => {
+      usedSkillNames.add(sanitizePathName(skill.name))
+      return {
+        name: skill.name,
+        sourceDir: skill.sourceDir,
+      }
+    })
 
   const generatedSkills = plugin.commands.map((command) =>
     convertCommandToSkill(command, usedSkillNames),

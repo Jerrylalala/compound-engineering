@@ -101,18 +101,43 @@ export async function resolveCommandPath(dir: string, name: string, ext: string)
 }
 
 export async function copyDir(sourceDir: string, targetDir: string): Promise<void> {
+  const sourceRoot = await canonicalizeExistingPath(sourceDir)
+  await copyDirWithinRoot(sourceDir, targetDir, sourceRoot)
+}
+
+async function copyDirWithinRoot(sourceDir: string, targetDir: string, sourceRoot: string): Promise<void> {
   await ensureDir(targetDir)
   const entries = await fs.readdir(sourceDir, { withFileTypes: true })
   for (const entry of entries) {
     const sourcePath = path.join(sourceDir, entry.name)
     const targetPath = path.join(targetDir, entry.name)
     if (entry.isDirectory()) {
-      await copyDir(sourcePath, targetPath)
+      await copyDirWithinRoot(sourcePath, targetPath, sourceRoot)
+    } else if (entry.isSymbolicLink()) {
+      const realPath = await fs.realpath(sourcePath)
+      ensureWithinRoot(realPath, sourceRoot)
+      const stat = await fs.stat(realPath)
+      if (stat.isDirectory()) {
+        await copyDirWithinRoot(realPath, targetPath, sourceRoot)
+      } else if (stat.isFile()) {
+        await ensureDir(path.dirname(targetPath))
+        await fs.copyFile(realPath, targetPath)
+      }
     } else if (entry.isFile()) {
       await ensureDir(path.dirname(targetPath))
       await fs.copyFile(sourcePath, targetPath)
     }
   }
+}
+
+async function canonicalizeExistingPath(targetPath: string): Promise<string> {
+  return path.resolve(await fs.realpath(targetPath))
+}
+
+function ensureWithinRoot(candidate: string, root: string): void {
+  const relative = path.relative(root, path.resolve(candidate))
+  if (relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative))) return
+  throw new Error(`Refusing to copy symlink target outside source root: ${candidate}`)
 }
 
 /**
@@ -131,6 +156,17 @@ export async function copySkillDir(
   transformSkillContent?: (content: string) => string,
   transformAllMarkdown?: boolean,
 ): Promise<void> {
+  const sourceRoot = await canonicalizeExistingPath(sourceDir)
+  await copySkillDirWithinRoot(sourceDir, targetDir, sourceRoot, transformSkillContent, transformAllMarkdown)
+}
+
+async function copySkillDirWithinRoot(
+  sourceDir: string,
+  targetDir: string,
+  sourceRoot: string,
+  transformSkillContent?: (content: string) => string,
+  transformAllMarkdown?: boolean,
+): Promise<void> {
   await ensureDir(targetDir)
   const entries = await fs.readdir(sourceDir, { withFileTypes: true })
 
@@ -139,18 +175,37 @@ export async function copySkillDir(
     const targetPath = path.join(targetDir, entry.name)
 
     if (entry.isDirectory()) {
-      await copySkillDir(sourcePath, targetPath, transformSkillContent, transformAllMarkdown)
-    } else if (entry.isFile()) {
-      const shouldTransform = transformSkillContent && (
-        entry.name === "SKILL.md" || (transformAllMarkdown && entry.name.endsWith(".md"))
-      )
-      if (shouldTransform) {
-        const content = await readText(sourcePath)
-        await writeText(targetPath, transformSkillContent(content))
-      } else {
-        await ensureDir(path.dirname(targetPath))
-        await fs.copyFile(sourcePath, targetPath)
+      await copySkillDirWithinRoot(sourcePath, targetPath, sourceRoot, transformSkillContent, transformAllMarkdown)
+    } else if (entry.isSymbolicLink()) {
+      const realPath = await fs.realpath(sourcePath)
+      ensureWithinRoot(realPath, sourceRoot)
+      const stat = await fs.stat(realPath)
+      if (stat.isDirectory()) {
+        await copySkillDirWithinRoot(realPath, targetPath, sourceRoot, transformSkillContent, transformAllMarkdown)
+      } else if (stat.isFile()) {
+        await copySkillFile(realPath, targetPath, entry.name, transformSkillContent, transformAllMarkdown)
       }
+    } else if (entry.isFile()) {
+      await copySkillFile(sourcePath, targetPath, entry.name, transformSkillContent, transformAllMarkdown)
     }
+  }
+}
+
+async function copySkillFile(
+  sourcePath: string,
+  targetPath: string,
+  fileName: string,
+  transformSkillContent?: (content: string) => string,
+  transformAllMarkdown?: boolean,
+): Promise<void> {
+  const shouldTransform = transformSkillContent && (
+    fileName === "SKILL.md" || (transformAllMarkdown && fileName.endsWith(".md"))
+  )
+  if (shouldTransform) {
+    const content = await readText(sourcePath)
+    await writeText(targetPath, transformSkillContent(content))
+  } else {
+    await ensureDir(path.dirname(targetPath))
+    await fs.copyFile(sourcePath, targetPath)
   }
 }

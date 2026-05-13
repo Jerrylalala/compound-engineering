@@ -1,6 +1,7 @@
 ---
 name: ce:compound-refresh
-description: Refresh stale or drifting learnings and pattern docs in docs/solutions/ by reviewing, updating, consolidating, replacing, or deleting them against the current codebase. Use after refactors, migrations, dependency upgrades, or when a retrieved learning feels outdated or wrong. Also use when reviewing docs/solutions/ for accuracy, when a recently solved problem contradicts an existing learning, when pattern docs no longer reflect current code, or when multiple docs seem to cover the same topic and might benefit from consolidation.
+description: "刷新经验库：检查 docs/solutions/ 中过期、漂移或重复的经验文档，并更新、合并、替换或标记"
+argument-hint: "[可选：范围或 mode:autofix]"
 disable-model-invocation: true
 ---
 

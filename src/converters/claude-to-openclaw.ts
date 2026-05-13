@@ -23,13 +23,14 @@ export function convertClaudeToOpenClaw(
 ): OpenClawBundle {
   const enabledCommands = plugin.commands.filter((cmd) => !cmd.disableModelInvocation)
 
+  const publicSkills = plugin.skills.filter((skill) => !skill.claudeCodeOnly)
   const agentSkills = plugin.agents.map(convertAgentToSkill)
   const commandSkills = enabledCommands.map(convertCommandToSkill)
   const commands = enabledCommands.map(convertCommand)
 
   const skills: OpenClawSkillFile[] = [...agentSkills, ...commandSkills]
 
-  const skillDirCopies = plugin.skills.map((skill) => ({
+  const skillDirCopies = publicSkills.map((skill) => ({
     sourceDir: skill.sourceDir,
     name: skill.name,
   }))
@@ -37,7 +38,7 @@ export function convertClaudeToOpenClaw(
   const allSkillDirs = [
     ...agentSkills.map((s) => sanitizePathName(s.dir)),
     ...commandSkills.map((s) => sanitizePathName(s.dir)),
-    ...plugin.skills.map((s) => sanitizePathName(s.name)),
+    ...publicSkills.map((s) => sanitizePathName(s.name)),
   ]
 
   const manifest = buildManifest(plugin, allSkillDirs)

@@ -50,6 +50,7 @@ export type ClaudeSkill = {
   description?: string
   argumentHint?: string
   disableModelInvocation?: boolean
+  claudeCodeOnly?: boolean
   sourceDir: string
   skillPath: string
 }

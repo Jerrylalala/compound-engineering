@@ -45,7 +45,7 @@ async function createTestRepo(): Promise<string> {
 
   await runGit(["init", "-b", "main"], repoRoot, gitEnv)
   await runGit(["add", "."], repoRoot, gitEnv)
-  await runGit(["commit", "-m", "initial"], repoRoot, gitEnv)
+  await runGit(["commit", "-m", "test: add initial fixture"], repoRoot, gitEnv)
   return repoRoot
 }
 
@@ -72,6 +72,7 @@ describe("plugin-path", () => {
       env: {
         ...gitEnv,
         HOME: tempHome,
+        USERPROFILE: tempHome,
         COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
       },
     })
@@ -114,6 +115,7 @@ describe("plugin-path", () => {
       env: {
         ...gitEnv,
         HOME: tempHome,
+        USERPROFILE: tempHome,
         COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
       },
     })
@@ -138,7 +140,7 @@ describe("plugin-path", () => {
     const markerPath = path.join(repoRoot, "plugins", "compound-engineering", "MARKER.txt")
     await fs.writeFile(markerPath, "v1")
     await runGit(["add", "."], repoRoot, gitEnv)
-    await runGit(["commit", "-m", "add marker v1"], repoRoot, gitEnv)
+    await runGit(["commit", "-m", "test: add marker v1"], repoRoot, gitEnv)
 
     await runGit(["checkout", "main"], repoRoot, gitEnv)
 
@@ -161,6 +163,7 @@ describe("plugin-path", () => {
         env: {
           ...gitEnv,
           HOME: tempHome,
+          USERPROFILE: tempHome,
           COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
         },
       })
@@ -183,7 +186,7 @@ describe("plugin-path", () => {
     await runGit(["checkout", "feat/update-test"], repoRoot, gitEnv)
     await fs.writeFile(markerPath, "v2")
     await runGit(["add", "."], repoRoot, gitEnv)
-    await runGit(["commit", "-m", "update marker to v2"], repoRoot, gitEnv)
+    await runGit(["commit", "-m", "test: update marker to v2"], repoRoot, gitEnv)
     await runGit(["checkout", "main"], repoRoot, gitEnv)
 
     // Second run: update
@@ -211,6 +214,7 @@ describe("plugin-path", () => {
       env: {
         ...gitEnv,
         HOME: tempHome,
+        USERPROFILE: tempHome,
         COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
       },
     })
@@ -244,6 +248,7 @@ describe("plugin-path", () => {
         env: {
           ...gitEnv,
           HOME: tempHome,
+          USERPROFILE: tempHome,
           COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
         },
       })
@@ -283,6 +288,7 @@ describe("plugin-path", () => {
       env: {
         ...gitEnv,
         HOME: tempHome,
+        USERPROFILE: tempHome,
         COMPOUND_PLUGIN_GITHUB_SOURCE: repoRoot,
       },
     })

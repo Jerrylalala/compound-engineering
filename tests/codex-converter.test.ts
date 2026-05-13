@@ -105,7 +105,7 @@ describe("convertClaudeToCodex", () => {
     expect(parseFrontmatter(skill!.content).data.model).toBeUndefined()
   })
 
-  test("generates prompt wrappers for canonical ce workflow skills and omits workflows aliases", () => {
+  test("generates prompt wrappers only for canonical Codex workflow skills", () => {
     const plugin: ClaudePlugin = {
       ...fixturePlugin,
       manifest: { name: "compound-engineering", version: "1.0.0" },
@@ -118,6 +118,12 @@ describe("convertClaudeToCodex", () => {
           argumentHint: "[feature]",
           sourceDir: "/tmp/plugin/skills/ce-plan",
           skillPath: "/tmp/plugin/skills/ce-plan/SKILL.md",
+        },
+        {
+          name: "ce:pr",
+          description: "PR helper",
+          sourceDir: "/tmp/plugin/skills/ce-pr",
+          skillPath: "/tmp/plugin/skills/ce-pr/SKILL.md",
         },
         {
           name: "workflows:plan",
@@ -143,7 +149,7 @@ describe("convertClaudeToCodex", () => {
     expect(parsedPrompt.data["argument-hint"]).toBe("[feature]")
     expect(parsedPrompt.body).toContain("Use the ce:plan skill")
 
-    expect(bundle.skillDirs.map((skill) => skill.name)).toEqual(["ce:plan"])
+    expect(bundle.skillDirs.map((skill) => skill.name)).toEqual(["ce:plan", "ce:pr"])
   })
 
   test("does not apply compound workflow canonicalization to other plugins", () => {
@@ -395,7 +401,7 @@ If planning is complete, continue with /ce:work.`,
     const parsed = parseFrontmatter(commandSkill!.content)
 
     expect(parsed.body).toContain("/prompts:ce-plan")
-    expect(parsed.body).toContain("/prompts:ce-work")
+    expect(parsed.body).toContain("the ce:work skill")
     expect(parsed.body).not.toContain("the ce:plan skill")
   })
 
@@ -527,6 +533,37 @@ Run \`/compound-engineering-setup\` to create a settings file.`,
     expect(description.length).toBeLessThanOrEqual(1024)
     expect(description).not.toContain("\n")
     expect(description.endsWith("...")).toBe(true)
+  })
+
+  test("excludes claude-code-only skills from conversion", () => {
+    const plugin: ClaudePlugin = {
+      ...fixturePlugin,
+      commands: [],
+      agents: [],
+      skills: [
+        {
+          name: "normal-skill",
+          description: "Normal skill",
+          sourceDir: "/tmp/plugin/skills/normal-skill",
+          skillPath: "/tmp/plugin/skills/normal-skill/SKILL.md",
+        },
+        {
+          name: "ce:doctor",
+          description: "Claude-only doctor",
+          claudeCodeOnly: true,
+          sourceDir: "/tmp/plugin/skills/ce-doctor",
+          skillPath: "/tmp/plugin/skills/ce-doctor/SKILL.md",
+        },
+      ],
+    }
+
+    const bundle = convertClaudeToCodex(plugin, {
+      agentMode: "subagent",
+      inferTemperature: false,
+      permissions: "none",
+    })
+
+    expect(bundle.skillDirs.map((skill) => skill.name)).toEqual(["normal-skill"])
   })
 
   test("excludes claude-code-only commands from conversion", () => {

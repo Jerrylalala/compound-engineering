@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test"
+import { describe, expect, mock, test } from "bun:test"
 import { promises as fs } from "fs"
 import os from "os"
 import path from "path"
@@ -45,7 +45,8 @@ describe("syncToCodex", () => {
     await syncToCodex(config, tempRoot)
 
     const skillPath = path.join(tempRoot, "skills", "skill-one")
-    expect((await fs.lstat(skillPath)).isSymbolicLink()).toBe(true)
+    expect(await fs.lstat(skillPath)).toBeDefined()
+    expect(await fs.readFile(path.join(skillPath, "SKILL.md"), "utf8")).toContain("name: skill-one")
 
     const content = await fs.readFile(configPath, "utf8")
     expect(content).toContain("[custom]")
@@ -61,7 +62,9 @@ describe("syncToCodex", () => {
     expect(content.match(/# BEGIN Compound Engineering plugin MCP/g)?.length).toBe(1)
 
     const perms = (await fs.stat(configPath)).mode & 0o777
-    expect(perms).toBe(0o600)
+    if (process.platform !== "win32") {
+      expect(perms).toBe(0o600)
+    }
   })
 
   test("cleans up stale managed block when syncing with zero MCP servers", async () => {
@@ -87,5 +90,98 @@ describe("syncToCodex", () => {
     const content = await fs.readFile(configPath, "utf8")
     expect(content).not.toContain("[mcp_servers.old]")
     expect(content).not.toContain("# BEGIN")
+  })
+
+  test("copies skills when symlink privileges are unavailable and refreshes managed copies", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "sync-codex-copy-"))
+    const sourceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "sync-codex-source-"))
+    const fixtureSkillDir = path.join(sourceRoot, "skill-one")
+    await fs.mkdir(fixtureSkillDir, { recursive: true })
+    await fs.writeFile(path.join(fixtureSkillDir, "SKILL.md"), "---\nname: skill-one\n---\n\nv1\n")
+    await fs.mkdir(path.join(fixtureSkillDir, "references"), { recursive: true })
+    await fs.writeFile(path.join(fixtureSkillDir, "references", "note.md"), "note v1\n")
+
+    const symlinkMock = mock(async () => {
+      const error = new Error("privilege missing") as NodeJS.ErrnoException
+      error.code = "EPERM"
+      throw error
+    })
+    const originalSymlink = fs.symlink
+    fs.symlink = symlinkMock as unknown as typeof fs.symlink
+
+    try {
+      const config: ClaudeHomeConfig = {
+        skills: [
+          {
+            name: "skill-one",
+            sourceDir: fixtureSkillDir,
+            skillPath: path.join(fixtureSkillDir, "SKILL.md"),
+          },
+        ],
+        mcpServers: {},
+      }
+
+      await syncToCodex(config, tempRoot)
+      const skillPath = path.join(tempRoot, "skills", "skill-one")
+      expect((await fs.lstat(skillPath)).isDirectory()).toBe(true)
+      expect(await fs.readFile(path.join(skillPath, "SKILL.md"), "utf8")).toContain("v1")
+      expect(await fs.readFile(path.join(skillPath, "references", "note.md"), "utf8")).toContain("note v1")
+
+      await fs.writeFile(path.join(fixtureSkillDir, "SKILL.md"), "---\nname: skill-one\n---\n\nv2\n")
+      await syncToCodex(config, tempRoot)
+
+      const movedSourceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "sync-codex-source-moved-"))
+      const movedSkillDir = path.join(movedSourceRoot, "skill-one")
+      await fs.mkdir(movedSkillDir, { recursive: true })
+      await fs.writeFile(path.join(movedSkillDir, "SKILL.md"), "---\nname: skill-one\n---\n\nv3\n")
+      await syncToCodex({
+        skills: [
+          {
+            name: "skill-one",
+            sourceDir: movedSkillDir,
+            skillPath: path.join(movedSkillDir, "SKILL.md"),
+          },
+        ],
+        mcpServers: {},
+      }, tempRoot)
+
+      expect(await fs.readFile(path.join(skillPath, "SKILL.md"), "utf8")).toContain("v3")
+    } finally {
+      fs.symlink = originalSymlink
+    }
+  })
+
+  test("does not replace user-owned real skill directories during symlink fallback", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "sync-codex-user-dir-"))
+    const fixtureSkillDir = path.join(import.meta.dir, "fixtures", "sample-plugin", "skills", "skill-one")
+    const userSkillPath = path.join(tempRoot, "skills", "skill-one")
+    await fs.mkdir(userSkillPath, { recursive: true })
+    await fs.writeFile(path.join(userSkillPath, "SKILL.md"), "user content\n")
+
+    const symlinkMock = mock(async () => {
+      const error = new Error("privilege missing") as NodeJS.ErrnoException
+      error.code = "EPERM"
+      throw error
+    })
+    const originalSymlink = fs.symlink
+    fs.symlink = symlinkMock as unknown as typeof fs.symlink
+
+    try {
+      const config: ClaudeHomeConfig = {
+        skills: [
+          {
+            name: "skill-one",
+            sourceDir: fixtureSkillDir,
+            skillPath: path.join(fixtureSkillDir, "SKILL.md"),
+          },
+        ],
+        mcpServers: {},
+      }
+
+      await syncToCodex(config, tempRoot)
+      expect(await fs.readFile(path.join(userSkillPath, "SKILL.md"), "utf8")).toBe("user content\n")
+    } finally {
+      fs.symlink = originalSymlink
+    }
   })
 })

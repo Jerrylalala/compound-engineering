@@ -17,8 +17,9 @@ export function convertClaudeToPi(
   plugin: ClaudePlugin,
   _options: ClaudeToPiOptions,
 ): PiBundle {
+  const publicSkills = plugin.skills.filter((skill) => !skill.claudeCodeOnly)
   const promptNames = new Set<string>()
-  const usedSkillNames = new Set<string>(plugin.skills.map((skill) => normalizeName(skill.name)))
+  const usedSkillNames = new Set<string>(publicSkills.map((skill) => normalizeName(skill.name)))
 
   const prompts = plugin.commands
     .filter((command) => !command.disableModelInvocation)
@@ -35,7 +36,7 @@ export function convertClaudeToPi(
 
   return {
     prompts,
-    skillDirs: plugin.skills.map((skill) => ({
+    skillDirs: publicSkills.map((skill) => ({
       name: skill.name,
       sourceDir: skill.sourceDir,
     })),

@@ -23,7 +23,7 @@ describe("detectInstalledTools", () => {
 
     const windsurf = results.find((t) => t.name === "windsurf")
     expect(windsurf?.detected).toBe(true)
-    expect(windsurf?.reason).toContain(".codeium/windsurf")
+    expect(windsurf?.reason).toContain(`${path.sep}.codeium${path.sep}windsurf`)
 
     const gemini = results.find((t) => t.name === "gemini")
     expect(gemini?.detected).toBe(true)
@@ -87,7 +87,7 @@ describe("detectInstalledTools", () => {
 
     results = await detectInstalledTools(tempHome, tempCwd)
     expect(results.find((t) => t.name === "copilot")?.detected).toBe(true)
-    expect(results.find((t) => t.name === "copilot")?.reason).toContain(".github/skills")
+    expect(results.find((t) => t.name === "copilot")?.reason).toContain(`${path.sep}.github${path.sep}skills`)
   })
 })
 

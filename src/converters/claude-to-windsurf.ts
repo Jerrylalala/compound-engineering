@@ -16,10 +16,12 @@ export function convertClaudeToWindsurf(
   const knownAgentNames = plugin.agents.map((a) => normalizeName(a.name))
 
   // Pass-through skills (collected first so agent skill names can deduplicate against them)
-  const skillDirs = plugin.skills.map((skill) => ({
-    name: skill.name,
-    sourceDir: skill.sourceDir,
-  }))
+  const skillDirs = plugin.skills
+    .filter((skill) => !skill.claudeCodeOnly)
+    .map((skill) => ({
+      name: skill.name,
+      sourceDir: skill.sourceDir,
+    }))
 
   // Convert agents to skills (seed usedNames with sanitized pass-through skill names
   // so generated agent skills detect collisions that would occur on disk)

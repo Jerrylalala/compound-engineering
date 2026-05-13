@@ -26,7 +26,7 @@ describe("syncToKiro", () => {
 
     await syncToKiro(config, tempRoot)
 
-    expect((await fs.lstat(path.join(tempRoot, "skills", "skill-one"))).isSymbolicLink()).toBe(true)
+    expect(await fs.readFile(path.join(tempRoot, "skills", "skill-one", "SKILL.md"), "utf8")).toContain("name: skill-one")
 
     const content = JSON.parse(
       await fs.readFile(path.join(tempRoot, "settings", "mcp.json"), "utf8"),

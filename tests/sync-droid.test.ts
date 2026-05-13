@@ -26,8 +26,7 @@ describe("syncToDroid", () => {
     await syncToDroid(config, tempRoot)
 
     const linkedSkillPath = path.join(tempRoot, "skills", "skill-one")
-    const linkedStat = await fs.lstat(linkedSkillPath)
-    expect(linkedStat.isSymbolicLink()).toBe(true)
+    expect(await fs.readFile(path.join(linkedSkillPath, "SKILL.md"), "utf8")).toContain("name: skill-one")
 
     const mcpConfig = JSON.parse(
       await fs.readFile(path.join(tempRoot, "mcp.json"), "utf8"),

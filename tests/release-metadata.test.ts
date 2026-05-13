@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, writeFile } from "fs/promises"
+import { mkdtemp, mkdir, writeFile, rm } from "fs/promises"
 import os from "os"
 import path from "path"
 import { afterEach, describe, expect, test } from "bun:test"
@@ -26,6 +26,9 @@ async function makeFixtureRoot(): Promise<string> {
   await mkdir(path.join(root, "plugins", "compound-engineering", "skills", "ce-plan"), {
     recursive: true,
   })
+  await mkdir(path.join(root, "plugins", "compound-engineering", "commands"), {
+    recursive: true,
+  })
   await mkdir(path.join(root, "plugins", "compound-engineering", ".claude-plugin"), {
     recursive: true,
   })
@@ -50,12 +53,16 @@ async function makeFixtureRoot(): Promise<string> {
     "# ce:plan\n",
   )
   await writeFile(
+    path.join(root, "plugins", "compound-engineering", "commands", "legacy.md"),
+    "# Legacy Command\n",
+  )
+  await writeFile(
     path.join(root, "plugins", "compound-engineering", ".mcp.json"),
     JSON.stringify({ mcpServers: { context7: { command: "ctx7" } } }, null, 2),
   )
   await writeFile(
     path.join(root, "plugins", "compound-engineering", ".claude-plugin", "plugin.json"),
-    JSON.stringify({ version: "2.42.0", description: "old" }, null, 2),
+    JSON.stringify({ version: "2.42.0", description: "old", mcpServers: { context7: { type: "http" } } }, null, 2),
   )
   await writeFile(
     path.join(root, "plugins", "compound-engineering", ".cursor-plugin", "plugin.json"),
@@ -107,20 +114,45 @@ describe("release metadata", () => {
 
     expect(counts).toEqual({
       agents: expect.any(Number),
+      commands: expect.any(Number),
       skills: expect.any(Number),
       mcpServers: expect.any(Number),
     })
     expect(counts.agents).toBeGreaterThan(0)
-    expect(counts.skills).toBeGreaterThan(0)
-    expect(counts.mcpServers).toBeGreaterThanOrEqual(0)
+    expect(counts.commands).toBe(4)
+    expect(counts.skills).toBe(66)
+    expect(counts.mcpServers).toBe(1)
   })
 
-  test("builds a stable compound-engineering manifest description", async () => {
-    const description = await buildCompoundEngineeringDescription(process.cwd())
+  test("builds a count-aware compound-engineering manifest description", async () => {
+    const root = await makeFixtureRoot()
+    const description = await buildCompoundEngineeringDescription(root)
 
     expect(description).toBe(
-      "AI-powered development tools for code review, research, design, and workflow automation.",
+      "AI-powered development tools. 1 agents, 1 commands, 1 skills, 1 MCP server for code review, research, design, and workflow automation.",
     )
+  })
+
+  test("counts MCP servers from plugin manifest when .mcp.json is absent", async () => {
+    const root = await makeFixtureRoot()
+    await rm(path.join(root, "plugins", "compound-engineering", ".mcp.json"))
+
+    const counts = await getCompoundEngineeringCounts(root)
+
+    expect(counts.mcpServers).toBe(1)
+  })
+
+  test("returns zero MCP servers when no MCP config exists", async () => {
+    const root = await makeFixtureRoot()
+    await rm(path.join(root, "plugins", "compound-engineering", ".mcp.json"))
+    await writeFile(
+      path.join(root, "plugins", "compound-engineering", ".claude-plugin", "plugin.json"),
+      JSON.stringify({ version: "2.42.0", description: "old" }, null, 2),
+    )
+
+    const counts = await getCompoundEngineeringCounts(root)
+
+    expect(counts.mcpServers).toBe(0)
   })
 
   test("detects cross-surface version drift even without explicit override versions", async () => {

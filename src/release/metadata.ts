@@ -43,12 +43,15 @@ export type MetadataSyncResult = {
 
 export type CompoundEngineeringCounts = {
   agents: number
+  commands: number
   skills: number
   mcpServers: number
 }
 
-const COMPOUND_ENGINEERING_DESCRIPTION =
-  "AI-powered development tools for code review, research, design, and workflow automation."
+function formatCompoundEngineeringDescription(counts: CompoundEngineeringCounts): string {
+  const mcpLabel = counts.mcpServers === 1 ? "MCP server" : "MCP servers"
+  return `AI-powered development tools. ${counts.agents} agents, ${counts.commands} commands, ${counts.skills} skills, ${counts.mcpServers} ${mcpLabel} for code review, research, design, and workflow automation.`
+}
 
 const COMPOUND_ENGINEERING_MARKETPLACE_DESCRIPTION =
   "AI-powered development tools that get smarter with every use. Make each unit of engineering work easier than the last."
@@ -102,6 +105,14 @@ export async function countMcpServers(pluginRoot: string): Promise<number> {
     const manifest = await readJson<{ mcpServers?: Record<string, unknown> }>(mcpPath)
     return Object.keys(manifest.mcpServers ?? {}).length
   } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err
+  }
+
+  const pluginManifestPath = path.join(pluginRoot, ".claude-plugin", "plugin.json")
+  try {
+    const manifest = await readJson<{ mcpServers?: Record<string, unknown> }>(pluginManifestPath)
+    return Object.keys(manifest.mcpServers ?? {}).length
+  } catch (err: unknown) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") return 0
     throw err
   }
@@ -109,17 +120,18 @@ export async function countMcpServers(pluginRoot: string): Promise<number> {
 
 export async function getCompoundEngineeringCounts(root: string): Promise<CompoundEngineeringCounts> {
   const pluginRoot = path.join(root, "plugins", "compound-engineering")
-  const [agents, skills, mcpServers] = await Promise.all([
+  const [agents, commands, skills, mcpServers] = await Promise.all([
     countMarkdownFiles(path.join(pluginRoot, "agents")),
+    countMarkdownFiles(path.join(pluginRoot, "commands")),
     countSkillDirectories(path.join(pluginRoot, "skills")),
     countMcpServers(pluginRoot),
   ])
 
-  return { agents, skills, mcpServers }
+  return { agents, commands, skills, mcpServers }
 }
 
-export async function buildCompoundEngineeringDescription(_root: string): Promise<string> {
-  return COMPOUND_ENGINEERING_DESCRIPTION
+export async function buildCompoundEngineeringDescription(root: string): Promise<string> {
+  return formatCompoundEngineeringDescription(await getCompoundEngineeringCounts(root))
 }
 
 export async function buildCompoundEngineeringMarketplaceDescription(_root: string): Promise<string> {

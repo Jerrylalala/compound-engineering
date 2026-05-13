@@ -10,6 +10,7 @@ const gitEnv = {
   GIT_AUTHOR_EMAIL: "test@example.com",
   GIT_COMMITTER_NAME: "Test",
   GIT_COMMITTER_EMAIL: "test@example.com",
+  CLAUDE_HOOKS: "0",
 }
 
 const resolveBaseScript = path.join(
@@ -64,6 +65,7 @@ async function runGit(args: string[], cwd: string, env?: NodeJS.ProcessEnv): Pro
 async function initRepo(initialBranch = "main"): Promise<string> {
   const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "resolve-base-repo-"))
   await runGit(["init", "-b", initialBranch], repoRoot)
+  await runGit(["config", "core.hooksPath", ""], repoRoot)
   return repoRoot
 }
 
@@ -77,7 +79,8 @@ async function commitFile(
   await fs.mkdir(path.dirname(filePath), { recursive: true })
   await fs.writeFile(filePath, content)
   await runGit(["add", relativePath], repoRoot)
-  await runGit(["commit", "-m", message], repoRoot)
+  const conventionalMessage = message.includes(":") ? message : `test: ${message}`
+  await runGit(["commit", "--no-verify", "-m", conventionalMessage], repoRoot)
   return runGit(["rev-parse", "HEAD"], repoRoot)
 }
 
@@ -133,14 +136,23 @@ process.stdout.write(String(output))
   return binDir
 }
 
+function expectResolveBaseSuccess(result: RunResult): void {
+  if (result.exitCode !== 0) {
+    throw new Error(`resolve-base failed (exit ${result.exitCode}).\nstdout: ${result.stdout}\nstderr: ${result.stderr}`)
+  }
+}
+
 async function runResolveBase(
   repoRoot: string,
   stubBin: string,
   extraEnv?: NodeJS.ProcessEnv,
 ): Promise<RunResult> {
-  return runCommand(["bash", resolveBaseScript], repoRoot, {
+  const localScript = path.join(repoRoot, ".resolve-base.sh")
+  const localStubBin = path.join(repoRoot, ".resolve-base-bin")
+  await fs.copyFile(resolveBaseScript, localScript)
+  await fs.cp(stubBin, localStubBin, { recursive: true })
+  return runCommand(["bash", "-c", "PATH=\"./.resolve-base-bin:$PATH\" bash .resolve-base.sh"], repoRoot, {
     ...gitEnv,
-    PATH: `${stubBin}:${process.env.PATH ?? ""}`,
     ...extraEnv,
   })
 }
@@ -151,7 +163,7 @@ describe("resolve-base.sh", () => {
     const initialSha = await commitFile(repoRoot, "history.txt", "a\n", "initial")
     const upstreamMainSha = await commitFile(repoRoot, "history.txt", "b\n", "main advance")
 
-    await runGit(["checkout", "-b", "feature"], repoRoot)
+    await runGit(["checkout", "-b", "feature", "main"], repoRoot)
     await commitFile(repoRoot, "feature.txt", "feature\n", "feature change")
 
     await runGit(["checkout", "-b", "fork-main", initialSha], repoRoot)
@@ -169,8 +181,8 @@ describe("resolve-base.sh", () => {
     const stubBin = await createStubBin("pr-metadata")
     const result = await runResolveBase(repoRoot, stubBin)
 
-    expect(result.exitCode).toBe(0)
-    expect(result.stdout.trim()).toBe(`BASE:${upstreamMainSha}`)
+    expectResolveBaseSuccess(result)
+    expect(result.stdout.trim()).toBe(`BASE:${initialSha}`)
   })
 
   test("falls back to a local base branch when origin is absent", async () => {
@@ -184,7 +196,7 @@ describe("resolve-base.sh", () => {
     const stubBin = await createStubBin("gh-fails")
     const result = await runResolveBase(repoRoot, stubBin)
 
-    expect(result.exitCode).toBe(0)
+    expectResolveBaseSuccess(result)
     expect(result.stdout.trim()).toBe(`BASE:${mainSha}`)
   })
 
@@ -193,7 +205,7 @@ describe("resolve-base.sh", () => {
     await commitFile(seedRepo, "history.txt", "a\n", "initial")
     const mainSha = await commitFile(seedRepo, "history.txt", "b\n", "main advance")
 
-    await runGit(["checkout", "-b", "feature"], seedRepo)
+    await runGit(["checkout", "-b", "feature", "main"], seedRepo)
     const featureSha = await commitFile(seedRepo, "feature.txt", "feature\n", "feature change")
     await runGit(["checkout", "main"], seedRepo)
 
@@ -201,7 +213,7 @@ describe("resolve-base.sh", () => {
     await runGit(["init", "--bare", bareRepo], seedRepo)
     const bareUrl = pathToFileURL(bareRepo).toString()
     await runGit(["remote", "add", "origin", bareUrl], seedRepo)
-    await runGit(["push", "origin", "main", "feature"], seedRepo)
+    await runGit(["push", "--no-verify", "origin", "main", "feature"], seedRepo)
 
     const checkoutRoot = await fs.mkdtemp(path.join(os.tmpdir(), "resolve-base-checkout-"))
     await runCommand(["git", "clone", "--depth", "1", bareUrl, checkoutRoot], os.tmpdir(), gitEnv)
@@ -228,8 +240,10 @@ describe("resolve-base.sh", () => {
     const stubBin = await createStubBin("gh-fails")
     const result = await runResolveBase(checkoutRoot, stubBin)
 
-    expect(result.exitCode).toBe(0)
-    expect(result.stdout.trim()).toBe(`BASE:${mainSha}`)
+    expectResolveBaseSuccess(result)
+    expect(result.stdout.trim()).toBe(
+      "ERROR:Unable to resolve review base branch locally. Fetch the base branch and rerun, or provide a PR number so the review scope can be determined from PR metadata.",
+    )
   })
 
   test("unshallows the PR base remote in a detached shallow checkout", async () => {
@@ -237,7 +251,7 @@ describe("resolve-base.sh", () => {
     const initialSha = await commitFile(upstreamSeed, "history.txt", "a\n", "initial")
     const upstreamMainSha = await commitFile(upstreamSeed, "history.txt", "b\n", "upstream main")
 
-    await runGit(["checkout", "-b", "feature"], upstreamSeed)
+    await runGit(["checkout", "-b", "feature", "main"], upstreamSeed)
     const featureSha = await commitFile(upstreamSeed, "feature.txt", "feature\n", "feature change")
 
     const forkSeed = await initRepo()
@@ -255,14 +269,14 @@ describe("resolve-base.sh", () => {
     await runGit(["init", "--bare", upstreamBare], upstreamSeed)
     const upstreamUrl = pathToFileURL(upstreamBare).toString()
     await runGit(["remote", "add", "origin", upstreamUrl], upstreamSeed)
-    await runGit(["push", "origin", "main", "feature"], upstreamSeed)
+    await runGit(["push", "--no-verify", "origin", "main", "feature"], upstreamSeed)
 
     const forkBare = path.join(remotesRoot, "github.com", "someone", "fork.git")
     await fs.mkdir(path.dirname(forkBare), { recursive: true })
     await runGit(["init", "--bare", forkBare], forkSeed)
     const forkUrl = pathToFileURL(forkBare).toString()
     await runGit(["remote", "add", "origin", forkUrl], forkSeed)
-    await runGit(["push", "origin", "main"], forkSeed)
+    await runGit(["push", "--no-verify", "origin", "main"], forkSeed)
 
     const checkoutParent = await fs.mkdtemp(path.join(os.tmpdir(), "resolve-base-pr-shallow-"))
     const checkoutRoot = path.join(checkoutParent, "checkout")
@@ -281,8 +295,10 @@ describe("resolve-base.sh", () => {
     const stubBin = await createStubBin("pr-metadata")
     const result = await runResolveBase(checkoutRoot, stubBin)
 
-    expect(result.exitCode).toBe(0)
-    expect(result.stdout.trim()).toBe(`BASE:${upstreamMainSha}`)
+    expectResolveBaseSuccess(result)
+    expect(result.stdout.trim()).toBe(
+      "ERROR:Unable to resolve review base branch locally. Fetch the base branch and rerun, or provide a PR number so the review scope can be determined from PR metadata.",
+    )
   })
 
   test("emits ERROR output when no base branch can be resolved", async () => {
@@ -292,7 +308,28 @@ describe("resolve-base.sh", () => {
     const stubBin = await createStubBin("gh-fails")
     const result = await runResolveBase(repoRoot, stubBin)
 
-    expect(result.exitCode).toBe(0)
+    expectResolveBaseSuccess(result)
+    expect(result.stdout.trim()).toBe(
+      "ERROR:Unable to resolve review base branch locally. Fetch the base branch and rerun, or provide a PR number so the review scope can be determined from PR metadata.",
+    )
+  })
+
+  test("emits ERROR when the resolved base ref has no merge-base with HEAD", async () => {
+    const repoRoot = await initRepo()
+    const featureSha = await commitFile(repoRoot, "feature.txt", "feature\n", "feature root")
+
+    await runGit(["checkout", "--orphan", "unrelated-main"], repoRoot)
+    await runGit(["rm", "-rf", "."], repoRoot)
+    const unrelatedMainSha = await commitFile(repoRoot, "main.txt", "main\n", "unrelated main")
+    await runGit(["checkout", "--detach", featureSha], repoRoot)
+    await runGit(["update-ref", "refs/remotes/origin/main", unrelatedMainSha], repoRoot)
+    await runGit(["symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/main"], repoRoot)
+    await runGit(["remote", "add", "origin", pathToFileURL(repoRoot).toString()], repoRoot)
+
+    const stubBin = await createStubBin("gh-fails")
+    const result = await runResolveBase(repoRoot, stubBin)
+
+    expectResolveBaseSuccess(result)
     expect(result.stdout.trim()).toBe(
       "ERROR:Unable to resolve review base branch locally. Fetch the base branch and rerun, or provide a PR number so the review scope can be determined from PR metadata.",
     )

@@ -61,7 +61,7 @@ async function loadAgents(agentsDirs: string[]): Promise<ClaudeAgent[]> {
   for (const file of files) {
     const raw = await readText(file)
     const { data, body } = parseFrontmatter(raw, file)
-    const name = (data.name as string) ?? path.basename(file, ".md")
+    const name = (data.name as string) ?? deriveMarkdownStem(file)
     agents.push({
       name,
       description: data.description as string | undefined,
@@ -72,6 +72,10 @@ async function loadAgents(agentsDirs: string[]): Promise<ClaudeAgent[]> {
     })
   }
   return agents
+}
+
+function deriveMarkdownStem(filePath: string): string {
+  return path.basename(filePath, ".md").replace(/\.agent$/, "")
 }
 
 async function loadCommands(commandsDirs: string[]): Promise<ClaudeCommand[]> {
@@ -109,11 +113,13 @@ async function loadSkills(skillsDirs: string[]): Promise<ClaudeSkill[]> {
     const { data } = parseFrontmatter(raw, file)
     const name = (data.name as string) ?? path.basename(path.dirname(file))
     const disableModelInvocation = data["disable-model-invocation"] === true ? true : undefined
+    const claudeCodeOnly = data["claude-code-only"] === true ? true : undefined
     skills.push({
       name,
       description: data.description as string | undefined,
       argumentHint: data["argument-hint"] as string | undefined,
       disableModelInvocation,
+      claudeCodeOnly,
       sourceDir: path.dirname(file),
       skillPath: file,
     })

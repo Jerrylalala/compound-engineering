@@ -21,14 +21,14 @@ export function convertClaudeToCodex(
   )
   const applyCompoundWorkflowModel = shouldApplyCompoundWorkflowModel(plugin)
   const canonicalWorkflowSkills = applyCompoundWorkflowModel
-    ? plugin.skills.filter((skill) => isCanonicalCodexWorkflowSkill(skill.name))
+    ? plugin.skills.filter((skill) => !skill.claudeCodeOnly && isCanonicalCodexWorkflowSkill(skill.name))
     : []
   const deprecatedWorkflowAliases = applyCompoundWorkflowModel
-    ? plugin.skills.filter((skill) => isDeprecatedCodexWorkflowAlias(skill.name))
+    ? plugin.skills.filter((skill) => !skill.claudeCodeOnly && isDeprecatedCodexWorkflowAlias(skill.name))
     : []
   const copiedSkills = applyCompoundWorkflowModel
-    ? plugin.skills.filter((skill) => !isDeprecatedCodexWorkflowAlias(skill.name))
-    : plugin.skills
+    ? plugin.skills.filter((skill) => !skill.claudeCodeOnly && !isDeprecatedCodexWorkflowAlias(skill.name))
+    : plugin.skills.filter((skill) => !skill.claudeCodeOnly)
   const skillDirs = copiedSkills.map((skill) => ({
     name: skill.name,
     sourceDir: skill.sourceDir,
@@ -180,7 +180,7 @@ function renderWorkflowPrompt(skill: ClaudeSkill): string {
 }
 
 function isCanonicalCodexWorkflowSkill(name: string): boolean {
-  return name.startsWith("ce:")
+  return name === "ce:brainstorm" || name === "ce:plan" || name === "ce:review"
 }
 
 function isDeprecatedCodexWorkflowAlias(name: string): boolean {

@@ -83,6 +83,14 @@ Use $workflows-review to review ...
 $workflows-brainstorm
 ```
 
+常用参数：
+
+- `[P]`：3 个核心视角，至少两轮讨论后再收敛
+- `[P+]`：8-12 个视角深度发散，适合模糊、高风险或架构性问题
+- `[R]`：强制检索 `docs/solutions/` 历史经验；Standard/Deep 场景即使不传也会自动检索
+
+Codex 版 brainstorm 不再提供外部 AI 咨询参数；它只负责本地上下文、历史经验、方案比较和文档化。
+
 2. 需要生成 Claude 可执行的计划时：
 
 ```text
@@ -151,11 +159,13 @@ powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
 powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1 -CodexHome "C:\Users\你的用户名\.codex"
 ```
 
-安装完成后，目标目录里应包含：
+安装完成后，目标目录里应包含并更新这三个 workflow 入口：
 
 - `skills/workflows-brainstorm/SKILL.md`
 - `skills/workflows-plan/SKILL.md`
 - `skills/workflows-review/SKILL.md`
+
+同步脚本会移除已知的旧 workflow 入口（如 `ce-*` 工作流副本和旧 prompt），但不会清理用户自己安装的其它全局 Codex skills。
 
 ## 不推荐的做法
 
@@ -169,7 +179,7 @@ bun run src/index.ts install ./plugins/compound-engineering --to codex
 
 - 它会安装整个转换后的插件
 - 会把额外的 `ce-*`、其他 `workflows-*` 也带到 `~/.codex`
-- 不符合“Codex 只保留这 3 个主入口”的目标
+- 不符合“Codex workflow 只维护这 3 个主入口”的目标
 
 ## 给 AI 的明确规则
 

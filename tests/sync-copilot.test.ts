@@ -24,8 +24,7 @@ describe("syncToCopilot", () => {
     await syncToCopilot(config, tempRoot)
 
     const linkedSkillPath = path.join(tempRoot, "skills", "skill-one")
-    const linkedStat = await fs.lstat(linkedSkillPath)
-    expect(linkedStat.isSymbolicLink()).toBe(true)
+    expect(await fs.readFile(path.join(linkedSkillPath, "SKILL.md"), "utf8")).toContain("name: skill-one")
   })
 
   test("converts personal commands into Copilot skills", async () => {
@@ -151,7 +150,9 @@ describe("syncToCopilot", () => {
     const stat = await fs.stat(mcpPath)
     // Check owner read+write permission (0o600 = 33216 in decimal, masked to file perms)
     const perms = stat.mode & 0o777
-    expect(perms).toBe(0o600)
+    if (process.platform !== "win32") {
+      expect(perms).toBe(0o600)
+    }
   })
 
   test("does not write MCP config when no MCP servers", async () => {
