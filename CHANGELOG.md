@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.49.7] - 2026-05-22
+
+### ce:brainstorm 派对模式契约恢复（PATCH）
+
+- **恢复 `[P]/[P+]` 强执行语义**：`ce:brainstorm` 现在明确把 Party Mode 作为硬流程开关，要求显式执行 `Skill("party-mode")`，避免参数只停留在描述性提示
+- **恢复派对模式交互体验**：`party-mode` 退出契约补齐共识、分歧、风险、复用机会、构建边界和 P1-P4 候选优先级，保留 emoji + 角色名 + 互相质疑/补充的讨论体验
+- **恢复 brainstorm P1-P4 收敛**：requirements 模板新增 P1 Must / P2 Should / P3 Could / P4 Later 分组，同时保留 R1/R2 稳定需求编号
+- **固化胶水编程边界**：`ce:brainstorm` 方案探索和 requirements 文档都要求写明 Reuse / Build Boundary，明确成熟能力复用、胶水代码和必须自研的边界
+- **新增回归检查**：`scripts/check-brainstorm-features.ps1` 校验 `[P]/[P+]`、`party-mode` 显式调用、P1-P4 和 Reuse / Build Boundary 不再漂移
+
+---
+
 ## [2.49.6] - 2026-05-12
 
 ### 上游优先迁移 P1/P4/P5（PATCH）

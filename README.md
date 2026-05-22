@@ -130,7 +130,9 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 
 ### [P] 派对模式 + 自动收敛
 
-`ce:brainstorm [P]` 3 个核心视角快速验证，`[P+]` 全量 12-14 视角深度发散，结束后**自动触发探索者+挑战者结构化收敛**。
+`ce:brainstorm [P]` 显式启动 `party-mode`，用 3 个核心视角快速验证；`[P+]` 启动 12-14 个视角深度发散。两种模式都会保留 emoji + 角色名 + 相互质疑/补充的讨论体验，并在退出后自动触发探索者+挑战者结构化收敛。
+
+Party Mode 结果会进入 requirements 文档：P1-P4 优先级、共识/分歧/风险、复用机会，以及 Reuse / Build Boundary（哪些复用成熟能力、哪些只写胶水代码、哪些必须自研）。
 
 ### Codex / Gemini 双重审查 + Claude 裁决
 

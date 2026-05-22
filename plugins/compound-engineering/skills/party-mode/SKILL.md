@@ -157,6 +157,20 @@ description: |
 遗留分歧：
 • [分歧点]（建议后续验证）
 
+复用机会：
+• [可复用的成熟库 / CLI / API / 平台能力 / 项目内既有模式]
+
+构建边界：
+• Reuse：[直接复用的成熟能力]
+• Glue code：[只需编排、配置、适配、连接的部分]
+• Net-new：[必须自研的部分及原因]
+
+候选优先级：
+• P1 — Must Have：[没有它，核心问题不成立]
+• P2 — Should Have：[本轮默认包含，但可在范围压力下裁剪]
+• P3 — Could Have：[低成本增强，不阻塞主路径]
+• P4 — Later / Parking Lot：[明确延后，防止 scope creep]
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 各位的告别：
@@ -166,8 +180,10 @@ description: |
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-下一步建议：运行 `/workflows:plan` 将讨论转化为计划
+下一步建议：运行 `/ce:plan` 将讨论转化为计划
 ```
+
+**退出契约（供 `ce:brainstorm` 继续收敛）：**派对模式结束时必须保留上面的结构化结果，尤其是 Consensus、Disagreements、Risks、Reuse Opportunities、Build Boundary、Candidate Priorities。不要只输出气氛化总结；后续 requirements 文档会消费这些字段。
 
 ---
 
@@ -176,17 +192,19 @@ description: |
 派对模式是 `/workflows:brainstorm` 的**可选增强**，不是独立流程：
 
 ```
-/workflows:brainstorm
+/ce:brainstorm
     │
     ├─ 默认模式：单代理逐步引导
     │
-    └─ 派对模式（用户输入 [P] 激活）
+    └─ 派对模式（用户输入 [P] / [P+] 激活）
         ↓
     多代理协作讨论
         ↓
-    讨论结果整合到 brainstorm 文档
+    结构化退出契约（共识 / 分歧 / 风险 / 复用机会 / 构建边界 / P1-P4）
         ↓
-    继续 /workflows:plan（流程不变）
+    讨论结果整合到 requirements 文档
+        ↓
+    继续 /ce:plan（流程不变）
 ```
 
 ---
