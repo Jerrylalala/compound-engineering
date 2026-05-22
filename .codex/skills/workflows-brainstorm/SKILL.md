@@ -9,11 +9,12 @@ description: 探索需求和方案，支持 [P]/[P+] 多视角讨论，并写出
 
 这是 Codex 中的 brainstorm 主入口。它不尝试复刻 Claude Code 的完整运行时，而是用明确状态机保留高价值能力：
 
-- `[P]` 触发 3 个核心视角的多轮讨论
+- `[P]` 触发 3 个核心视角的多轮讨论，并模拟 `party-mode` 的 emoji + 角色名 + 相互质疑体验
 - `[P+]` 触发 8-12 个视角的深度发散和挑战收敛
 - `[R]` 强制历史经验检索；未传 `[R]` 时，Standard/Deep 场景自动做历史检索
+- 每轮都纳入胶水编程：复用机会、胶水代码边界、必须自研的部分
 - 每轮后等待用户选择继续、换视角或收敛
-- 写出可继续交给 `$workflows-plan` 的 brainstorm 文档
+- 写出带 P1-P4 优先级和 Reuse / Build Boundary 的 brainstorm 文档
 
 不要调用 Codex CLI。
 不要调用 Gemini CLI。
@@ -121,12 +122,15 @@ description: 探索需求和方案，支持 [P]/[P+] 多视角讨论，并写出
 
 如果 `PARTY_MODE = quick`：
 
+- 模拟 `party-mode` 的核心体验：emoji + 角色名 + 角色人格发言，而不是普通 bullet list
 - 选择 3 个核心视角：用户代言人、技术负责人、魔鬼代言人
 - 最少 2 轮：第一轮发散，第二轮挑战和补洞
+- 至少一个角色必须明确同意、反对、追问或补充前一个角色的观点
 - 除非用户明确要求结束，不要一轮后直接写文档
 
 如果 `PARTY_MODE = deep`：
 
+- 模拟 `party-mode` 的全量体验：emoji + 角色名 + 跨角色碰撞
 - 选择 8-12 个视角，按批次发言，避免一次输出过载
 - 推荐视角：产品、用户、架构、开发、QA、安全、性能、运维、极简主义、反向思考、历史经验、文档/交付
 - 最少 3 轮：发散、冲突、收敛
@@ -138,6 +142,8 @@ description: 探索需求和方案，支持 [P]/[P+] 多视角讨论，并写出
 - 主要分歧
 - 风险与边界
 - 更简单方案
+- 复用机会：成熟库、CLI、API、服务、平台能力或项目内既有模式
+- 构建边界：哪些复用、哪些只写胶水代码、哪些必须自研
 - 历史经验或现有模式的影响
 - 下一轮应该追问的问题
 
@@ -178,6 +184,9 @@ description: 探索需求和方案，支持 [P]/[P+] 多视角讨论，并写出
 - 简要描述
 - 优点
 - 缺点
+- 复用机会：成熟库、CLI、API、服务或既有项目模式
+- 胶水边界：本项目只需要编排、配置、适配或连接的部分
+- 必须自研：没有成熟能力可复用时才列出，并说明原因
 - 适用场景
 - 风险和未知
 - 与历史经验或现有模式的关系
@@ -225,6 +234,12 @@ description: 探索需求和方案，支持 [P]/[P+] 多视角讨论，并写出
 
 - `## What We're Building`
 - `## Problem Frame`
+- `## Requirements`
+  - `### P1 — Must Have`
+  - `### P2 — Should Have`
+  - `### P3 — Could Have`
+  - `### P4 — Later / Parking Lot`
+- `## Reuse / Build Boundary`
 - `## Why This Approach`
 - `## Approaches Considered`
 - `## Key Decisions`
@@ -239,6 +254,9 @@ description: 探索需求和方案，支持 [P]/[P+] 多视角讨论，并写出
 - `## Areas Of Agreement`
 - `## Areas Of Disagreement`
 - `## Coverage Matrix`
+- `## Candidate Priorities`
+
+`Requirements` 中的 P1-P4 表示优先级，R1/R2/R3 表示稳定需求编号；两者必须同时保留。`Reuse / Build Boundary` 必须说明 Existing capabilities to reuse、Glue code we expect to write、Net-new behavior、Explicit non-goals。
 
 文档要简洁，但必须保留：
 

@@ -36,12 +36,24 @@ topic: <kebab-case-topic>
 
 ## Requirements
 
-**[Group Header]**
-- R1. [Concrete requirement in this group]
-- R2. [Concrete requirement in this group]
+### P1 — Must Have
+- R1. [Core requirement without which the brainstorm does not solve the problem]
+- R2. [Core behavior or scope promise that planning must preserve]
 
-**[Group Header]**
-- R3. [Concrete requirement in this group]
+### P2 — Should Have
+- R3. [Important requirement included by default, but adjustable if scope pressure appears]
+
+### P3 — Could Have
+- R4. [Low-cost enhancement that improves usefulness but does not block the core path]
+
+### P4 — Later / Parking Lot
+- R5. [Valuable follow-up explicitly deferred from the current scope]
+
+## Reuse / Build Boundary
+- Existing capabilities to reuse: [libraries, tools, CLIs, APIs, services, or project patterns]
+- Glue code we expect to write: [orchestration, configuration, adaptation, and input/output connection]
+- Net-new behavior: [custom behavior that must be built because no mature capability fits]
+- Explicit non-goals: [things we will not reimplement]
 
 ## Success Criteria
 - [How we will know this solved the right problem]
@@ -77,6 +89,16 @@ For **Lightweight** brainstorms, keep the document compact. Skip document creati
 
 For very small requirements docs with only 1-3 simple requirements, plain bullet requirements are acceptable. For **Standard** and **Deep** requirements docs, use stable IDs like `R1`, `R2`, `R3` so planning and later review can refer to them unambiguously.
 
+For **Standard** and **Deep** requirements docs, group requirements by priority first: `P1 — Must Have`, `P2 — Should Have`, `P3 — Could Have`, and `P4 — Later / Parking Lot`. Keep stable requirement IDs (`R1`, `R2`, `R3`) inside those priority groups; P-levels express delivery priority, while R-levels provide durable references for planning and review. Omit empty priority groups only when they would add noise.
+
+Priority definitions:
+- `P1 — Must Have`: without this, the brainstorm does not solve the core problem or planning cannot proceed coherently.
+- `P2 — Should Have`: important for completeness, reliability, or user experience; included by default but adjustable under scope pressure.
+- `P3 — Could Have`: useful low-cost enhancement that should not block the main path.
+- `P4 — Later / Parking Lot`: valuable idea explicitly deferred to prevent scope creep.
+
+Always include `Reuse / Build Boundary` for software work. State what mature capability should be reused, what glue code is expected, what net-new behavior remains, and what the team should not reimplement. For non-software work, omit this section unless an analogous reuse boundary is useful.
+
 When requirements span multiple distinct concerns, group them under bold topic headers within the Requirements section. The trigger for grouping is distinct logical areas, not item count — even four requirements benefit from headers if they cover three different topics. Group by logical theme (e.g., "Packaging", "Migration and Compatibility", "Contributor Workflow"), not by the order they were discussed. Requirements keep their original stable IDs — numbering does not restart per group. A requirement belongs to whichever group it fits best; do not duplicate it across groups. Skip grouping only when all requirements are about the same thing.
 
 When the work is simple, combine sections rather than padding them. A short requirements document is better than a bloated one.
@@ -87,7 +109,8 @@ Before finalizing, check:
 - Are any unresolved items actually product decisions rather than planning questions?
 - Did implementation details leak in when they shouldn't have?
 - Do any requirements claim that infrastructure is absent without that claim having been verified against the codebase? If so, verify now or label as an unverified assumption.
-- Is there a low-cost change that would make this materially more useful?
+- Are P1/P2/P3/P4 priority assignments clear enough that `ce:plan` knows what must ship first and what is explicitly deferred?
+- Does `Reuse / Build Boundary` identify mature capabilities to reuse and keep custom work limited to glue code where possible?
 - Would a visual aid (flow diagram, comparison table, relationship diagram) help a reader grasp the requirements faster than prose alone?
 
 If planning would need to invent product behavior, scope boundaries, or success criteria, the brainstorm is not complete yet.

@@ -90,25 +90,25 @@ if ($verifyPlugin -eq $newVersion) {
 
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "  发版流程" -ForegroundColor Yellow
+    Write-Host "  Release flow" -ForegroundColor Yellow
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "1. 更新 CHANGELOG.md（添加 v$newVersion 的变更内容）"
-    Write-Host "2. 提交并推送 PR：git add . ; git commit -m 'chore: 升级版本至 v$newVersion'"
-    Write-Host "3. PR 合并到 main 后，tag 由 GitHub Actions 自动创建，无需手动打。"
+    Write-Host "1. Update CHANGELOG.md for v$newVersion"
+    Write-Host "2. Commit and push a PR"
+    Write-Host "3. After PR merges to main, GitHub Actions creates the tag automatically."
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Yellow
-    Write-Host "  文档核查清单（合并前必须全部完成）" -ForegroundColor Yellow
+    Write-Host "  Documentation checklist before merge" -ForegroundColor Yellow
     Write-Host "========================================" -ForegroundColor Yellow
-    Write-Host "  新增 Skill/Agent/Command 时："
-    Write-Host "  [ ] README.md — 工作流表、组件数量是否已更新"
-    Write-Host "  [ ] docs/zh-CN/workflow.html — 工作流节点是否已更新（如链路有变）"
-    Write-Host "  [ ] CHANGELOG.md — 变更内容是否已记录"
-    Write-Host "  [ ] plugin.json description — 组件数量字符串是否已更新"
+    Write-Host "  When adding Skill/Agent/Command:"
+    Write-Host "  [ ] README.md workflow table and component counts are updated"
+    Write-Host "  [ ] docs/zh-CN/workflow.html workflow nodes are updated when links change"
+    Write-Host "  [ ] CHANGELOG.md records the change"
+    Write-Host "  [ ] plugin.json description component counts are updated"
     Write-Host ""
-    Write-Host "  修改已有命令/参数行为时："
-    Write-Host "  [ ] README.md — 参数说明是否同步"
-    Write-Host "  [ ] docs/zh-CN/workflow.html — 参数/示例是否同步"
-    Write-Host "  [ ] CHANGELOG.md — 变更是否已记录"
+    Write-Host "  When changing command or parameter behavior:"
+    Write-Host "  [ ] README.md parameter docs are updated"
+    Write-Host "  [ ] docs/zh-CN/workflow.html parameters/examples are updated"
+    Write-Host "  [ ] CHANGELOG.md records the change"
     Write-Host ""
 } else {
     Write-Err "Verification failed, please check files manually"

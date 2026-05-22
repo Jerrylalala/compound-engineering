@@ -51,11 +51,13 @@ Parse `$ARGUMENTS` for the following optional tokens before entering the Executi
 
 | Token | Effect |
 |-------|--------|
-| `[P]` | Party Mode（3 核心视角：用户代言人 + 技术专家 + 魔鬼代言人）。快速多角度验证，结束后自动收敛。 |
-| `[P+]` | Party Mode 全量（12-14 视角发散讨论）。思路不清晰或高风险决策时使用，结束后自动收敛。 |
+| `[P]` | PARTY_MODE_ENABLED = true; PARTY_MODE_LEVEL = core. 显式调用 `party-mode`，使用 3 个核心视角（用户代言人 + 技术专家 + 魔鬼代言人）碰撞讨论，结束后自动收敛。 |
+| `[P+]` | PARTY_MODE_ENABLED = true; PARTY_MODE_LEVEL = full. 显式调用 `party-mode`，使用 12-14 个视角全量发散讨论，结束后自动收敛。 |
 | `[C]` | CODEX_ENABLED = true. Phase 2 结束后自动调用 Codex CLI 咨询，结果整合到 brainstorm 文档。 |
 | `[G]` | GEMINI_ENABLED = true. Phase 2 结束后自动调用 Gemini CLI 咨询，结果整合到 brainstorm 文档。 |
 | `[R]` | Run learnings-researcher before Phase 1. Inject results as historical reference in Phase 2. |
+
+**Execution contract:** `[P]` and `[P+]` are hard workflow switches, not descriptive hints. When either token is present, strip it from the feature description, set the flags above, and invoke `party-mode` before normal Phase 1 dialogue. Describing Party Mode is insufficient; the workflow must explicitly execute it.
 
 ---
 
@@ -130,13 +132,41 @@ Task compound-engineering:research:learnings-researcher(feature_description)
 - 在 Phase 2 展示方案时，增加「📚 历史参考」子节，列出相关 solution 文档及其核心洞察
 - 若无相关历史记录 → 在「历史参考」节注明：`No relevant learnings found — 本次为全新探索`
 
-#### 0.5 [P]/[P+] Post-Party Structured Convergence（仅当 `[P]` 或 `[P+]` 标志存在时）
+#### 0.5 [P]/[P+] Party Mode Activation and Structured Convergence（仅当 `[P]` 或 `[P+]` 标志存在时）
 
-**触发时机**：Party Mode 讨论轮次结束后，进入此阶段。不使用 `[P]`/`[P+]` 时跳过，直接进入 Phase 1。
+**触发时机**：Phase 0.4 之后、Phase 1 之前。不使用 `[P]`/`[P+]` 时跳过，直接进入 Phase 1。
+
+**Step 0.5.1: 显式启动 Party Mode**
+
+If PARTY_MODE_ENABLED = true, invoke the `party-mode` skill before continuing. This is a hard execution requirement:
+
+```
+Execute: Skill("party-mode")
+```
+
+When invoking `party-mode`, pass the feature description and level guidance:
+- `[P]` / PARTY_MODE_LEVEL = core: use 3 core perspectives — user advocate, technical expert, devil's advocate. Keep the cast compact, but preserve emoji + persona names and natural cross-challenge.
+- `[P+]` / PARTY_MODE_LEVEL = full: use 12-14 perspectives for high-ambiguity or high-risk decisions. Invite a broader cast across architecture, security, performance, QA, product, UX, minimalism, reverse thinking, infrastructure, and risk.
+
+Party Mode must produce dialog, not a parallel bullet list: at least one persona must explicitly agree, disagree, question, or build on a previous persona's point. Party Mode must also surface reuse opportunities and glue-code boundaries when the topic involves software.
+
+**Step 0.5.2: Party Mode Result Contract**
+
+Before returning control to `ce-brainstorm`, carry forward the Party Mode exit summary as working context:
+- Consensus
+- Disagreements
+- Risks
+- Reuse opportunities
+- Build boundary（reuse / glue code / net-new）
+- Candidate priorities（P1 / P2 / P3 / P4）
+
+**Step 0.5.3: Post-Party Structured Convergence**
+
+After Party Mode ends, run a short two-role convergence pass before Phase 1.
 
 **视角数量由标志决定**：
-- `[P]`：3 个核心视角（用户代言人 + 技术专家 + 魔鬼代言人），每个视角 1 个 sub-agent
-- `[P+]`：12-14 个视角（架构师 / 安全 / 性能 / QA / 用户代言人 / 产品策略 / 极简主义 / 逆向思维 / 基础设施 / 风险分析 / UX 设计 / 代码专家等），每个视角 1 个 sub-agent，并行派发
+- `[P]`：3 个核心视角（用户代言人 + 技术专家 + 魔鬼代言人）先完成 Party Mode，再进入探索者/挑战者收敛。
+- `[P+]`：12-14 个视角先完成 Party Mode，再进入探索者/挑战者收敛。
 
 **执行方式**：以 2 个对立视角顺序输出（同一 agent 切换视角），不创建独立 teammate：
 
@@ -232,6 +262,9 @@ When useful, include one deliberately higher-upside alternative:
 For each approach, provide:
 - Brief description (2-3 sentences)
 - Pros and cons
+- Reuse opportunities: existing tools, libraries, CLIs, APIs, services, or established project patterns that can carry the work
+- Glue boundary: what the project only needs to orchestrate, configure, adapt, or connect
+- Net-new code: what truly must be custom, and why existing capabilities are insufficient
 - Key risks or unknowns
 - When it's best suited
 
