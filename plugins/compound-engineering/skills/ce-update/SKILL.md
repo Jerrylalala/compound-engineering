@@ -11,13 +11,14 @@ allowed-tools: Bash(bash *upstream-version.sh), Bash(bash *currently-loaded-vers
 
 # Check Plugin Version
 
-Verify the installed compound-engineering plugin version matches the upstream
-`plugin.json` on `main`, and recommend the update command if it doesn't.
-Claude Code only.
+Verify the installed compound-engineering plugin version matches the public
+repository `plugin.json` on `main`, and recommend the update command if it
+doesn't. Claude Code only.
 
-The upstream version comes from `plugins/compound-engineering/.claude-plugin/plugin.json`
-on `main` rather than the latest GitHub release tag, because the marketplace
-installs plugin contents from `main` HEAD. Comparing against release tags
+The public repository version comes from
+`plugins/compound-engineering/.claude-plugin/plugin.json` on `main` rather than
+the latest GitHub release tag, because the marketplace installs plugin contents
+from `main` HEAD. Comparing against release tags
 false-positives whenever `main` is ahead of the last tag (the normal state
 between releases).
 
@@ -34,9 +35,10 @@ bash "${CLAUDE_SKILL_DIR}/scripts/currently-loaded-version.sh"
 bash "${CLAUDE_SKILL_DIR}/scripts/marketplace-name.sh"
 ```
 
-`scripts/upstream-version.sh` reads `plugin.json` on `main` via `gh api`. It
+`scripts/upstream-version.sh` reads `plugin.json` on `main` via `gh api`, then
+falls back to the raw GitHub URL when `gh` is unavailable in the shell PATH. It
 prints the version string, or the sentinel `__CE_UPDATE_VERSION_FAILED__` if
-`gh` is unavailable or rate-limited.
+the public repository version cannot be fetched or parsed.
 
 `scripts/currently-loaded-version.sh` and `scripts/marketplace-name.sh` parse
 `${CLAUDE_SKILL_DIR}` against the marketplace-cache layout
@@ -50,8 +52,8 @@ They print the version segment / marketplace segment, or the sentinel
 ### Handle failure cases
 
 If `scripts/upstream-version.sh` printed `__CE_UPDATE_VERSION_FAILED__`: tell
-the user the upstream version could not be fetched (gh may be unavailable or
-rate-limited) and stop.
+the user the public repository version could not be fetched or parsed (network
+access, `gh`, `curl`, Python, or Node may be unavailable) and stop.
 
 If `scripts/currently-loaded-version.sh` printed
 `__CE_UPDATE_NOT_MARKETPLACE__`: the skill is loaded from outside the
