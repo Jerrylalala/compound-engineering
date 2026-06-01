@@ -9,6 +9,14 @@ All notable changes to the compound-engineering plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.64.1](https://github.com/Jerrylalala/compound-engineering/compare/compound-engineering-v2.64.0...compound-engineering-v2.64.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* **skills:** 修正公共仓库用户入口链接 ([88bc2ab](https://github.com/Jerrylalala/compound-engineering/commit/88bc2ab85628c20095a195cfa20ec24589d95487))
+* **skills:** 修正公共仓库用户入口链接 ([081058b](https://github.com/Jerrylalala/compound-engineering/commit/081058b6faae6a9c9590595ff259b60f92fef4ab))
+
 ## [2.64.0](https://github.com/Jerrylalala/compound-engineering/compare/compound-engineering-v2.63.1...compound-engineering-v2.64.0) (2026-06-01)
 
 
