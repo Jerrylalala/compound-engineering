@@ -1,6 +1,6 @@
 ---
 name: ce-work-integration
-description: "私有 Overlay：Task Bundle 持久化 + Failure FSM 集成。在 ce:work 基础上增加 state.md 读写和状态机转换。使用时机：执行 ce:work 时，如果任务有对应的 Task Bundle（docs/tasks/<id>/），加载此 skill 以启用持久化和状态追踪。"
+description: "Fork Overlay：Task Bundle 持久化 + Failure FSM 集成。在 ce:work 基础上增加 state.md 读写和状态机转换。使用时机：执行 ce:work 时，如果任务有对应的 Task Bundle（docs/tasks/<id>/），加载此 skill 以启用持久化和状态追踪。"
 ---
 
 # ce:work 集成 Overlay — Task Bundle + FSM

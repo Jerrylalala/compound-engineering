@@ -66,7 +66,7 @@
 
 ### Overlay 技能触发时机
 
-以下私有 overlay 技能需**手动加载**，不会自动触发：
+以下 fork overlay 技能需**手动加载**，不会自动触发：
 
 | 触发场景 | 加载技能 |
 |----------|----------|
@@ -148,10 +148,7 @@
 powershell -ExecutionPolicy Bypass -File ../../scripts/check-versions.ps1
 ```
 
-**快速更新**：
-```powershell
-powershell -ExecutionPolicy Bypass -File ../../scripts/bump-version.ps1 -BumpType patch
-```
+常规功能 PR 不手动 bump 版本；release-owned 版本和 release notes 由 release-please 的 release PR 生成。修改 manifest、组件数量或 marketplace 元数据后，在仓库根目录运行 `bun run release:validate`。
 
 ### Directory Structure
 
@@ -294,4 +291,3 @@ claude-code-only: true
 - [版本管理规范](../../docs/development/VERSIONING.md)
 - [脚本使用说明](../../docs/zh-CN/SCRIPTS.md)
 - [核心概念](../../docs/zh-CN/CONCEPTS.md)
-- [Skill 开发规范](../../docs/development/SKILL-DEVELOPMENT.md)（Skill Compliance Checklist 已移至此处）

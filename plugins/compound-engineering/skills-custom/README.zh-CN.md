@@ -1,6 +1,14 @@
 # 自定义技能（skills-custom）
 
-本目录用于存放自定义技能。每个技能一个目录，目录内至少包含 `SKILL.md`（可附带 `assets/`、`references/`、`scripts/` 等）。
+本目录用于存放本 fork 的 overlay 技能。它们是公开仓库里可见的增强层，但不属于 `compound-engineering` 稳定默认技能清单，也不会随 Claude manifest 自动触发。
+
+每个技能一个目录，目录内至少包含 `SKILL.md`（可附带 `assets/`、`references/`、`scripts/` 等）。
+
+## 使用边界
+
+- 面向维护者或高级用户：需要明确知道何时手动加载对应 skill。
+- 不作为 README / marketplace 里的默认能力承诺，除非已经补齐安装说明、验证路径和兼容性说明。
+- 若某个 overlay 技能要升级为稳定公共能力，应移动到 `skills/`，同步公开文档，并运行 release metadata 验证。
 
 ## 命名规范
 

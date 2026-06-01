@@ -9,7 +9,7 @@ This repository now supports a dual-runtime workflow split:
 
 The bridge between the two runtimes is **shared document protocol**, not shared command implementation.
 
-For this private fork, the Codex-side entrypoints are the three repo-scoped skills:
+For this public fork, the Codex-side entrypoints are the three repo-scoped skills:
 
 - `workflows-brainstorm`
 - `workflows-plan`

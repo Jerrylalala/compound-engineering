@@ -95,12 +95,13 @@
 ## 更新插件时的检查清单
 
 **自动化工具（推荐）**:
-```powershell
-# 一键更新版本号 + 验证
-powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch
+```bash
+# 同步并验证 release metadata
+bun run release:sync-metadata
+bun run release:validate
 ```
 
-**手动检查**: 见 [版本管理预防策略](docs/zh-CN/VERSION-STRATEGY.md)
+**手动检查**: 见 [版本管理预防策略](../zh-CN/VERSION-STRATEGY.md)
 ```
 
 **节省**: ~200 tokens
@@ -335,8 +336,8 @@ powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patc
 ```markdown
 ## 更新插件
 
-**推荐**: `scripts/bump-version.ps1 -BumpType patch`（自动更新 + 验证）
-**手动**: 见 [版本管理预防策略](docs/zh-CN/VERSION-STRATEGY.md)
+**推荐**: `bun run release:sync-metadata && bun run release:validate`（同步 + 验证）
+**手动**: 见 [版本管理预防策略](../zh-CN/VERSION-STRATEGY.md)
 ```
 
 #### 2. 开发者检查清单混入运行时规则
