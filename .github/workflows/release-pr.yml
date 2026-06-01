@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
 
       - name: Create or update release PR
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5.0.0
         with:
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
