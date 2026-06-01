@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.64.3](https://github.com/Jerrylalala/compound-engineering/compare/cli-v2.64.2...cli-v2.64.3) (2026-06-01)
+
+
+### Miscellaneous Chores
+
+* **cli:** Synchronize compound-engineering versions
+
 ## [2.64.2](https://github.com/Jerrylalala/compound-engineering/compare/cli-v2.64.1...cli-v2.64.2) (2026-06-01)
 
 
