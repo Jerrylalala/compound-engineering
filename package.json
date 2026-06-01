@@ -1,6 +1,6 @@
 {
   "name": "@jerry-jian/compound-plugin",
-  "version": "2.64.1",
+  "version": "2.64.2",
   "description": "Compound Engineering plugin for Claude Code and Codex, with Chinese localization and public fork workflow extensions",
   "type": "module",
   "private": false,
