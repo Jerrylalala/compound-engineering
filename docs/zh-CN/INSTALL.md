@@ -19,10 +19,12 @@
 把这个仓库同步到 codex 和 gemini 中
 ```
 
-然后依次执行：
+Claude Code marketplace 安装本身按以下方式更新：
 
-1. **更新插件市场** — 在 Claude Code 中运行 `/plugins`，选择 marketplace `jerry-marketplace` 进行更新
-2. **重新安装插件** — 进入插件列表，更新 `compound-engineering`（会重新克隆仓库）
+1. 在 Claude Code 中运行 `/plugins`
+2. 选择 `Jerrylalala/compound-engineering` 这个 marketplace
+3. 更新或重新安装 `compound-engineering`
+4. 重启 Claude Code，让新版本插件重新加载
 
 ---
 
@@ -46,11 +48,10 @@
 可能是上次安装失败残留的临时文件（如 `temp_local_*`），手动清除后重试：
 
 ```powershell
-# 第一步：删除残留临时文件和旧缓存
+# 第一步：删除残留临时文件
 Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\temp_local_*"
-Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\cache\jerry-marketplace"
 
-# 第二步：重新进入 /plugins，更新 marketplace 并重新安装插件
+# 第二步：重新进入 /plugins，移除并重新添加 marketplace
 ```
 
 </details>
@@ -90,14 +91,18 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 - 两阶段审查：规范合规 → 代码质量
 - 每 3 个任务设置人工检查点
 
-### 辅助命令
+### 辅助入口
 
-| 命令           | 说明                 |
-| -------------- | -------------------- |
-| `/deepen-plan` | 增强计划（并行研究） |
-| `/plan_review` | 计划评审             |
-| `/lfg`         | 全自动工程流程       |
-| `/glue-coding` | 胶水编程架构规划     |
+| 入口 | 说明 |
+| ---- | ---- |
+| `/ce:doctor` | 检查本地工具、MCP、认证和工作流健康状态 |
+| `/ce:pr` | 按插件流程创建 PR |
+| `/ce:sync-upstream` | 检测上游仓库更新，生成分析报告 |
+| `/ce:release-notes` | 查看插件发布说明 |
+| `/ce:update` | 检查 Claude Code marketplace 缓存版本 |
+| `/slfg` | 简化版完整工作流命令 |
+| `/technical-review` | 聚焦技术审查 |
+| `glue-coding` skill | 胶水编程架构规划 |
 
 ---
 
@@ -130,7 +135,7 @@ Brainstorm → Plan → Work → Review → Compound → Repeat
 ### 场景 3：新项目架构
 
 ```
-1. /glue-coding 我要做一个博客系统
+1. 使用 `glue-coding` skill：我要做一个博客系统
    ↓ 完整技术选型 + 开源库推荐
 2. /ce:plan 博客系统基础架构
 3. /ce:work
@@ -225,7 +230,7 @@ bun run src/index.ts install ./plugins/compound-engineering --to codex
 bun run src/index.ts install ./plugins/compound-engineering --to gemini
 
 # 指定 Gemini 输出目录
-bun run src/index.ts install ./plugins/compound-engineering --to gemini --gemini-home "你的项目根目录"
+bun run src/index.ts install ./plugins/compound-engineering --to gemini --output "你的项目根目录"
 
 # 同时转换多个目标
 bun run src/index.ts install ./plugins/compound-engineering --to opencode --also codex,gemini
@@ -239,24 +244,26 @@ bun run src/index.ts install ./plugins/compound-engineering --to opencode --also
 
 ```powershell
 $env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering"
-bunx @every-env/compound-plugin install compound-engineering --to gemini
-bunx @every-env/compound-plugin install compound-engineering --to codex
+bunx @every-env/compound-plugin install compound-engineering --to gemini --output "你的项目根目录"
+bunx @every-env/compound-plugin install compound-engineering --to codex --includeSkills
 ```
 
 **Linux/macOS：**
 
 ```bash
 COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering \
-  bunx @every-env/compound-plugin install compound-engineering --to gemini
+  bunx @every-env/compound-plugin install compound-engineering --to gemini --output .
 ```
+
+> 过渡期使用的 `@every-env/compound-plugin` 当前参数名与本仓库源码略有差异：Gemini 远程安装请用 `--output`，Codex 需要完整 prompts/skills 时请加 `--includeSkills`。发布 `@jerry-jian/compound-plugin` 后，以本仓库 CLI 帮助输出为准。
 
 ### 输出位置
 
 | 目标     | 输出位置                                  | 说明       |
 | -------- | ----------------------------------------- | ---------- |
 | OpenCode | `~/.config/opencode/`                     | 全局配置   |
-| Codex    | `~/.codex/prompts/` 和 `~/.codex/skills/` | 全局配置   |
-| Gemini   | `<当前目录>/.gemini/GEMINI.md`            | 项目级配置 |
+| Codex    | `~/.codex/AGENTS.md`、`~/.codex/agents/`、`~/.codex/skills/`（部分版本也会生成 `prompts/`） | 全局配置   |
+| Gemini   | `<项目目录>/.gemini/skills/`、`.gemini/commands/`、`.gemini/settings.json` | 项目级配置 |
 
 ### 可选参数
 
@@ -264,9 +271,8 @@ COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineerin
 | --------------- | -------------------- | ------------------------------- |
 | `--to`          | 目标格式             | `opencode` / `codex` / `gemini` |
 | `--also`        | 额外目标（逗号分隔） | `--also codex,gemini`           |
-| `--output`      | OpenCode 输出目录    | `--output ~/my-project`         |
+| `--output`      | OpenCode / Gemini 等项目级输出目录 | `--output ~/my-project`         |
 | `--codex-home`  | Codex 输出目录       | `--codex-home ~/.codex`         |
-| `--gemini-home` | Gemini 输出目录      | `--gemini-home ~/my-project`    |
 
 ---
 

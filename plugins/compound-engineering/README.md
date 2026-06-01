@@ -207,7 +207,7 @@ Codex / Gemini conversion currently uses the published upstream CLI with this fo
 
 ```bash
 COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering \
-  bunx @every-env/compound-plugin install compound-engineering --to codex
+  bunx @every-env/compound-plugin install compound-engineering --to codex --includeSkills
 ```
 
 ## Known Issues

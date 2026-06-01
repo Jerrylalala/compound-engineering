@@ -35,7 +35,7 @@ powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
 ### 3. 安装到 Gemini
 
 ```bash
-bun run src/index.ts install plugins/compound-engineering --to gemini --gemini-home ~
+bun run src/index.ts install plugins/compound-engineering --to gemini --output ~
 ```
 
 输出位置: `~/.gemini/`
@@ -47,8 +47,8 @@ bun run src/index.ts install plugins/compound-engineering --to gemini --gemini-h
 ls ~/.codex/skills/ | head -5
 
 # 检查 Gemini
-ls ~/.gemini/GEMINI.md
-ls ~/.gemini/commands/ | head -5
+ls ~/.gemini/skills/ | head -5
+test -f ~/.gemini/settings.json && echo "settings.json exists"
 ```
 
 ## 一键命令（Windows PowerShell）
@@ -68,5 +68,5 @@ powershell -ExecutionPolicy Bypass -File scripts/sync-to-targets.ps1
 ## 注意事项
 
 - 此操作面向维护者本机同步，会覆盖目标位置的同名插件配置
-- Gemini CLI 需要 `.gemini/GEMINI.md` 和 `.gemini/commands/*.toml`
+- Gemini CLI 需要 `.gemini/skills/*/SKILL.md`；有命令或 MCP 时还会写入 `.gemini/commands/*.toml` 和 `.gemini/settings.json`
 - Codex CLI 需要 `.codex/skills/*/SKILL.md`；完整 CLI 安装还会写入 `.codex/prompts/*.md` 和 `.codex/AGENTS.md`

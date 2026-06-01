@@ -15,7 +15,7 @@
 | docs | `mkdocs build --strict` 通过 |
 | package contents | `npm pack --dry-run` 只包含运行 CLI 必需文件，不包含 `tests/`、`.github/`、历史 `docs/` |
 | local package smoke | CI 和本地都要从临时目录安装 `npm pack` 产物后运行 `npx compound-plugin --help` 成功 |
-| published install smoke | 发布后从干净目录运行 `bunx @jerry-jian/compound-plugin install compound-engineering --to codex` 成功 |
+| published install smoke | 发布后从干净目录运行 `bunx @jerry-jian/compound-plugin install compound-engineering --to codex --includeSkills` 成功 |
 
 ## 当前 release 流程
 
@@ -66,13 +66,13 @@ Pop-Location
 
 ```bash
 COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering \
-  bunx @every-env/compound-plugin install compound-engineering --to codex
+  bunx @every-env/compound-plugin install compound-engineering --to codex --includeSkills
 ```
 
 切换为：
 
 ```bash
-bunx @jerry-jian/compound-plugin install compound-engineering --to codex
+bunx @jerry-jian/compound-plugin install compound-engineering --to codex --includeSkills
 ```
 
 ## 不要做的事
