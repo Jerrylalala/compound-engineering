@@ -9,26 +9,35 @@
 
 set -u
 
-RAW_URL="https://raw.githubusercontent.com/Jerrylalala/compound-engineering/main/plugins/compound-engineering/.claude-plugin/plugin.json"
+CONTENTS_URL="https://api.github.com/repos/Jerrylalala/compound-engineering/contents/plugins/compound-engineering/.claude-plugin/plugin.json?ref=main"
 
 json=""
+api_json=""
 
 if command -v gh >/dev/null 2>&1; then
   json=$(gh api repos/Jerrylalala/compound-engineering/contents/plugins/compound-engineering/.claude-plugin/plugin.json --jq '.content | @base64d' 2>/dev/null || true)
 fi
 
 if [ -z "$json" ] && command -v curl >/dev/null 2>&1; then
-  json=$(curl -fsSL "$RAW_URL" 2>/dev/null || true)
+  api_json=$(curl --retry 3 --retry-delay 2 --retry-all-errors -fsSL -H "Accept: application/vnd.github+json" -H "Cache-Control: no-cache" "$CONTENTS_URL" 2>/dev/null || true)
 fi
 
 version=""
 
-if [ -n "$json" ] && command -v python3 >/dev/null 2>&1; then
-  version=$(printf '%s' "$json" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("version", ""))' 2>/dev/null || true)
-elif [ -n "$json" ] && command -v python >/dev/null 2>&1; then
-  version=$(printf '%s' "$json" | python -c 'import json,sys; print(json.load(sys.stdin).get("version", ""))' 2>/dev/null || true)
-elif [ -n "$json" ] && command -v node >/dev/null 2>&1; then
-  version=$(printf '%s' "$json" | node -e 'let input=""; process.stdin.on("data", d => input += d); process.stdin.on("end", () => { try { console.log(JSON.parse(input).version || ""); } catch { process.exit(1); } });' 2>/dev/null || true)
+payload="$json"
+payload_kind="plugin"
+
+if [ -z "$payload" ] && [ -n "$api_json" ]; then
+  payload="$api_json"
+  payload_kind="contents"
+fi
+
+if [ -n "$payload" ] && command -v python3 >/dev/null 2>&1; then
+  version=$(printf '%s' "$payload" | python3 -c 'import base64,json,sys; kind=sys.argv[1]; data=json.load(sys.stdin); data=json.loads(base64.b64decode(data["content"])) if kind == "contents" else data; print(data.get("version", ""))' "$payload_kind" 2>/dev/null || true)
+elif [ -n "$payload" ] && command -v python >/dev/null 2>&1; then
+  version=$(printf '%s' "$payload" | python -c 'import base64,json,sys; kind=sys.argv[1]; data=json.load(sys.stdin); data=json.loads(base64.b64decode(data["content"])) if kind == "contents" else data; print(data.get("version", ""))' "$payload_kind" 2>/dev/null || true)
+elif [ -n "$payload" ] && command -v node >/dev/null 2>&1; then
+  version=$(printf '%s' "$payload" | node -e 'const kind = process.argv[1]; let input=""; process.stdin.on("data", d => input += d); process.stdin.on("end", () => { try { let data = JSON.parse(input); if (kind === "contents") data = JSON.parse(Buffer.from(data.content, "base64").toString("utf8")); console.log(data.version || ""); } catch { process.exit(1); } });' "$payload_kind" 2>/dev/null || true)
 fi
 
 if [ -n "$version" ]; then

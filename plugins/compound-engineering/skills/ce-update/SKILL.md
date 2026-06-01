@@ -36,9 +36,11 @@ bash "${CLAUDE_SKILL_DIR}/scripts/marketplace-name.sh"
 ```
 
 `scripts/upstream-version.sh` reads `plugin.json` on `main` via `gh api`, then
-falls back to the raw GitHub URL when `gh` is unavailable in the shell PATH. It
-prints the version string, or the sentinel `__CE_UPDATE_VERSION_FAILED__` if
-the public repository version cannot be fetched or parsed.
+falls back to the GitHub Contents API when `gh` is unavailable in the shell
+PATH. It avoids raw.githubusercontent.com because the raw CDN can briefly serve
+stale content immediately after release automation updates `main`. It prints
+the version string, or the sentinel `__CE_UPDATE_VERSION_FAILED__` if the
+public repository version cannot be fetched or parsed.
 
 `scripts/currently-loaded-version.sh` and `scripts/marketplace-name.sh` parse
 `${CLAUDE_SKILL_DIR}` against the marketplace-cache layout
