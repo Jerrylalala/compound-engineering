@@ -108,7 +108,7 @@ Use the GitHub CLI to create the issue:
 
 ```bash
 gh issue create \
-  --repo EveryInc/compound-engineering-plugin \
+  --repo Jerrylalala/compound-engineering \
   --title "[compound-engineering] Bug: [Brief description]" \
   --body "[Formatted bug report from Step 3]" \
   --label "bug,compound-engineering"
@@ -117,7 +117,7 @@ gh issue create \
 **Note:** If labels don't exist, create without labels:
 ```bash
 gh issue create \
-  --repo EveryInc/compound-engineering-plugin \
+  --repo Jerrylalala/compound-engineering \
   --title "[compound-engineering] Bug: [Brief description]" \
   --body "[Formatted bug report]"
 ```
@@ -134,7 +134,7 @@ After the issue is created:
 ```
 Bug report submitted successfully!
 
-Issue: https://github.com/EveryInc/compound-engineering-plugin/issues/[NUMBER]
+Issue: https://github.com/Jerrylalala/compound-engineering/issues/[NUMBER]
 Title: [compound-engineering] Bug: [description]
 
 Thank you for helping improve the compound-engineering plugin!

@@ -316,7 +316,7 @@ Append a badge footer to the PR description, separated by a `---` rule. Do not a
 ```markdown
 ---
 
-[![Compound Engineering](https://img.shields.io/badge/Built_with-Compound_Engineering-6366f1)](https://github.com/EveryInc/compound-engineering-plugin)
+[![Compound Engineering](https://img.shields.io/badge/Built_with-Compound_Engineering-6366f1)](https://github.com/Jerrylalala/compound-engineering)
 ![HARNESS](https://img.shields.io/badge/HARNESS_SLUG-MODEL_SLUG-COLOR?logo=LOGO&logoColor=white)
 ```
 
@@ -347,7 +347,7 @@ PR description here
 
 ---
 
-[![Compound Engineering](https://img.shields.io/badge/Built_with-Compound_Engineering-6366f1)](https://github.com/EveryInc/compound-engineering-plugin)
+[![Compound Engineering](https://img.shields.io/badge/Built_with-Compound_Engineering-6366f1)](https://github.com/Jerrylalala/compound-engineering)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-Opus_4.6_(1M,_Extended_Thinking)-D97757?logo=claude&logoColor=white)
 EOF
 )"
