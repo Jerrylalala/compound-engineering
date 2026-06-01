@@ -15,7 +15,7 @@
 
 ### 1. 确认当前仓库
 
-确认当前工作目录是 `compound-engineering-plugin-private` 仓库：
+确认当前工作目录是 `compound-engineering` 仓库：
 
 ```bash
 # 验证插件目录存在
@@ -24,7 +24,7 @@ ls plugins/compound-engineering/.claude-plugin/plugin.json
 
 ### 2. 同步到 Codex
 
-**注意**：此操作只同步 3 个主入口 workflow skill（brainstorm/plan/review），不安装整个插件。
+**注意**：此操作只同步 3 个 Codex 兼容入口 workflow skill（brainstorm/plan/review），不安装整个插件。
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/sync-codex-workflows.ps1
@@ -44,7 +44,7 @@ bun run src/index.ts install plugins/compound-engineering --to gemini --gemini-h
 
 ```bash
 # 检查 Codex
-ls ~/.codex/agents/ | head -5
+ls ~/.codex/skills/ | head -5
 
 # 检查 Gemini
 ls ~/.gemini/GEMINI.md
@@ -67,6 +67,6 @@ powershell -ExecutionPolicy Bypass -File scripts/sync-to-targets.ps1
 
 ## 注意事项
 
-- 此操作会覆盖目标位置的现有配置
+- 此操作面向维护者本机同步，会覆盖目标位置的同名插件配置
 - Gemini CLI 需要 `.gemini/GEMINI.md` 和 `.gemini/commands/*.toml`
-- Codex CLI 需要 `.codex/agents/*.md` 和 `.codex/AGENTS.md`
+- Codex CLI 需要 `.codex/skills/*/SKILL.md`；完整 CLI 安装还会写入 `.codex/prompts/*.md` 和 `.codex/AGENTS.md`
