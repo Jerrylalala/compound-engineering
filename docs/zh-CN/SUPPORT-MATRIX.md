@@ -43,7 +43,7 @@ CLI 转换命令依赖 [Bun](https://bun.sh/)。公共 CLI 当前 `package.json`
 COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering
 ```
 
-发布 `@jerry-jian/compound-plugin` 后，再把文档默认命令切换为 Jerry 包。
+发布 `@jerry-jian/compound-plugin` 后，再把文档默认命令切换为 Jerry 包。过渡期使用 `@every-env/compound-plugin` 时，Codex 完整 standalone 输出需要 `--includeSkills`，Gemini 输出目录使用 `--output`。
 
 ## 验证要求
 

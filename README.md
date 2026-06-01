@@ -108,11 +108,11 @@ CLI 转换命令依赖 [Bun](https://bun.sh/)。发布 `@jerry-jian/compound-plu
 ```bash
 # Windows PowerShell
 $env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering"
-bunx @every-env/compound-plugin install compound-engineering --to codex
+bunx @every-env/compound-plugin install compound-engineering --to codex --includeSkills
 
 # macOS/Linux
 COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering \
-  bunx @every-env/compound-plugin install compound-engineering --to gemini
+  bunx @every-env/compound-plugin install compound-engineering --to gemini --output .
 ```
 
 当前 npm 上已发布的是 `@every-env/compound-plugin`。`@jerry-jian/compound-plugin` 发布前，请使用上面的环境变量方式指向本公共仓库。
