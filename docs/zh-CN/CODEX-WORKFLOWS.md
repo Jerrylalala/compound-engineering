@@ -107,9 +107,10 @@ $workflows-review
 
 后续在 Claude Code 中开发本项目时，如果改动影响了以下任一项，必须同步 Codex 层：
 
-- `plugins/compound-engineering/commands/workflows/brainstorm.md`
-- `plugins/compound-engineering/commands/workflows/plan.md`
-- `plugins/compound-engineering/commands/workflows/review.md`
+- `.codex/skills/workflows-brainstorm/SKILL.md`
+- `.codex/skills/workflows-plan/SKILL.md`
+- `.codex/skills/workflows-review/SKILL.md`
+- `scripts/sync-codex-workflows.ps1`
 - 共享文档协议
 - `install --to codex` 的发现或复制逻辑
 

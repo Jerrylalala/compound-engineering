@@ -41,9 +41,13 @@ nav:
   - 交互式工作流: workflow.html
   - 安装与使用: INSTALL.md
   - 工作流指南: WORKFLOW-VISUAL.md
+  - Codex 工作流: CODEX-WORKFLOWS.md
+  - 平台支持矩阵: SUPPORT-MATRIX.md
   - 核心概念: CONCEPTS.md
   - 脚本说明: SCRIPTS.md
+  - npm 发布清单: PUBLISHING.md
   - 版本策略: VERSION-STRATEGY.md
+  - Fork 初始化: FORK-SETUP.md
   - 同步上游: SYNC.md
 
 extra:

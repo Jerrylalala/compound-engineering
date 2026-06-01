@@ -1,15 +1,14 @@
 {
   "name": "compound-engineering",
   "displayName": "Compound Engineering",
-  "version": "2.49.6",
+  "version": "2.49.7",
   "description": "AI-powered development tools. 51 agents, 4 commands, 66 skills, 1 MCP server for code review, research, design, and workflow automation.",
   "author": {
-    "name": "Kieran Klaassen",
-    "email": "kieran@every.to",
-    "url": "https://github.com/kieranklaassen"
+    "name": "Jerry Jian (fork of Kieran Klaassen)",
+    "url": "https://github.com/Jerrylalala"
   },
-  "homepage": "https://every.to/source-code/my-ai-had-already-fixed-the-code-before-i-saw-it",
-  "repository": "https://github.com/EveryInc/compound-engineering-plugin",
+  "homepage": "https://github.com/Jerrylalala/compound-engineering",
+  "repository": "https://github.com/Jerrylalala/compound-engineering",
   "license": "MIT",
   "keywords": [
     "cursor",

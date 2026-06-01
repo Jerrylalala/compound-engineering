@@ -6,7 +6,7 @@
 
 > **中文增强版** Claude Code 复合工程插件 — 真实 Agent Teams、分层验证、UI 设计联动，让每一个工程单元都比上一个更容易。
 
-📖 **[在线文档](https://jerrylalala.github.io/compound-engineering/)** | 🔄 **[更新日志](CHANGELOG.md)**
+📖 **[在线文档](https://jerrylalala.github.io/compound-engineering/)** | 🔄 **[更新日志](CHANGELOG.md)** | 🤝 **[贡献指南](CONTRIBUTING.md)**
 
 ---
 
@@ -101,6 +101,22 @@ Resume → 0: Ideate/Ideas → 1: Brainstorm → 2: Plan → 3: Work → 4: Revi
 claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 ```
 
+### Codex / Gemini
+
+CLI 转换命令依赖 [Bun](https://bun.sh/)。发布 `@jerry-jian/compound-plugin` 前，先使用已发布的上游 CLI 包并显式指向本公共仓库：
+
+```bash
+# Windows PowerShell
+$env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering"
+bunx @every-env/compound-plugin install compound-engineering --to codex
+
+# macOS/Linux
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering \
+  bunx @every-env/compound-plugin install compound-engineering --to gemini
+```
+
+当前 npm 上已发布的是 `@every-env/compound-plugin`。`@jerry-jian/compound-plugin` 发布前，请使用上面的环境变量方式指向本公共仓库。
+
 ---
 
 ## 主要特性
@@ -165,8 +181,13 @@ Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验�
 | [交互式工作流](https://jerrylalala.github.io/compound-engineering/workflow.html) | 参数可视化，点击展开详情 |
 | [Pencil MCP 设计联动](docs/zh-CN/pencil.html) | AI 设计工作流 · 工具列表 · 使用示例 |
 | [安装指南](docs/zh-CN/INSTALL.md) | 详细安装步骤 |
+| [平台支持矩阵](docs/zh-CN/SUPPORT-MATRIX.md) | Claude Code / Codex / Gemini / OpenCode 支持边界 |
 | [核心概念](docs/zh-CN/CONCEPTS.md) | Skills vs Agents vs Commands |
+| [npm 发布清单](docs/zh-CN/PUBLISHING.md) | `@jerry-jian/compound-plugin` 发布前置条件 |
 | [更新日志](CHANGELOG.md) | 版本历史 |
+| [贡献指南](CONTRIBUTING.md) | 公共仓库贡献、验证和 PR 规范 |
+| [支持入口](SUPPORT.md) | Bug、功能请求和使用问题 |
+| [安全策略](SECURITY.md) | 私密漏洞披露流程 |
 
 ---
 
@@ -220,7 +241,7 @@ Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验�
 | **历史经验检索** | ✅ `[R]` docs/solutions/ | ⚡ | — | — | — |
 | **浏览器自动化** | ✅ agent-browser + [V+] | — | — | — | — |
 | **UI 设计联动** | ✅ Pencil MCP + Figma | — | — | — | ⚡ |
-| **跨 AI 平台支持** | Claude Code 专注 | ✅ 12+ 平台 | Claude Code 专注 | Claude Code 专注 | Claude Code 专注 |
+| **跨 AI 平台支持** | Claude Code 主支持 + Codex/Gemini/OpenCode 转换 | ✅ 12+ 平台 | Claude Code 专注 | Claude Code 专注 | Claude Code 专注 |
 | **中文生态** | ✅ 中英双语 + 在线文档 | 英文 | 英文 | 英文 | 中文 |
 | **Skill 数量** | 66 skills | 40+ skills | 15 skills | — | — |
 | **Review Agent 数量** | 51 agents | 40+ agents | — | ~9 agents | — |
@@ -231,7 +252,7 @@ Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验�
 
 | 项目 | 最擅长 | 局限 |
 |------|--------|------|
-| **CE（本项目）** | 真实 Agent Teams；UI 设计联动；专项审查 agent 最多；中文生态 | 仅 Claude Code；相对新项目，生态较小 |
+| **CE（本项目）** | 真实 Agent Teams；UI 设计联动；专项审查 agent 最多；中文生态 | Claude Code 是完整体验；其他平台以转换支持为准 |
 | **CE-UP（上游）** | 最清晰的工程哲学；跨平台（12+ AI 工具）；社区最成熟 | 无真实 Agent Teams；无分层验证；英文为主 |
 | **SP（Superpowers）** | 轻量；Skill 设计模式清晰；适合个人开发者快速上手 | 无命名 Agent；无 Agent Teams；覆盖较少 |
 | **OMCC** | 角色化 Agent 设计直观；executor/tester/reviewer 职责清晰 | Agent 协作为角色模拟；无合约机制 |
@@ -257,7 +278,7 @@ Pencil 设计 → frontend-design 生成实现 → figma-design-sync 对比验�
 - [P] 派对模式后自动结构化收敛
 - Codex / Gemini 双重交叉验证
 - Pencil MCP + Figma UI 设计联动
-- 私有覆盖层（`skills-custom/`）支持本地扩展
+- 本地增强层（`skills-custom/`）支持 fork 级扩展
 
 ---
 

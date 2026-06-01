@@ -31,6 +31,75 @@ bun run release:validate  # check plugin/marketplace consistency
   - **Markdown tables:** Use pipe-delimited (`| col | col |`), never box-drawing characters.
   - **Prose and skill content:** Unicode is fine (emoji, punctuation, etc.). Prefer ASCII arrows (`->`, `<-`) over Unicode arrows in code blocks and terminal examples.
 
+## Public Repository Maintenance Standard
+
+This repository is maintained as the public project `Jerrylalala/compound-engineering`. Treat it as an open-source product for external users first, not as a private Claude Code-only workspace.
+
+### Product Positioning
+
+- Present the project as reusable workflow assets and a converter/install CLI for multiple AI coding tools.
+- Claude Code remains a supported/legacy-rich surface, but public-facing docs must not imply Claude Code is the only practical path unless a feature is truly Claude-only.
+- When a capability depends on a specific host tool, label it clearly as `stable`, `experimental`, or `legacy/Claude-only`.
+- Keep public messaging honest: do not advertise a feature as stable unless install instructions, docs, and a fresh validation path exist.
+
+### Public-Ready Baseline
+
+Before claiming a change is ready for public users, verify the relevant baseline:
+
+- `bun test` for parser, converter, writer, CLI, or release behavior.
+- `bun run release:validate` for plugin, marketplace, version, or component inventory changes.
+- `mkdocs build --strict` for public documentation changes.
+- `bash scripts/check-feature-integrity.sh` for `ce-*` skill argument/feature drift.
+
+If a baseline is currently failing for unrelated existing reasons, state the exact failing command and failure, and keep the work in a partial/not-public-ready state.
+
+### Community Health
+
+Public maintenance must keep these files accurate and discoverable:
+
+- `LICENSE`
+- `SECURITY.md`
+- `PRIVACY.md`
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `SUPPORT.md`
+- `.github/ISSUE_TEMPLATE/*`
+- `.github/pull_request_template.md`
+
+If any of these are missing or stale, treat that as public-repo maintenance debt. Security reporting must point to the current maintainer/project, not upstream maintainers unless explicitly coordinated.
+
+### Documentation Architecture
+
+- `README.md` is the public first-contact page. Keep it short, accurate, and installation-oriented.
+- `docs/zh-CN/` is the user-facing documentation site. Every linked page should be included in `mkdocs.yml` or intentionally excluded with no broken links.
+- `docs/specs/` stores target/platform contracts.
+- `docs/brainstorms/` and `docs/plans/` are durable project history and planning records, not primary onboarding docs.
+- `docs/solutions/` is a reusable knowledge base; do not delete it as cleanup.
+- `plugins/compound-engineering/README.md` must match the actual plugin inventory and current `ce:*` skill-first entrypoints.
+
+### Stability And Compatibility
+
+- Prefer stable, documented install paths for public users. If an install path relies on local overrides, environment variables, or a host-specific cache, label it as maintainer/development usage.
+- Keep target support explicit. For each supported target, document output paths, known limitations, and whether tests cover it.
+- Do not remove Claude Code compatibility casually, but do not let Claude-only assumptions block Codex, Gemini, OpenCode, or other converter targets.
+- When old names such as `workflows:*` remain only as historical aliases, mark them as deprecated or remove them from user-facing docs.
+
+### Release And Version Policy
+
+- Public releases are produced by release automation. Do not hand-bump release-owned versions or hand-author release notes in routine PRs.
+- If release metadata drifts, fix the metadata sync/release automation path rather than papering over one file.
+- Root `CHANGELOG.md` is not the source of truth for new public releases; GitHub release PRs and GitHub Releases are the canonical release surface.
+
+### Contribution Workflow
+
+- Optimize issues and PRs for outside contributors: clear templates, exact reproduction steps, expected validation, and concise maintainer response.
+- Do not require contributors to know private local paths, private marketplace names, or personal workflow assumptions.
+- Public-facing examples must be copy-pasteable on Windows PowerShell and POSIX shells when both are relevant.
+
+### Rule-Only Updates
+
+When the user asks to update repository working rules only, edit the rule files and do not create a commit unless the user explicitly asks for one. Mention the files changed and leave normal source changes for a separate implementation task.
+
 ## Directory Layout
 
 ```

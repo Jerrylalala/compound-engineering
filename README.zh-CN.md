@@ -1,6 +1,6 @@
 # Compound Marketplace（中文）
 
-这是 `EveryInc/compound-engineering-plugin` 的私有镜像。本仓库 **不修改上游英文文件**，只新增中文文档层。
+这是面向公共使用维护的 `Jerrylalala/compound-engineering` fork，在 `EveryInc/compound-engineering-plugin` 的基础上增加中文文档、Codex/Gemini 转换和本地工作流增强。
 
 - 中文文档：`docs/zh-CN/`
 - 中文使用说明：本文件
@@ -23,13 +23,15 @@ claude --plugin-dir "路径/plugins/compound-engineering"
 
 **CLI 转换（Codex / Gemini）：**
 
+CLI 转换命令依赖 [Bun](https://bun.sh/)。发布 `@jerry-jian/compound-plugin` 前，远程安装先使用已发布的 `@every-env/compound-plugin` 并显式指向本公共仓库。
+
 ```bash
 # 本地转换（推荐）
 cd 你的项目目录
 bun run src/index.ts install ./plugins/compound-engineering --to codex
 bun run src/index.ts install ./plugins/compound-engineering --to gemini
 
-# 从私有仓库远程安装（临时设置环境变量）
+# 从当前公共仓库远程安装
 # Windows PowerShell:
 $env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering"
 bunx @every-env/compound-plugin install compound-engineering --to gemini
@@ -43,7 +45,7 @@ COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineerin
 - Codex: `~/.codex/prompts/` 和 `~/.codex/skills/`
 - Gemini: `<当前目录>/.gemini/GEMINI.md`
 
-> **注意**：`COMPOUND_PLUGIN_GITHUB_SOURCE` 只影响这个 CLI 工具，不会影响其他工具。建议临时设置，不要添加到永久环境变量。
+> **注意**：当前 npm 上已发布的是 `@every-env/compound-plugin`。`@jerry-jian/compound-plugin` 发布前，请使用 `COMPOUND_PLUGIN_GITHUB_SOURCE` 显式指向本公共仓库。
 
 ## 工作流命令
 
@@ -60,6 +62,8 @@ COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineerin
 | 文档 | 说明 |
 |------|------|
 | `docs/zh-CN/INSTALL.md` | 插件安装指南 |
+| `docs/zh-CN/SUPPORT-MATRIX.md` | 平台支持矩阵 |
+| `docs/zh-CN/PUBLISHING.md` | npm 发布前置清单 |
 | `docs/zh-CN/SYNC.md` | 上游同步指南 |
 | `CLAUDE.md` | 项目指令 |
 

@@ -18,6 +18,28 @@ PR_BASE_REPO=""
 PR_BASE_REMOTE=""
 BASE_REF=""
 
+find_github_remote_for_repo() {
+  target_repo="$1"
+  for remote_name in $(git remote); do
+    remote_url=$(git remote get-url "$remote_name" 2>/dev/null || true)
+    case "$remote_url" in
+      *"github.com:$target_repo"*|*"github.com/$target_repo"*)
+        echo "$remote_name"
+        return 0
+        ;;
+    esac
+  done
+  return 1
+}
+
+deepen_remote_history() {
+  remote_name="$1"
+  git fetch --no-tags --unshallow "$remote_name" "+refs/heads/*:refs/remotes/$remote_name/*" 2>/dev/null \
+    || git fetch --no-tags --deepen=2147483647 "$remote_name" "+refs/heads/*:refs/remotes/$remote_name/*" 2>/dev/null \
+    || git fetch --no-tags "$remote_name" "+refs/heads/*:refs/remotes/$remote_name/*" 2>/dev/null \
+    || true
+}
+
 # Step 1: Try PR metadata (handles fork workflows)
 if command -v gh >/dev/null 2>&1; then
   PR_META=$(gh pr view --json baseRefName,url 2>/dev/null || true)
@@ -50,7 +72,7 @@ fi
 # Resolve the base ref from the correct remote (fork-safe)
 if [ -n "$REVIEW_BASE_BRANCH" ]; then
   if [ -n "$PR_BASE_REPO" ]; then
-    PR_BASE_REMOTE=$(git remote -v | awk "index(\$2, \"github.com:$PR_BASE_REPO\") || index(\$2, \"github.com/$PR_BASE_REPO\") {print \$1; exit}")
+    PR_BASE_REMOTE=$(find_github_remote_for_repo "$PR_BASE_REPO" || true)
     if [ -n "$PR_BASE_REMOTE" ]; then
       git rev-parse --verify "$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" >/dev/null 2>&1 || git fetch --no-tags "$PR_BASE_REMOTE" "$REVIEW_BASE_BRANCH:refs/remotes/$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" 2>/dev/null || git fetch --no-tags "$PR_BASE_REMOTE" "$REVIEW_BASE_BRANCH" 2>/dev/null || true
       BASE_REF=$(git rev-parse --verify "$PR_BASE_REMOTE/$REVIEW_BASE_BRANCH" 2>/dev/null || true)
@@ -77,11 +99,11 @@ if [ -n "$BASE_REF" ]; then
   BASE=$(git merge-base HEAD "$BASE_REF" 2>/dev/null) || BASE=""
   if [ -z "$BASE" ] && [ "$(git rev-parse --is-shallow-repository 2>/dev/null || echo false)" = "true" ]; then
     if git remote get-url origin >/dev/null 2>&1; then
-      git fetch --no-tags --unshallow origin 2>/dev/null || true
+      deepen_remote_history origin
       BASE=$(git merge-base HEAD "$BASE_REF" 2>/dev/null) || BASE=""
     fi
     if [ -z "$BASE" ] && [ -n "$PR_BASE_REMOTE" ] && [ "$PR_BASE_REMOTE" != "origin" ]; then
-      git fetch --no-tags --unshallow "$PR_BASE_REMOTE" 2>/dev/null || true
+      deepen_remote_history "$PR_BASE_REMOTE"
       BASE=$(git merge-base HEAD "$BASE_REF" 2>/dev/null) || BASE=""
     fi
   fi

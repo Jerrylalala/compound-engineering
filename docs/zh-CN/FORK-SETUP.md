@@ -5,7 +5,7 @@
 ## 为什么需要初始化？
 
 Fork 仓库默认继承上游的身份信息（作者、仓库地址等）。如果不修改：
-- Claude Code 无法正确识别你的私有仓库
+- Claude Code 无法正确识别你的 fork 仓库
 - Marketplace 安装时会指向错误的仓库
 - 贡献者信息不正确
 
@@ -85,7 +85,7 @@ git commit -m "Initialize fork: update identity information
 
 - Update marketplace.json with new owner
 - Update plugin.json with new author and URLs
-- Configure for private repository use"
+- Configure for public fork use"
 git push origin main
 ```
 
@@ -101,7 +101,7 @@ git push origin main
 | `plugin.json` homepage | 你的仓库 URL |
 | `plugin.json` repository | 你的仓库 URL |
 | `CLAUDE.md` 安装命令 | 你的仓库路径 |
-| 版本号一致性 | marketplace.json = plugin.json |
+| release metadata | `bun run release:validate` 通过 |
 
 ---
 
@@ -119,9 +119,9 @@ git push origin main
 
 **症状**: 执行 `/plugins` 更新时提示已是最新，但实际有更新
 
-**原因**: `marketplace.json` 版本号未同步
+**原因**: release metadata 未同步或 marketplace 缓存未刷新
 
-**解决**: 确保 `marketplace.json` 和 `plugin.json` 版本号一致
+**解决**: 运行 `bun run release:sync-metadata` 和 `bun run release:validate`，再刷新 marketplace 缓存
 
 ### 错误 3: 上游同步冲突
 

@@ -13,7 +13,7 @@ async function exists(filePath: string): Promise<boolean> {
 }
 
 async function runGit(args: string[], cwd: string, env?: NodeJS.ProcessEnv): Promise<void> {
-  const proc = Bun.spawn(["git", ...args], {
+  const proc = Bun.spawn(["git", "-c", "core.hooksPath=", ...args], {
     cwd,
     stdout: "pipe",
     stderr: "pipe",

@@ -1,6 +1,6 @@
 # 上游同步指南
 
-本仓库是 `EveryInc/compound-engineering-plugin` 的**私有镜像 + 中文化层**。
+本仓库是 `EveryInc/compound-engineering-plugin` 的公共 fork，保留中文化层、本地工作流增强和跨平台转换能力。
 
 ## 仓库架构
 
@@ -9,12 +9,12 @@
 │                     仓库关系图                               │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  upstream (只读)                 origin (你的私有仓库)        │
+│  upstream (只读)                 origin (公共 fork)            │
 │  ┌──────────────────┐           ┌──────────────────┐        │
 │  │ EveryInc/        │  fetch    │ Jerrylalala/     │        │
 │  │ compound-        │ ────────> │ compound-        │        │
 │  │ engineering-     │           │ engineering-     │        │
-│  │ plugin           │           │ plugin-private   │        │
+│  │ plugin           │           │ engineering      │        │
 │  └──────────────────┘           └──────────────────┘        │
 │         │                              ↑                    │
 │         │ merge                        │ push               │
@@ -27,7 +27,7 @@
 
 ```text
 upstream -> https://github.com/EveryInc/compound-engineering-plugin.git  (上游，只读)
-origin   -> https://github.com/Jerrylalala/compound-engineering.git  (你的私有仓库)
+origin   -> https://github.com/Jerrylalala/compound-engineering.git  (当前公共 fork)
 ```
 
 ---
@@ -85,7 +85,7 @@ git add .
 git commit -m "Merge upstream/main - 同步上游更新"
 ```
 
-### 第四步：推送到私有仓库
+### 第四步：推送到公共 fork
 
 ```bash
 git push origin main
@@ -162,7 +162,7 @@ git remote -v
 
 ### Q：skills-custom 会同步到上游吗？
 
-不会。`skills-custom/` 只存在于你的私有仓库。
+不会。`skills-custom/` 是当前 fork 的本地增强目录，上游仓库没有这个目录。
 
 ---
 

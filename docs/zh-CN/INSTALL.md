@@ -231,14 +231,13 @@ bun run src/index.ts install ./plugins/compound-engineering --to gemini --gemini
 bun run src/index.ts install ./plugins/compound-engineering --to opencode --also codex,gemini
 ```
 
-### 方式 2：从私有仓库远程安装
+### 方式 2：从当前公共仓库远程安装
 
-> **注意**：`COMPOUND_PLUGIN_GITHUB_SOURCE` 环境变量只影响 `@every-env/compound-plugin` 这个 CLI 工具，不会影响其他工具。建议**临时设置**，不要添加到永久环境变量。
+> **注意**：当前 npm 上已发布的是 `@every-env/compound-plugin`。`@jerry-jian/compound-plugin` 发布前，请使用 `COMPOUND_PLUGIN_GITHUB_SOURCE` 显式指向本公共仓库。
 
 **Windows PowerShell：**
 
 ```powershell
-# 临时设置环境变量并安装
 $env:COMPOUND_PLUGIN_GITHUB_SOURCE="https://github.com/Jerrylalala/compound-engineering"
 bunx @every-env/compound-plugin install compound-engineering --to gemini
 bunx @every-env/compound-plugin install compound-engineering --to codex
@@ -247,7 +246,6 @@ bunx @every-env/compound-plugin install compound-engineering --to codex
 **Linux/macOS：**
 
 ```bash
-# 一行命令（临时设置）
 COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering \
   bunx @every-env/compound-plugin install compound-engineering --to gemini
 ```

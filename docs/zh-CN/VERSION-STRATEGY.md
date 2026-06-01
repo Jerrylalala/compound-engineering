@@ -8,14 +8,14 @@
 
 ### 问题描述
 
-需要同步 **4 个位置** 的版本信息：
+当前仓库由 release automation 管理版本和发布元数据。常规开发不再手动同步多个版本字段；重点是确保 release metadata 没有漂移。
 
 | 文件 | 字段 | 说明 |
 |------|------|------|
-| `.claude-plugin/marketplace.json` | `plugins[0].version` | Marketplace 读取的版本 |
 | `plugins/.../plugin.json` | `version` | 插件本身版本 |
-| `CHANGELOG.md` | 标题 | 变更记录 |
-| `README.md` / `plugin.json` description | 组件数量 | agents/commands/skills 数量 |
+| `.github/.release-please-manifest.json` | component versions | release-please 的组件版本来源 |
+| `.claude-plugin/marketplace.json` / `.cursor-plugin/marketplace.json` | marketplace metadata | 发布展示信息 |
+| plugin manifests | description / capabilities | 插件展示和安装元数据 |
 
 ### 风险
 
@@ -25,21 +25,17 @@
 
 ### 预防措施
 
-#### 措施 1: 使用自动化脚本（推荐）
+#### 措施 1: 使用 release metadata 自动同步（推荐）
 
-```powershell
-# 自动递增 patch 版本并同步
-powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch
-
-# 或直接指定版本
-powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -Version "2.30.0"
+```bash
+bun run release:sync-metadata
+bun run release:validate
 ```
 
 脚本会自动：
-1. 更新 `marketplace.json` 中的版本
-2. 更新 `plugin.json` 中的版本
-3. 验证同步成功
-4. 提示下一步操作
+1. 根据 release-please manifest 和当前组件数量同步发布元数据
+2. 更新 Claude / Cursor marketplace 相关描述
+3. 验证 release 配置和元数据没有漂移
 
 #### 措施 2: 安装 pre-commit hook
 
@@ -69,8 +65,9 @@ bash scripts/check-versions.sh
 
 每次发版必须完成：
 
-- [ ] **版本号同步** - 运行 `bump-version.ps1` 或手动同步
-- [ ] **CHANGELOG 更新** - 记录本次变更内容
+- [ ] **release metadata 同步** - 运行 `bun run release:sync-metadata`
+- [ ] **release metadata 验证** - 运行 `bun run release:validate`
+- [ ] **CHANGELOG/Release Notes** - 由 release automation 生成，不在普通 PR 中手写
 - [ ] **组件数量核对** - 如有新增/删除，更新以下位置：
   - `CLAUDE.md` 当前组件统计表
   - `marketplace.json` 插件描述
@@ -92,7 +89,7 @@ bash scripts/check-versions.sh
 
 ### 风险
 
-- Claude Code 无法正确识别私有仓库
+- Claude Code 无法正确识别当前 fork
 - 安装指向错误的仓库
 - 上游同步时产生合并冲突
 
@@ -147,9 +144,11 @@ git commit -m "Sync upstream changes, preserve local identity"
 
 | 脚本 | 用途 | 使用方式 |
 |------|------|----------|
-| `scripts/check-versions.ps1` | 验证版本一致性 | 提交前运行 |
-| `scripts/check-versions.sh` | 验证版本一致性 (Bash) | 提交前运行 |
-| `scripts/bump-version.ps1` | 自动更新版本号 | 发版时运行 |
+| `bun run release:sync-metadata` | 同步 release metadata | 修改插件清单后运行 |
+| `bun run release:validate` | 验证 release 配置与元数据 | 提交前运行 |
+| `scripts/check-versions.ps1` | 轻量身份和版本格式检查 | 提交前可选 |
+| `scripts/check-versions.sh` | 轻量身份和版本格式检查 (Bash) | 提交前可选 |
+| `scripts/bump-version.ps1` | 旧版手工版本工具 | 一般不推荐 |
 | `scripts/pre-commit` | Git hook | 安装到 `.git/hooks/` |
 
 ---
@@ -158,21 +157,22 @@ git commit -m "Sync upstream changes, preserve local identity"
 
 ### 日常开发
 
-1. 修改功能后，使用 `bump-version.ps1 -BumpType patch` 更新版本
-2. 提交前运行 `check-versions.ps1` 验证
-3. 确保 CHANGELOG 记录了变更
+1. 不手动 bump release-owned 版本
+2. 修改插件清单、描述或组件数量后运行 `bun run release:sync-metadata`
+3. 提交前运行 `bun run release:validate`
 
 ### 上游同步
 
 1. 同步前备份身份信息相关文件
 2. 合并后检查身份信息是否被覆盖
-3. 运行 `check-versions.ps1` 确认一致性
+3. 运行 `bun run release:sync-metadata`
+4. 运行 `bun run release:validate`
 
 ### 新人入职/Fork 初始化
 
 1. Fork 后第一时间按 [FORK-SETUP.md](./FORK-SETUP.md) 初始化
 2. 安装 pre-commit hook
-3. 测试一次完整的版本更新流程
+3. 测试一次 `bun run release:validate`
 
 ---
 

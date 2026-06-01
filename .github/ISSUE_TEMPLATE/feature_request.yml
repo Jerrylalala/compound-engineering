@@ -1,0 +1,45 @@
+name: Feature request
+description: Propose an improvement to the plugin, CLI, converter, or docs.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and where does the current project fall short?
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - Claude Code plugin
+        - Codex conversion
+        - Gemini conversion
+        - OpenCode conversion
+        - CLI
+        - Documentation
+        - Release process
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the smallest useful change.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility notes
+      description: Mention affected agent platforms, install methods, or known migration concerns.
+
