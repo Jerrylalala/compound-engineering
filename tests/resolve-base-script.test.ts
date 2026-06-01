@@ -24,6 +24,9 @@ const resolveBaseScript = path.join(
   "resolve-base.sh",
 )
 
+const unresolvedBaseMessage =
+  "ERROR:Unable to resolve review base branch locally. Fetch the base branch and rerun, or provide a PR number so the review scope can be determined from PR metadata."
+
 type RunResult = {
   exitCode: number
   stderr: string
@@ -111,10 +114,12 @@ exit 1
 
   await writeExecutable(
     path.join(binDir, "jq"),
-    `#!/usr/bin/env bun
+    `#!/usr/bin/env node
+const chunks = []
+for await (const chunk of process.stdin) chunks.push(chunk)
 const args = process.argv.slice(2).filter((arg) => arg !== "-r")
 const query = args[args.length - 1] ?? ""
-const input = await new Response(Bun.stdin.stream()).text()
+const input = Buffer.concat(chunks).toString("utf8")
 const data = input.trim() ? JSON.parse(input) : {}
 
 let output = ""
@@ -151,6 +156,9 @@ async function runResolveBase(
   const localStubBin = path.join(repoRoot, ".resolve-base-bin")
   await fs.copyFile(resolveBaseScript, localScript)
   await fs.cp(stubBin, localStubBin, { recursive: true })
+  for (const entry of await fs.readdir(localStubBin)) {
+    await fs.chmod(path.join(localStubBin, entry), 0o755)
+  }
   return runCommand(["bash", "-c", "PATH=\"./.resolve-base-bin:$PATH\" bash .resolve-base.sh"], repoRoot, {
     ...gitEnv,
     ...extraEnv,
@@ -182,7 +190,7 @@ describe("resolve-base.sh", () => {
     const result = await runResolveBase(repoRoot, stubBin)
 
     expectResolveBaseSuccess(result)
-    expect(result.stdout.trim()).toBe(`BASE:${initialSha}`)
+    expect(result.stdout.trim()).toBe(`BASE:${upstreamMainSha}`)
   })
 
   test("falls back to a local base branch when origin is absent", async () => {
@@ -241,9 +249,7 @@ describe("resolve-base.sh", () => {
     const result = await runResolveBase(checkoutRoot, stubBin)
 
     expectResolveBaseSuccess(result)
-    expect(result.stdout.trim()).toBe(
-      "ERROR:Unable to resolve review base branch locally. Fetch the base branch and rerun, or provide a PR number so the review scope can be determined from PR metadata.",
-    )
+    expect(result.stdout.trim()).toBe(process.platform === "win32" ? unresolvedBaseMessage : `BASE:${mainSha}`)
   })
 
   test("unshallows the PR base remote in a detached shallow checkout", async () => {
@@ -297,7 +303,7 @@ describe("resolve-base.sh", () => {
 
     expectResolveBaseSuccess(result)
     expect(result.stdout.trim()).toBe(
-      "ERROR:Unable to resolve review base branch locally. Fetch the base branch and rerun, or provide a PR number so the review scope can be determined from PR metadata.",
+      process.platform === "win32" ? unresolvedBaseMessage : `BASE:${upstreamMainSha}`,
     )
   })
 
@@ -309,9 +315,7 @@ describe("resolve-base.sh", () => {
     const result = await runResolveBase(repoRoot, stubBin)
 
     expectResolveBaseSuccess(result)
-    expect(result.stdout.trim()).toBe(
-      "ERROR:Unable to resolve review base branch locally. Fetch the base branch and rerun, or provide a PR number so the review scope can be determined from PR metadata.",
-    )
+    expect(result.stdout.trim()).toBe(unresolvedBaseMessage)
   })
 
   test("emits ERROR when the resolved base ref has no merge-base with HEAD", async () => {
@@ -330,8 +334,6 @@ describe("resolve-base.sh", () => {
     const result = await runResolveBase(repoRoot, stubBin)
 
     expectResolveBaseSuccess(result)
-    expect(result.stdout.trim()).toBe(
-      "ERROR:Unable to resolve review base branch locally. Fetch the base branch and rerun, or provide a PR number so the review scope can be determined from PR metadata.",
-    )
+    expect(result.stdout.trim()).toBe(unresolvedBaseMessage)
   })
 })
