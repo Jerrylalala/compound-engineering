@@ -31,8 +31,8 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-OWNER = "EveryInc"
-REPO = "compound-engineering-plugin"
+OWNER = "Jerrylalala"
+REPO = "compound-engineering"
 TAG_PREFIX = "compound-engineering-v"
 DEFAULT_API_BASE = "https://api.github.com"
 GH_TIMEOUT_SECS = 10

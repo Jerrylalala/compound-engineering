@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 Look up what shipped in recent releases of the compound-engineering plugin. Bare invocation summarizes the last 5 plugin releases. Argument invocation searches the last 40 releases and answers a specific question, citing the release version that introduced the change.
 
-Data comes from the GitHub Releases API for `EveryInc/compound-engineering-plugin`, filtered to the `compound-engineering-v*` tag prefix so sibling components (`cli-v*`, `coding-tutor-v*`, `marketplace-v*`, `cursor-marketplace-v*`) are excluded.
+Data comes from the GitHub Releases API for `Jerrylalala/compound-engineering`, filtered to the `compound-engineering-v*` tag prefix so sibling components (`cli-v*`, `coding-tutor-v*`, `marketplace-v*`, `cursor-marketplace-v*`) are excluded.
 
 ## Phase 1 — Parse Arguments
 
@@ -32,7 +32,7 @@ The helper always exits 0 and emits a single JSON object on stdout. It owns all 
 
 If the helper subprocess itself fails to launch (non-zero exit AND empty or non-JSON stdout — e.g., `python3` is not installed, the script is not executable, or the interpreter crashes before emitting the contract), tell the user:
 
-> `python3` is required to run `/ce:release-notes`. Install Python 3.x and retry, or open https://github.com/EveryInc/compound-engineering-plugin/releases directly.
+> `python3` is required to run `/ce:release-notes`. Install Python 3.x and retry, or open https://github.com/Jerrylalala/compound-engineering/releases directly.
 
 Then stop. This is distinct from the helper returning `ok: false`, which means the helper ran successfully but both transports failed (handled below).
 
@@ -84,7 +84,7 @@ After all releases are rendered, append a two-line footer:
 
 ```
 Showing the last 5 releases. For older history, ask a specific question (e.g., `/ce:release-notes what happened to <skill>?`).
-Browse all releases at https://github.com/EveryInc/compound-engineering-plugin/releases
+Browse all releases at https://github.com/Jerrylalala/compound-engineering/releases
 ```
 
 Stop. Summary mode is done.
@@ -122,7 +122,7 @@ If no confident match exists, skip to Phase 9.
 For each cited release (the most recent match as primary, plus up to 2 older matches), if the release's `linked_prs` array is non-empty, fetch the first PR for grounding context:
 
 ```bash
-gh pr view <linked_prs[0]> --repo EveryInc/compound-engineering-plugin --json title,body,url
+gh pr view <linked_prs[0]> --repo Jerrylalala/compound-engineering --json title,body,url
 ```
 
 Always pass the PR number as a separate argument (list-form) — never interpolate it into a shell string. This call is best-effort:
@@ -149,7 +149,7 @@ Stop.
 Print this line literally — the URL is hardcoded so it cannot drift:
 
 ```
-I couldn't find this in the last 40 plugin releases. Browse the full history at https://github.com/EveryInc/compound-engineering-plugin/releases
+I couldn't find this in the last 40 plugin releases. Browse the full history at https://github.com/Jerrylalala/compound-engineering/releases
 ```
 
 Stop.
