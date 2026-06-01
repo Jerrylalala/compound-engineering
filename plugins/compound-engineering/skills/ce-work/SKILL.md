@@ -32,14 +32,15 @@ This command takes a work document (plan, specification, or todo file) or a bare
 > **向后兼容（参数别名）**：以下旧参数名在传入时自动识别并映射：
 > - `[team]` → 等同 `[T]`
 > - `[team:full]` → 等同 `[T+]`
-> - `[T]`（旧：四层验证）→ 等同 `[V]`（新名）
 > - `[PW]` → 等同 `[V+]`
 > 传入旧名不会报错，等同传入新名。
+>
+> `[T]` 现在固定表示 Agent Teams；四层自验证使用 `[V]`。不要再把 `[T]` 当作旧自验证别名。
 
 **[V] 自验证标志检测**（独立执行）：
-- 如果 `$ARGUMENTS` 包含 `[V]` 或 `[v]`，或向后兼容的 `[T]`（旧名）：
+- 如果 `$ARGUMENTS` 包含 `[V]` 或 `[v]`：
   - 设置 V_MODE_ENABLED = true
-  - 从参数中移除 `[V]`（或 `[T]`）
+  - 从参数中移除 `[V]`
   - 宣告：「✅ [V] 自验证模式已启用——执行完成后将运行四层验证（Phase 3.5）」
   - **[V+] 检测**（[V+] 自动启用四层验证，无需单独传 [V]）：
     - 如果 `$ARGUMENTS` 包含 `[V+]` 或 `[pw]`：
@@ -662,7 +663,7 @@ Determine how to proceed based on what was provided in `<input_document>`.
 
 ---
 
-### Phase 3.5: 四层自验证（仅当 `[T]` 时）
+### Phase 3.5: 四层自验证（仅当 `[V]` / `[V+]` 时）
 
 **触发条件**：V_MODE_ENABLED = true（在 Phase -1 中设置）。V_MODE_ENABLED = false 时跳过本节，直接进入 Phase 4。
 
@@ -990,7 +991,7 @@ fi
 
 展示验证摘要：
 ```
-✅ [T] 验证通过（第 N 轮）
+✅ [V] 验证通过（第 N 轮）
   Layer 0: pass  ✅
   Layer 1: skip  —
   Layer 2: pass  ✅ (截图: verification-<ts>.png)
@@ -1006,7 +1007,7 @@ fi
 **第 2 轮结束仍有层失败（BLOCKED）**：
 
 使用 **AskUserQuestion** 工具询问：
-> "⚠️ [T] 验证未通过（已重试 2 轮）
+> "⚠️ [V] 验证未通过（已重试 2 轮）
 > 失败层：[层名] — [失败原因摘要]
 > （Layer 0 层内重试：[layer0_inner_retries] 次，Layer 2 层内重试：[layer2_inner_retries] 次）
 >
@@ -1088,12 +1089,12 @@ Based on selection:
 > "功能已完成。下一步？
 >
 > 1. **代码审查（推荐）** — `/ce:review mode:autofix plan:<计划路径>` 进行结构化审查
-> 2. **直接创建 PR** — `/workflows:pr`
+> 2. **直接创建 PR** — `/ce:pr`
 > 3. **完成** — 无需额外操作"
 
 Based on selection:
 - 选 1 → 调用 `ce:review` skill，传入 `mode:autofix`，plan 路径已知则传入（加 `[T]` 如果 TEAM_GATE_ENABLED）
-- 选 2 → 执行 `/workflows:pr` command
+- 选 2 → 执行 `/ce:pr` skill
 - 选 3 → 结束流程
 
 ---

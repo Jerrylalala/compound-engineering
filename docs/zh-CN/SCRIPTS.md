@@ -8,14 +8,14 @@
 |------|------|------|
 | `check-versions.ps1` | 检查版本一致性 | Windows |
 | `check-versions.sh` | 检查版本一致性 | Linux/macOS |
-| `bump-version.ps1` | 自动更新版本号 | Windows |
+| `bump-version.ps1` | 旧版手工版本工具，常规开发不推荐 | Windows |
 | `pre-commit` | Git 提交前检查 | 通用 |
 
 ---
 
 ## check-versions（版本检查）
 
-检查 `marketplace.json` 和 `plugin.json` 的版本号是否一致。
+检查插件清单是否存在、`plugin.json` 版本号格式是否正确、仓库身份信息是否指向当前 fork，并提示组件数量是否与描述同步。
 
 ### Windows
 
@@ -38,10 +38,10 @@ bash scripts/check-versions.sh
 
 [INFO] Checking file existence...
 [INFO] Reading version numbers...
-  marketplace.json: 2.32.0
-  plugin.json:      2.32.0
-[INFO] Comparing versions...
-[OK] Versions match: 2.32.0
+  plugin.json: 2.32.0
+[OK] Version (plugin.json): 2.32.0
+[INFO] Validating version format...
+[OK] Version format valid: 2.32.0
 
 [INFO] Checking component counts...
   Actual: Agents=28, Commands=26, Skills=20
@@ -55,9 +55,9 @@ bash scripts/check-versions.sh
 
 ---
 
-## bump-version（版本更新）
+## bump-version（旧版手工版本工具）
 
-自动更新所有版本号文件。
+自动更新旧版手工版本文件。当前常规开发不推荐手动 bump 版本；正式发布由 release automation 处理。只有在维护历史流程或修复旧版脚本时才应使用。
 
 ### 用法
 
@@ -117,12 +117,11 @@ chmod +x .git/hooks/pre-commit
 ### 版本不一致
 
 ```
-[ERROR] Version mismatch!
-  marketplace.json: 2.31.0
-  plugin.json:      2.32.0
+[ERROR] Release metadata drift detected:
+- plugins/compound-engineering/.cursor-plugin/plugin.json
 ```
 
-**解决**：使用 `bump-version.ps1` 统一更新，或手动修改两个文件。
+**解决**：常规开发不要手动修改 release-owned 版本。先运行 `bun run release:sync-metadata`，再运行 `bun run release:validate`；如果仍失败，再检查 release-please 配置和 manifest。
 
 ### 组件数量不匹配
 
@@ -142,4 +141,4 @@ chmod +x .git/hooks/pre-commit
 ## 相关文档
 
 - [版本管理策略](VERSION-STRATEGY.md)
-- [发布检查清单](../development/VERSIONING.md)
+- [发布检查清单](https://github.com/Jerrylalala/compound-engineering/blob/main/docs/development/VERSIONING.md)

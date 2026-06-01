@@ -118,5 +118,5 @@ commands/
 
 ## 相关文档
 
-- [Skill vs Agent 调用问题](../solutions/integration-issues/skill-vs-agent-invocation.md)
+- [Skill vs Agent 调用问题](https://github.com/Jerrylalala/compound-engineering/blob/main/docs/solutions/integration-issues/skill-vs-agent-invocation.md)
 - [安装与使用指南](INSTALL.md)

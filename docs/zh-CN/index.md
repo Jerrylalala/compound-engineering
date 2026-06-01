@@ -85,4 +85,4 @@ claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
 ## Credits
 
 Fork 自 [compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin)（EveryInc，MIT 协议）。  
-在原版基础上增加：中文化 · Agent Teams · 四层自验证 · 双重 AI 审查 · 私有覆盖层。
+在原版基础上增加：中文化 · Agent Teams · 四层自验证 · 双重 AI 审查 · 本地增强层。

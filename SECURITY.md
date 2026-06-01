@@ -8,8 +8,11 @@ Security fixes are applied to the latest version on `main`.
 
 Please do not open a public issue for undisclosed vulnerabilities.
 
-Instead, report privately by emailing:
-- `kieran@every.to`
+Report privately through GitHub Security Advisories:
+
+- https://github.com/Jerrylalala/compound-engineering/security/advisories/new
+
+If GitHub private vulnerability reporting is unavailable for the repository, open a public issue only to request a private contact channel. Do not include exploit details, secrets, proof-of-concept code, or sensitive logs in that public issue.
 
 Include:
 - A clear description of the issue

@@ -1,0 +1,59 @@
+name: Release Preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Conventional release intent title, for example "feat(cli): add provider"'
+        required: true
+        type: string
+      files:
+        description: 'Changed files, one path per line'
+        required: true
+        type: string
+      overrides:
+        description: 'Optional bump overrides, comma-separated, for example "cli=minor,marketplace=patch"'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build preview
+        shell: bash
+        env:
+          PREVIEW_TITLE: ${{ inputs.title }}
+          PREVIEW_FILES: ${{ inputs.files }}
+          PREVIEW_OVERRIDES: ${{ inputs.overrides }}
+        run: |
+          args=(--title "$PREVIEW_TITLE")
+
+          while IFS= read -r file; do
+            if [ -n "$file" ]; then
+              args+=(--file "$file")
+            fi
+          done <<< "$PREVIEW_FILES"
+
+          IFS=',' read -ra overrides <<< "$PREVIEW_OVERRIDES"
+          for override in "${overrides[@]}"; do
+            override="${override#"${override%%[![:space:]]*}"}"
+            override="${override%"${override##*[![:space:]]}"}"
+            if [ -n "$override" ]; then
+              args+=(--override "$override")
+            fi
+          done
+
+          bun run release:preview -- "${args[@]}"

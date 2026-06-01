@@ -68,47 +68,35 @@ Agents are organized into categories for easier discovery.
 |-------|-------------|
 | `ankane-readme-writer` | Create READMEs following Ankane-style template for Ruby gems |
 
-## Commands
+## User Entry Points
 
-### Workflow Commands
+The current user-facing workflow is skill-first and uses the `ce:` namespace. Older `workflows:*` names are historical or compatibility-only and should not be documented as the primary Claude Code entrypoint.
 
-Core workflow commands use `workflows:` prefix to avoid collisions with built-in commands:
+### Core Workflow
 
 | Step | Command | Description |
 |------|---------|-------------|
-| 0 | `/workflows:load` | Load project context from previous session |
-| 1 | `/workflows:brainstorm` | Explore requirements and approaches before planning |
-| 2 | `/workflows:plan` | Create implementation plans |
-| 3 | `/workflows:work` | Execute work items systematically |
-| 4 | `/workflows:review` | Run comprehensive code reviews |
-| 5 | `/workflows:compound` | Document solved problems to compound team knowledge |
-| 6 | `/workflows:save` | Save project context for cross-session recovery |
+| 0 | `/ce:resume` | Recover current project state |
+| 0.5 | `/ce:ideate` / `/ce:ideas` | Generate and manage candidate work |
+| 1 | `/ce:brainstorm` | Explore requirements and approaches before planning |
+| 2 | `/ce:plan` | Create implementation plans |
+| 3 | `/ce:work` | Execute work items systematically |
+| 4 | `/ce:review` | Run comprehensive code reviews |
+| 5 | `/ce:compound` | Document solved problems to compound team knowledge |
 
-### Utility Commands
+### Utility Entrypoints
 
 | Command | Description |
 |---------|-------------|
-| `/agent-native-audit` | Run comprehensive agent-native architecture review with scored principles |
-| `/changelog` | Create engaging changelogs for recent merges |
-| `/codex` | Ask Codex for better solutions and optimal approaches |
-| `/create-agent-skill` | Create or edit Claude Code skills |
-| `/deepen-plan` | Enhance plans with parallel research agents for each section |
-| `/deploy-docs` | Validate and prepare documentation for GitHub Pages deployment |
-| `/feature-video` | Record video walkthroughs and add to PR description |
-| `/gemini` | Ask Gemini for better solutions and optimal approaches |
-| `/generate_command` | Generate new slash commands |
-| `/heal-skill` | Fix skill documentation issues |
-| `/lfg` | Full autonomous engineering workflow |
-| `/plan_review` | Multi-agent plan review in parallel |
-| `/release-docs` | Build and update the documentation site with current plugin components |
-| `/report-bug` | Report a bug in the plugin |
-| `/reproduce-bug` | Reproduce bugs using logs and console |
-| `/resolve_parallel` | Resolve TODO comments in parallel |
-| `/resolve_pr_parallel` | Resolve PR comments in parallel |
-| `/resolve_todo_parallel` | Resolve todos in parallel |
-| `/test-browser` | Run browser tests on PR-affected pages |
-| `/triage` | Triage and prioritize issues |
-| `/xcode-test` | Build and test iOS apps on simulator |
+| `/ce:doctor` | Check local tool, MCP, and workflow health |
+| `/ce:pr` | Create a PR using the plugin workflow |
+| `/ce:sync-upstream` | Check upstream repository changes |
+| `/ce:release-notes` | Read plugin release notes |
+| `/ce:update` | Update local plugin-related state |
+| `/codex` | Ask Codex for additional review or alternatives in Claude Code |
+| `/gemini` | Ask Gemini for additional review or alternatives in Claude Code |
+| `/slfg` | Run the simplified full workflow command |
+| `/technical-review` | Run a focused technical review |
 
 ## Skills
 
@@ -202,8 +190,24 @@ The `agent-browser` skill provides comprehensive documentation on usage.
 
 ## Installation
 
+Claude Code marketplace:
+
 ```bash
-claude /plugin install compound-engineering
+/plugin marketplace add Jerrylalala/compound-engineering
+/plugin install compound-engineering
+```
+
+Local development:
+
+```bash
+claude --plugin-dir "/path/to/compound-engineering/plugins/compound-engineering"
+```
+
+Codex / Gemini conversion currently uses the published upstream CLI with this fork as the source:
+
+```bash
+COMPOUND_PLUGIN_GITHUB_SOURCE=https://github.com/Jerrylalala/compound-engineering \
+  bunx @every-env/compound-plugin install compound-engineering --to codex
 ```
 
 ## Known Issues

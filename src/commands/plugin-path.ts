@@ -103,5 +103,5 @@ async function fetchAndCheckout(repoDir: string, branch: string): Promise<void> 
 function resolveGitHubSource(): string {
   const override = process.env.COMPOUND_PLUGIN_GITHUB_SOURCE
   if (override && override.trim()) return override.trim()
-  return "https://github.com/EveryInc/compound-engineering-plugin"
+  return "https://github.com/Jerrylalala/compound-engineering"
 }

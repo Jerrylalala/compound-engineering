@@ -48,25 +48,22 @@ if ! command -v jq &> /dev/null; then
     exit 0
 fi
 
-MARKETPLACE_VERSION=$(jq -r '.plugins[0].version // "null"' "$MARKETPLACE_FILE")
 PLUGIN_VERSION=$(jq -r '.version // "null"' "$PLUGIN_FILE")
 
-if [ "$MARKETPLACE_VERSION" = "null" ] || [ "$PLUGIN_VERSION" = "null" ]; then
-    error "版本字段缺失: marketplace=$MARKETPLACE_VERSION, plugin=$PLUGIN_VERSION"
+if [ "$PLUGIN_VERSION" = "null" ]; then
+    error "版本字段缺失: plugin=$PLUGIN_VERSION"
     exit 1
 fi
 
-echo "  marketplace.json: $MARKETPLACE_VERSION"
-echo "  plugin.json:      $PLUGIN_VERSION"
+echo "  plugin.json: $PLUGIN_VERSION"
+success "版本来源 (plugin.json): $PLUGIN_VERSION"
 
-# 3. 比较版本号
-info "比较版本号..."
-if [ "$MARKETPLACE_VERSION" = "$PLUGIN_VERSION" ]; then
-    success "版本号一致: $PLUGIN_VERSION"
+# 3. 校验版本号格式
+info "校验版本号格式..."
+if [[ "$PLUGIN_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    success "版本号格式正确: $PLUGIN_VERSION"
 else
-    error "版本号不一致!"
-    echo -e "  ${RED}marketplace.json: $MARKETPLACE_VERSION${NC}"
-    echo -e "  ${RED}plugin.json:      $PLUGIN_VERSION${NC}"
+    error "版本号格式错误: $PLUGIN_VERSION (期望 x.y.z)"
     HAS_ERROR=true
 fi
 

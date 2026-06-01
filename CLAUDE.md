@@ -1,6 +1,19 @@
 # Compound Engineering Plugin
 
 > 本仓库基于 [compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin) 独立开发，包含中文化、本地扩展和私有覆盖层。
+> 本文件是兼容入口；仓库权威规则以 `AGENTS.md` 为准。若本文件与 `AGENTS.md` 冲突，遵循 `AGENTS.md`。
+
+## 公共仓库维护标准（最高优先级）
+
+本仓库按公共开源项目 `Jerrylalala/compound-engineering` 长期维护。后续所有改动都按“陌生用户能安装、能理解、能信任、能贡献”的标准处理，而不是按个人私有工作区或 Claude Code-only 项目处理。
+
+- **定位**：对外表述为多工具 workflow assets + converter/install CLI。Claude Code 是重要兼容面，但不是唯一主线。
+- **稳定性**：公开宣称可用前必须有新鲜验证证据；涉及 CLI/转换器运行 `bun test`，涉及 release/manifest 运行 `bun run release:validate`，涉及文档站运行 `mkdocs build --strict`。
+- **社区健康**：维护 `LICENSE`、`SECURITY.md`、`PRIVACY.md`、`CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`SUPPORT.md`、issue templates、PR template。漏洞报告入口必须指向当前项目维护方，不能默认指向上游作者。
+- **文档架构**：`README.md` 是公共第一入口；`docs/zh-CN/` 是用户文档站；`docs/specs/` 是平台协议；`docs/brainstorms/`、`docs/plans/` 是历史和规划记录；`docs/solutions/` 是知识库，不当作清理对象。
+- **兼容策略**：保留 Claude Code 兼容，但不让 Claude-only 假设污染 Codex/Gemini/OpenCode 等目标。旧 `workflows:*` 名称若只剩历史意义，必须标为 deprecated 或从用户文档移除。
+- **版本策略**：公共 release 由自动化管理；常规 PR 不手动 bump release-owned version，不手写新 release notes。发现 drift 时优先修 release metadata/sync 机制。
+- **规则更新**：用户只要求更新规则时，直接改规则文件，不主动 commit；后续产品代码、文档和 CI 改进另开实现任务。
 
 ## AI 助手快速入门
 
