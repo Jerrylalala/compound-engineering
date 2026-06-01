@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.64.0](https://github.com/Jerrylalala/compound-engineering/compare/cli-v2.63.1...cli-v2.64.0) (2026-06-01)
+
+
+### Features
+
+* [P]/[P+] 派对模式分层 + IDEAS.md 清理（v2.49.2） ([86b6f30](https://github.com/Jerrylalala/compound-engineering/commit/86b6f30fd37d1e72540c0cce24a30cdde34a82fb))
+* [P]/[P+] 派对模式分层 + IDEAS.md 清理（v2.49.2） ([18715f2](https://github.com/Jerrylalala/compound-engineering/commit/18715f244ce528683f7354ee7619ca668fa86ae3))
+* ce:review 外部 AI 审核裁决协议 (v2.48.2) ([a285097](https://github.com/Jerrylalala/compound-engineering/commit/a285097111eb96bfafdab0e6a0db065a2bd6550b))
+* IDEAS.md 想法停车场 + /ce:ideate 命令恢复 + 工作流链路需求文档 (v2.48.3) ([62b63af](https://github.com/Jerrylalala/compound-engineering/commit/62b63afb122595a4bcf1633e162386fd3b7fb5be))
+* workflow.html 补全入口命令 + 场景指南 + 工具命令（v2.49.4） ([fedf88b](https://github.com/Jerrylalala/compound-engineering/commit/fedf88b416e0cbf37ada7a76b94ebaf2abc51284))
+* workflow.html 补全入口命令+场景指南+工具命令（v2.49.4） ([17f3c38](https://github.com/Jerrylalala/compound-engineering/commit/17f3c3841072fc526ae8009d43170a4dc743c4e9))
+* 恢复 ce:brainstorm [C][G] + 功能完整性校验（v2.49.1） ([ff06c2d](https://github.com/Jerrylalala/compound-engineering/commit/ff06c2de384d3b2d63d29b7f00a1210d6f57b456))
+* 恢复 ce:brainstorm [C][G] Phase 2.5 + 功能完整性校验脚本（v2.49.1） ([6fb2c65](https://github.com/Jerrylalala/compound-engineering/commit/6fb2c65ac25b913cfb0f7f24e6aff0b8e0cdff9c))
+* 新增 /ce:ideas 和 /ce:resume 工作流命令（v2.48.4） ([66f8339](https://github.com/Jerrylalala/compound-engineering/commit/66f833966ac3a0efcaae2be843a38320b6ab0497))
+* 新增 /ce:ideas 和 /ce:resume 工作流命令（v2.48.4） ([df75dc3](https://github.com/Jerrylalala/compound-engineering/commit/df75dc34719fe072ba43c98be4ffd0f5dc54040e))
+* 新增 IDEAS.md 想法停车场 + /ce:ideate 命令入口 + 工作流链路需求文档 ([6235312](https://github.com/Jerrylalala/compound-engineering/commit/623531268f41a9841fc9ec11e06151de34a6c608))
+* 通用自动化验证引擎 [V] Layer 2 多项目类型测试（v2.49.0） ([bb4b429](https://github.com/Jerrylalala/compound-engineering/commit/bb4b429013b67be5a7b042537c36f6d7c63410f9))
+* 通用自动化验证引擎——扩展 [V] Layer 2 为多项目类型测试（v2.49.0） ([0230cac](https://github.com/Jerrylalala/compound-engineering/commit/0230cac07a4508fcdade5329f9886f2bab16d81f))
+
+
+### Bug Fixes
+
+* **brainstorm:** 恢复派对模式契约 ([e957bdb](https://github.com/Jerrylalala/compound-engineering/commit/e957bdb403ebc4c30fbe3f76c12c50130691382d))
+* **brainstorm:** 恢复派对模式契约和 P1-P4 收敛 ([4d91215](https://github.com/Jerrylalala/compound-engineering/commit/4d912156f47d8bd4c73516a175fbf0b6c0ff97b2))
+* **plugin:** 去除 /ce 工作流重复补全入口 ([f822cd3](https://github.com/Jerrylalala/compound-engineering/commit/f822cd3582af81feafb1ae01fe6190d176641939))
+* pre-commit hook 强制执行功能完整性校验 ([fccf9fb](https://github.com/Jerrylalala/compound-engineering/commit/fccf9fbf603710a95cd518067395b64226d40033))
+* pre-commit hook 强制执行功能完整性校验（修正 hook 分叉） ([966ec87](https://github.com/Jerrylalala/compound-engineering/commit/966ec87b127964babf330b2239cbb0ea3dfa9bbb))
+* **review:** 修复 PR base 解析的 CI 浅克隆校验 ([128a473](https://github.com/Jerrylalala/compound-engineering/commit/128a47310bd9b5d0272cf7d4a6c0a0d2cfa98073))
+* 去除 /ce 工作流重复补全入口 ([647e923](https://github.com/Jerrylalala/compound-engineering/commit/647e9237360fc40338f10c243cd98ed7e7c53691))
+* 文档准确性修复 + CI 防回归（v2.49.3） ([98b4231](https://github.com/Jerrylalala/compound-engineering/commit/98b423171320880240c193f50e0b8e189edb4be7))
+* 文档准确性修复 + CI 防回归（v2.49.3） ([149105b](https://github.com/Jerrylalala/compound-engineering/commit/149105b15db36f3aebb140a6dbdc4a15be111195))
+
 ## [2.49.7] - 2026-05-22
 
 ### ce:brainstorm 派对模式契约恢复（PATCH）
