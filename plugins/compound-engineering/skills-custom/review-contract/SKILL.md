@@ -1,9 +1,9 @@
 ---
 name: review-contract
-description: "私有 Overlay：Review Contract 三档 Tier 分类 + Anti-Leniency 注入。在 ce:review 基础上增加 Blocking/Analytical/Advisory 分层和结论类型系统。使用时机：运行 ce:review 前阅读此协议以理解审查标准。"
+description: "Fork Overlay：Review Contract 三档 Tier 分类 + Anti-Leniency 注入。在 ce:review 基础上增加 Blocking/Analytical/Advisory 分层和结论类型系统。使用时机：运行 ce:review 前阅读此协议以理解审查标准。"
 ---
 
-# Review Contract — 私有 Overlay
+# Review Contract — Fork Overlay
 
 > **基础层**：上游 `ce:review` 已实现 P0-P3 严重级别、confidence 阈值（≥0.60 才报告）、autofix_class 路由。
 >

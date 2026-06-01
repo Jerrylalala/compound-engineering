@@ -37,7 +37,7 @@ resolution: architectural-recommendation
 ### 1.1 Repository Architecture
 
 ```
-Jerrylalala/compound-engineering-plugin-private (fork)
+Jerrylalala/compound-engineering (fork)
 ├── Upstream Mirror Layer        [EveryInc original code]
 ├── Localization Layer           [Chinese docs + scripts]
 ├── Custom Extension Layer       [Gemini/Codex integration]
@@ -470,7 +470,7 @@ git diff --name-status HEAD upstream/main | grep "^D" > custom-files-at-risk.txt
 **Step 4: Run Integration Tests**
 ```bash
 # Verify current state works
-claude --plugin-dir "E:\project\compound-engineering-plugin-private\plugins\compound-engineering"
+claude --plugin-dir "E:\project\compound-engineering\plugins\compound-engineering"
 # Test key commands
 /workflows:review
 /gemini "test query"

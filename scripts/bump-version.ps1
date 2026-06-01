@@ -1,4 +1,5 @@
-# Version bump and sync script
+# Legacy version bump script.
+# Normal public releases are managed by release-please release PRs.
 # Usage:
 #   powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -Version "2.30.0"
 #   powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch
@@ -21,8 +22,9 @@ $pluginFile = "plugins/compound-engineering/.claude-plugin/plugin.json"
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Version Bump Tool" -ForegroundColor Cyan
+Write-Host "  Legacy Version Bump Tool" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "Normal feature PRs should not use this script; release-please owns public releases." -ForegroundColor Yellow
 Write-Host ""
 
 # Read current version
@@ -90,11 +92,12 @@ if ($verifyPlugin -eq $newVersion) {
 
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "  Release flow" -ForegroundColor Yellow
+    Write-Host "  Legacy-only flow" -ForegroundColor Yellow
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "1. Update CHANGELOG.md for v$newVersion"
-    Write-Host "2. Commit and push a PR"
-    Write-Host "3. After PR merges to main, GitHub Actions creates the tag automatically."
+    Write-Host "1. Explain in the PR why a manual version edit was required."
+    Write-Host "2. Run: bun run release:sync-metadata"
+    Write-Host "3. Run: bun run release:validate"
+    Write-Host "4. Do not hand-author release notes unless you are fixing release automation itself."
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Yellow
     Write-Host "  Documentation checklist before merge" -ForegroundColor Yellow
@@ -102,13 +105,13 @@ if ($verifyPlugin -eq $newVersion) {
     Write-Host "  When adding Skill/Agent/Command:"
     Write-Host "  [ ] README.md workflow table and component counts are updated"
     Write-Host "  [ ] docs/zh-CN/workflow.html workflow nodes are updated when links change"
-    Write-Host "  [ ] CHANGELOG.md records the change"
-    Write-Host "  [ ] plugin.json description component counts are updated"
+    Write-Host "  [ ] release metadata validation passes"
+    Write-Host "  [ ] release-please will generate release notes"
     Write-Host ""
     Write-Host "  When changing command or parameter behavior:"
     Write-Host "  [ ] README.md parameter docs are updated"
     Write-Host "  [ ] docs/zh-CN/workflow.html parameters/examples are updated"
-    Write-Host "  [ ] CHANGELOG.md records the change"
+    Write-Host "  [ ] release-please will generate release notes"
     Write-Host ""
 } else {
     Write-Err "Verification failed, please check files manually"

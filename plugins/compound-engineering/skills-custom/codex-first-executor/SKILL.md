@@ -1,6 +1,6 @@
 ---
 name: codex-first-executor
-description: "私有 Overlay：Codex-first 外部执行器策略。按任务特征路由到 Claude 或 Codex，Codex-first（非品牌路由）。使用时机：需要决定是否将当前任务派发给 Codex 时加载此 skill。"
+description: "Fork Overlay：Codex-first 外部执行器策略。按任务特征路由到 Claude 或 Codex，Codex-first（非品牌路由）。使用时机：需要决定是否将当前任务派发给 Codex 时加载此 skill。"
 ---
 
 # Codex-first External Executor — 任务特征路由

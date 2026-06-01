@@ -31,7 +31,7 @@ status: living-document
 
 ### 预防措施
 
-#### 1.1 自动化版本同步
+#### 1.1 release metadata 同步
 
 **安装 Git Hook（一次性）**
 ```powershell
@@ -42,55 +42,42 @@ copy scripts\pre-commit .git\hooks\pre-commit
 Test-Path .git\hooks\pre-commit
 ```
 
-**每次版本更新使用自动化工具**
-```powershell
-# 自动更新版本号（推荐）
-powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch
-
-# 手动验证
-powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+**修改发布元数据后使用 release 脚本**
+```bash
+bun run release:sync-metadata
+bun run release:validate
 ```
 
 #### 1.2 版本号同步检查点
 
 | 文件 | 字段 | 必须同步 |
 |------|------|----------|
-| `.claude-plugin/marketplace.json` | `plugins[0].version` | ✅ |
-| `plugins/compound-engineering/.claude-plugin/plugin.json` | `version` | ✅ |
-| `plugins/compound-engineering/CHANGELOG.md` | 最新版本记录 | ✅ |
-| `plugins/compound-engineering/README.md` | 组件数量 | ⚠️ 可选 |
+| `.github/.release-please-manifest.json` | component versions | ✅ |
+| `plugins/compound-engineering/.claude-plugin/plugin.json` | `version` / `description` | ✅ |
+| `plugins/compound-engineering/.cursor-plugin/plugin.json` | `version` / `description` | ✅ |
+| `.claude-plugin/marketplace.json` / `.cursor-plugin/marketplace.json` | marketplace metadata | ✅ |
+| `plugins/compound-engineering/README.md` | 组件数量与公开能力描述 | ✅ |
 
 #### 1.3 快速验证命令
 
 ```powershell
-# 检查版本一致性
-(Get-Content .claude-plugin/marketplace.json | ConvertFrom-Json).plugins[0].version
-(Get-Content plugins/compound-engineering/.claude-plugin/plugin.json | ConvertFrom-Json).version
+# 轻量身份和版本格式检查
+powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+```
 
-# 检查组件数量
-(Get-ChildItem -Recurse plugins/compound-engineering/agents/*.md).Count
-(Get-ChildItem -Recurse plugins/compound-engineering/commands/*.md).Count
-(Get-ChildItem -Directory plugins/compound-engineering/skills/).Count
+```bash
+# 权威 release metadata 验证
+bun run release:validate
 ```
 
 #### 1.4 测试用例
 
 **测试脚本：`tests/version-consistency.test.ps1`**
 ```powershell
-# 版本一致性测试
 Describe "Version Consistency" {
-    It "marketplace.json and plugin.json versions match" {
-        $marketplace = Get-Content .claude-plugin/marketplace.json | ConvertFrom-Json
-        $plugin = Get-Content plugins/compound-engineering/.claude-plugin/plugin.json | ConvertFrom-Json
-
-        $marketplace.plugins[0].version | Should -Be $plugin.version
-    }
-
-    It "CHANGELOG.md contains current version" {
-        $plugin = Get-Content plugins/compound-engineering/.claude-plugin/plugin.json | ConvertFrom-Json
-        $changelog = Get-Content plugins/compound-engineering/CHANGELOG.md -Raw
-
-        $changelog | Should -Match "## \[$($plugin.version)\]"
+    It "release metadata validation passes" {
+        bun run release:validate
+        $LASTEXITCODE | Should -Be 0
     }
 }
 ```
@@ -163,7 +150,7 @@ skills-custom/
     │
     └─ 有保护文件冲突 ──→ 必须使用选择性合并
                            ↓
-                        参考 UPSTREAM-MERGE-RECOMMENDATION.md
+                        参考 upstream merge 架构分析
                            ↓
                         手动整合 + 文档记录
 ```
@@ -472,42 +459,21 @@ Describe "Hook System Safety" {
 
 | 修改类型 | 必须更新的文档 | 检查方式 |
 |----------|----------------|----------|
-| 新增 Agent | CHANGELOG.md, 版本号, README.md | 手动检查 |
-| 新增 Command | CHANGELOG.md, 版本号, INSTALL.md | 手动检查 |
-| 新增 Skill | CHANGELOG.md, 版本号 | 手动检查 |
-| 修改工作流 | CHANGELOG.md, WORKFLOW-VISUAL.md | 手动检查 |
-| Bug 修复 | CHANGELOG.md, 相关解决方案文档 | 手动检查 |
+| 新增 Agent | README / plugin README / 支持矩阵 | `bun run release:validate` |
+| 新增 Command | README / 安装说明 / 支持矩阵 | `bun run release:validate` |
+| 新增 Skill | README / plugin README / skill 参数表 | `bash scripts/check-feature-integrity.sh` |
+| 修改工作流 | README / workflow 文档 / 相关解决方案文档 | `mkdocs build --strict` |
+| Bug 修复 | 相关解决方案文档（如适用） | 对应测试 + release validate |
 
-#### 6.2 CHANGELOG.md 格式规范
+#### 6.2 Release notes 规则
 
-```markdown
-## [版本号] - YYYY-MM-DD
-
-### Added
-- 新增功能描述
-
-### Changed
-- 修改内容描述
-
-### Fixed
-- Bug 修复描述
-
-### Removed
-- 移除内容描述
-```
+公开 release notes 由 release-please 生成。普通 PR 不手写 `CHANGELOG.md` 条目；通过 conventional commit 标题表达变更类型和范围。
 
 #### 6.3 测试用例
 
 **测试脚本：`tests/documentation.test.ps1`**
 ```powershell
 Describe "Documentation Sync" {
-    It "CHANGELOG.md contains current version" {
-        $plugin = Get-Content plugins/compound-engineering/.claude-plugin/plugin.json | ConvertFrom-Json
-        $changelog = Get-Content plugins/compound-engineering/CHANGELOG.md -Raw
-
-        $changelog | Should -Match "## \[$($plugin.version)\]"
-    }
-
     It "Component counts in README match actual counts" {
         $readme = Get-Content plugins/compound-engineering/README.md -Raw
 
@@ -595,22 +561,20 @@ jobs:
 
 ### 8.3 提交前检查
 
-- [ ] 运行版本检查：`scripts/check-versions.ps1`
-- [ ] 运行所有测试：`Invoke-Pester tests/`
-- [ ] 更新 CHANGELOG.md
+- [ ] 运行 release metadata 验证：`bun run release:validate`
+- [ ] 运行相关测试：`bun test`
 - [ ] 更新相关文档（如有）
 - [ ] 检查 Git 暂存区：`git status`
 - [ ] 使用中文 commit message
 
 ### 8.4 发布前检查
 
-- [ ] 更新版本号：`scripts/bump-version.ps1 -BumpType [patch|minor|major]`
-- [ ] 验证版本一致性：`scripts/check-versions.ps1`
-- [ ] 更新 CHANGELOG.md 添加发布日期
-- [ ] 更新 README.md 组件数量
-- [ ] 运行完整测试套件
-- [ ] 创建 Git tag：`git tag v<version>`
-- [ ] 推送到远程：`git push origin main --tags`
+- [ ] release PR 已由 release-please 创建或更新
+- [ ] release PR 中组件版本、tag 和 release notes 正确
+- [ ] `bun run release:validate` 通过
+- [ ] `bun test` 通过
+- [ ] `mkdocs build --strict` 通过
+- [ ] 如涉及 npm，按 `docs/zh-CN/PUBLISHING.md` 做 pack/install smoke test
 
 ### 8.5 上游同步前检查
 
@@ -618,7 +582,7 @@ jobs:
 - [ ] 审查上游 commits：`git log --oneline HEAD..upstream/main`
 - [ ] 识别受保护文件冲突
 - [ ] 准备选择性合并策略
-- [ ] 参考 `UPSTREAM-MERGE-RECOMMENDATION.md`
+- [ ] 参考 `docs/solutions/integration-issues/upstream-merge-architectural-analysis-2026-02-10.md`
 
 ---
 
@@ -629,7 +593,8 @@ jobs:
 ```powershell
 # 版本管理
 scripts/check-versions.ps1                    # 检查版本一致性
-scripts/bump-version.ps1 -BumpType patch     # 自动更新版本号
+bun run release:validate                      # 验证 release metadata
+bun run release:sync-metadata                 # 同步 release metadata
 
 # 上游同步
 scripts/validate-upstream-merge.ps1          # 验证上游合并安全性
@@ -673,7 +638,7 @@ Invoke-Pester tests/version-consistency.test.ps1  # 运行单个测试
 | [VERSION-STRATEGY.md](../zh-CN/VERSION-STRATEGY.md) | 版本管理详细策略 |
 | [SYNC.md](../zh-CN/SYNC.md) | 上游同步操作指南 |
 | [SCRIPTS.md](../zh-CN/SCRIPTS.md) | 脚本使用说明 |
-| [UPSTREAM-MERGE-RECOMMENDATION.md](../../UPSTREAM-MERGE-RECOMMENDATION.md) | 上游合并架构分析 |
+| [upstream-merge-architectural-analysis-2026-02-10.md](integration-issues/upstream-merge-architectural-analysis-2026-02-10.md) | 上游合并架构分析 |
 | [integration-issues/](integration-issues/) | 已知问题解决方案库 |
 
 ---

@@ -1,6 +1,6 @@
 ---
 name: intent-gate
-description: "私有 Overlay：ce:work 意图分类门控。在执行前识别任务意图（实现/修复/重构/探索），设定对应的执行策略。使用时机：ce:work Phase 0（环境扫描）之后、Phase 1（Quick Start）之前。"
+description: "Fork Overlay：ce:work 意图分类门控。在执行前识别任务意图（实现/修复/重构/探索），设定对应的执行策略。使用时机：ce:work Phase 0（环境扫描）之后、Phase 1（Quick Start）之前。"
 ---
 
 # Intent Gate — 意图分类门控

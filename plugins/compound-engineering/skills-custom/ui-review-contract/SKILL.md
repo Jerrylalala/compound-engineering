@@ -1,6 +1,6 @@
 ---
 name: ui-review-contract
-description: "私有 Overlay：UI Review Contract — 四信号门触发协议。自动检测任务是否涉及 UI，决定是否在 ce:review 中加入视觉审查层。使用时机：运行 ce:work 或 ce:review 时，系统自动检查四信号门以决定是否触发 design review。"
+description: "Fork Overlay：UI Review Contract — 四信号门触发协议。自动检测任务是否涉及 UI，决定是否在 ce:review 中加入视觉审查层。使用时机：运行 ce:work 或 ce:review 时，系统自动检查四信号门以决定是否触发 design review。"
 ---
 
 # UI Review Contract — 四信号门触发协议

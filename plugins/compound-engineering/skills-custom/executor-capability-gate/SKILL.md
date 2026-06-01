@@ -1,6 +1,6 @@
 ---
 name: executor-capability-gate
-description: "私有 Overlay：外部模型调用前置检查门控。调用 Codex/Gemini 之前运行五项检查，防止调用失败浪费时间。使用时机：任何调用外部模型（Codex [C]、Gemini [G]）之前自动运行。"
+description: "Fork Overlay：外部模型调用前置检查门控。调用 Codex/Gemini 之前运行五项检查，防止调用失败浪费时间。使用时机：任何调用外部模型（Codex [C]、Gemini [G]）之前自动运行。"
 ---
 
 # Executor Capability Gate — 外部调用前置检查

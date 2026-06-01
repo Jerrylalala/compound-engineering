@@ -15,7 +15,7 @@ resolution: verified
 
 ## 问题描述
 
-本仓库（`Jerrylalala/compound-engineering-plugin-private`）是 `EveryInc/compound-engineering-plugin` 的私有 fork，同时监控 4 个上游仓库的变更：
+本仓库（`Jerrylalala/compound-engineering`）是 `EveryInc/compound-engineering-plugin` 的公共 fork，同时监控 4 个上游仓库的变更：
 
 | 上游仓库 | 作用 |
 |----------|------|

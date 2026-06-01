@@ -1,6 +1,6 @@
 ---
 name: compound-promotion-ladder
-description: "私有 Overlay：经验分层沉淀升级阶梯。检测是否值得将 solution 升级为 pattern 或 skill。使用时机：ce:compound 完成后手动调用，分析 docs/solutions/ 中的重复模式。（不会自动触发，需主动加载此 skill）"
+description: "Fork Overlay：经验分层沉淀升级阶梯。检测是否值得将 solution 升级为 pattern 或 skill。使用时机：ce:compound 完成后手动调用，分析 docs/solutions/ 中的重复模式。（不会自动触发，需主动加载此 skill）"
 ---
 
 # Compound Promotion Ladder — 经验分层沉淀
@@ -131,7 +131,7 @@ Windows 上运行 hooks 时注意：
 
 ```bash
 # 1. 使用 create-agent-skills skill 创建
-# 2. 放入 skills-custom/ (私有 overlay)
+# 2. 放入 skills-custom/ (fork overlay)
 # 3. 在 docs/solutions/ 中链接新 skill
 ```
 

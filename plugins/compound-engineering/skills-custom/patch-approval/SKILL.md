@@ -1,6 +1,6 @@
 ---
 name: patch-approval
-description: "私有 Overlay：Codex Patch Approval 咨询版。当 Codex 返回 patch 时，Claude 审批后才写入文件。使用时机：Codex 以 patch/diff 格式返回代码变更时，由 Claude 作为审批层。"
+description: "Fork Overlay：Codex Patch Approval 咨询版。当 Codex 返回 patch 时，Claude 审批后才写入文件。使用时机：Codex 以 patch/diff 格式返回代码变更时，由 Claude 作为审批层。"
 ---
 
 # Patch Approval — 咨询版

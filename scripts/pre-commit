@@ -105,16 +105,16 @@ if [ -n "$VERSION_FILES_CHANGED" ]; then
 fi
 
 # ──────────────────────────────────────────
-# 检查 5：组件变更提醒（不阻止，但提示 bump 版本）
+# 检查 5：组件变更提醒（不阻止，提示 release metadata 验证）
 # ──────────────────────────────────────────
 COMPONENT_CHANGED=$(git diff --cached --name-only | grep -E "plugins/compound-engineering/(agents|commands|skills)" || true)
 VERSION_BUMPED=$(git diff --cached --name-only | grep "plugin\.json" || true)
 
 if [ -n "$COMPONENT_CHANGED" ] && [ -z "$VERSION_BUMPED" ]; then
   echo ""
-  echo "⚠️  检测到组件变更但未更新版本号"
+  echo "⚠️  检测到组件变更"
   echo "   变更文件: $(echo "$COMPONENT_CHANGED" | wc -l | tr -d ' ') 个"
-  echo "   建议运行: powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch"
+  echo "   常规 PR 不手动 bump 版本；请运行: bun run release:validate"
   echo ""
 fi
 

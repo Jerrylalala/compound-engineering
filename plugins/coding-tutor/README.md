@@ -15,7 +15,8 @@ This project starts with programming - the domain where AI has the most immediat
 ## Install
 
 ```
-/plugin install coding-tutor@claude-code-essentials
+/plugin marketplace add Jerrylalala/compound-engineering
+/plugin install coding-tutor
 ```
 
 ## Features

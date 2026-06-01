@@ -34,7 +34,7 @@ version_fixed: "2.29.0"
 
 ### 问题1：Marketplace 更新失败
 
-私有 fork 仓库沿用了上游的身份信息，导致 Claude Code 识别冲突：
+fork 仓库沿用了上游的身份信息，导致 Claude Code 识别冲突：
 
 | 配置项 | 问题 |
 |--------|------|
@@ -46,7 +46,7 @@ version_fixed: "2.29.0"
 Claude Code 检测到：
 1. marketplace 名称是 `every-marketplace`
 2. 但 repository 指向 `EveryInc/...`（上游）
-3. 而实际仓库是 `Jerrylalala/...`（私有 fork）
+3. 而实际仓库是 `Jerrylalala/...`（fork）
 4. **身份信息冲突** → 被识别为"本地修改的插件" → 无法远程更新
 
 ### 问题2：Marketplace 名称缓存不更新
@@ -118,7 +118,7 @@ Unicode 圆圈数字（U+2460-U+2464 等）依赖终端字体支持：
       "name": "Jerry Jian (fork of Kieran Klaassen)",
       "url": "https://github.com/Jerrylalala"
     },
-    "homepage": "https://github.com/Jerrylalala/compound-engineering-plugin-private"
+    "homepage": "https://github.com/Jerrylalala/compound-engineering"
   }]
 }
 ```
@@ -130,8 +130,8 @@ Unicode 圆圈数字（U+2460-U+2464 等）依赖终端字体支持：
     "name": "Jerry Jian (fork of Kieran Klaassen)",
     "url": "https://github.com/Jerrylalala"
   },
-  "homepage": "https://github.com/Jerrylalala/compound-engineering-plugin-private",
-  "repository": "https://github.com/Jerrylalala/compound-engineering-plugin-private"
+  "homepage": "https://github.com/Jerrylalala/compound-engineering",
+  "repository": "https://github.com/Jerrylalala/compound-engineering"
 }
 ```
 
@@ -140,11 +140,9 @@ Unicode 圆圈数字（U+2460-U+2464 等）依赖终端字体支持：
 使用自动化工具：
 
 ```powershell
-# 自动更新版本号
-powershell -ExecutionPolicy Bypass -File scripts/bump-version.ps1 -BumpType patch
-
-# 验证版本一致性
-powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
+# 同步并验证 release metadata
+bun run release:sync-metadata
+bun run release:validate
 ```
 
 ### 4. 重新安装插件（重要）
@@ -158,7 +156,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 3. 选中旧的 marketplace（如 `every-marketplace`）
 4. 按 **`r`** 移除
 5. 选择 **`+ Add Marketplace`**
-6. 输入：`Jerrylalala/compound-engineering-plugin-private`
+6. 输入：`Jerrylalala/compound-engineering`
 7. 新名称 `jerry-marketplace` 会正确显示
 
 **方法 B：手动删除缓存**
@@ -168,7 +166,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-versions.ps1
 Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\marketplaces\every-marketplace"
 
 # 重启 Claude Code 后重新添加
-# /plugins → Add marketplace → Jerrylalala/compound-engineering-plugin-private
+# /plugins → Add marketplace → Jerrylalala/compound-engineering
 ```
 
 ### 5. 验证修复
@@ -182,8 +180,8 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\plugins\marketplaces\every
 ### 版本号同步
 
 1. **安装 pre-commit hook**：`copy scripts\pre-commit .git\hooks\pre-commit`
-2. **使用自动化工具**：`scripts/bump-version.ps1`
-3. **每次提交前检查**：`scripts/check-versions.ps1`
+2. **使用自动化工具**：`bun run release:sync-metadata`
+3. **每次提交前检查**：`bun run release:validate`
 
 ### Fork 仓库初始化
 
